@@ -11,10 +11,17 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
  * - app_launched = true → render the nested route
  */
 export function RequireAppLaunched() {
-  const { app_launched, isLoading } = useFeatureToggles();
+  const { app_launched, isLoading: featuresLoading } = useFeatureToggles();
   const { isAdmin, loading: adminLoading } = useAdminAuth();
 
-  if (isLoading || adminLoading) {
+  // Let admins through as soon as their identity resolves — don't wait for
+  // the feature-toggle fetch (which requires the DB migration to be run).
+  if (!adminLoading && isAdmin) {
+    return <Outlet />;
+  }
+
+  // Still resolving admin status or feature flags
+  if (adminLoading || featuresLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -22,8 +29,8 @@ export function RequireAppLaunched() {
     );
   }
 
-  // Admins always have full access so they can preview all sections
-  if (isAdmin || app_launched) {
+  // Non-admin: check the launch flag
+  if (app_launched) {
     return <Outlet />;
   }
 

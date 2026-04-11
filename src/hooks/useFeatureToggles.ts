@@ -32,6 +32,7 @@ export const useFeatureToggles = () => {
 
       if (error) {
         console.error("Error fetching feature toggles:", error);
+        setFeatures(prev => ({ ...prev, isLoading: false }));
         return;
       }
 
