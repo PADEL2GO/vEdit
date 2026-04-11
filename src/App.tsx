@@ -73,6 +73,7 @@ import AdminRewardDefinitions from "./pages/admin/AdminRewardDefinitions";
 import AdminRewardApprovals from "./pages/admin/AdminRewardApprovals";
 import AdminCredits from "./pages/admin/AdminCredits";
 import AdminRedemptions from "./pages/admin/AdminRedemptions";
+import AdminIntegrations from "./pages/admin/AdminIntegrations";
 import AGB from "./pages/AGB";
 import Datenschutz from "./pages/Datenschutz";
 
@@ -138,6 +139,7 @@ const App = () => (
                   <Route path="/admin/reward-approvals" element={<AdminRewardApprovals />} />
                   <Route path="/admin/credits" element={<AdminCredits />} />
                   <Route path="/admin/redemptions" element={<AdminRedemptions />} />
+                  <Route path="/admin/integrations" element={<AdminIntegrations />} />
 
                   {/* Locked until app_launched = true */}
                   <Route path="/lobbies" element={<Lobbies />} />

@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@4.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Resend is initialized lazily inside the handler so we can fall back to DB config
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -44,6 +44,20 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Resolve Resend API key: env var takes precedence, DB config is fallback
+    let resendApiKey = Deno.env.get("RESEND_API_KEY");
+    let appUrl = Deno.env.get("APP_URL");
+    if (!resendApiKey || !appUrl) {
+      const { data: ic } = await supabase.from("site_integration_configs").select("config, service").in("service", ["resend", "app"]);
+      for (const row of ic ?? []) {
+        const cfg = (row.config as Record<string, string>) ?? {};
+        if (row.service === "resend" && !resendApiKey) resendApiKey = cfg.api_key;
+        if (row.service === "app" && !appUrl) appUrl = cfg.url;
+      }
+    }
+    if (!resendApiKey) throw new Error("RESEND_API_KEY is not configured");
+    const resend = new Resend(resendApiKey);
 
     const { booking_id, user_id, payment_type, participant_id, amount_cents }: ConfirmationRequest = await req.json();
     logStep("Request parsed", { booking_id, user_id, payment_type, participant_id, amount_cents });
@@ -148,9 +162,9 @@ serve(async (req) => {
       ? "Deine Buchung wurde erfolgreich bezahlt und ist damit bestätigt."
       : "Deine Teilnahme am Match wurde erfolgreich bezahlt.";
 
-    // Generate booking URL
-    const appUrl = Deno.env.get("APP_URL") || "https://padel2go.de";
-    const bookingUrl = `${appUrl}/dashboard/booking`;
+    // Generate booking URL (appUrl resolved above, fallback to production domain)
+    const resolvedAppUrl = appUrl || "https://padel2go.de";
+    const bookingUrl = `${resolvedAppUrl}/dashboard/booking`;
 
     const htmlContent = `
 <!DOCTYPE html>

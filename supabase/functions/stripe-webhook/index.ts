@@ -21,11 +21,21 @@ serve(async (req) => {
   try {
     logStep("Webhook received");
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
-    
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    if (!webhookSecret) throw new Error("STRIPE_WEBHOOK_SECRET is not set");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Resolve keys: env var takes precedence, DB config is fallback
+    let stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    let webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+    if (!stripeKey || !webhookSecret) {
+      const { data: ic } = await supabaseAdmin.from("site_integration_configs").select("config").eq("service", "stripe").single();
+      const cfg = (ic?.config as Record<string, string>) ?? {};
+      if (!stripeKey) stripeKey = cfg.secret_key;
+      if (!webhookSecret) webhookSecret = cfg.webhook_secret;
+    }
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not configured");
+    if (!webhookSecret) throw new Error("STRIPE_WEBHOOK_SECRET is not configured");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
@@ -46,10 +56,6 @@ serve(async (req) => {
     }
 
     logStep("Event verified", { type: event.type, id: event.id });
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     switch (event.type) {
       case "checkout.session.completed": {

@@ -37,14 +37,23 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-
     // Get auth user
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // Resolve Stripe key: env var takes precedence, DB config is fallback
+    let stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) {
+      const { data: ic } = await supabaseAdmin.from("site_integration_configs").select("config").eq("service", "stripe").single();
+      stripeKey = (ic?.config as Record<string, string>)?.secret_key;
+    }
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not configured");
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header");

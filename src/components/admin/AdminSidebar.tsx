@@ -31,6 +31,7 @@ import {
   Megaphone,
   ImagePlus,
   Palette,
+  Plug,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ const menuItems = [
   { title: "Mitteilungen", url: "/admin/notifications", icon: Bell },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
   { title: "Visuals", url: "/admin/visuals", icon: Image },
+  { title: "Integrationen", url: "/admin/integrations", icon: Plug },
   { title: "Features", url: "/admin/features", icon: Rocket },
   { title: "Einstellungen", url: "/admin/settings", icon: Settings },
 ];

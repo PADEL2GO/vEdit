@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Resend is initialized lazily inside the handler so we can fall back to DB config
 
 const allowedOrigins = [
   "https://padel2go.lovable.app",
@@ -61,11 +61,20 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log("Client IP:", clientIP);
 
-    // Initialize Supabase client for rate limiting
+    // Initialize Supabase client
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
+
+    // Resolve Resend API key: env var takes precedence, DB config is fallback
+    let resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      const { data: ic } = await supabaseAdmin.from("site_integration_configs").select("config").eq("service", "resend").single();
+      resendApiKey = (ic?.config as Record<string, string>)?.api_key;
+    }
+    if (!resendApiKey) throw new Error("RESEND_API_KEY is not configured");
+    const resend = new Resend(resendApiKey);
 
     // Check rate limit
     const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();

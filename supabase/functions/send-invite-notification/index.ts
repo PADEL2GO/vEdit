@@ -20,14 +20,17 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
-    if (!resendApiKey) {
-      throw new Error("RESEND_API_KEY not configured");
-    }
-
-    const resend = new Resend(resendApiKey);
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Resolve Resend API key: env var takes precedence, DB config is fallback
+    let resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      const { data: ic } = await adminClient.from("site_integration_configs").select("config").eq("service", "resend").single();
+      resendApiKey = (ic?.config as Record<string, string>)?.api_key;
+    }
+    if (!resendApiKey) throw new Error("RESEND_API_KEY not configured");
+    const resend = new Resend(resendApiKey);
 
     // Verify caller identity — accept either a user JWT or the service role key
     const authHeader = req.headers.get("Authorization");
