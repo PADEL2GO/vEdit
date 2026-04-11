@@ -1,0 +1,76 @@
+project_id = "kfjfxfeidgjksxsubtjw"
+
+[functions.create-checkout-session]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.create-participant-checkout]
+verify_jwt = true
+
+[functions.user-search]
+verify_jwt = true
+
+[functions.send-contact-email]
+verify_jwt = false
+
+[functions.marketplace-redeem]
+verify_jwt = true
+
+[functions.rewards-api]
+verify_jwt = true
+
+[functions.rewards-claim]
+verify_jwt = true
+
+[functions.rewards-trigger]
+verify_jwt = false
+
+[functions.referral-api]
+verify_jwt = true
+
+[functions.send-invite-notification]
+verify_jwt = true
+
+[functions.send-booking-confirmation]
+verify_jwt = false
+
+[functions.process-completed-bookings]
+verify_jwt = false
+
+[functions.admin-credits]
+verify_jwt = true
+
+[functions.p2g-points-api]
+verify_jwt = false
+
+[functions.rewards-estimate]
+verify_jwt = true
+
+[functions.camera-webhook]
+verify_jwt = false
+
+[functions.friends-api]
+verify_jwt = false
+
+[functions.matching-algorithm]
+verify_jwt = false
+
+[functions.public-profile-api]
+verify_jwt = false
+
+[functions.admin-notifications-api]
+verify_jwt = false
+
+[functions.cleanup-expired-notifications]
+verify_jwt = false
+
+[functions.club-booking-api]
+verify_jwt = false
+
+[functions.club-court-update]
+verify_jwt = false
+
+[functions.lobby-api]
+verify_jwt = false

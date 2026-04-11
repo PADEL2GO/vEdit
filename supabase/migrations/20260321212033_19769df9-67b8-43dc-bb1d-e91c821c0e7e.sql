@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "System can insert lobby events" ON public.lobby_events;

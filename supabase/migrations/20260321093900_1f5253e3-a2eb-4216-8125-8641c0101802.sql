@@ -1,0 +1,1 @@
+ALTER TABLE public.location_teasers ADD COLUMN club_url text;

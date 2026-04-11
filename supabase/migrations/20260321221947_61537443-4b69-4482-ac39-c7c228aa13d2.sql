@@ -1,0 +1,1 @@
+ALTER TABLE public.partner_tiles ADD COLUMN website_url text;
