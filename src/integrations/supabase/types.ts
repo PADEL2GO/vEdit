@@ -2016,6 +2016,8 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          feature_app_launched: boolean
+          feature_app_launched_updated_at: string | null
           feature_events_enabled: boolean
           feature_events_updated_at: string | null
           feature_league_enabled: boolean | null
@@ -2035,6 +2037,8 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          feature_app_launched?: boolean
+          feature_app_launched_updated_at?: string | null
           feature_events_enabled?: boolean
           feature_events_updated_at?: string | null
           feature_league_enabled?: boolean | null
@@ -2054,6 +2058,8 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          feature_app_launched?: boolean
+          feature_app_launched_updated_at?: string | null
           feature_events_enabled?: boolean
           feature_events_updated_at?: string | null
           feature_league_enabled?: boolean | null

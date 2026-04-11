@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Rocket, Users, Sparkles, Trophy, Calendar, Loader2, Coins } from "lucide-react";
+import { Rocket, Users, Sparkles, Trophy, Calendar, Loader2, Coins, Globe } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -56,6 +56,7 @@ const FEATURES: FeatureConfig[] = [
 
 export default function AdminFeatures() {
   const [featureStates, setFeatureStates] = useState<Record<string, boolean>>({
+    feature_app_launched: false,
     feature_lobbies_enabled: false,
     feature_matching_enabled: false,
     feature_league_enabled: false,
@@ -73,18 +74,19 @@ export default function AdminFeatures() {
     try {
       const { data, error } = await supabase
         .from("site_settings")
-        .select("feature_lobbies_enabled, feature_matching_enabled, feature_league_enabled, feature_events_enabled, feature_p2g_enabled")
+        .select("feature_app_launched, feature_lobbies_enabled, feature_matching_enabled, feature_league_enabled, feature_events_enabled, feature_p2g_enabled")
         .eq("id", "global")
         .single();
 
       if (error) throw error;
 
       setFeatureStates({
+        feature_app_launched: data?.feature_app_launched ?? false,
         feature_lobbies_enabled: data?.feature_lobbies_enabled ?? false,
         feature_matching_enabled: data?.feature_matching_enabled ?? false,
         feature_league_enabled: data?.feature_league_enabled ?? false,
-        feature_events_enabled: (data as any)?.feature_events_enabled ?? false,
-        feature_p2g_enabled: (data as any)?.feature_p2g_enabled ?? false,
+        feature_events_enabled: data?.feature_events_enabled ?? false,
+        feature_p2g_enabled: data?.feature_p2g_enabled ?? false,
       });
     } catch (error) {
       console.error("Error fetching feature states:", error);
@@ -150,6 +152,45 @@ export default function AdminFeatures() {
             Schalte Features für eingeloggte User frei oder zeige "Coming Soon" an
           </p>
         </div>
+
+        {/* ── Master Launch Toggle ─────────────────────────── */}
+        <Card className={`border-2 ${featureStates.feature_app_launched ? "border-green-500/60 bg-green-500/5" : "border-amber-500/60 bg-amber-500/5"}`}>
+          <CardContent className="pt-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className={`p-3 rounded-xl ${featureStates.feature_app_launched ? "bg-green-500/20" : "bg-amber-500/20"}`}>
+                  <Globe className={`h-7 w-7 ${featureStates.feature_app_launched ? "text-green-500" : "text-amber-500"}`} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-xl font-bold text-foreground">App freischalten</h2>
+                    {featureStates.feature_app_launched ? (
+                      <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Live</Badge>
+                    ) : (
+                      <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30">Vor-Launch</Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground max-w-xl">
+                    {featureStates.feature_app_launched
+                      ? "Die App ist freigeschaltet. Alle eingeloggten User haben Zugriff auf alle Bereiche (soweit die einzelnen Features unten aktiviert sind)."
+                      : "Vor-Launch-Modus aktiv. Eingeloggte User sehen nur Buchung & Account. Alle anderen Seiten sind gesperrt. Admins haben immer vollen Zugriff."}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-sm font-medium text-muted-foreground">
+                  {featureStates.feature_app_launched ? "Aktiv" : "Gesperrt"}
+                </span>
+                <Switch
+                  checked={featureStates.feature_app_launched}
+                  onCheckedChange={(checked) => toggleFeature("feature_app_launched", checked)}
+                  disabled={savingKey === "feature_app_launched"}
+                />
+                {savingKey === "feature_app_launched" && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid gap-6">
           {FEATURES.map((feature) => {

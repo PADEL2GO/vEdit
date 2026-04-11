@@ -8,6 +8,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import { RequireAuth } from "@/components/RequireAuth";
+import { RequireAppLaunched } from "@/components/RequireAppLaunched";
 import Index from "./pages/Index";
 import FuerSpieler from "./pages/FuerSpieler";
 import FuerVereine from "./pages/FuerVereine";
@@ -104,6 +105,7 @@ const App = () => (
 
               {/* Protected Routes — require login */}
               <Route element={<RequireAuth />}>
+                {/* Always accessible after login: booking flow + account */}
                 <Route path="/account" element={<Account />} />
                 <Route path="/booking" element={<Booking />} />
                 <Route path="/booking/locations/:slug" element={<BookingLocation />} />
@@ -111,50 +113,52 @@ const App = () => (
                 <Route path="/booking/success" element={<BookingSuccess />} />
                 <Route path="/booking/cancel" element={<BookingCancel />} />
                 <Route path="/invite/accept" element={<InviteAccept />} />
-                <Route path="/lobbies" element={<Lobbies />} />
-                <Route path="/lobbies/:id" element={<Lobbies />} />
 
-                {/* Dashboard Routes */}
-                <Route path="/dashboard" element={<DashboardBooking />} />
-                <Route path="/dashboard/booking" element={<DashboardBooking />} />
-                <Route path="/dashboard/rewards" element={<DashboardRewards />} />
-                <Route path="/dashboard/p2g-points" element={<DashboardP2GPoints />} />
-                <Route path="/dashboard/marketplace" element={<DashboardMarketplace />} />
-                <Route path="/dashboard/league" element={<DashboardLeague />} />
-                <Route path="/dashboard/events" element={<DashboardEvents />} />
-                <Route path="/dashboard/friends" element={<DashboardFriends />} />
+                {/* Admin Routes — always accessible to admins (RequireAppLaunched lets admins through) */}
+                <Route element={<RequireAppLaunched />}>
+                  <Route path="/admin" element={<AdminOverview />} />
+                  <Route path="/admin/bookings" element={<AdminBookings />} />
+                  <Route path="/admin/courts" element={<AdminCourts />} />
+                  <Route path="/admin/events" element={<AdminEvents />} />
+                  <Route path="/admin/marketplace" element={<AdminMarketplace />} />
+                  <Route path="/admin/p2g-points" element={<AdminP2GPoints />} />
+                  <Route path="/admin/users" element={<AdminUsers />} />
+                  <Route path="/admin/notifications" element={<AdminNotifications />} />
+                  <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                  <Route path="/admin/visuals" element={<AdminVisuals />} />
+                  <Route path="/admin/features" element={<AdminFeatures />} />
+                  <Route path="/admin/club-owners" element={<AdminClubOwners />} />
+                  <Route path="/admin/clubs" element={<AdminClubs />} />
+                  <Route path="/admin/vouchers" element={<AdminVouchers />} />
+                  <Route path="/admin/location-teasers" element={<AdminLocationTeasers />} />
+                  <Route path="/admin/skypadel-gallery" element={<AdminSkyPadelGallery />} />
+                  <Route path="/admin/partner-tiles" element={<AdminPartnerTiles />} />
+                  <Route path="/admin/settings" element={<AdminSettings />} />
+                  <Route path="/admin/reward-definitions" element={<AdminRewardDefinitions />} />
+                  <Route path="/admin/reward-approvals" element={<AdminRewardApprovals />} />
+                  <Route path="/admin/credits" element={<AdminCredits />} />
+                  <Route path="/admin/redemptions" element={<AdminRedemptions />} />
 
-                {/* Club Owner Routes */}
-                <Route path="/club" element={<ClubLayout />}>
-                  <Route index element={<ClubDashboard />} />
-                  <Route path="bookings" element={<ClubBookings />} />
-                  <Route path="calendar" element={<ClubCalendar />} />
-                  <Route path="court" element={<ClubCourtFeatures />} />
+                  {/* Locked until app_launched = true */}
+                  <Route path="/lobbies" element={<Lobbies />} />
+                  <Route path="/lobbies/:id" element={<Lobbies />} />
+                  <Route path="/dashboard" element={<DashboardBooking />} />
+                  <Route path="/dashboard/booking" element={<DashboardBooking />} />
+                  <Route path="/dashboard/rewards" element={<DashboardRewards />} />
+                  <Route path="/dashboard/p2g-points" element={<DashboardP2GPoints />} />
+                  <Route path="/dashboard/marketplace" element={<DashboardMarketplace />} />
+                  <Route path="/dashboard/league" element={<DashboardLeague />} />
+                  <Route path="/dashboard/events" element={<DashboardEvents />} />
+                  <Route path="/dashboard/friends" element={<DashboardFriends />} />
+
+                  {/* Club Owner Routes */}
+                  <Route path="/club" element={<ClubLayout />}>
+                    <Route index element={<ClubDashboard />} />
+                    <Route path="bookings" element={<ClubBookings />} />
+                    <Route path="calendar" element={<ClubCalendar />} />
+                    <Route path="court" element={<ClubCourtFeatures />} />
+                  </Route>
                 </Route>
-
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminOverview />} />
-                <Route path="/admin/bookings" element={<AdminBookings />} />
-                <Route path="/admin/courts" element={<AdminCourts />} />
-                <Route path="/admin/events" element={<AdminEvents />} />
-                <Route path="/admin/marketplace" element={<AdminMarketplace />} />
-                <Route path="/admin/p2g-points" element={<AdminP2GPoints />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/admin/notifications" element={<AdminNotifications />} />
-                <Route path="/admin/analytics" element={<AdminAnalytics />} />
-                <Route path="/admin/visuals" element={<AdminVisuals />} />
-                <Route path="/admin/features" element={<AdminFeatures />} />
-                <Route path="/admin/club-owners" element={<AdminClubOwners />} />
-                <Route path="/admin/clubs" element={<AdminClubs />} />
-                <Route path="/admin/vouchers" element={<AdminVouchers />} />
-                <Route path="/admin/location-teasers" element={<AdminLocationTeasers />} />
-                <Route path="/admin/skypadel-gallery" element={<AdminSkyPadelGallery />} />
-                <Route path="/admin/partner-tiles" element={<AdminPartnerTiles />} />
-                <Route path="/admin/settings" element={<AdminSettings />} />
-                <Route path="/admin/reward-definitions" element={<AdminRewardDefinitions />} />
-                <Route path="/admin/reward-approvals" element={<AdminRewardApprovals />} />
-                <Route path="/admin/credits" element={<AdminCredits />} />
-                <Route path="/admin/redemptions" element={<AdminRedemptions />} />
               </Route>
 
               {/* Public Profile */}

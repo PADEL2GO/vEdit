@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface FeatureToggles {
+  app_launched: boolean;
   lobbies_enabled: boolean;
   matching_enabled: boolean;
   league_enabled: boolean;
@@ -12,6 +13,7 @@ export interface FeatureToggles {
 
 export const useFeatureToggles = () => {
   const [features, setFeatures] = useState<FeatureToggles>({
+    app_launched: false,
     lobbies_enabled: false,
     matching_enabled: false,
     league_enabled: false,
@@ -24,7 +26,7 @@ export const useFeatureToggles = () => {
     try {
       const { data, error } = await supabase
         .from("site_settings")
-        .select("feature_lobbies_enabled, feature_matching_enabled, feature_league_enabled, feature_events_enabled, feature_p2g_enabled")
+        .select("feature_app_launched, feature_lobbies_enabled, feature_matching_enabled, feature_league_enabled, feature_events_enabled, feature_p2g_enabled")
         .eq("id", "global")
         .single();
 
@@ -34,11 +36,12 @@ export const useFeatureToggles = () => {
       }
 
       setFeatures({
+        app_launched: data?.feature_app_launched ?? false,
         lobbies_enabled: data?.feature_lobbies_enabled ?? false,
         matching_enabled: data?.feature_matching_enabled ?? false,
         league_enabled: data?.feature_league_enabled ?? false,
-        events_enabled: (data as any)?.feature_events_enabled ?? false,
-        p2g_enabled: (data as any)?.feature_p2g_enabled ?? false,
+        events_enabled: data?.feature_events_enabled ?? false,
+        p2g_enabled: data?.feature_p2g_enabled ?? false,
         isLoading: false,
       });
     } catch (error) {
