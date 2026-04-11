@@ -99,7 +99,7 @@ const UeberUns = () => {
         {/* 1. Hero */}
         <section className="relative py-16 md:py-28 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-hero" />
-          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/8 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[280px] h-[280px] md:w-[600px] md:h-[600px] bg-primary/8 rounded-full blur-3xl pointer-events-none" />
           
           <div className="container mx-auto px-4 relative z-10">
             <motion.div

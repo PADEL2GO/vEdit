@@ -259,13 +259,13 @@ const Account = () => {
         {/* Tab Content */}
         <div className="container mx-auto px-4 max-w-2xl py-8">
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 gap-y-1">
               <TabsTrigger value="profile">Profil</TabsTrigger>
               <TabsTrigger value="bookings">Buchungen</TabsTrigger>
-              <TabsTrigger value="p2g-points">P2G Points</TabsTrigger>
+              <TabsTrigger value="p2g-points" className="text-xs sm:text-sm">P2G Points</TabsTrigger>
               <TabsTrigger value="matching" className="flex items-center gap-1">
                 <Users className="w-3.5 h-3.5" />
-                Matching
+                <span>Matching</span>
               </TabsTrigger>
               <TabsTrigger value="stats">Stats</TabsTrigger>
             </TabsList>

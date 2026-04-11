@@ -109,22 +109,22 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="grid grid-cols-3 gap-4 md:gap-6"
+              className="grid grid-cols-3 gap-2 md:gap-6"
             >
-              <div className="flex flex-col items-center lg:items-start p-4 rounded-xl bg-card/50 border border-border">
-                <MapPin className="w-6 h-6 text-primary mb-2" />
-                <span className="text-2xl md:text-3xl font-bold">15+</span>
-                <span className="text-sm text-muted-foreground">Standorte</span>
+              <div className="flex flex-col items-center lg:items-start p-2 sm:p-4 rounded-xl bg-card/50 border border-border">
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-primary mb-1 sm:mb-2" />
+                <span className="text-lg sm:text-2xl md:text-3xl font-bold">15+</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Standorte</span>
               </div>
-              <div className="flex flex-col items-center lg:items-start p-4 rounded-xl bg-card/50 border border-border">
-                <Calendar className="w-6 h-6 text-primary mb-2" />
-                <span className="text-2xl md:text-3xl font-bold">5.000+</span>
-                <span className="text-sm text-muted-foreground">Buchungen</span>
+              <div className="flex flex-col items-center lg:items-start p-2 sm:p-4 rounded-xl bg-card/50 border border-border">
+                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-primary mb-1 sm:mb-2" />
+                <span className="text-lg sm:text-2xl md:text-3xl font-bold">5.000+</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Buchungen</span>
               </div>
-              <div className="flex flex-col items-center lg:items-start p-4 rounded-xl bg-card/50 border border-border">
-                <Trophy className="w-6 h-6 text-primary mb-2" />
-                <span className="text-2xl md:text-3xl font-bold">50+</span>
-                <span className="text-sm text-muted-foreground">Events</span>
+              <div className="flex flex-col items-center lg:items-start p-2 sm:p-4 rounded-xl bg-card/50 border border-border">
+                <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-primary mb-1 sm:mb-2" />
+                <span className="text-lg sm:text-2xl md:text-3xl font-bold">50+</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">Events</span>
               </div>
             </motion.div>
           </div>
@@ -139,7 +139,7 @@ const HeroSection = () => {
             <img 
               src={iphoneMockup} 
               alt="PADEL2GO App" 
-              className="h-[350px] md:h-[450px] lg:h-[550px] w-auto object-contain"
+              className="h-[220px] sm:h-[300px] md:h-[420px] lg:h-[520px] w-auto object-contain"
             />
             
             {/* App Store Buttons */}

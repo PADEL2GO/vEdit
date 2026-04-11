@@ -194,7 +194,7 @@ const Rewards = () => {
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-2 md:gap-4 max-w-lg mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4 max-w-lg mx-auto">
                 <motion.div 
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}

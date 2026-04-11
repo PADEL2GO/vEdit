@@ -45,11 +45,11 @@ const CommunitySection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="grid grid-cols-3 gap-4 md:gap-8 max-w-2xl mx-auto mb-12"
+            className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-8 max-w-2xl mx-auto mb-12"
           >
             {stats.map((stat, index) => (
               <div key={index} className="p-4 md:p-6">
-                <div className="text-3xl md:text-5xl font-bold text-gradient-lime mb-2">
+                <div className="text-2xl sm:text-3xl md:text-5xl font-bold text-gradient-lime mb-2">
                   {stat.value}
                 </div>
                 <div className="text-sm md:text-base text-muted-foreground">

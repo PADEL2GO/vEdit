@@ -7,25 +7,19 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   
   const links = {
-    spieler: [
-      { label: "Court buchen", href: "/fuer-spieler#booking" },
-      { label: "P2G Rewards", href: "/fuer-spieler#rewards" },
-      { label: "League", href: "/fuer-spieler#league" },
-      { label: "Community", href: "/fuer-spieler#community" },
-      { label: "Jetzt registrieren", href: "/faq-kontakt?reason=spieler" },
+    plattform: [
+      { label: "Court buchen", href: "/booking" },
+      { label: "Rewards", href: "/rewards" },
+      { label: "Liga", href: "/league" },
+      { label: "Events", href: "/events" },
+      { label: "Lobbies", href: "/lobbies" },
     ],
-    vereine: [
-      { label: "Unser Modell", href: "/fuer-vereine#modell" },
-      { label: "Vorteile", href: "/fuer-vereine#vorteile" },
-      { label: "Digitales Ökosystem", href: "/fuer-vereine#digital" },
-      { label: "Praxisbeispiel", href: "/fuer-vereine#beispiel" },
-      { label: "Kontakt aufnehmen", href: "/faq-kontakt?reason=verein" },
-    ],
-    partner: [
-      { label: "Brand-Touchpoints", href: "/fuer-partner#touchpoints" },
-      { label: "Co-Growth Modelle", href: "/fuer-partner#cogrowth" },
-      { label: "Partnerschaften", href: "/fuer-partner#usecases" },
-      { label: "Partner werden", href: "/faq-kontakt?reason=partner" },
+    unternehmen: [
+      { label: "Für Spieler", href: "/fuer-spieler" },
+      { label: "Für Vereine", href: "/fuer-vereine" },
+      { label: "Für Partner", href: "/fuer-partner" },
+      { label: "Über uns", href: "/ueber-uns" },
+      { label: "FAQ & Kontakt", href: "/faq-kontakt" },
     ],
     legal: [
       { label: "Impressum", href: "/impressum" },
@@ -37,7 +31,7 @@ const Footer = () => {
   return (
     <footer className="bg-card/50 border-t border-border">
       <div className="container mx-auto px-4 py-8 md:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mb-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <img src={logo} alt="PADEL2GO" className="h-8 mb-4" />
@@ -45,19 +39,19 @@ const Footer = () => {
               Padel dorthin bringen, wo die Menschen schon sind.
             </p>
             <div className="space-y-2">
-              <a 
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors" 
+              <a
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 href="mailto:contact@padel2go.eu"
               >
                 <Mail className="w-4 h-4" />
                 contact@padel2go.eu
               </a>
-              <a 
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors" 
+              <a
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 href="tel:+4917632350759"
               >
                 <Phone className="w-4 h-4" />
-                +49 176 32350759  
+                +49 176 32350759
               </a>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4" />
@@ -66,31 +60,14 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Für Spieler */}
+          {/* Plattform */}
           <div>
-            <h4 className="font-semibold mb-4">Für Spieler</h4>
+            <h4 className="font-semibold mb-4">Plattform</h4>
             <ul className="space-y-2">
-              {links.spieler.map((link) => (
+              {links.plattform.map((link) => (
                 <li key={link.label}>
-                  <NavLink 
-                    to={link.href} 
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-block min-h-[44px] flex items-center"
-                  >
-                    {link.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Für Vereine */}
-          <div>
-            <h4 className="font-semibold mb-4">Für Vereine</h4>
-            <ul className="space-y-2">
-              {links.vereine.map((link) => (
-                <li key={link.label}>
-                  <NavLink 
-                    to={link.href} 
+                  <NavLink
+                    to={link.href}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {link.label}
@@ -100,14 +77,14 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Für Partner */}
+          {/* Unternehmen */}
           <div>
-            <h4 className="font-semibold mb-4">Für Partner</h4>
+            <h4 className="font-semibold mb-4">Unternehmen</h4>
             <ul className="space-y-2">
-              {links.partner.map((link) => (
+              {links.unternehmen.map((link) => (
                 <li key={link.label}>
-                  <NavLink 
-                    to={link.href} 
+                  <NavLink
+                    to={link.href}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {link.label}
@@ -123,8 +100,8 @@ const Footer = () => {
             <ul className="space-y-2">
               {links.legal.map((link) => (
                 <li key={link.label}>
-                  <NavLink 
-                    to={link.href} 
+                  <NavLink
+                    to={link.href}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {link.label}
