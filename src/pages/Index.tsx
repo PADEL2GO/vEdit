@@ -34,6 +34,8 @@ import p2gAppIcon from "@/assets/p2g-app-icon.png";
 import wingfieldLogo from "@/assets/partners/wingfield.png";
 import { usePartnerTiles } from "@/hooks/usePartnerTiles";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/useAuth";
+import { Navigate } from "react-router-dom";
 import badgeAppStore from "@/assets/badge-app-store.png";
 import badgeGooglePlay from "@/assets/badge-google-play.png";
 import { EXPERT_LEVELS, getExpertLevelEmoji } from "@/lib/expertLevels";
@@ -256,6 +258,12 @@ const ECOSYSTEM_STEPS = [
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 const Index = () => {
+  const { user, isLoading } = useAuth();
+
+  if (!isLoading && user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <>
       <Helmet>
