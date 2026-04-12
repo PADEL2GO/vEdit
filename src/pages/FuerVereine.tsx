@@ -13,34 +13,25 @@ import { PinGate } from "@/components/PinGate";
 import { usePinAccess } from "@/hooks/usePinAccess";
 import { SiteVisual } from "@/components/SiteVisual";
 import BrandName from "@/components/BrandName";
-import partnerTennisPointLogo from "@/assets/partners/tennis-point-vereine.png";
-import partnerPadelPointLogo from "@/assets/partners/padel-point-vereine.png";
 import partnerP2GLogo from "@/assets/partners/p2g-logo-vereine.png";
 import p2gIconLogo from "@/assets/p2g-icon-clean.png";
 import { usePartnerTiles } from "@/hooks/usePartnerTiles";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useSkyPadelGallery } from "@/hooks/useSkyPadelGallery";
 import tennisPadelAerial from "@/assets/courts/tennis-padel-aerial.jpg";
 import padelNorway from "@/assets/courts/padel-norway.webp";
 import useEmblaCarousel from "embla-carousel-react";
 import {
   ArrowRight,
+  BarChart3,
   Building2,
-  MapPin,
+  CalendarCheck,
   Smartphone,
-  PieChart,
   Trophy,
-  CheckCircle,
   TrendingUp,
   Users,
   Megaphone,
   Zap,
   Target,
-  BarChart3,
-  Lightbulb,
-  FileText,
-  ChevronDown,
-  ChevronUp,
   ChevronLeft,
   ChevronRight,
   Mail,
@@ -53,13 +44,8 @@ import {
   CircleCheck,
   Wrench,
   Shield,
-  Quote,
   Handshake,
-  Snowflake,
-  RotateCcw,
-  Gift,
   Package,
-  Percent,
   Briefcase,
   LayoutGrid,
   Gem,
@@ -118,44 +104,6 @@ const digitalFeatures = [
 { icon: Target, label: "Loyalty & Rewards", visualKey: "fuer-vereine.oekosystem.loyalty-rewards" }];
 
 
-// Angebot-Punkte
-const angebotItems = [
-{
-  icon: Shield,
-  title: "Wir übernehmen die Kosten",
-  description: "Courts, Aufbau, Software, Marketing, Montage – alles inklusive, €0 für euren Verein.",
-  model: "both"
-},
-{
-  icon: TrendingUp,
-  title: "Betreibermodell",
-  description: "Zusatzerlöse bereits ab Tag 1 – ihr erhaltet x% des Gesamtergebnisses, P2G ist Betreiber.",
-  model: "betreiber"
-},
-{
-  icon: Handshake,
-  title: "Amortisationsmodell",
-  description: "Nach 5-6 Jahren gehören euch die Courts – nachhaltiger Vermögensaufbau ohne Kapitalbindung.",
-  model: "amortisation"
-},
-{
-  icon: Coins,
-  title: "Keine laufenden Kosten",
-  description: "PADEL2GO bleibt euer Partner für App, Buchung und Service – ohne versteckte Gebühren.",
-  model: "both"
-},
-{
-  icon: Snowflake,
-  title: "Indoor-Option",
-  description: "Court kann auch in der Wintersaison genutzt werden – ganzjährig Padel spielen.",
-  model: "both"
-},
-{
-  icon: RotateCcw,
-  title: "Risikolos",
-  description: "Sollte Padel nichts für euren Verein sein, bauen wir kostenlos zurück.",
-  model: "both"
-}];
 
 
 const CourtImageCarousel = () => {
@@ -222,7 +170,7 @@ const CourtImageCarousel = () => {
 const FuerVereine = () => {
   const { isUnlocked, isLoading, validatePin } = usePinAccess("vereine");
   const [showPinDialog, setShowPinDialog] = useState(false);
-  const { data: partnerTiles, isLoading: partnerTilesLoading } = usePartnerTiles(true);
+  const { data: partnerTiles } = usePartnerTiles(true);
 
   return (
     <>
@@ -268,19 +216,21 @@ const FuerVereine = () => {
             </div>
           </motion.div>
 
-          <p className="text-lg md:text-2xl text-white/80 max-w-3xl mx-auto mb-10">
+          <p className="text-lg md:text-2xl text-white/80 max-w-3xl mx-auto mb-4">
             Wir bringen den Court, die Technik, das Marketing und die Community – ihr bringt nur die Fläche und die Zustimmung.
+          </p>
+          <p className="text-base md:text-lg font-semibold text-primary max-w-2xl mx-auto mb-10">
+            Für euren Verein entstehen keine Kosten – niemals.
           </p>
 
           <motion.a
-            href="mailto:contact@padel2go.eu?subject=Anfrage%20für%20Vereine"
+            href="#termin"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="inline-flex items-center gap-3 px-10 py-4 rounded-full bg-white/20 border border-white/30 text-white hover:bg-white/30 transition-colors">
-            
-            <Mail className="w-5 h-5" />
-            <span className="font-medium text-lg">Tritt mit uns in Kontakt</span>
+            className="inline-flex items-center gap-3 px-10 py-4 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity font-semibold text-lg shadow-lg shadow-primary/30">
+            <CalendarCheck className="w-5 h-5" />
+            <span>Termin buchen – kostenlos</span>
           </motion.a>
         </GalaxyHero>
 
@@ -311,14 +261,9 @@ const FuerVereine = () => {
                 viewport={{ once: true }}
                 className="max-w-5xl mx-auto text-center mb-16">
                 
-                <h2 className="text-2xl md:text-5xl lg:text-6xl font-bold mb-6">
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
                   <BrandName inline /> als <span className="text-gradient-lime">Full-Service Partner</span> für euren Verein
                 </h2>
-                <p className="text-base md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-                  Wir übernehmen Court-Bau, Buchungssystem, Marketing und Community-Aufbau – ihr profitiert von einem
-                  verjüngten Mitglieder-Mix, zusätzlichen Einnahmen und einem attraktiven neuen Sportangebot.
-                  Kein finanzielles Risiko, keine Bausorgen.
-                </p>
               </motion.div>
 
               {/* 3 Service Buckets */}
@@ -383,7 +328,7 @@ const FuerVereine = () => {
                     <Star className="w-4 h-4 text-primary" />
                     Unser Angebot
                   </span>
-                  <h2 className="text-2xl md:text-4xl font-bold mb-4">
+                  <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                     Premium Courts von <span className="text-gradient-lime">SkyPadel</span>
                   </h2>
                 </div>
@@ -463,286 +408,23 @@ const FuerVereine = () => {
 
           <SectionDivider variant="glow" />
 
-          {/* SEKTION: Technologie-Partner */}
-          <section className="py-14 md:py-24 bg-card/30">
-            <div className="container mx-auto px-4">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="max-w-4xl mx-auto">
-                
-                <div className="text-center mb-12">
-                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 border border-white/30 text-foreground text-sm font-medium mb-4">
-                    <LayoutGrid className="w-4 h-4" />
-                    Unsere Partner
-                  </span>
-                  <h2 className="text-2xl md:text-4xl font-bold">
-                    Erstklassige <span className="text-gradient-lime">Equipment-Partner</span>
-                  </h2>
-                </div>
-
-                {/* Equipment Partners – 3-column grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {partnerTilesLoading ? (
-                    Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="flex flex-col items-center p-6 rounded-2xl bg-background border border-border">
-                        <Skeleton className="w-full h-20 rounded-xl mb-4" />
-                        <Skeleton className="h-5 w-32 mb-2" />
-                        <Skeleton className="h-4 w-full" />
-                      </div>
-                    ))
-                  ) : (
-                    partnerTiles?.filter(t => t.partner_type !== 'local').map((tile, index) => {
-                      const card = (
-                        <motion.div
-                          key={tile.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: index * 0.08 }}
-                          className={`flex flex-col items-center text-center p-6 rounded-2xl bg-background border border-border hover:border-primary/30 transition-all duration-300 ${tile.website_url ? 'hover:scale-[1.02] hover:shadow-lg cursor-pointer' : ''}`}>
-                          
-                          <div
-                            className="rounded-xl p-3 flex items-center justify-center w-full h-20 mb-4"
-                            style={{ backgroundColor: tile.bg_color || '#FFFFFF' }}>
-                            {tile.logo_url ? (
-                              <img src={tile.logo_url} alt={tile.name} className="max-h-12 max-w-[120px] w-auto object-contain" />
-                            ) : (
-                              <span className="font-bold text-lg tracking-tight">{tile.name}</span>
-                            )}
-                          </div>
-                          <p className="text-lg font-semibold text-foreground mb-1">{tile.name}</p>
-                          {tile.description && (
-                            <p className="text-sm text-muted-foreground leading-relaxed">{tile.description}</p>
-                          )}
-                        </motion.div>
-                      );
-
-                      return tile.website_url ? (
-                        <a key={tile.id} href={tile.website_url} target="_blank" rel="noopener noreferrer">
-                          {card}
-                        </a>
-                      ) : (
-                        <div key={tile.id}>{card}</div>
-                      );
-                    })
-                  )}
-                </div>
-
-                {/* Local / Standortpartner */}
-                {(() => {
-                  const localTiles = partnerTiles?.filter(t => t.partner_type === 'local') || [];
-                  if (partnerTilesLoading || localTiles.length === 0) return null;
-
-                  const grouped: Record<string, typeof localTiles> = {};
-                  localTiles.forEach(t => {
-                    const region = t.region || 'Weitere';
-                    if (!grouped[region]) grouped[region] = [];
-                    grouped[region].push(t);
-                  });
-
-                  return (
-                    <div className="mt-16">
-                      <div className="text-center mb-10">
-                        <h2 className="text-2xl md:text-4xl font-bold">
-                          Unsere <span className="text-gradient-lime">Standortpartner</span>
-                        </h2>
-                      </div>
-
-                      <div className="space-y-10">
-                        {Object.entries(grouped).map(([region, tiles]) => (
-                          <div key={region}>
-                            <div className="flex items-center gap-2 mb-4">
-                              <MapPin className="w-5 h-5 text-primary" />
-                              <h3 className="text-xl font-bold text-foreground">Region {region}</h3>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                              {tiles.map((tile, index) => {
-                                const card = (
-                                  <motion.div
-                                    key={tile.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: index * 0.08 }}
-                                    className={`flex flex-col items-center text-center p-6 rounded-2xl bg-background border border-border hover:border-primary/30 transition-all duration-300 ${tile.website_url ? 'hover:scale-[1.02] hover:shadow-lg cursor-pointer' : ''}`}>
-                                    
-                                    <div
-                                      className="rounded-xl p-3 flex items-center justify-center w-full h-20 mb-4"
-                                      style={{ backgroundColor: tile.bg_color || '#FFFFFF' }}>
-                                      {tile.logo_url ? (
-                                        <img src={tile.logo_url} alt={tile.name} className="max-h-12 max-w-[120px] w-auto object-contain" />
-                                      ) : (
-                                        <span className="font-bold text-lg tracking-tight">{tile.name}</span>
-                                      )}
-                                    </div>
-                                    <p className="text-lg font-semibold text-foreground mb-1">{tile.name}</p>
-                                    {tile.description && (
-                                      <p className="text-sm text-muted-foreground leading-relaxed">{tile.description}</p>
-                                    )}
-                                  </motion.div>
-                                );
-
-                                return tile.website_url ? (
-                                  <a key={tile.id} href={tile.website_url} target="_blank" rel="noopener noreferrer">
-                                    {card}
-                                  </a>
-                                ) : (
-                                  <div key={tile.id}>{card}</div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </motion.div>
-            </div>
-          </section>
-
-          <SectionDivider variant="glow" />
-
-          {/* SEKTION: Zwei starke Partner – Equipment */}
-          <section className="py-14 md:py-20 bg-background">
-            <div className="container mx-auto px-4">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="max-w-5xl mx-auto">
-                
-                <div className="text-center mb-12">
-                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 border border-white/30 text-foreground text-sm font-medium mb-4">
-                    <Handshake className="w-4 h-4" />
-                    Starke Partner
-                  </span>
-                  <h2 className="text-2xl md:text-4xl font-bold mb-4">
-                    Zwei starke Partner – <span className="text-gradient-lime">volle Ausstattung</span> für euren Verein
-                  </h2>
-                  <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                    Wir sind stolz auf unsere Partnerschaft mit Padel Point und Tennis Point.
-                    Damit profitiert euer Verein von Tag 1 an von professionellem Equipment – ohne eigene Kosten.
-                  </p>
-                </div>
-
-                {/* Logo-Trio */}
-                <div className="flex flex-wrap items-center justify-center gap-4 md:gap-12 mb-16">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.1 }}
-                    className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-border flex items-center justify-center h-20 md:h-28 w-28 md:w-40 lg:w-52">
-                    
-                    <img src={partnerTennisPointLogo} alt="Tennis Point" className="max-h-14 md:max-h-16 w-auto object-contain" />
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 }}
-                    className="bg-card rounded-2xl p-4 md:p-6 shadow-lg border-2 border-primary/30 flex items-center justify-center h-24 md:h-32 w-32 md:w-44 lg:w-56">
-                    
-                    <img src={partnerP2GLogo} alt="PADEL2GO" className="max-h-16 md:max-h-20 w-auto object-contain" />
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-border flex items-center justify-center h-20 md:h-28 w-28 md:w-40 lg:w-52">
-                    
-                    <img src={partnerPadelPointLogo} alt="Padel Point" className="max-h-14 md:max-h-16 w-auto object-contain" />
-                  </motion.div>
-                </div>
-
-                {/* Vorteile Grid */}
-                <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 }}
-                    className="p-5 md:p-8 rounded-2xl bg-card border border-border">
-                    
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center">
-                        <img src={partnerPadelPointLogo} alt="Padel Point" className="w-8 h-8 object-contain" />
-                      </div>
-                      <h3 className="text-xl font-bold">Padel Point</h3>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed mb-5">
-                      <span className="font-semibold text-foreground">Volle Ausstattung ab Tag 1:</span> Padel Point stellt eurem Verein das komplette Equipment zur Verfügung.
-                    </p>
-                    <ul className="space-y-3">
-                      <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                        <Trophy className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <span>Testschläger-Set für jeden Verein</span>
-                      </li>
-                      <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                        <CircleCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <span>Bälle inklusive</span>
-                      </li>
-                      <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                        <Gift className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <span>Kostenlos für den Verein</span>
-                      </li>
-                    </ul>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.3 }}
-                    className="p-5 md:p-8 rounded-2xl bg-card border border-border">
-                    
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center">
-                        <img src={partnerTennisPointLogo} alt="Tennis Point" className="w-8 h-8 object-contain" />
-                      </div>
-                      <h3 className="text-xl font-bold">Tennis Point</h3>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed mb-5">
-                      <span className="font-semibold text-foreground">Günstiges Equipment für eure Mitglieder:</span> Über Tennis Point erhalten eure Vereinsmitglieder exklusive Konditionen.
-                    </p>
-                    <ul className="space-y-3">
-                      <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                        <ShoppingBag className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <span>Vergünstigtes Padel- & Tennis-Equipment</span>
-                      </li>
-                      <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                        <Percent className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <span>Exklusive Konditionen für Vereinsmitglieder</span>
-                      </li>
-                      <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                        <Package className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                        <span>Schläger, Bälle und Zubehör</span>
-                      </li>
-                    </ul>
-                  </motion.div>
-                </div>
-              </motion.div>
-            </div>
-          </section>
-
-          <SectionDivider variant="glow" />
-
           {/* SEKTION: Nutzen für euren Verein und eure Mitglieder */}
-          <section className="py-14 md:py-24 bg-card/30">
+          <section className="py-20 md:py-32 bg-gradient-to-b from-background via-primary/5 to-background">
             <div className="container mx-auto px-4">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 className="max-w-5xl mx-auto">
-                
-                <div className="text-center mb-14">
-                  <h2 className="text-2xl md:text-5xl font-bold">
-                    Nutzen für euren <span className="text-gradient-lime">Verein</span> und eure <span className="text-gradient-lime">Mitglieder</span>
+
+                <div className="text-center mb-16">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-5">
+                    <Shield className="w-4 h-4" />
+                    Warum Vereine sich für P2G entscheiden
+                  </span>
+                  <h2 className="text-4xl md:text-6xl font-bold tracking-tight">
+                    Euer Verein gewinnt.<br />
+                    <span className="text-gradient-lime">Eure Mitglieder auch.</span>
                   </h2>
                 </div>
 
@@ -751,9 +433,10 @@ const FuerVereine = () => {
                   {/* Linke Spalte */}
                   <div className="space-y-4">
                     {[
-                    { icon: Briefcase, title: "Keine Investitionskosten", description: "0€ für euren Verein – P2G trägt alle Kosten für Court, Aufbau und Betrieb." },
+                    { icon: Briefcase, title: "Keine Investitionskosten", description: "0€ für euren Verein – heute nicht, morgen nicht, niemals. P2G trägt alle Kosten für Court, Aufbau, Wartung und Betrieb." },
                     { icon: LayoutGrid, title: "Keine eigene Organisation", description: "Buchungen, Wartung, Marketing – wir kümmern uns. Euer Verein konzentriert sich aufs Wesentliche." },
-                    { icon: Coins, title: "Zusätzliche Einnahmen", description: "Attraktive Umsatzbeteiligung – direkt auf euer Vereinskonto." }].
+                    { icon: Coins, title: "Zusätzliche Einnahmen", description: "Attraktive Umsatzbeteiligung – direkt auf euer Vereinskonto." },
+                    { icon: Package, title: "Starter-Equipment inklusive", description: "Jeder Verein erhält von uns ein Testschläger-Set und Bälle – damit kann sofort gespielt werden." }].
                     map((item, index) =>
                     <motion.div
                       key={item.title}
@@ -825,152 +508,58 @@ const FuerVereine = () => {
 
           <SectionDivider variant="glow" />
 
-          {/* SEKTION: Betreibermodell & Amortisationsmodell */}
+          {/* SEKTION: Curiosity CTA */}
           <section className="py-14 md:py-24 bg-background">
             <div className="container mx-auto px-4">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="max-w-6xl mx-auto">
-                
-                <div className="text-center mb-12">
-                  <h2 className="text-2xl md:text-5xl font-bold mb-4">
-                    Zwei Modelle – <span className="text-gradient-lime">Maximaler Outcome</span>
-                  </h2>
-                  <p className="text-lg text-muted-foreground">Ihr testet und entscheidet selbst.</p>
+                className="max-w-4xl mx-auto text-center">
+
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
+                  <Coins className="w-4 h-4" />
+                  Euer Vorteil
+                </span>
+
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+                  Was ihr konkret bekommt –<br />
+                  <span className="text-gradient-lime">am besten persönlich erklärt.</span>
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-12">
+                  Revenue-Share, Mitgliederkonditionen, Timeline: Die Details sind individuell – und gut für euren Verein. Lernt uns kennen.
+                </p>
+
+                <div className="grid sm:grid-cols-3 gap-4 mb-12">
+                  {[
+                    { icon: TrendingUp, label: "Ihr verdient mit", sub: "ohne einen Cent zu investieren" },
+                    { icon: Users, label: "Eure Mitglieder spielen günstiger", sub: "als alle anderen Spieler" },
+                    { icon: Gem, label: "Die Courts können euch gehören", sub: "langfristig und ohne Risiko" }
+                  ].map((item, i) =>
+                    <motion.div
+                      key={item.label}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.1 }}
+                      className="p-6 rounded-2xl bg-card border border-border hover:border-primary/30 transition-colors">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                        <item.icon className="w-6 h-6 text-primary" />
+                      </div>
+                      <p className="font-bold text-base mb-1">{item.label}</p>
+                      <p className="text-sm text-muted-foreground">{item.sub}</p>
+                    </motion.div>
+                  )}
                 </div>
 
-                {/* Konservative Auslastung Banner – vollflächig Amber */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="mb-8 p-4 rounded-xl bg-amber-400 text-center">
-                  
-                  <span className="font-bold text-xl text-black">
-                    Konservative Auslastung ~27%
-                  </span>
-                </motion.div>
-
-                {/* Zwei Modell-Spalten */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  {/* Betreibermodell – Grün */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.1 }}
-                    className="rounded-2xl border-2 border-primary/50 overflow-hidden flex flex-col">
-                    
-                    <div className="bg-primary/10 px-6 py-5 border-b border-primary/20 text-center">
-                      <h3 className="text-2xl md:text-3xl font-bold text-primary">Betreibermodell</h3>
-                      <p className="text-base text-muted-foreground mt-1">Ausschüttung ab Start</p>
-                    </div>
-                    <div className="p-6 md:p-8 bg-card flex flex-col flex-1">
-                      {/* Eckpunkte */}
-                      <div className="flex flex-wrap gap-3 mb-6">
-                        {["P2G ist Betreiber", "Verein erhält x% Gesamtergebnis", "Courts gehören P2G"].map((tag) =>
-                        <span key={tag} className="px-4 py-2 rounded-full bg-primary/10 border border-primary/30 text-sm font-medium text-primary">
-                            {tag}
-                          </span>
-                        )}
-                      </div>
-                      {/* Icons */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-                        {[
-                        { icon: Shield, label: "0€ Investition" },
-                        { icon: LayoutGrid, label: "Keine Organisation" },
-                        { icon: Wrench, label: "Kein Wartungsaufwand" }].
-                        map((item) =>
-                        <div key={item.label} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-primary/5 border border-primary/20">
-                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                              <item.icon className="w-5 h-5 text-primary" />
-                            </div>
-                            <span className="text-sm text-center font-medium">{item.label}</span>
-                          </div>
-                        )}
-                      </div>
-                      {/* Vorteile */}
-                      <div className="mb-6">
-                        <p className="text-sm text-muted-foreground uppercase tracking-wider mb-3 font-semibold">Eure Vorteile</p>
-                        <div className="flex flex-wrap gap-2">
-                          {["Zusatzertrag", "Keine Kapitalbindung", "Alle Kosten trägt P2G", "Festes Kontingent", "Vergünstigte Preise für Mitglieder", "Kostenloses Equipment"].map((v) =>
-                          <span key={v} className="px-3 py-2 rounded-lg bg-primary/5 border border-primary/20 text-sm text-foreground">
-                              {v}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {/* Fazit */}
-                      <div className="mt-auto pt-5 border-t border-border">
-                        <div className="p-4 rounded-xl bg-primary text-primary-foreground">
-                          <p className="text-base font-bold text-center">
-                            ✓ Direkter Cashflow – ohne operative Verantwortung. Kein Risiko.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Amortisationsmodell – Orange */}
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 }}
-                    className="rounded-2xl border-2 border-amber-500/50 overflow-hidden flex flex-col">
-                    
-                    <div className="bg-amber-500/10 px-6 py-5 border-b border-amber-500/20 text-center">
-                      <h3 className="text-2xl md:text-3xl font-bold text-amber-500">Amortisationsmodell</h3>
-                      <p className="text-base text-muted-foreground mt-1">Nach 5-6 Jahren in eurem Besitz</p>
-                    </div>
-                    <div className="p-6 md:p-8 bg-card flex flex-col flex-1">
-                      {/* Eckpunkte */}
-                      <div className="flex flex-wrap gap-3 mb-6">
-                        {["P2G ist Betreiber", "Verein erhält keinen Anteil", "Courts gehören in 5-6 Jahren euch"].map((tag) =>
-                        <span key={tag} className="px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 text-sm font-medium text-amber-500">
-                            {tag}
-                          </span>
-                        )}
-                      </div>
-                      {/* Icons */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-                        {[
-                        { icon: Shield, label: "0€ Investition" },
-                        { icon: LayoutGrid, label: "Keine Organisation" },
-                        { icon: Wrench, label: "Kein Wartungsaufwand" }].
-                        map((item) =>
-                        <div key={item.label} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
-                            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
-                              <item.icon className="w-5 h-5 text-amber-500" />
-                            </div>
-                            <span className="text-sm text-center font-medium">{item.label}</span>
-                          </div>
-                        )}
-                      </div>
-                      {/* Vorteile */}
-                      <div className="mb-6">
-                        <p className="text-sm text-muted-foreground uppercase tracking-wider mb-3 font-semibold">Eure Vorteile</p>
-                        <div className="flex flex-wrap gap-2">
-                          {["Vermögensaufbau", "Vergünstigte Preise für Mitglieder", "Kostenloses Equipment", "Alle Kosten trägt P2G"].map((v) =>
-                          <span key={v} className="px-3 py-2 rounded-lg bg-amber-500/5 border border-amber-500/20 text-sm text-foreground">
-                              {v}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {/* Fazit */}
-                      <div className="mt-auto pt-5 border-t border-border">
-                        <div className="p-4 rounded-xl bg-amber-400 text-black">
-                          <p className="text-base font-bold text-center">
-                            ✓ Nachhaltiger Vermögensaufbau – Courts gehören euch. Geteiltes Risiko.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </div>
+                <a
+                  href="#termin"
+                  className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity font-semibold text-lg group shadow-lg shadow-primary/25">
+                  <CalendarCheck className="w-5 h-5" />
+                  Termin buchen – kostenlos
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </a>
+                <p className="text-sm text-muted-foreground mt-4">Kein Pitch, kein Druck – nur ein offenes Gespräch.</p>
               </motion.div>
             </div>
           </section>
@@ -978,19 +567,24 @@ const FuerVereine = () => {
           <SectionDivider variant="glow" />
 
           {/* SEKTION: Wie es jetzt konkret weitergeht */}
-          <section className="py-14 md:py-24 bg-card/30">
-            <div className="container mx-auto px-4">
+          <section className="py-20 md:py-32 bg-background relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-hero opacity-60 pointer-events-none" />
+            <div className="container mx-auto px-4 relative z-10">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 className="max-w-5xl mx-auto">
-                
-                <div className="text-center mb-14">
-                  <h2 className="text-2xl md:text-5xl font-bold mb-2">
-                    Wie es jetzt konkret <span className="text-gradient-lime">weitergeht…</span>
+
+                <div className="text-center mb-16">
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-5">
+                    <Target className="w-4 h-4" />
+                    In 4 Schritten zum eigenen Court
+                  </span>
+                  <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-3">
+                    Wie es jetzt konkret <span className="text-gradient-lime">weitergeht.</span>
                   </h2>
-                  <p className="text-muted-foreground text-lg">Unser Modell für Vereine: einfach, transparent, skalierbar.</p>
+                  <p className="text-muted-foreground text-lg max-w-xl mx-auto">Von eurem ersten Gespräch mit uns bis zum laufenden Court – in unter 2 Monaten.</p>
                 </div>
 
                 {/* 4-Schritt-Timeline */}
@@ -1038,7 +632,7 @@ const FuerVereine = () => {
                       }>
                           {step.step}
                         </div>
-                        <h3 className="font-bold text-lg mb-3">{step.title}</h3>
+                        <h3 className="text-xl font-bold mb-3">{step.title}</h3>
                         <ul className="space-y-1 text-sm text-muted-foreground">
                           {step.details.map((d) =>
                         <li key={d}>{d}</li>
@@ -1058,11 +652,12 @@ const FuerVereine = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.6 }}
-                  className="mt-12 p-5 rounded-2xl bg-primary text-primary-foreground text-center">
-                  
-                  <p className="text-xl md:text-2xl font-bold">
-                    Wir bringen in <span className="underline">2 Monaten</span> Padel zu euch!
+                  className="mt-14 p-8 rounded-3xl bg-primary text-primary-foreground text-center shadow-2xl shadow-primary/30">
+
+                  <p className="text-2xl md:text-4xl font-bold mb-2">
+                    In <span className="underline decoration-4 underline-offset-4">2 Monaten</span> spielt ihr Padel.
                   </p>
+                  <p className="text-base md:text-lg opacity-80 font-medium">Versprochen.</p>
                 </motion.div>
               </motion.div>
             </div>
@@ -1142,13 +737,12 @@ const FuerVereine = () => {
                   </div>
 
                   <div className="text-center pt-6 border-t border-border/50">
-                    <NavLink
-                      to="/faq-kontakt?reason=ki-kamera"
+                    <a
+                      href="#termin"
                       className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white/20 border border-white/30 text-foreground hover:bg-white/30 transition-all font-medium">
-                      
-                      <MessageCircle className="w-5 h-5" />
-                      Unverbindliches Gespräch anfragen
-                    </NavLink>
+                      <CalendarCheck className="w-5 h-5" />
+                      Termin buchen – kostenlos
+                    </a>
                   </div>
                 </motion.div>
               </motion.div>
@@ -1157,33 +751,50 @@ const FuerVereine = () => {
 
           <SectionDivider variant="glow" />
 
-          {/* SEKTION: CTA */}
-          <section className="py-14 md:py-24 lg:py-32 bg-gradient-to-b from-background to-primary/5">
+          {/* SEKTION: Termin buchen */}
+          <section id="termin" className="py-14 md:py-24 bg-gradient-to-b from-background via-primary/5 to-background">
             <div className="container mx-auto px-4">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-center max-w-3xl mx-auto">
-                
-                <h2 className="text-2xl md:text-5xl font-bold mb-6">
-                  Bereit, Padel in Ihren Verein zu{" "}
-                  <span className="text-gradient-lime">bringen?</span>
+                className="text-center max-w-2xl mx-auto mb-10">
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold mb-5">
+                  <CalendarCheck className="w-4 h-4" />
+                  Kostenloses Erstgespräch
+                </span>
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+                  Termin direkt{" "}
+                  <span className="text-gradient-lime">hier buchen.</span>
                 </h2>
-                <p className="text-xl text-muted-foreground mb-10">
-                  Starten Sie risikofrei – wir investieren, Sie profitieren.
+                <p className="text-lg text-muted-foreground">
+                  30 Minuten – kein Pitch, kein Druck. Wir zeigen euch, wie Padel in euren Verein passt und was wir konkret übernehmen.
                 </p>
-                <div className="flex justify-center">
-                  <NavLink
-                    to="/faq-kontakt?reason=verein"
-                    className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-full bg-white/20 border border-white/30 text-foreground hover:bg-white/30 transition-all font-medium text-base group max-w-md">
-                    
-                    <MessageCircle className="w-5 h-5" />
-                    Unverbindliches Gespräch anfragen
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </NavLink>
-                </div>
               </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.15 }}
+                className="max-w-3xl mx-auto rounded-2xl overflow-hidden border border-border/50 bg-card shadow-xl">
+                <iframe
+                  src="https://calendly.com/fsteinfelder-padel2go/kennenlernen-padel2go"
+                  width="100%"
+                  height="700"
+                  frameBorder="0"
+                  title="Termin mit PADEL2GO buchen"
+                  className="w-full"
+                  style={{ minHeight: 700 }}
+                />
+              </motion.div>
+
+              <p className="text-center text-sm text-muted-foreground mt-6">
+                Lieber per E-Mail?{" "}
+                <NavLink to="/faq-kontakt?reason=verein" className="text-primary hover:underline">
+                  Nachricht schreiben
+                </NavLink>
+              </p>
             </div>
           </section>
 

@@ -317,7 +317,7 @@ export function BookingSummary({
             </>
           ) : (
             <>
-              {user ? 'Jetzt buchen' : 'Einloggen & Buchen'}
+              Jetzt buchen
               <ArrowRight className="w-4 h-4 ml-2" />
             </>
           )}
@@ -325,7 +325,9 @@ export function BookingSummary({
 
         {!user && (
           <p className="text-xs text-muted-foreground text-center">
-            Du wirst zur Anmeldung weitergeleitet
+            Buchung ohne Konto möglich — oder{" "}
+            <a href="/auth" className="text-primary hover:underline">anmelden</a>{" "}
+            für Punkte & Vorteile.
           </p>
         )}
       </div>

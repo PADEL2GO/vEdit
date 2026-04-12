@@ -17,6 +17,8 @@ export interface BookingDetails {
   location: { name: string; slug: string; address: string | null };
   court: { name: string };
   invitedCount: number;
+  guest_name?: string | null;
+  guest_email?: string | null;
 }
 
 export interface RewardBreakdown {
@@ -63,6 +65,11 @@ export interface UseBookingCheckoutReturn {
   setVoucherCode: (code: string) => void;
   validateVoucher: () => Promise<void>;
   clearVoucher: () => void;
+  creditsToUse: number;
+  setCreditsToUse: (n: number) => void;
+  availableCredits: number;
+  maxCreditsForBooking: number;
+  isGuest: boolean;
   handlePayment: () => Promise<void>;
   createInvitesAndPay: (friendIds: string[]) => Promise<void>;
   formatTimeLeft: (seconds: number) => string;
@@ -80,6 +87,10 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
   const [stripeUrl, setStripeUrl] = useState<string | null>(null);
   const [rewardsEstimate, setRewardsEstimate] = useState<RewardsEstimate | null>(null);
   const [selectedFriendIds, setSelectedFriendIds] = useState<string[]>([]);
+  const [creditsToUse, setCreditsToUse] = useState(0);
+  const [availableCredits, setAvailableCredits] = useState(0);
+  const [creditsMaxPercent, setCreditsMaxPercent] = useState(50);
+  const [creditsEnabled, setCreditsEnabled] = useState(false);
   const [voucher, setVoucher] = useState<VoucherState>({
     code: "",
     status: "idle",
@@ -91,20 +102,22 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
   });
 
   const bookingId = searchParams.get("booking_id");
+  // Guest mode: booking was created without auth — no redirect, no user checks
+  const isGuest = searchParams.get("guest") === "1";
 
-  // Auth redirect effect
+  // Auth redirect: only when NOT a guest checkout
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && !isGuest) {
       navigate(`/auth?redirect=/booking/checkout?booking_id=${bookingId}`);
     }
-  }, [authLoading, user, bookingId, navigate]);
+  }, [authLoading, user, isGuest, bookingId, navigate]);
 
-  // Fetch booking effect
+  // Fetch booking: for guests (no user) wait until auth loading done then fetch
   useEffect(() => {
-    if (user && bookingId) {
+    if (bookingId && (user || (!authLoading && isGuest))) {
       fetchBooking();
     }
-  }, [user, bookingId]);
+  }, [user, bookingId, authLoading, isGuest]);
 
   // Countdown timer effect
   useEffect(() => {
@@ -196,7 +209,7 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
 
   const fetchBooking = async () => {
     try {
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from("bookings")
         .select(`
           id,
@@ -207,12 +220,19 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
           currency,
           hold_expires_at,
           payment_mode,
+          guest_name,
+          guest_email,
           location:locations (name, slug, address),
           court:courts (name)
         `)
-        .eq("id", bookingId!)
-        .eq("user_id", user!.id)
-        .single();
+        .eq("id", bookingId!);
+
+      // For authenticated users verify ownership; for guests the UUID is the credential
+      if (user) {
+        query = query.eq("user_id", user.id);
+      }
+
+      const { data, error: fetchError } = await query.single();
 
       if (fetchError || !data) {
         setError("Buchung nicht gefunden oder kein Zugriff.");
@@ -222,7 +242,7 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
 
       if (data.status !== "pending_payment") {
         if (data.status === "confirmed") {
-          navigate("/account");
+          navigate(isGuest ? "/booking/success?guest=1" : "/account");
           toast.info("Diese Buchung wurde bereits bezahlt.");
           setState("already_paid");
         } else {
@@ -248,7 +268,23 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
       setBooking(bookingDetails);
       setState("ready");
 
-      // Fetch rewards estimate (non-blocking)
+      // Fetch credits balance + settings (only for authenticated users)
+      if (user && !isGuest) {
+        Promise.all([
+          supabase.from("wallets").select("play_credits").eq("user_id", user.id).maybeSingle(),
+          supabase.from("site_settings")
+            .select("feature_credits_payment_enabled, credits_payment_max_percent")
+            .eq("id", "global").single(),
+        ]).then(([walletRes, settingsRes]) => {
+          setAvailableCredits(walletRes.data?.play_credits ?? 0);
+          const settings = settingsRes.data as any;
+          setCreditsEnabled(settings?.feature_credits_payment_enabled ?? false);
+          setCreditsMaxPercent(settings?.credits_payment_max_percent ?? 50);
+        });
+      }
+
+      // Fetch rewards estimate only for authenticated users (guests don't earn points)
+      if (isGuest) return;
       invokeEdgeFunction<RewardsEstimate>("rewards-estimate", {
         body: {
           booking_id: bookingId,
@@ -297,7 +333,9 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
   };
 
   const createInvitesAndPay = async (friendIds: string[]) => {
-    if (!booking || !user) return;
+    if (!booking) return;
+    // Guests skip friend invites; authenticated users require user object
+    if (!isGuest && !user) return;
 
     setState("processing");
     try {
@@ -405,6 +443,7 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
         body: {
           booking_id: booking.id,
           ...(isPartialVoucher && voucher.voucherId ? { voucher_id: voucher.voucherId } : {}),
+          ...(creditsToUse > 0 ? { credits_to_use: creditsToUse } : {}),
         },
         maxRetries: 2,
         retryDelayMs: 1500,
@@ -453,6 +492,15 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const ownerPrice = booking
+    ? booking.payment_mode === "split"
+      ? Math.ceil(booking.price_cents / 4)
+      : booking.price_cents
+    : 0;
+  const maxCreditsForBooking = creditsEnabled
+    ? Math.min(availableCredits, Math.floor(ownerPrice * creditsMaxPercent / 100))
+    : 0;
+
   return {
     booking,
     state,
@@ -466,6 +514,11 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
     setVoucherCode,
     validateVoucher,
     clearVoucher,
+    creditsToUse,
+    setCreditsToUse,
+    availableCredits,
+    maxCreditsForBooking,
+    isGuest,
     handlePayment,
     createInvitesAndPay,
     formatTimeLeft,

@@ -7,6 +7,7 @@ import { setHours, setMinutes, addMinutes } from "date-fns";
 import { useBookingSlots } from "@/hooks/useBookingSlots";
 import { useCourtPricesWithFallback, getPriceFromList } from "@/hooks/useCourtPrices";
 import { getSharePerPlayer } from "@/lib/pricing";
+import { invokeEdgeFunction } from "@/lib/edgeFunctionUtils";
 import type { Court, TimeSlot } from "@/components/booking/types";
 import type { DbLocation } from "@/types/database";
 import type { LobbySettings } from "@/types/lobby";
@@ -35,6 +36,8 @@ export function useBookingLocation(slug: string | undefined) {
   const [paymentMode, setPaymentMode] = useState<"full" | "split">("full");
   const [lobbyEnabled, setLobbyEnabled] = useState(false);
   const [lobbySettings, setLobbySettings] = useState<LobbySettings>(DEFAULT_LOBBY_SETTINGS);
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [guestBookingInProgress, setGuestBookingInProgress] = useState(false);
 
   // Fetch court prices with fallback to global prices
   const { data: courtPrices, isLoading: pricesLoading } = useCourtPricesWithFallback(selectedCourt);
@@ -97,9 +100,56 @@ export function useBookingLocation(slug: string | undefined) {
     }
   }, [slug, fetchLocation]);
 
+  // Guest booking handler — called after the GuestCheckoutModal is submitted
+  const handleGuestBooking = useCallback(async (guestName: string, guestEmail: string, guestPhone: string) => {
+    if (!selectedSlot || !location || !selectedCourt || !hasPrices) return;
+
+    setGuestBookingInProgress(true);
+    try {
+      const [hours, minutes] = selectedSlot.time.split(':').map(Number);
+      const startTime = setMinutes(setHours(selectedDate, hours), minutes);
+      const endTime = addMinutes(startTime, selectedDuration);
+
+      const { data, error } = await invokeEdgeFunction<{ booking_id: string; price_cents: number }>(
+        "create-guest-booking",
+        {
+          body: {
+            court_id: selectedCourt,
+            location_id: location.id,
+            start_time: startTime.toISOString(),
+            end_time: endTime.toISOString(),
+            guest_name: guestName,
+            guest_email: guestEmail,
+            guest_phone: guestPhone,
+          },
+          maxRetries: 1,
+        }
+      );
+
+      if (error || !data?.booking_id) {
+        toast.error("Fehler bei der Buchung", {
+          description: error?.message || "Bitte versuche es erneut.",
+        });
+        return;
+      }
+
+      setShowGuestModal(false);
+      navigate(`/booking/checkout?booking_id=${data.booking_id}&guest=1`);
+    } catch (err: any) {
+      toast.error("Fehler bei der Buchung", { description: err.message || "Bitte versuche es erneut." });
+    } finally {
+      setGuestBookingInProgress(false);
+    }
+  }, [selectedSlot, location, selectedCourt, hasPrices, selectedDate, selectedDuration, navigate]);
+
   const handleBooking = useCallback(async () => {
     if (!user) {
-      navigate("/auth?redirect=/booking/locations/" + slug);
+      // Open guest checkout modal instead of redirecting to auth
+      if (!selectedSlot || !hasPrices) {
+        toast.error("Bitte wähle zuerst einen Zeitslot");
+        return;
+      }
+      setShowGuestModal(true);
       return;
     }
 
@@ -258,7 +308,9 @@ export function useBookingLocation(slug: string | undefined) {
     user,
     lobbyEnabled,
     lobbySettings,
-    
+    showGuestModal,
+    guestBookingInProgress,
+
     // Setters
     setSelectedDate,
     setSelectedCourt,
@@ -267,9 +319,11 @@ export function useBookingLocation(slug: string | undefined) {
     setPaymentMode,
     setLobbyEnabled,
     setLobbySettings,
-    
+    setShowGuestModal,
+
     // Actions
     handleBooking,
+    handleGuestBooking,
     addPlayer,
     removePlayer,
   };

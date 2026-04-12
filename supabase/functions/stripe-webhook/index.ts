@@ -318,6 +318,104 @@ serve(async (req) => {
               logStep("Booking confirmed", { bookingId });
             }
 
+            const isGuestWebhook = session.metadata?.is_guest === "1";
+            const guestEmail = session.metadata?.guest_email;
+            const guestName = session.metadata?.guest_name;
+
+            // ── Award play credits for this booking (authenticated users only) ─
+            if (!isGuestWebhook) try {
+              const { data: bk } = await supabaseAdmin
+                .from("bookings")
+                .select("start_time, end_time, user_id, play_credits_awarded")
+                .eq("id", bookingId)
+                .single();
+
+              if (bk && bk.play_credits_awarded === 0 && bk.user_id) {
+                // Calculate weekly streak for this user
+                const threeMonthsAgo = new Date();
+                threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+                const { data: prevBookings } = await supabaseAdmin
+                  .from("bookings")
+                  .select("start_time")
+                  .eq("user_id", bk.user_id)
+                  .eq("status", "confirmed")
+                  .neq("id", bookingId)
+                  .gte("start_time", threeMonthsAgo.toISOString());
+
+                // ISO week key helper
+                const isoWeekKey = (d: Date): string => {
+                  const dt = new Date(d);
+                  dt.setHours(12, 0, 0, 0);
+                  dt.setDate(dt.getDate() + 3 - ((dt.getDay() + 6) % 7));
+                  const jan4 = new Date(dt.getFullYear(), 0, 4);
+                  const wn = 1 + Math.round(((dt.getTime() - jan4.getTime()) / 86400000 - 3 + ((jan4.getDay() + 6) % 7)) / 7);
+                  return `${dt.getFullYear()}-W${String(wn).padStart(2, "0")}`;
+                };
+
+                const weekSet = new Set((prevBookings || []).map(b => isoWeekKey(new Date(b.start_time))));
+                // Include current booking's week
+                weekSet.add(isoWeekKey(new Date(bk.start_time)));
+
+                let weekStreak = 0;
+                const cursor = new Date();
+                for (let i = 0; i < 13; i++) {
+                  if (!weekSet.has(isoWeekKey(cursor))) break;
+                  weekStreak++;
+                  cursor.setDate(cursor.getDate() - 7);
+                }
+
+                // Multiplier
+                const multiplier = weekStreak >= 4 ? 2.5 : weekStreak === 3 ? 2.0 : weekStreak === 2 ? 1.5 : 1.0;
+
+                // Hours (rounded to nearest 0.5)
+                const hours = (new Date(bk.end_time).getTime() - new Date(bk.start_time).getTime()) / 3600000;
+                const roundedHours = Math.max(0.5, Math.round(hours * 2) / 2);
+                const creditsToAward = Math.round(roundedHours * 100 * multiplier);
+
+                // Fetch current wallet
+                const { data: wallet } = await supabaseAdmin
+                  .from("wallets")
+                  .select("play_credits, lifetime_credits")
+                  .eq("user_id", bk.user_id)
+                  .single();
+
+                const currentCredits = wallet?.play_credits ?? 0;
+                const currentLifetime = wallet?.lifetime_credits ?? 0;
+
+                await supabaseAdmin.from("wallets").upsert({
+                  user_id: bk.user_id,
+                  play_credits: currentCredits + creditsToAward,
+                  lifetime_credits: currentLifetime + creditsToAward,
+                }, { onConflict: "user_id" });
+
+                await supabaseAdmin.from("bookings")
+                  .update({ play_credits_awarded: creditsToAward })
+                  .eq("id", bookingId);
+
+                logStep("Play credits awarded", { bookingId, creditsToAward, weekStreak, multiplier });
+
+                // First-booking onboarding bonus (one-time 500 pts)
+                const { data: walletAfter } = await supabaseAdmin
+                  .from("wallets")
+                  .select("onboarding_booking_credited, play_credits, lifetime_credits")
+                  .eq("user_id", bk.user_id)
+                  .single();
+
+                if (walletAfter && !walletAfter.onboarding_booking_credited) {
+                  await supabaseAdmin.from("wallets").update({
+                    play_credits: (walletAfter.play_credits ?? 0) + 500,
+                    lifetime_credits: (walletAfter.lifetime_credits ?? 0) + 500,
+                    onboarding_booking_credited: true,
+                  }).eq("user_id", bk.user_id);
+                  logStep("Onboarding booking bonus awarded", { userId: bk.user_id });
+                }
+              }
+            } catch (creditErr) {
+              logStep("Failed to award play credits", { error: (creditErr as Error).message });
+            }
+            // ────────────────────────────────────────────────────────────────
+
+
             // Update payment record
             const { error: paymentError } = await supabaseAdmin
               .from("payments")
@@ -345,10 +443,35 @@ serve(async (req) => {
               logStep("Voucher redemption recorded", { voucherId: appliedVoucherId, bookingId });
             }
 
-            // Trigger rewards for booking payment
+            // ── Deduct credits if applied ────────────────────────────────
+            const creditsUsed = parseInt(session.metadata?.credits_used ?? "0", 10);
+            const creditUserId = session.metadata?.user_id;
+            if (creditsUsed > 0 && creditUserId) {
+              try {
+                const { data: walletForCredits } = await supabaseAdmin
+                  .from("wallets")
+                  .select("play_credits")
+                  .eq("user_id", creditUserId)
+                  .single();
+                const newBalance = Math.max(0, (walletForCredits?.play_credits ?? 0) - creditsUsed);
+                await supabaseAdmin.from("wallets")
+                  .update({ play_credits: newBalance })
+                  .eq("user_id", creditUserId);
+                await supabaseAdmin.from("bookings")
+                  .update({ credits_used: creditsUsed })
+                  .eq("id", bookingId);
+                logStep("Credits deducted", { userId: creditUserId, creditsUsed, newBalance });
+              } catch (cErr) {
+                logStep("Failed to deduct credits", { error: (cErr as Error).message });
+              }
+            }
+            // ─────────────────────────────────────────────────────────────
+
             const userId = session.metadata?.user_id;
             const priceCents = session.amount_total;
-            if (userId && priceCents) {
+
+            if (!isGuestWebhook && userId && priceCents) {
+              // ── Authenticated user: trigger rewards + send confirmation ──
               try {
                 await fetch(`${supabaseUrl}/functions/v1/rewards-trigger`, {
                   method: "POST",
@@ -356,19 +479,13 @@ serve(async (req) => {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${supabaseServiceKey}`,
                   },
-                  body: JSON.stringify({
-                    event: "bookingPaid",
-                    userId,
-                    bookingId,
-                    priceCents,
-                  }),
+                  body: JSON.stringify({ event: "bookingPaid", userId, bookingId, priceCents }),
                 });
                 logStep("Rewards trigger called", { userId, bookingId, priceCents });
               } catch (rewardErr) {
                 logStep("Failed to trigger rewards", { error: (rewardErr as Error).message });
               }
 
-              // Send confirmation email to booking owner
               try {
                 await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
                   method: "POST",
@@ -386,6 +503,27 @@ serve(async (req) => {
                 logStep("Owner confirmation email triggered", { userId });
               } catch (emailErr) {
                 logStep("Failed to send owner confirmation", { error: (emailErr as Error).message });
+              }
+            } else if (isGuestWebhook && guestEmail) {
+              // ── Guest: send confirmation to guest email, skip rewards ──
+              try {
+                await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${supabaseServiceKey}`,
+                  },
+                  body: JSON.stringify({
+                    booking_id: bookingId,
+                    guest_email: guestEmail,
+                    guest_name: guestName || "Gast",
+                    payment_type: "owner",
+                    amount_cents: priceCents,
+                  }),
+                });
+                logStep("Guest confirmation email triggered", { guestEmail });
+              } catch (emailErr) {
+                logStep("Failed to send guest confirmation", { error: (emailErr as Error).message });
               }
             }
           } else {

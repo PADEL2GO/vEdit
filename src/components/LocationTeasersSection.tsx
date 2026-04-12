@@ -31,8 +31,8 @@ export function LocationTeasersSection() {
               <MapPin className="w-4 h-4" />
               Bald bei dir
             </span>
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4" style={{ lineHeight: 1.1 }}>
-              Die nächsten PADEL2GO-Standorte
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4" style={{ lineHeight: 1.1 }}>
+              Die nächsten PADEL<span className="text-primary">2</span>GO-Standorte
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto" style={{ textWrap: "pretty" }}>
               Hier siehst du, wo wir als Nächstes aufschlagen — stay tuned!

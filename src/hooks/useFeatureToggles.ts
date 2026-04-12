@@ -8,6 +8,9 @@ export interface FeatureToggles {
   league_enabled: boolean;
   events_enabled: boolean;
   p2g_enabled: boolean;
+  marketplace_enabled: boolean;
+  rewards_enabled: boolean;
+  friends_enabled: boolean;
   isLoading: boolean;
 }
 
@@ -19,6 +22,9 @@ export const useFeatureToggles = () => {
     league_enabled: false,
     events_enabled: false,
     p2g_enabled: false,
+    marketplace_enabled: false,
+    rewards_enabled: false,
+    friends_enabled: false,
     isLoading: true,
   });
 
@@ -26,7 +32,7 @@ export const useFeatureToggles = () => {
     try {
       const { data, error } = await supabase
         .from("site_settings")
-        .select("feature_app_launched, feature_lobbies_enabled, feature_matching_enabled, feature_league_enabled, feature_events_enabled, feature_p2g_enabled")
+        .select("feature_app_launched, feature_lobbies_enabled, feature_matching_enabled, feature_league_enabled, feature_events_enabled, feature_p2g_enabled, feature_marketplace_enabled, feature_rewards_enabled, feature_friends_enabled")
         .eq("id", "global")
         .single();
 
@@ -43,6 +49,9 @@ export const useFeatureToggles = () => {
         league_enabled: data?.feature_league_enabled ?? false,
         events_enabled: data?.feature_events_enabled ?? false,
         p2g_enabled: data?.feature_p2g_enabled ?? false,
+        marketplace_enabled: (data as any)?.feature_marketplace_enabled ?? false,
+        rewards_enabled: (data as any)?.feature_rewards_enabled ?? false,
+        friends_enabled: (data as any)?.feature_friends_enabled ?? false,
         isLoading: false,
       });
     } catch (error) {

@@ -417,7 +417,7 @@ const Events = () => {
                 <Sparkles className="w-4 h-4" />
                 <span className="text-sm font-medium">Mehr als Padel</span>
               </span>
-              <h2 className="text-2xl md:text-5xl font-bold mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 Was dich <span className="text-gradient-lime">erwartet</span>
               </h2>
               <p className="text-muted-foreground">

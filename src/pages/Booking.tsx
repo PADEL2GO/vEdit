@@ -147,7 +147,7 @@ const Booking = () => {
             className="max-w-4xl mx-auto"
           >
             <div className="text-center mb-12">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 Wähle deinen <span className="text-gradient-lime">Standort</span>
               </h1>
               <p className="text-lg text-muted-foreground">

@@ -237,7 +237,7 @@ const FaqKontakt = () => {
               viewport={{ once: true }}
               className="text-center max-w-2xl mx-auto mb-10 md:mb-16"
             >
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 Kontakt <span className="text-gradient-lime">aufnehmen</span>
               </h2>
               <p className="text-muted-foreground">
@@ -356,7 +356,7 @@ const FaqKontakt = () => {
               >
                 {/* Direct Contact */}
                 <div className="bg-card border border-border rounded-2xl p-6">
-                  <h3 className="text-lg font-bold mb-4">Direkt erreichen</h3>
+                  <h3 className="text-xl font-bold mb-4">Direkt erreichen</h3>
                   <div className="space-y-4">
                     <a 
                       href="mailto:contact@padel2go.eu" 
@@ -391,7 +391,7 @@ const FaqKontakt = () => {
                     <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
                       <Calendar className="w-5 h-5 text-primary" />
                     </div>
-                    <h3 className="text-lg font-bold">Für Vereine</h3>
+                    <h3 className="text-xl font-bold">Für Vereine</h3>
                   </div>
                   <p className="text-muted-foreground mb-4">
                     Interesse an Padel-Courts für euren Verein? Wir bieten eine kostenlose 
@@ -420,7 +420,7 @@ const FaqKontakt = () => {
                     <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
                       <FileText className="w-5 h-5 text-accent" />
                     </div>
-                    <h3 className="text-lg font-bold">Für Partner</h3>
+                    <h3 className="text-xl font-bold">Für Partner</h3>
                   </div>
                   <p className="text-muted-foreground mb-4">
                     Du möchtest Partner werden? Fordere unser Partner-Deck an mit allen Infos 
@@ -456,7 +456,7 @@ const FaqKontakt = () => {
               viewport={{ once: true }}
               className="text-center max-w-2xl mx-auto mb-16"
             >
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 Häufig gestellte <span className="text-gradient-lime">Fragen</span>
               </h2>
               <p className="text-muted-foreground">
@@ -479,7 +479,7 @@ const FaqKontakt = () => {
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                         <CategoryIcon className="w-5 h-5 text-primary" />
                       </div>
-                      <h3 className="text-2xl font-bold">{category.category}</h3>
+                      <h3 className="text-xl font-bold">{category.category}</h3>
                     </div>
                     
                     <div className="space-y-3">

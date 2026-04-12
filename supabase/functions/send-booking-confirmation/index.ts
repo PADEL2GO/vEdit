@@ -16,7 +16,9 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 
 interface ConfirmationRequest {
   booking_id: string;
-  user_id: string;
+  user_id?: string;
+  guest_email?: string;
+  guest_name?: string;
   payment_type: "owner" | "participant";
   participant_id?: string;
   amount_cents?: number;
@@ -59,11 +61,14 @@ serve(async (req) => {
     if (!resendApiKey) throw new Error("RESEND_API_KEY is not configured");
     const resend = new Resend(resendApiKey);
 
-    const { booking_id, user_id, payment_type, participant_id, amount_cents }: ConfirmationRequest = await req.json();
-    logStep("Request parsed", { booking_id, user_id, payment_type, participant_id, amount_cents });
+    const { booking_id, user_id, guest_email, guest_name, payment_type, participant_id, amount_cents }: ConfirmationRequest = await req.json();
+    logStep("Request parsed", { booking_id, user_id: user_id ?? "guest", payment_type, participant_id, amount_cents });
 
-    if (!booking_id || !user_id) {
-      throw new Error("booking_id and user_id are required");
+    if (!booking_id) {
+      throw new Error("booking_id is required");
+    }
+    if (!user_id && !guest_email) {
+      throw new Error("Either user_id or guest_email is required");
     }
 
     // Fetch booking details with location and court
@@ -87,22 +92,32 @@ serve(async (req) => {
     }
     logStep("Booking fetched", { bookingId: booking.id });
 
-    // Fetch recipient email from auth.users
-    const { data: userData, error: userError } = await supabase.auth.admin.getUserById(user_id);
-    if (userError || !userData.user?.email) {
-      throw new Error(`Failed to fetch user email: ${userError?.message || "No email"}`);
+    // Resolve recipient email + name
+    let recipientEmail: string;
+    let recipientName: string;
+
+    if (guest_email) {
+      // Guest booking — use provided email/name directly
+      recipientEmail = guest_email;
+      recipientName = guest_name || "Gast";
+      logStep("Guest recipient resolved", { email: recipientEmail });
+    } else {
+      // Authenticated user — fetch from auth.users + profile
+      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(user_id!);
+      if (userError || !userData.user?.email) {
+        throw new Error(`Failed to fetch user email: ${userError?.message || "No email"}`);
+      }
+      recipientEmail = userData.user.email;
+      logStep("Recipient email fetched", { email: recipientEmail });
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("display_name, username")
+        .eq("user_id", user_id!)
+        .single();
+
+      recipientName = profile?.display_name || profile?.username || "Spieler";
     }
-    const recipientEmail = userData.user.email;
-    logStep("Recipient email fetched", { email: recipientEmail });
-
-    // Fetch profile for display name
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("display_name, username")
-      .eq("user_id", user_id)
-      .single();
-
-    const recipientName = profile?.display_name || profile?.username || "Spieler";
 
     // Calculate duration and format times
     const startDate = new Date(booking.start_time);
@@ -164,7 +179,10 @@ serve(async (req) => {
 
     // Generate booking URL (appUrl resolved above, fallback to production domain)
     const resolvedAppUrl = appUrl || "https://padel2go.de";
-    const bookingUrl = `${resolvedAppUrl}/dashboard/booking`;
+    // Guests land on /booking (they can't access the dashboard); users go to their booking list
+    const bookingUrl = guest_email
+      ? `${resolvedAppUrl}/booking`
+      : `${resolvedAppUrl}/dashboard/booking`;
 
     const htmlContent = `
 <!DOCTYPE html>

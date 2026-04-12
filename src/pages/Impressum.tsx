@@ -24,7 +24,7 @@ const Impressum = () => {
             
             {/* Anbieter */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">Anbieter</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">Anbieter</h2>
               <div className="space-y-1 text-foreground">
                 <p className="font-semibold">PADEL2GO UG (haftungsbeschränkt)</p>
                 <p>Am Neudeck 10</p>
@@ -35,7 +35,7 @@ const Impressum = () => {
 
             {/* Vertretungsberechtigte */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">Vertretungsberechtigte Geschäftsführer</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">Vertretungsberechtigte Geschäftsführer</h2>
               <div className="space-y-1 text-foreground">
                 <p>Florian Steinfelder</p>
                 <p>David Klemm</p>
@@ -44,7 +44,7 @@ const Impressum = () => {
 
             {/* Kontakt */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">Kontakt</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">Kontakt</h2>
               <div className="space-y-2 text-foreground">
                 <p>
                   <span className="text-muted-foreground">E-Mail:</span>{" "}
@@ -63,7 +63,7 @@ const Impressum = () => {
 
             {/* Registereintrag */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">Registereintrag</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">Registereintrag</h2>
               <div className="space-y-2 text-foreground">
                 <p>
                   <span className="text-muted-foreground">Registergericht:</span> Amtsgericht München
@@ -76,7 +76,7 @@ const Impressum = () => {
 
             {/* Umsatzsteuer-ID */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">Umsatzsteuer-ID</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">Umsatzsteuer-ID</h2>
               <p className="text-foreground">
                 <span className="text-muted-foreground">Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG:</span><br />
                 DE [Nummer wird ergänzt]
@@ -85,7 +85,7 @@ const Impressum = () => {
 
             {/* Verantwortlich für den Inhalt */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
               <div className="space-y-1 text-foreground">
                 <p className="font-semibold">Florian Steinfelder & David Klemm</p>
                 <p>Am Neudeck 10</p>
@@ -95,7 +95,7 @@ const Impressum = () => {
 
             {/* Streitschlichtung */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">EU-Streitschlichtung</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">EU-Streitschlichtung</h2>
               <p className="text-muted-foreground mb-4">
                 Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
               </p>
@@ -109,7 +109,7 @@ const Impressum = () => {
 
             {/* Verbraucherstreitbeilegung */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">Verbraucherstreitbeilegung/Universalschlichtungsstelle</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">Verbraucherstreitbeilegung/Universalschlichtungsstelle</h2>
               <p className="text-muted-foreground">
                 Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer 
                 Verbraucherschlichtungsstelle teilzunehmen.
@@ -118,7 +118,7 @@ const Impressum = () => {
 
             {/* Haftung für Inhalte */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">Haftung für Inhalte</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">Haftung für Inhalte</h2>
               <p className="text-muted-foreground">
                 Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den 
                 allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht 
@@ -135,7 +135,7 @@ const Impressum = () => {
 
             {/* Haftung für Links */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">Haftung für Links</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">Haftung für Links</h2>
               <p className="text-muted-foreground">
                 Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. 
                 Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der 
@@ -152,7 +152,7 @@ const Impressum = () => {
 
             {/* Urheberrecht */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">Urheberrecht</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">Urheberrecht</h2>
               <p className="text-muted-foreground">
                 Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem 
                 deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung 

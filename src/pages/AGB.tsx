@@ -25,7 +25,7 @@ const AGB = () => {
 
             {/* § 1 Geltungsbereich */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">§ 1 Geltungsbereich</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">§ 1 Geltungsbereich</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Diese Allgemeinen Geschäftsbedingungen (nachfolgend „AGB") gelten für alle Verträge, die zwischen der PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 München (nachfolgend „PADEL2GO" oder „wir") und Nutzerinnen und Nutzern (nachfolgend „Nutzer") über die Plattform <span className="font-medium">padel2go.de</span> geschlossen werden.
@@ -41,7 +41,7 @@ const AGB = () => {
 
             {/* § 2 Vertragsschluss & Registrierung */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">§ 2 Registrierung & Nutzerkonto</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">§ 2 Registrierung & Nutzerkonto</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Die Nutzung buchungspflichtiger Leistungen setzt eine kostenlose Registrierung voraus. Der Nutzer ist verpflichtet, bei der Registrierung wahrheitsgemäße und vollständige Angaben zu machen und diese aktuell zu halten.
@@ -57,7 +57,7 @@ const AGB = () => {
 
             {/* § 3 Buchung & Zahlung */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">§ 3 Buchung & Zahlung</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">§ 3 Buchung & Zahlung</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   <span className="font-medium">Buchungsvorgang:</span> Durch Klick auf „Jetzt bezahlen" gibt der Nutzer ein verbindliches Angebot auf Abschluss eines Nutzungsvertrags für den gewählten Court und Zeitraum ab. Der Vertrag kommt mit Eingang der Zahlungsbestätigung zustande.
@@ -79,7 +79,7 @@ const AGB = () => {
 
             {/* § 4 Stornierung & Widerruf */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">§ 4 Stornierung & Widerrufsrecht</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">§ 4 Stornierung & Widerrufsrecht</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   <span className="font-medium">Kein gesetzliches Widerrufsrecht:</span> Gemäß § 312g Abs. 2 Nr. 9 BGB besteht für Verträge über Freizeitdienstleistungen, bei denen der Unternehmer sich verpflichtet, die Dienstleistung zu einem bestimmten Zeitpunkt zu erbringen, kein gesetzliches Widerrufsrecht. Court-Buchungen fallen unter diese Ausnahmeregelung.
@@ -99,7 +99,7 @@ const AGB = () => {
 
             {/* § 5 Pflichten des Nutzers */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">§ 5 Pflichten des Nutzers</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">§ 5 Pflichten des Nutzers</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>Der Nutzer verpflichtet sich:</p>
                 <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
@@ -117,7 +117,7 @@ const AGB = () => {
 
             {/* § 6 P2G Rewards & Credits */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">§ 6 P2G Rewards & Credits</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">§ 6 P2G Rewards & Credits</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   PADEL2GO betreibt ein freiwilliges Belohnungssystem (P2G Rewards). Credits und Punkte haben keinen Geldwert und können nicht ausgezahlt werden. Sie dienen ausschließlich der Einlösung gegen verfügbare Prämien im PADEL2GO Marketplace.
@@ -133,7 +133,7 @@ const AGB = () => {
 
             {/* § 7 Haftung */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">§ 7 Haftung & Gewährleistung</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">§ 7 Haftung & Gewährleistung</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   PADEL2GO haftet unbeschränkt für Vorsatz und grobe Fahrlässigkeit sowie für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit.
@@ -154,7 +154,7 @@ const AGB = () => {
 
             {/* § 8 Datenschutz */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">§ 8 Datenschutz</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">§ 8 Datenschutz</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Die Erhebung und Verarbeitung personenbezogener Daten erfolgt gemäß unserer <a href="/datenschutz" className="text-primary underline hover:no-underline">Datenschutzerklärung</a>, die Bestandteil dieser AGB ist.
@@ -164,7 +164,7 @@ const AGB = () => {
 
             {/* § 9 Änderungen der AGB */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">§ 9 Änderungen der AGB</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">§ 9 Änderungen der AGB</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   PADEL2GO behält sich vor, diese AGB mit angemessener Vorankündigung (mindestens 4 Wochen) zu ändern. Nutzer werden per E-Mail über wesentliche Änderungen informiert. Die fortgesetzte Nutzung der Plattform nach Ablauf der Ankündigungsfrist gilt als Zustimmung zu den geänderten AGB.
@@ -174,7 +174,7 @@ const AGB = () => {
 
             {/* § 10 Schlussbestimmungen */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">§ 10 Schlussbestimmungen</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">§ 10 Schlussbestimmungen</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts (CISG).

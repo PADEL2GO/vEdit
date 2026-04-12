@@ -192,7 +192,7 @@ const League = () => {
                 <Flame className="w-4 h-4" />
                 P2G League
               </div>
-              <h2 className="text-2xl md:text-5xl font-bold mb-6">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
                 Dynamisches Punktesystem –{" "}
                 <span className="text-gradient-lime">belohnt Ehrgeiz</span>
               </h2>
@@ -210,7 +210,7 @@ const League = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
               >
-                <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
                   <Zap className="w-6 h-6 text-primary" />
                   So sammelst du Punkte
                 </h3>
@@ -241,7 +241,7 @@ const League = () => {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
               >
-                <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
                   <BarChart3 className="w-6 h-6 text-primary" />
                   Live-Rankings
                 </h3>
@@ -309,7 +309,7 @@ const League = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <h3 className="text-2xl font-bold text-center mb-8">Deine Vorteile in der League</h3>
+              <h3 className="text-xl font-bold text-center mb-8">Deine Vorteile in der League</h3>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {leagueAdvantages.map((advantage, index) => (
                   <motion.div

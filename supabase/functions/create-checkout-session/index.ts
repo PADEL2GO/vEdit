@@ -54,22 +54,23 @@ serve(async (req) => {
     }
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not configured");
 
+    // Try to resolve authenticated user — for guests this will return null
+    let user: { id: string; email: string } | null = null;
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData } = await supabaseClient.auth.getUser(token);
+      if (userData?.user?.id && userData.user.email) {
+        user = userData.user as { id: string; email: string };
+      }
+    }
+    logStep("Auth resolved", { userId: user?.id ?? "guest" });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    
-    const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
-
-    const { booking_id, voucher_id } = await req.json();
+    const { booking_id, voucher_id, credits_to_use = 0 } = await req.json();
     if (!booking_id) throw new Error("booking_id is required");
     logStep("Received booking_id", { booking_id });
 
-    // Fetch booking using service role (bypasses RLS) and verify ownership
+    // Fetch booking using service role (bypasses RLS) — works for both auth and guest
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from("bookings")
       .select(`
@@ -90,13 +91,20 @@ serve(async (req) => {
       throw new Error("Booking not found");
     }
 
-    // Verify ownership
-    if (booking.user_id !== user.id) {
-      logStep("Access denied - user does not own this booking", { 
-        booking_user_id: booking.user_id, 
-        request_user_id: user.id 
-      });
-      throw new Error("Access denied");
+    // Ownership check:
+    //   - Authenticated booking → user_id must match JWT user
+    //   - Guest booking (user_id IS NULL) → UUID is the credential, no user required
+    const isGuestBooking = booking.user_id === null;
+    if (!isGuestBooking) {
+      if (!user) throw new Error("Authentication required for this booking");
+      if (booking.user_id !== user.id) {
+        logStep("Access denied", { booking_user_id: booking.user_id, request_user_id: user.id });
+        throw new Error("Access denied");
+      }
+    } else {
+      // Guest booking — must have guest_email stored on record
+      if (!(booking as any).guest_email) throw new Error("Guest booking is missing email");
+      logStep("Guest booking access granted", { booking_id, guest_email: (booking as any).guest_email });
     }
 
     // Verify booking is in pending_payment status
@@ -105,24 +113,24 @@ serve(async (req) => {
       throw new Error(`Booking is not awaiting payment. Status: ${booking.status}`);
     }
 
-    // Server-side hold limit: max 3 active (unpaid) holds per user at a time.
-    // Confirmed (paid) bookings are excluded — no limit on those.
-    // Expired holds are excluded — they no longer block a slot.
-    const now = new Date().toISOString();
-    const { count: activeHolds, error: holdCountError } = await supabaseAdmin
-      .from("bookings")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("status", "pending_payment")
-      .gt("hold_expires_at", now)
-      .neq("id", booking_id); // exclude the current booking from the count
+    // Hold limit: max 3 active unpaid holds per authenticated user.
+    // Guests are exempt — each guest booking is a one-off transaction.
+    if (!isGuestBooking && user) {
+      const now = new Date().toISOString();
+      const { count: activeHolds, error: holdCountError } = await supabaseAdmin
+        .from("bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("status", "pending_payment")
+        .gt("hold_expires_at", now)
+        .neq("id", booking_id);
 
-    if (holdCountError) {
-      logStep("Error checking active holds", { error: holdCountError.message });
-      // Non-fatal — proceed rather than block the user on a count error
-    } else if ((activeHolds ?? 0) >= 3) {
-      logStep("Hold limit exceeded", { userId: user.id, activeHolds });
-      throw new Error("Buchungslimit erreicht: Du hast bereits 3 offene Reservierungen.");
+      if (holdCountError) {
+        logStep("Error checking active holds", { error: holdCountError.message });
+      } else if ((activeHolds ?? 0) >= 3) {
+        logStep("Hold limit exceeded", { userId: user.id, activeHolds });
+        throw new Error("Buchungslimit erreicht: Du hast bereits 3 offene Reservierungen.");
+      }
     }
 
     logStep("Booking verified", { 
@@ -272,14 +280,64 @@ serve(async (req) => {
       }
     }
 
+    // ── Apply credits discount (authenticated users only) ────────────────────
+    let appliedCredits = 0;
+    if (credits_to_use > 0 && !isGuestBooking && user) {
+      // Fetch settings: max percent + credits per euro (default 50 / 100)
+      const { data: siteSettings } = await supabaseAdmin
+        .from("site_settings")
+        .select("feature_credits_payment_enabled, credits_payment_max_percent, credits_per_euro")
+        .eq("id", "global")
+        .single();
+
+      const creditsEnabled = (siteSettings as any)?.feature_credits_payment_enabled ?? false;
+      const maxPercent: number = (siteSettings as any)?.credits_payment_max_percent ?? 50;
+      const creditsPerEuro: number = (siteSettings as any)?.credits_per_euro ?? 100;
+
+      if (!creditsEnabled) {
+        throw new Error("Credits-Zahlung ist aktuell nicht aktiviert");
+      }
+
+      // Validate user has enough credits
+      const { data: wallet } = await supabaseAdmin
+        .from("wallets")
+        .select("play_credits")
+        .eq("user_id", user.id)
+        .single();
+
+      const availableCredits = wallet?.play_credits ?? 0;
+      if (credits_to_use > availableCredits) {
+        throw new Error(`Nicht genug Credits. Verfügbar: ${availableCredits}`);
+      }
+
+      // Cap at max percent of ownerPaymentCents
+      // 100 credits = 1 euro = 100 cents → credits_value_cents = credits_to_use * (100 / creditsPerEuro)
+      const centsPerCredit = 100 / creditsPerEuro; // e.g. 1.0 at default rate
+      const maxDiscountCents = Math.floor(ownerPaymentCents * maxPercent / 100);
+      const requestedDiscountCents = Math.floor(credits_to_use * centsPerCredit);
+      const actualDiscountCents = Math.min(requestedDiscountCents, maxDiscountCents);
+      appliedCredits = Math.ceil(actualDiscountCents / centsPerCredit);
+
+      ownerPaymentCents = Math.max(50, ownerPaymentCents - actualDiscountCents); // Stripe minimum 50 cents
+      logStep("Credits discount applied", { credits_to_use, appliedCredits, actualDiscountCents, newPrice: ownerPaymentCents });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
-    // Check for existing Stripe customer
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    // Resolve email for Stripe checkout
+    const effectiveEmail = isGuestBooking
+      ? (booking as any).guest_email as string
+      : (user!.email as string);
+
+    // Check for existing Stripe customer (only for authenticated users)
     let customerId: string | undefined;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Existing Stripe customer found", { customerId });
+    if (!isGuestBooking) {
+      const customers = await stripe.customers.list({ email: effectiveEmail, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        logStep("Existing Stripe customer found", { customerId });
+      }
     }
 
     const requestOrigin = origin || "https://padel2go.lovable.app";
@@ -298,7 +356,7 @@ serve(async (req) => {
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: customerId ? undefined : effectiveEmail,
       payment_method_types: ["card"],
       expires_at: sessionExpiresAt,
       line_items: [
@@ -315,7 +373,7 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      success_url: `${requestOrigin}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${requestOrigin}/booking/success?session_id={CHECKOUT_SESSION_ID}${isGuestBooking ? "&guest=1" : ""}`,
       cancel_url: `${requestOrigin}/booking/cancel?booking_id=${booking_id}`,
       metadata: {
         booking_id: booking.id,
@@ -324,10 +382,17 @@ serve(async (req) => {
         start_time: booking.start_time,
         end_time: booking.end_time,
         duration_minutes: durationMinutes.toString(),
-        user_id: user.id,
         payment_mode: booking.payment_mode || "full",
         owner_amount_cents: ownerPaymentCents.toString(),
+        ...(isGuestBooking
+          ? {
+              is_guest: "1",
+              guest_email: (booking as any).guest_email,
+              guest_name: (booking as any).guest_name ?? "",
+            }
+          : { user_id: user!.id }),
         ...(appliedVoucherId ? { voucher_id: appliedVoucherId } : {}),
+        ...(appliedCredits > 0 ? { credits_used: appliedCredits.toString() } : {}),
       },
     });
 
@@ -373,7 +438,7 @@ serve(async (req) => {
         .from("payments")
         .insert({
           booking_id: booking.id,
-          user_id: user.id,
+          user_id: isGuestBooking ? null : user!.id,
           stripe_checkout_session_id: session.id,
           amount_total_cents: ownerPaymentCents,
           currency: booking.currency || "EUR",

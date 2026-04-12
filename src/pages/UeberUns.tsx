@@ -140,7 +140,7 @@ const UeberUns = () => {
                 <Users className="w-4 h-4" />
                 Das Team
               </span>
-              <h2 className="text-3xl md:text-4xl font-bold mb-3">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-3">
                 Wer wir sind
               </h2>
               <p className="text-muted-foreground">
@@ -238,7 +238,7 @@ const UeberUns = () => {
                 <Heart className="w-4 h-4" />
                 Unsere Werte
               </span>
-              <h2 className="text-3xl md:text-4xl font-bold">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
                 Was uns <span className="text-gradient-lime">antreibt</span>
               </h2>
             </motion.div>
@@ -271,7 +271,7 @@ const UeberUns = () => {
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <value.icon className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-base font-bold mb-2">{value.title}</h3>
+                  <h3 className="text-xl font-bold mb-2">{value.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{value.description}</p>
                 </motion.div>
               )}
@@ -290,7 +290,7 @@ const UeberUns = () => {
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <value.icon className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-base font-bold mb-2">{value.title}</h3>
+                  <h3 className="text-xl font-bold mb-2">{value.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{value.description}</p>
                 </motion.div>
               )}
@@ -311,7 +311,7 @@ const UeberUns = () => {
                 <Rocket className="w-4 h-4" />
                 Unsere Story
               </span>
-              <h2 className="text-3xl md:text-4xl font-bold mb-3">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-3">
                 Wie <BrandName inline /> entstanden ist
               </h2>
               <p className="text-muted-foreground">
@@ -365,7 +365,7 @@ const UeberUns = () => {
                     <Target className="w-4 h-4" />
                     Unsere Vision
                   </span>
-                  <h2 className="text-3xl md:text-4xl font-bold mb-5">
+                  <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-5">
                     Padel als <span className="text-gradient-lime">Gesellschaftssport</span> – nicht als Luxus
                   </h2>
                   <p className="text-lg text-muted-foreground mb-4">
@@ -383,7 +383,7 @@ const UeberUns = () => {
                 <div className="lg:col-span-2 space-y-4">
                   <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
                     <Globe className="w-9 h-9 text-primary mb-3" />
-                    <h3 className="text-base font-bold mb-2">Rein in die Vereine</h3>
+                    <h3 className="text-xl font-bold mb-2">Rein in die Vereine</h3>
                     <p className="text-muted-foreground text-sm">
                       Padel gehört nicht in teure Hallen. Wir bringen den Sport dahin, 
                       wo er hingehört: in die lokalen Vereine und Gemeinden.
@@ -391,7 +391,7 @@ const UeberUns = () => {
                   </div>
                   <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15">
                     <Zap className="w-9 h-9 text-primary mb-3" />
-                    <h3 className="text-base font-bold mb-2">0-Euro für Vereine</h3>
+                    <h3 className="text-xl font-bold mb-2">0-Euro für Vereine</h3>
                     <p className="text-muted-foreground text-sm">
                       Der Verein stellt die Fläche, wir liefern Courts, Technik und Betrieb. 
                       Komplett kostenlos.
@@ -416,7 +416,7 @@ const UeberUns = () => {
                 <TrendingUp className="w-4 h-4" />
                 Die Zukunft
               </span>
-              <h2 className="text-3xl md:text-4xl font-bold mb-3">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-3">
                 Was als <span className="text-gradient-lime">Nächstes</span> kommt
               </h2>
               <p className="text-muted-foreground">

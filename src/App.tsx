@@ -35,6 +35,7 @@ import PublicProfile from "./pages/PublicProfile";
 import Lobbies from "./pages/Lobbies";
 
 // Dashboard Pages (Logged-In)
+import DashboardHome from "./pages/dashboard/DashboardHome";
 import DashboardBooking from "./pages/dashboard/DashboardBooking";
 import DashboardRewards from "./pages/dashboard/DashboardRewards";
 import DashboardMarketplace from "./pages/dashboard/DashboardMarketplace";
@@ -104,15 +105,17 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/play" element={<Play />} />
 
+              {/* Public booking routes — no login required (guest checkout supported) */}
+              <Route path="/booking" element={<Booking />} />
+              <Route path="/booking/locations/:slug" element={<BookingLocation />} />
+              <Route path="/booking/checkout" element={<BookingCheckout />} />
+              <Route path="/booking/success" element={<BookingSuccess />} />
+              <Route path="/booking/cancel" element={<BookingCancel />} />
+
               {/* Protected Routes — require login */}
               <Route element={<RequireAuth />}>
-                {/* Always accessible after login: booking flow + account */}
+                {/* Always accessible after login: account + invite accept */}
                 <Route path="/account" element={<Account />} />
-                <Route path="/booking" element={<Booking />} />
-                <Route path="/booking/locations/:slug" element={<BookingLocation />} />
-                <Route path="/booking/checkout" element={<BookingCheckout />} />
-                <Route path="/booking/success" element={<BookingSuccess />} />
-                <Route path="/booking/cancel" element={<BookingCancel />} />
                 <Route path="/invite/accept" element={<InviteAccept />} />
 
                 {/* Admin Routes — always accessible to admins (RequireAppLaunched lets admins through) */}
@@ -144,7 +147,8 @@ const App = () => (
                   {/* Locked until app_launched = true */}
                   <Route path="/lobbies" element={<Lobbies />} />
                   <Route path="/lobbies/:id" element={<Lobbies />} />
-                  <Route path="/dashboard" element={<DashboardBooking />} />
+                  <Route path="/dashboard" element={<DashboardHome />} />
+                  <Route path="/dashboard/home" element={<DashboardHome />} />
                   <Route path="/dashboard/booking" element={<DashboardBooking />} />
                   <Route path="/dashboard/rewards" element={<DashboardRewards />} />
                   <Route path="/dashboard/p2g-points" element={<DashboardP2GPoints />} />

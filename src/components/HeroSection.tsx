@@ -73,8 +73,9 @@ const HeroSection = () => {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6"
             >
-              Padel dorthin bringen,{" "}
-              <span className="text-gradient-lime">wo du schon spielst</span>
+              Dein Padel. Dein Level.
+              <br />
+              <span className="text-gradient-lime">Dein Spiel.</span>
             </motion.h1>
 
             {/* Subheadline */}

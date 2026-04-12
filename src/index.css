@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+/* Fonts loaded via index.html <link> for optimal performance */
 
 @tailwind base;
 @tailwind components;
@@ -80,8 +80,12 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'DM Sans', sans-serif;
     overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Bricolage Grotesque', sans-serif;
   }
 
   /* Prevent iOS zoom on input focus */
@@ -130,6 +134,23 @@
 
   .border-lime-glow {
     border-color: hsl(71 91% 51% / 0.3);
+  }
+
+  /* JetBrains Mono — for stat values, metrics, dashboard numbers */
+  .font-stat {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Bricolage Grotesque italic — for expressive headline emphasis */
+  .font-display {
+    font-family: 'Bricolage Grotesque', sans-serif;
+  }
+
+  .font-display-italic {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-style: italic;
   }
 
   .animate-float {

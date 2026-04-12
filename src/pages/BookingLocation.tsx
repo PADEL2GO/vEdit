@@ -8,6 +8,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { BookingLocationHeader } from "@/components/booking/BookingLocationHeader";
 import { BookingSlotPicker } from "@/components/booking/BookingSlotPicker";
 import { BookingSummary } from "@/components/booking/BookingSummary";
+import { GuestCheckoutModal } from "@/components/booking/GuestCheckoutModal";
 import { useBookingLocation } from "@/hooks/useBookingLocation";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 
@@ -34,6 +35,8 @@ const BookingLocation = () => {
     user,
     lobbyEnabled,
     lobbySettings,
+    showGuestModal,
+    guestBookingInProgress,
     setSelectedDate,
     setSelectedCourt,
     setSelectedSlot,
@@ -41,7 +44,9 @@ const BookingLocation = () => {
     setPaymentMode,
     setLobbyEnabled,
     setLobbySettings,
+    setShowGuestModal,
     handleBooking,
+    handleGuestBooking,
     addPlayer,
     removePlayer,
   } = useBookingLocation(slug);
@@ -128,6 +133,14 @@ const BookingLocation = () => {
       </main>
 
       <Footer />
+
+      <GuestCheckoutModal
+        open={showGuestModal}
+        onOpenChange={setShowGuestModal}
+        onConfirm={handleGuestBooking}
+        isSubmitting={guestBookingInProgress}
+        locationSlug={slug ?? ""}
+      />
     </>
   );
 };

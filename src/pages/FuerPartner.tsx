@@ -174,7 +174,7 @@ const FuerPartner = () => {
                 viewport={{ once: true }}
                 className="max-w-4xl mx-auto text-center"
               >
-                <h2 className="text-2xl md:text-4xl font-bold mb-6">
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
                   <span><span className="text-foreground">PADEL</span><span className="text-primary">2</span><span className="text-foreground">GO</span></span> als <span className="text-gradient-lime">physisch-digitaler Touchpoint</span> für deine Marke
                 </h2>
                 <p className="text-base md:text-xl text-muted-foreground leading-relaxed">
@@ -197,7 +197,7 @@ const FuerPartner = () => {
                 viewport={{ once: true }}
                 className="text-center max-w-2xl mx-auto mb-16"
               >
-                <h2 className="text-2xl md:text-4xl font-bold mb-4">
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                   Wo deine Marke auf <span><span className="text-foreground">PADEL</span><span className="text-primary">2</span><span className="text-foreground">GO</span></span> trifft
                 </h2>
               </motion.div>
@@ -238,7 +238,7 @@ const FuerPartner = () => {
                 viewport={{ once: true }}
                 className="max-w-4xl mx-auto text-center"
               >
-                <h2 className="text-2xl md:text-4xl font-bold mb-6">
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
                   <span className="text-gradient-lime">Co-Growth</span> statt klassischem Sponsoring
                 </h2>
                 <p className="text-base md:text-xl text-muted-foreground leading-relaxed">
@@ -263,7 +263,7 @@ const FuerPartner = () => {
                 viewport={{ once: true }}
                 className="text-center max-w-2xl mx-auto mb-16"
               >
-                <h2 className="text-2xl md:text-4xl font-bold mb-4">
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                   Beispiele für <span className="text-gradient-lime">Partnerschaften</span>
                 </h2>
               </motion.div>
@@ -283,7 +283,7 @@ const FuerPartner = () => {
                         <useCase.icon className="w-7 h-7 text-primary" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-semibold mb-2">{useCase.title}</h3>
+                        <h3 className="text-xl font-bold mb-2">{useCase.title}</h3>
                         <p className="text-muted-foreground">{useCase.description}</p>
                       </div>
                     </div>
@@ -302,7 +302,7 @@ const FuerPartner = () => {
                 viewport={{ once: true }}
                 className="max-w-3xl mx-auto text-center"
               >
-                <h2 className="text-2xl md:text-4xl font-bold mb-6">
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
                   Padel als neuen <span className="text-gradient-lime">Brand-Channel</span> öffnen
                 </h2>
                 <p className="text-lg md:text-xl text-muted-foreground mb-10">

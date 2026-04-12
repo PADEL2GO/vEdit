@@ -93,6 +93,31 @@ export function useUploadVisual() {
   });
 }
 
+// Set visual URL directly (YouTube / Vimeo / direct video URL)
+export function useSetVisualUrl() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ key, url }: { key: string; url: string }) => {
+      const { error } = await supabase
+        .from("site_visuals" as any)
+        .update({ image_url: url || null })
+        .eq("key", key);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["site-visuals"] });
+      queryClient.invalidateQueries({ queryKey: ["site-visual"] });
+      toast.success("URL gespeichert");
+    },
+    onError: (error) => {
+      console.error("Set URL error:", error);
+      toast.error("Fehler beim Speichern der URL");
+    },
+  });
+}
+
 // Delete visual image (reset to placeholder)
 export function useDeleteVisualImage() {
   const queryClient = useQueryClient();

@@ -6,7 +6,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Calendar, ArrowRight, Loader2, Coins, Gift } from "lucide-react";
+import { CheckCircle, Calendar, ArrowRight, Loader2, Coins, Gift, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -22,6 +22,7 @@ const BookingSuccess = () => {
   const [totalEarned, setTotalEarned] = useState(0);
   const { user } = useAuth();
   const sessionId = searchParams.get("session_id");
+  const isGuest = searchParams.get("guest") === "1" || !user;
 
   useEffect(() => {
     const fetchEarnedRewards = async () => {
@@ -150,20 +151,39 @@ const BookingSuccess = () => {
                   )}
 
                   <div className="space-y-3">
-                    <Button variant="lime" size="lg" className="w-full" asChild>
-                      <NavLink to="/account">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Meine Buchungen ansehen
-                      </NavLink>
-                    </Button>
+                    {!isGuest ? (
+                      <Button variant="lime" size="lg" className="w-full" asChild>
+                        <NavLink to="/account">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          Meine Buchungen ansehen
+                        </NavLink>
+                      </Button>
+                    ) : (
+                      <Button variant="lime" size="lg" className="w-full" asChild>
+                        <NavLink to="/auth">
+                          <UserPlus className="w-4 h-4 mr-2" />
+                          Kostenloses Konto erstellen
+                        </NavLink>
+                      </Button>
+                    )}
 
-                    {totalEarned > 0 && (
+                    {!isGuest && totalEarned > 0 && (
                       <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10" asChild>
                         <NavLink to="/dashboard/p2g-points">
                           <Coins className="w-4 h-4 mr-2" />
                           Meine P2G Credits ansehen
                         </NavLink>
                       </Button>
+                    )}
+
+                    {isGuest && (
+                      <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground text-left">
+                        <p className="font-medium text-foreground mb-1 flex items-center gap-1.5">
+                          <Coins className="w-4 h-4 text-primary" />
+                          P2G Credits & mehr Vorteile
+                        </p>
+                        <p>Registriere dich kostenlos und sammle bei jeder Buchung Punkte, lade Freunde ein und verwalte deine Buchungen bequem online.</p>
+                      </div>
                     )}
 
                     <Button variant="outline" className="w-full" asChild>

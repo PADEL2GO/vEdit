@@ -6,12 +6,12 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { 
-  ArrowLeft, 
-  Loader2, 
-  MapPin, 
-  Calendar, 
-  Clock, 
+import {
+  ArrowLeft,
+  Loader2,
+  MapPin,
+  Calendar,
+  Clock,
   CreditCard,
   AlertCircle,
   Timer,
@@ -21,6 +21,8 @@ import {
   Ticket,
   Check,
   X,
+  UserPlus,
+  Mail,
 } from "lucide-react";
 import { useBookingCheckout } from "@/hooks/useBookingCheckout";
 import { InviteFriendsStep } from "@/components/booking/InviteFriendsStep";
@@ -45,6 +47,11 @@ const BookingCheckout = () => {
     setVoucherCode,
     validateVoucher,
     clearVoucher,
+    creditsToUse,
+    setCreditsToUse,
+    availableCredits,
+    maxCreditsForBooking,
+    isGuest,
     createInvitesAndPay,
     formatTimeLeft,
   } = useBookingCheckout();
@@ -91,9 +98,12 @@ const BookingCheckout = () => {
   const endTime = new Date(booking.end_time);
   const durationMinutes = differenceInMinutes(endTime, startTime);
   const isVoucherApplied = voucher.status === "valid";
-  const effectivePrice = isVoucherApplied
+  const priceAfterVoucher = isVoucherApplied
     ? applyVoucherDiscount(booking.price_cents, voucher.discountType, voucher.discountValue)
     : booking.price_cents;
+  // 100 credits = €1 = 100 cents
+  const creditsDiscountCents = Math.min(creditsToUse, Math.floor(priceAfterVoucher * 0.5));
+  const effectivePrice = Math.max(0, priceAfterVoucher - creditsDiscountCents);
   const isFullyFree = effectivePrice === 0;
 
   return (
@@ -172,12 +182,31 @@ const BookingCheckout = () => {
                   </div>
                 </div>
 
-                {/* Invite Friends Section */}
-                <InviteFriendsStep
-                  selectedFriends={selectedFriendIds}
-                  onSelectionChange={setSelectedFriendIds}
-                  maxInvites={3}
-                />
+                {/* Guest info banner */}
+                {isGuest && booking?.guest_name && (
+                  <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Gastbuchung</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4 text-muted-foreground" />
+                      <span>{booking.guest_name}</span>
+                    </div>
+                    {booking.guest_email && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Mail className="w-4 h-4" />
+                        <span>{booking.guest_email}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Invite Friends — only for logged-in users */}
+                {!isGuest && (
+                  <InviteFriendsStep
+                    selectedFriends={selectedFriendIds}
+                    onSelectionChange={setSelectedFriendIds}
+                    maxInvites={3}
+                  />
+                )}
 
                 {/* Voucher Code Section */}
                 <Collapsible open={voucherOpen || isVoucherApplied} onOpenChange={setVoucherOpen}>
@@ -240,8 +269,59 @@ const BookingCheckout = () => {
                   </CollapsibleContent>
                 </Collapsible>
 
-                {/* Rewards Estimate (hide if voucher applied) */}
-                {!isVoucherApplied && rewardsEstimate && rewardsEstimate.total_points > 0 && (
+                {/* ── P2G Credits Discount — only for authenticated users ── */}
+                {!isGuest && maxCreditsForBooking > 0 && (
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Coins className="w-4 h-4 text-primary" />
+                        <span className="font-semibold text-sm">P2G Credits einlösen</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        Verfügbar: {availableCredits.toLocaleString("de")} Credits
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min={0}
+                        max={maxCreditsForBooking}
+                        step={10}
+                        value={creditsToUse}
+                        onChange={e => setCreditsToUse(Number(e.target.value))}
+                        className="flex-1 accent-primary"
+                      />
+                      <span className="text-sm font-bold text-primary w-20 text-right">
+                        {creditsToUse > 0
+                          ? `−${(creditsToUse / 100).toFixed(2)} €`
+                          : "0 Credits"}
+                      </span>
+                    </div>
+                    {creditsToUse > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {creditsToUse.toLocaleString("de")} Credits = {(creditsToUse / 100).toFixed(2)} € Rabatt
+                        {" "}(max. 50% des Preises)
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Guest: upsell to create account for points */}
+                {isGuest && (
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 flex items-start gap-3">
+                    <UserPlus className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-semibold text-foreground mb-0.5">Punkte sammeln & mehr Vorteile</p>
+                      <p className="text-muted-foreground">
+                        Mit einem kostenlosen Konto sammelst du P2G Credits, kannst Freunde einladen und deine Buchungen verwalten.{" "}
+                        <NavLink to="/auth" className="text-primary hover:underline">Jetzt kostenlos registrieren →</NavLink>
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Rewards Estimate (hide if voucher applied or guest) */}
+                {!isGuest && !isVoucherApplied && rewardsEstimate && rewardsEstimate.total_points > 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -376,7 +456,9 @@ const BookingCheckout = () => {
                   ) : (
                     <>
                       <CreditCard className="w-4 h-4 mr-2" />
-                      {isVoucherApplied
+                      {creditsToUse > 0
+                        ? `${creditsToUse.toLocaleString("de")} Credits – ${formatPrice(effectivePrice, booking.currency)} bezahlen`
+                        : isVoucherApplied
                         ? `${voucher.discountLabel} – ${formatPrice(effectivePrice, booking.currency)} bezahlen`
                         : selectedFriendIds.length > 0
                           ? `Einladen & ${formatPrice(getOwnerShare(booking.price_cents, selectedFriendIds.length), booking.currency)} bezahlen`

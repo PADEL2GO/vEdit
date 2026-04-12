@@ -125,7 +125,7 @@ const AppBooking = () => {
               <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
                 <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white mb-6">
                   <Smartphone className="w-4 h-4" />
-                  <span className="text-sm font-medium">PADEL2GO App</span>
+                  <span className="text-sm font-medium">PADEL<span className="text-primary">2</span>GO App</span>
                 </span>
                 
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white">
@@ -200,7 +200,7 @@ const AppBooking = () => {
           }} viewport={{
             once: true
           }} className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 Was die <span><span className="text-foreground">PADEL</span><span className="text-primary">2</span><span className="text-foreground">GO</span></span> App kann
               </h2>
               <p className="text-lg text-muted-foreground">
@@ -228,7 +228,7 @@ const AppBooking = () => {
                   <div className={`w-12 h-12 rounded-xl ${feature.comingSoon ? 'bg-muted' : 'bg-primary/10 group-hover:bg-primary/20'} flex items-center justify-center mb-4 transition-colors`}>
                     <feature.icon className={`w-6 h-6 ${feature.comingSoon ? 'text-muted-foreground' : 'text-primary'}`} />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground">{feature.description}</p>
                 </motion.div>)}
             </div>
@@ -279,7 +279,7 @@ const AppBooking = () => {
                     <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                       <item.icon className="w-7 h-7 text-primary" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+                    <h3 className="text-xl font-bold mb-3">{item.title}</h3>
                     <p className="text-muted-foreground flex-grow">{item.description}</p>
                   </div>
                 </motion.div>)}
@@ -306,7 +306,7 @@ const AppBooking = () => {
                 <span className="text-sm font-medium">Coming Soon</span>
               </span>
               
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 <span className="text-gradient-lime">AI & Stats</span> – Die Zukunft deines Spiels
               </h2>
               <p className="text-lg text-muted-foreground mb-6">
@@ -359,7 +359,7 @@ const AppBooking = () => {
           }} className="mt-12 p-6 rounded-2xl bg-background/50 border border-primary/20 max-w-3xl mx-auto">
               <div className="flex items-center gap-4 mb-4">
                 <Camera className="w-8 h-8 text-primary" />
-                <h3 className="text-xl font-semibold">So funktioniert's</h3>
+                <h3 className="text-xl font-bold">So funktioniert's</h3>
               </div>
               <p className="text-muted-foreground">
                 An unseren Standorten werden Kameras installiert, die dein Spiel automatisch erfassen. 

@@ -88,7 +88,7 @@ const Play = () => {
             >
               <div className="grid lg:grid-cols-2 gap-12 items-center">
                 <div>
-                  <h2 className="text-2xl md:text-4xl font-bold mb-6">
+                  <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
                     Noch mehr mit der{" "}
                     <span className="text-gradient-lime">PADEL2GO App</span>
                   </h2>
@@ -187,7 +187,7 @@ const Play = () => {
               viewport={{ once: true }}
               className="max-w-3xl mx-auto text-center"
             >
-              <h2 className="text-2xl md:text-4xl font-bold mb-6">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
                 Lieber direkt über den Browser?
               </h2>
               <p className="text-lg text-muted-foreground mb-8">

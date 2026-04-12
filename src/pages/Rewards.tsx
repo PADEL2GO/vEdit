@@ -120,7 +120,7 @@ const TiersSection = () => {
           viewport={{ once: true }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
             Die P<span className="text-primary">2</span>G <span className="text-gradient-lime">Expert Levels</span>
           </h2>
           <p className="text-lg text-muted-foreground">
@@ -241,7 +241,7 @@ const Rewards = () => {
               viewport={{ once: true }}
               className="text-center max-w-3xl mx-auto mb-12"
             >
-              <h2 className="text-2xl md:text-5xl font-bold mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 So <span className="text-gradient-lime">funktioniert's</span>
               </h2>
               <p className="text-lg text-muted-foreground">
@@ -262,7 +262,7 @@ const Rewards = () => {
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
                     <span className="text-xl font-bold text-primary">{step.step}</span>
                   </div>
-                  <h3 className="font-semibold text-lg mb-2">{step.title}</h3>
+                  <h3 className="text-xl font-bold mb-2">{step.title}</h3>
                   <p className="text-sm text-muted-foreground">{step.description}</p>
                   
                   {idx < steps.length - 1 && (
@@ -293,7 +293,7 @@ const Rewards = () => {
                 <Zap className="w-4 h-4" />
                 <span className="text-sm font-medium">P2G Points</span>
               </div>
-              <h2 className="text-2xl md:text-5xl font-bold mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 <span className="text-gradient-lime">P2G Points</span> verdienen
               </h2>
               <p className="text-lg text-muted-foreground">
@@ -368,7 +368,7 @@ const Rewards = () => {
               viewport={{ once: true }}
               className="text-center max-w-3xl mx-auto mb-12"
             >
-              <h2 className="text-2xl md:text-5xl font-bold mb-4">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 Wofür du P2G Points <span className="text-gradient-lime">einlösen</span> kannst
               </h2>
               <p className="text-lg text-muted-foreground">
@@ -397,7 +397,7 @@ const Rewards = () => {
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg shadow-primary/10 group-hover:shadow-primary/20 transition-shadow">
                           <Icon className="w-6 h-6 text-primary" />
                         </div>
-                        <h3 className="font-semibold text-lg">{option.category}</h3>
+                        <h3 className="text-xl font-bold">{option.category}</h3>
                       </div>
                       <ul className="space-y-2.5">
                         {option.items.map((item) => (

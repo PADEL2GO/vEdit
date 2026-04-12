@@ -25,7 +25,7 @@ const Datenschutz = () => {
 
             {/* 1. Verantwortlicher */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">1. Verantwortlicher</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">1. Verantwortlicher</h2>
               <div className="space-y-1 text-foreground text-sm leading-relaxed">
                 <p className="font-medium">PADEL2GO UG (haftungsbeschränkt)</p>
                 <p>Am Neudeck 10</p>
@@ -43,7 +43,7 @@ const Datenschutz = () => {
 
             {/* 2. Überblick */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">2. Überblick der Datenverarbeitung</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">2. Überblick der Datenverarbeitung</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Wir erheben und verarbeiten personenbezogene Daten nur soweit dies für die Bereitstellung unserer Dienste erforderlich ist oder Sie uns ausdrücklich Ihre Einwilligung erteilt haben. Nachfolgend informieren wir Sie transparent über Art, Umfang und Zweck der Datenverarbeitung.
@@ -59,7 +59,7 @@ const Datenschutz = () => {
 
             {/* 3. Hosting & Infrastruktur */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">3. Hosting & Infrastruktur (Supabase)</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">3. Hosting & Infrastruktur (Supabase)</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Unsere Plattform wird auf Basis von <span className="font-medium">Supabase</span> (Supabase Inc., San Francisco, USA) betrieben. Supabase stellt Datenbankdienste, Authentifizierung und serverseitige Funktionen bereit. Die Datenspeicherung erfolgt auf Servern innerhalb der Europäischen Union (Frankfurt, AWS EU-Central-1).
@@ -87,7 +87,7 @@ const Datenschutz = () => {
 
             {/* 4. Zahlungsabwicklung */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">4. Zahlungsabwicklung (Stripe)</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">4. Zahlungsabwicklung (Stripe)</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Alle Zahlungen werden über <span className="font-medium">Stripe</span> (Stripe Payments Europe, Ltd., 1 Grand Canal Street Lower, Dublin, Irland) abgewickelt. Kartendaten und Zahlungsinformationen werden ausschließlich durch Stripe verarbeitet und gelangen zu keinem Zeitpunkt auf unsere Server.
@@ -109,7 +109,7 @@ const Datenschutz = () => {
 
             {/* 5. E-Mail-Kommunikation */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">5. E-Mail-Kommunikation (Resend)</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">5. E-Mail-Kommunikation (Resend)</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Für den Versand transaktionaler E-Mails (Buchungsbestätigungen, Erinnerungen, Einladungen) nutzen wir den Dienst <span className="font-medium">Resend</span> (Resend Inc., San Francisco, USA). Resend verarbeitet dabei Ihre E-Mail-Adresse sowie den Inhalt der jeweiligen E-Mail.
@@ -131,7 +131,7 @@ const Datenschutz = () => {
 
             {/* 6. Cookies */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">6. Cookies & lokale Speicherung</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">6. Cookies & lokale Speicherung</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Wir verwenden ausschließlich technisch notwendige Cookies und lokale Speichermechanismen (localStorage). Diese sind für den Betrieb der Plattform erforderlich und können nicht deaktiviert werden, ohne die Funktionalität der Website erheblich einzuschränken.
@@ -150,7 +150,7 @@ const Datenschutz = () => {
 
             {/* 7. Speicherdauer */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">7. Speicherdauer</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">7. Speicherdauer</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Personenbezogene Daten werden gelöscht, sobald sie für den Zweck ihrer Erhebung nicht mehr erforderlich sind. Buchungsdaten werden aus steuerrechtlichen Gründen für die gesetzlich vorgeschriebene Dauer (in Deutschland: 10 Jahre) aufbewahrt.
@@ -163,7 +163,7 @@ const Datenschutz = () => {
 
             {/* 8. Ihre Rechte */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">8. Ihre Rechte als betroffene Person</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">8. Ihre Rechte als betroffene Person</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>Sie haben gegenüber PADEL2GO folgende Rechte bezüglich Ihrer personenbezogenen Daten:</p>
                 <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
@@ -186,7 +186,7 @@ const Datenschutz = () => {
 
             {/* 9. Datensicherheit */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">9. Datensicherheit</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">9. Datensicherheit</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Wir treffen technische und organisatorische Maßnahmen, um Ihre Daten vor unbefugtem Zugriff, Verlust oder Manipulation zu schützen. Dazu gehören:
@@ -202,7 +202,7 @@ const Datenschutz = () => {
 
             {/* 10. Änderungen */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-semibold mb-4 text-lime">10. Änderungen dieser Datenschutzerklärung</h2>
+              <h2 className="text-xl font-bold mb-4 text-primary">10. Änderungen dieser Datenschutzerklärung</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>
                   Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an geänderte Rechtslagen oder Änderungen unserer Dienste anzupassen. Die jeweils aktuelle Version ist auf dieser Seite abrufbar. Bei wesentlichen Änderungen informieren wir registrierte Nutzer per E-Mail.

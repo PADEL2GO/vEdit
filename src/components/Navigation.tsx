@@ -31,25 +31,16 @@ const PublicNavigation = () => {
 
   const navItems = [
     { label: "Home", href: "/" },
-    { label: "Für Spieler", href: "/fuer-spieler" },
-    { label: "App & Booking", href: "/app-booking" },
-    { label: "P2G Points", href: "/rewards" },
-    { label: "League", href: "/league" },
-    { label: "Events", href: "/events" },
-    { label: "Für Vereine", href: "/fuer-vereine" },
-    { label: "Für Partner", href: "/fuer-partner" },
+    { label: "Spieler", href: "/fuer-spieler" },
+    { label: "Vereine", href: "/fuer-vereine" },
+    { label: "Partner", href: "/fuer-partner" },
     { label: "Über uns", href: "/ueber-uns" },
-    { label: "FAQ & Kontakt", href: "/faq-kontakt" },
   ];
 
-  // Convert navItems to tubelight format (first 6 main items)
-  const tubelightItems = navItems.slice(0, 6).map(item => ({
+  const tubelightItems = navItems.map(item => ({
     name: item.label,
     url: item.href,
   }));
-
-  // Remaining items for "Mehr" dropdown
-  const moreItems = navItems.slice(6);
 
   const handleLogout = async () => {
     await signOut();
@@ -72,45 +63,6 @@ const PublicNavigation = () => {
           {/* Desktop Navigation - Tubelight Style */}
           <div className="hidden lg:flex items-center gap-2">
             <TubelightNavBar items={tubelightItems} />
-            
-            {/* More Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setActiveDropdown(activeDropdown === 'more' ? null : 'more')}
-                className={`
-                  flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300
-                  text-muted-foreground hover:text-primary
-                  bg-background/60 backdrop-blur-xl border border-border/50
-                  hover:bg-primary/10
-                `}
-              >
-                Mehr
-                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${activeDropdown === 'more' ? 'rotate-180' : ''}`} />
-              </button>
-              <AnimatePresence>
-                {activeDropdown === 'more' && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full right-0 mt-3 py-2 w-52 bg-background/90 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl"
-                  >
-                    {moreItems.map((item) => (
-                      <NavLink
-                        key={item.label}
-                        to={item.href}
-                        className="block px-4 py-2.5 text-sm text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200 mx-2 rounded-lg"
-                        activeClassName="text-primary bg-primary/15"
-                        onClick={() => setActiveDropdown(null)}
-                      >
-                        {item.label}
-                      </NavLink>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
           </div>
 
           {/* Desktop CTA */}
@@ -181,13 +133,13 @@ const PublicNavigation = () => {
                 <NavLink to="/auth">Login</NavLink>
               </Button>
             )}
-            <Button 
-              variant="lime" 
-              size="sm" 
+            <Button
+              variant="lime"
+              size="sm"
               asChild
               className="rounded-full px-5 shadow-lg shadow-primary/25"
             >
-              <NavLink to="/app-booking">App downloaden</NavLink>
+              <NavLink to="/booking">Jetzt starten</NavLink>
             </Button>
           </div>
 
@@ -256,7 +208,7 @@ const PublicNavigation = () => {
                   </Button>
                 )}
                 <Button variant="lime" className="w-full rounded-xl shadow-lg shadow-primary/25" asChild>
-                  <NavLink to="/app-booking" onClick={() => setIsOpen(false)}>App downloaden</NavLink>
+                  <NavLink to="/booking" onClick={() => setIsOpen(false)}>Jetzt starten</NavLink>
                 </Button>
               </div>
             </div>

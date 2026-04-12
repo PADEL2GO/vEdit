@@ -32,6 +32,9 @@ import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { NavLink } from "react-router-dom";
 import { formatPrice } from "@/lib/pricing";
+import { useWeeklyBookingStreak } from "@/hooks/useWeeklyBookingStreak";
+import { getStreakLabel, getStreakColor, calculateBookingPoints } from "@/lib/bookingCredits";
+import { Flame, Coins, Zap } from "lucide-react";
 
 const useCountdown = (targetDate: string | null) => {
   const [countdownTimeLeft, setCountdownTimeLeft] = useState("");
@@ -94,6 +97,8 @@ function calculateTimeLeft(targetDate: Date) {
 const DashboardBooking = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { data: streakData } = useWeeklyBookingStreak(user?.id);
+  const weekStreak = streakData?.weekStreak ?? 0;
   const [locations, setLocations] = useState<LocationWithAvailability[]>([]);
   const [locationsLoading, setLocationsLoading] = useState(true);
   const [pastBookingsOpen, setPastBookingsOpen] = useState(false);
@@ -364,10 +369,39 @@ const DashboardBooking = () => {
             <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
               Buche deinen nächsten <span className="text-primary">Court</span>
             </h1>
-            <p className="text-muted-foreground mb-6 max-w-lg">
+            <p className="text-muted-foreground mb-4 max-w-lg">
               Wähle einen unserer Standorte und reserviere deinen Slot in Sekunden.
             </p>
-            
+
+            {/* Streak + Points Banner */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border ${
+                weekStreak >= 4 ? "bg-orange-500/10 border-orange-500/30 text-orange-400" :
+                weekStreak >= 2 ? "bg-amber-500/10 border-amber-500/30 text-amber-400" :
+                "bg-primary/10 border-primary/20 text-primary"
+              }`}>
+                <Flame className="w-4 h-4" />
+                {weekStreak === 0
+                  ? "Starte deine Wochenserie!"
+                  : `${weekStreak} ${weekStreak === 1 ? "Woche" : "Wochen"} in Folge`}
+                {weekStreak >= 2 && (
+                  <span className="ml-1 font-bold">{getStreakLabel(weekStreak)} Multiplikator</span>
+                )}
+              </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-primary/10 border border-primary/20 text-primary">
+                <Coins className="w-4 h-4" />
+                {weekStreak >= 2
+                  ? `${Math.round(100 * (streakData?.multiplier ?? 1))} Punkte / Stunde`
+                  : "100 Punkte / Stunde"}
+              </div>
+              {streakData?.multiplierWillIncrease && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-green-500/10 border border-green-500/20 text-green-400">
+                  <Zap className="w-4 h-4" />
+                  Nächste Woche: {getStreakLabel(weekStreak + 1)}
+                </div>
+              )}
+            </div>
+
             {nextBooking && (
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm mb-4">
                 <Calendar className="w-4 h-4" />
@@ -691,22 +725,35 @@ const UpcomingBookingCard = ({ booking, getStatusBadge }: { booking: any; getSta
           </p>
         )}
       </div>
-      <div className="flex items-center gap-3">
-        {booking.price_cents && (
-          <span className="text-sm font-medium">
-            {formatPrice(booking.price_cents, booking.currency || 'EUR')}
+      <div className="flex flex-col items-end gap-2">
+        <div className="flex items-center gap-3">
+          {booking.price_cents && (
+            <span className="text-sm font-medium">
+              {formatPrice(booking.price_cents, booking.currency || 'EUR')}
+            </span>
+          )}
+          {isPending ? (
+            <Button variant="lime" size="sm" asChild>
+              <NavLink to={`/booking/checkout?booking_id=${booking.id}`}>
+                <CreditCard className="w-4 h-4 mr-1" />
+                Jetzt bezahlen
+              </NavLink>
+            </Button>
+          ) : (
+            getStatusBadge(booking.status)
+          )}
+        </div>
+        {(booking as any).play_credits_awarded > 0 ? (
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+            <Coins className="w-3 h-3" />
+            +{(booking as any).play_credits_awarded} Punkte verdient
           </span>
-        )}
-        {isPending ? (
-          <Button variant="lime" size="sm" asChild>
-            <NavLink to={`/booking/checkout?booking_id=${booking.id}`}>
-              <CreditCard className="w-4 h-4 mr-1" />
-              Jetzt bezahlen
-            </NavLink>
-          </Button>
-        ) : (
-          getStatusBadge(booking.status)
-        )}
+        ) : booking.status === "confirmed" ? (
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <Coins className="w-3 h-3" />
+            +{calculateBookingPoints(booking.start_time, booking.end_time, 0)} Punkte
+          </span>
+        ) : null}
       </div>
     </div>
   );

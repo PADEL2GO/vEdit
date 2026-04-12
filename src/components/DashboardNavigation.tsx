@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useClubAuth } from "@/hooks/useClubAuth";
 import { useFriendships } from "@/hooks/useFriendships";
+import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import wordmark from "@/assets/padel2go-wordmark.png";
 
 const DashboardNavigation = () => {
@@ -18,16 +19,28 @@ const DashboardNavigation = () => {
   const { isClubUser } = useClubAuth();
   const { pendingReceived } = useFriendships();
   const pendingReceivedCount = pendingReceived.length;
+  const features = useFeatureToggles();
 
-  // Fixed dashboard nav items
-  const dashboardItems = [
-    { name: "Booking", url: "/dashboard/booking" },
-    { name: "Lobbys", url: "/lobbies" },
-    { name: "P2G Points", url: "/dashboard/p2g-points" },
-    { name: "Marketplace", url: "/dashboard/marketplace" },
-    { name: "League", url: "/dashboard/league" },
-    { name: "Events", url: "/dashboard/events" },
+  // All possible nav items with their required feature flag
+  const allNavItems = [
+    { name: "Übersicht", url: "/dashboard/home", feature: null },
+    { name: "Booking", url: "/dashboard/booking", feature: null },
+    { name: "Lobbys", url: "/lobbies", feature: "lobbies_enabled" },
+    { name: "P2G Points", url: "/dashboard/p2g-points", feature: "p2g_enabled" },
+    { name: "Marketplace", url: "/dashboard/marketplace", feature: "marketplace_enabled" },
+    { name: "League", url: "/dashboard/league", feature: "league_enabled" },
+    { name: "Events", url: "/dashboard/events", feature: "events_enabled" },
   ];
+
+  // Admins see everything; before launch non-admins only see Übersicht + Booking;
+  // after launch filter by individual feature flags
+  const dashboardItems = isAdmin
+    ? allNavItems.map(({ feature, ...item }) => item)
+    : !features.app_launched
+    ? [{ name: "Übersicht", url: "/dashboard/home" }, { name: "Booking", url: "/dashboard/booking" }]
+    : allNavItems
+        .filter(item => !item.feature || features[item.feature as keyof typeof features])
+        .map(({ feature, ...item }) => item);
 
   const handleLogout = async () => {
     await signOut();
@@ -38,7 +51,7 @@ const DashboardNavigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <NavLink to="/dashboard/booking" className="flex items-center shrink-0">
+          <NavLink to="/dashboard/home" className="flex items-center shrink-0">
             <img 
               src={wordmark} 
               alt="PADEL2GO" 
