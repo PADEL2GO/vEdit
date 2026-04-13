@@ -5,6 +5,8 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 // Resend is initialized lazily inside the handler so we can fall back to DB config
 
 const allowedOrigins = [
+  "https://www.padel2go-official.de",
+  "https://padel2go-official.de",
   "https://padel2go.lovable.app",
   "https://padel2go.de",
   "http://localhost:5173",

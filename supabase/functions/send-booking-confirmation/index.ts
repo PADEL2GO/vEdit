@@ -178,7 +178,7 @@ serve(async (req) => {
       : "Deine Teilnahme am Match wurde erfolgreich bezahlt.";
 
     // Generate booking URL (appUrl resolved above, fallback to production domain)
-    const resolvedAppUrl = appUrl || "https://padel2go.de";
+    const resolvedAppUrl = appUrl || "https://www.padel2go-official.de";
     // Guests land on /booking (they can't access the dashboard); users go to their booking list
     const bookingUrl = guest_email
       ? `${resolvedAppUrl}/booking`

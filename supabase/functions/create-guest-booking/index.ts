@@ -2,6 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const allowedOrigins = [
+  "https://www.padel2go-official.de",
+  "https://padel2go-official.de",
   "https://padel2go.lovable.app",
   "https://padel2go.de",
   "http://localhost:5173",

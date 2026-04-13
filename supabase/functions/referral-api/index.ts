@@ -62,7 +62,7 @@ serve(async (req) => {
         profile = { referral_code: code };
       }
 
-      const origin = req.headers.get("origin") || "https://padel2go.de";
+      const origin = req.headers.get("origin") || "https://www.padel2go-official.de";
       const referralLink = `${origin}/auth?ref=${profile.referral_code}`;
 
       // Get referral stats

@@ -3,6 +3,8 @@ import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const allowedOrigins = [
+  "https://www.padel2go-official.de",
+  "https://padel2go-official.de",
   "https://padel2go.lovable.app",
   "https://padel2go.de",
   "http://localhost:5173",
@@ -143,7 +145,7 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    const requestOrigin = origin || "https://padel2go.de";
+    const requestOrigin = origin || "https://www.padel2go-official.de";
 
     // Create checkout session for participant share
     const session = await stripe.checkout.sessions.create({

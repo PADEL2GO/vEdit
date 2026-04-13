@@ -170,7 +170,7 @@ serve(async (req) => {
     const sharePriceEuros = ((participant.share_price_cents || 0) / 100).toFixed(2).replace(".", ",");
 
     // Build accept URL - use participant_id as token
-    const baseUrl = origin || "https://padel2go.lovable.app";
+    const baseUrl = origin || "https://www.padel2go-official.de";
     const acceptUrl = `${baseUrl}/invite/accept?token=${participant.id}`;
 
     logStep("Building email", { acceptUrl, sharePriceEuros });
