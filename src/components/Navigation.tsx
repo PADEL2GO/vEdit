@@ -139,7 +139,7 @@ const PublicNavigation = () => {
               asChild
               className="rounded-full px-5 shadow-lg shadow-primary/25"
             >
-              <NavLink to="/booking">Jetzt starten</NavLink>
+              <NavLink to="/booking">Court buchen</NavLink>
             </Button>
           </div>
 
@@ -208,7 +208,7 @@ const PublicNavigation = () => {
                   </Button>
                 )}
                 <Button variant="lime" className="w-full rounded-xl shadow-lg shadow-primary/25" asChild>
-                  <NavLink to="/booking" onClick={() => setIsOpen(false)}>Jetzt starten</NavLink>
+                  <NavLink to="/booking" onClick={() => setIsOpen(false)}>Court buchen</NavLink>
                 </Button>
               </div>
             </div>
