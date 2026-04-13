@@ -58,6 +58,14 @@ const values = [
     glow: "rgba(251,191,36,0.12)",
     border: "rgba(251,191,36,0.25)",
   },
+  {
+    icon: Zap,
+    title: "Machen statt Reden",
+    description: "Wir versprechen nichts, was wir nicht halten können. Lieber weniger ankündigen und mehr liefern – das ist unser Anspruch an uns selbst.",
+    accent: "#fb923c",
+    glow: "rgba(251,146,60,0.12)",
+    border: "rgba(251,146,60,0.25)",
+  },
 ];
 
 const timeline = [

@@ -14,9 +14,6 @@ import {
 import {
   PartnerConceptSection,
   PartnerBenchmarksSection,
-  PartnerMarketStatsSection,
-  PartnerEcommerceSection,
-  PartnerTablesSection,
   TouchpointCarousel,
 } from "@/components/partner";
 import { usePartnerTiles } from "@/hooks/usePartnerTiles";
@@ -352,28 +349,6 @@ const FuerPartner = () => {
             </div>
           </div>
         </section>
-
-        {/* ═══ MARKET DIVIDER ═════════════════════════════════════════════════ */}
-        <div className="relative py-12 overflow-hidden border-y border-white/8"
-          style={{ background: "linear-gradient(90deg, transparent 0%, rgba(199,240,17,0.06) 50%, transparent 100%)" }}>
-          <div className={`${CONTAINER} text-center`}>
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-2xl md:text-4xl font-black tracking-tight text-white"
-            >
-              Der Markt —{" "}
-              <span className="text-[#C7F011]">die Daten</span>
-            </motion.h2>
-            <p className="text-white/40 mt-2 text-base">Padel ist die am schnellsten wachsende Sportart Europas.</p>
-          </div>
-        </div>
-
-        {/* ═══ MARKET STATS + ECOMMERCE ═══════════════════════════════════════ */}
-        <PartnerMarketStatsSection />
-        <PartnerEcommerceSection />
-        <PartnerTablesSection />
 
         {/* ═══ CALENDLY CTA ═══════════════════════════════════════════════════ */}
         <section id="calendly" className={`${SECTION} relative overflow-hidden`}>
