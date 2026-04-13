@@ -51,6 +51,23 @@ function getGreeting(): string {
   return "Guten Abend";
 }
 
+interface SkillLevelInfo {
+  label: string;
+  emoji: string;
+  color: string;
+  bg: string;
+  border: string;
+  ring: string;
+}
+
+function getSkillLevelInfo(level: number): SkillLevelInfo {
+  if (level >= 8.5) return { label: "Profi", emoji: "💎", color: "text-yellow-300", bg: "bg-yellow-500/20", border: "border-yellow-500/40", ring: "ring-yellow-400/50" };
+  if (level >= 7)   return { label: "Experte", emoji: "🔥", color: "text-lime-400", bg: "bg-lime-500/20", border: "border-lime-500/40", ring: "ring-lime-400/50" };
+  if (level >= 5)   return { label: "Fortgeschritten", emoji: "⚡", color: "text-blue-400", bg: "bg-blue-500/20", border: "border-blue-500/40", ring: "ring-blue-400/50" };
+  if (level >= 3)   return { label: "Einsteiger", emoji: "🎾", color: "text-cyan-400", bg: "bg-cyan-500/20", border: "border-cyan-500/40", ring: "ring-cyan-400/50" };
+  return { label: "Anfänger", emoji: "🌱", color: "text-zinc-400", bg: "bg-zinc-500/20", border: "border-zinc-500/40", ring: "ring-zinc-400/40" };
+}
+
 function formatBookingTime(iso: string): string {
   const d = parseISO(iso);
   if (isToday(d)) return `Heute · ${format(d, "HH:mm")}`;
@@ -118,6 +135,8 @@ const DashboardHome = () => {
   const streak = streakData?.weekStreak ?? 0;
   const streakMultiplier = streakData?.multiplier ?? 1;
   const pendingActions = pendingInvites.length + friendRequests.length;
+  const skillValue = skillStats?.skill_level ?? 0;
+  const skillInfo = getSkillLevelInfo(skillValue);
 
   // Onboarding state
   const hasDisplayName = !!profile?.display_name;
@@ -212,14 +231,14 @@ const DashboardHome = () => {
   // ── Feature tiles ──────────────────────────────────────────────────────────
 
   const featureTiles = [
-    { to: "/dashboard/booking", icon: Calendar, label: "Court buchen", color: "bg-primary/10 text-primary", show: true },
-    { to: "/dashboard/rewards", icon: Coins, label: "Rewards", color: "bg-amber-500/10 text-amber-400", show: true },
-    { to: "/dashboard/friends", icon: Users, label: "Freunde", color: "bg-blue-500/10 text-blue-400", badge: friendRequests.length, show: true },
-    { to: "/dashboard/p2g-points", icon: Gamepad2, label: "P2G Points", color: "bg-purple-500/10 text-purple-400", show: features.p2g_enabled },
-    { to: "/dashboard/league", icon: Trophy, label: "Liga", color: "bg-yellow-500/10 text-yellow-400", show: features.league_enabled },
-    { to: "/dashboard/events", icon: Star, label: "Events", color: "bg-rose-500/10 text-rose-400", show: features.events_enabled },
-    { to: "/dashboard/marketplace", icon: ShoppingBag, label: "Marketplace", color: "bg-teal-500/10 text-teal-400", show: features.marketplace_enabled },
-    { to: "/lobbies", icon: Target, label: "Lobbies", color: "bg-orange-500/10 text-orange-400", show: features.lobbies_enabled },
+    { to: "/dashboard/booking", icon: Calendar, label: "Court buchen", iconBg: "bg-[#C7F011]/20", iconColor: "text-[#C7F011]", border: "border-[#C7F011]/20", show: true },
+    { to: "/dashboard/rewards", icon: Coins, label: "Rewards", iconBg: "bg-amber-500/20", iconColor: "text-amber-300", border: "border-amber-500/20", show: true },
+    { to: "/dashboard/friends", icon: Users, label: "Freunde", iconBg: "bg-blue-500/20", iconColor: "text-blue-300", border: "border-blue-500/20", badge: friendRequests.length, show: true },
+    { to: "/dashboard/p2g-points", icon: Gamepad2, label: "P2G Points", iconBg: "bg-purple-500/20", iconColor: "text-purple-300", border: "border-purple-500/20", show: features.p2g_enabled },
+    { to: "/dashboard/league", icon: Trophy, label: "Liga", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-300", border: "border-yellow-500/20", show: features.league_enabled },
+    { to: "/dashboard/events", icon: Star, label: "Events", iconBg: "bg-rose-500/20", iconColor: "text-rose-300", border: "border-rose-500/20", show: features.events_enabled },
+    { to: "/dashboard/marketplace", icon: ShoppingBag, label: "Markt", iconBg: "bg-teal-500/20", iconColor: "text-teal-300", border: "border-teal-500/20", show: features.marketplace_enabled },
+    { to: "/lobbies", icon: Target, label: "Lobbies", iconBg: "bg-orange-500/20", iconColor: "text-orange-300", border: "border-orange-500/20", show: features.lobbies_enabled },
   ].filter((t) => t.show);
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -271,26 +290,26 @@ const DashboardHome = () => {
 
             {/* Stats — large number cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20">
-                <Coins className="w-5 h-5 text-primary mb-2" />
-                <p className="text-2xl font-bold text-primary leading-none">{playCredits.toLocaleString("de")}</p>
+              <div className="p-4 rounded-2xl bg-[#C7F011]/15 border border-[#C7F011]/30">
+                <Coins className="w-5 h-5 text-[#C7F011] mb-2" />
+                <p className="text-2xl font-bold text-[#C7F011] leading-none">{playCredits.toLocaleString("de")}</p>
                 <p className="text-xs text-white/50 mt-1">Play Credits</p>
               </div>
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
-                <Zap className="w-5 h-5 text-amber-400 mb-2" />
-                <p className="text-2xl font-bold text-amber-400 leading-none">{rewardCredits.toLocaleString("de")}</p>
+              <div className="p-4 rounded-2xl bg-amber-500/15 border border-amber-500/30">
+                <Zap className="w-5 h-5 text-amber-300 mb-2" />
+                <p className="text-2xl font-bold text-amber-300 leading-none">{rewardCredits.toLocaleString("de")}</p>
                 <p className="text-xs text-white/50 mt-1">Reward Credits</p>
               </div>
-              <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-                <TrendingUp className="w-5 h-5 text-blue-400 mb-2" />
-                <p className="text-2xl font-bold text-blue-400 leading-none">
-                  {skillStats?.skill_level ? skillStats.skill_level.toFixed(1) : "–"}
+              <div className={`p-4 rounded-2xl ${skillValue > 0 ? skillInfo.bg : "bg-zinc-500/15"} border ${skillValue > 0 ? skillInfo.border : "border-zinc-500/30"}`}>
+                <span className="text-lg mb-1 block">{skillValue > 0 ? skillInfo.emoji : "🎮"}</span>
+                <p className={`text-2xl font-bold leading-none ${skillValue > 0 ? skillInfo.color : "text-zinc-400"}`}>
+                  {skillValue > 0 ? skillValue.toFixed(1) : "–"}
                 </p>
-                <p className="text-xs text-white/50 mt-1">Skill Level</p>
+                <p className="text-xs text-white/50 mt-1">{skillValue > 0 ? skillInfo.label : "Skill (KI)"}</p>
               </div>
-              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
-                <Calendar className="w-5 h-5 text-rose-400 mb-2" />
-                <p className="text-2xl font-bold text-rose-400 leading-none">{monthlyCount}</p>
+              <div className="p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30">
+                <Calendar className="w-5 h-5 text-rose-300 mb-2" />
+                <p className="text-2xl font-bold text-rose-300 leading-none">{monthlyCount}</p>
                 <p className="text-xs text-white/50 mt-1">Buchungen / Monat</p>
               </div>
             </div>
@@ -441,23 +460,23 @@ const DashboardHome = () => {
           {/* ── Feature Nav Hub ──────────────────────────────────────── */}
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Bereiche</h2>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-2 sm:gap-3">
               {featureTiles.map((tile) => (
-                <NavLink key={tile.to} to={tile.to}>
+                <NavLink key={tile.to} to={tile.to} className="min-w-0">
                   <motion.div
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
-                    className="relative flex flex-col items-center justify-center gap-2.5 p-3 sm:p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors cursor-pointer text-center min-h-[90px] sm:min-h-[100px]"
+                    className={`relative flex flex-col items-center justify-center gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-card border transition-colors cursor-pointer text-center ${tile.border} hover:brightness-110`}
                   >
-                    {tile.badge != null && tile.badge > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                    {"badge" in tile && tile.badge != null && tile.badge > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center z-10">
                         {tile.badge > 9 ? "9+" : tile.badge}
                       </span>
                     )}
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${tile.color}`}>
-                      <tile.icon className="w-5 h-5" />
+                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center ${tile.iconBg}`}>
+                      <tile.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${tile.iconColor}`} />
                     </div>
-                    <span className="text-[11px] sm:text-xs font-semibold leading-tight">{tile.label}</span>
+                    <span className="text-[10px] sm:text-[11px] font-semibold leading-tight text-white/80 w-full truncate px-0.5">{tile.label}</span>
                   </motion.div>
                 </NavLink>
               ))}
@@ -809,11 +828,13 @@ const DashboardHome = () => {
               </Card>
 
               {/* KI Skill Card */}
-              {skillStats?.skill_level != null && skillStats.skill_level > 0 && (
-                <Card>
+              {skillValue > 0 && (
+                <Card className={`border ${skillInfo.border}`}>
                   <CardContent className="p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <h2 className="text-sm font-bold">KI-Skill Level</h2>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-sm font-bold flex items-center gap-1.5">
+                        <span>{skillInfo.emoji}</span> KI-Skill
+                      </h2>
                       {features.p2g_enabled && (
                         <NavLink to="/dashboard/p2g-points">
                           <Button variant="ghost" size="sm" className="text-xs text-primary h-7 px-2">
@@ -823,15 +844,27 @@ const DashboardHome = () => {
                       )}
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-full bg-blue-500/10 border-2 border-blue-500/30 flex items-center justify-center shrink-0">
-                        <span className="text-lg font-bold text-blue-400">{skillStats.skill_level.toFixed(1)}</span>
+                      <div className={`w-16 h-16 rounded-full ${skillInfo.bg} border-2 ${skillInfo.border} ring-4 ${skillInfo.ring} flex items-center justify-center shrink-0`}>
+                        <span className={`text-xl font-bold ${skillInfo.color}`}>{skillValue.toFixed(1)}</span>
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">Skill Score</p>
-                        <p className="text-xs text-muted-foreground">KI-basiert</p>
-                        {skillStats.ai_rank && (
-                          <p className="text-xs text-primary font-semibold mt-0.5">Rang #{skillStats.ai_rank}</p>
+                        <p className={`text-base font-bold ${skillInfo.color}`}>{skillInfo.label}</p>
+                        <p className="text-xs text-muted-foreground">KI-basiert · Skala 0–10</p>
+                        {skillStats?.ai_rank && (
+                          <p className="text-xs text-primary font-semibold mt-1">Rang #{skillStats.ai_rank}</p>
                         )}
+                      </div>
+                    </div>
+                    {/* Skill bar */}
+                    <div className="mt-4">
+                      <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                        <span>0</span><span>5</span><span>10</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ${skillInfo.bg}`}
+                          style={{ width: `${Math.min(100, (skillValue / 10) * 100)}%` }}
+                        />
                       </div>
                     </div>
                   </CardContent>
