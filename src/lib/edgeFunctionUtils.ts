@@ -108,29 +108,43 @@ export async function invokeEdgeFunction<T = unknown>(
           responseData: data,
           responseDataType: typeof data,
         });
-        
-        // Prüfe ob der Response-Body eine spezifische Fehlermeldung enthält
+
+        // Prüfe ob der Response-Body eine spezifische Fehlermeldung enthält.
+        // Supabase SDK v2.26+ stores the body in error.context (a Response object);
+        // older versions put it in data. We try both.
         let bodyError: string | null = null;
-        
-        if (data) {
+
+        // 1. Try error.context (Supabase SDK >= ~2.26, FunctionsHttpError)
+        const ctx = (error as unknown as { context?: Response }).context;
+        if (ctx && typeof ctx.json === 'function') {
+          try {
+            const errBody = await ctx.clone().json() as Record<string, unknown>;
+            if (errBody && typeof errBody === 'object' && 'error' in errBody && typeof errBody.error === 'string') {
+              bodyError = errBody.error;
+            }
+          } catch {
+            // body not JSON or already consumed
+          }
+        }
+
+        // 2. Fall back to data (older SDK behavior)
+        if (!bodyError && data) {
           if (typeof data === 'object' && 'error' in data) {
             bodyError = (data as { error: string }).error;
           } else if (typeof data === 'string') {
-            // Versuche JSON zu parsen wenn es ein String ist
             try {
               const parsed = JSON.parse(data);
               if (parsed && typeof parsed === 'object' && 'error' in parsed) {
                 bodyError = parsed.error;
               }
             } catch {
-              // Falls kein JSON, nutze den String direkt wenn er kurz genug ist
               if (data.length < 200) {
                 bodyError = data;
               }
             }
           }
         }
-        
+
         if (bodyError) {
           console.log(`[EdgeFunction] Extracted error from body:`, bodyError);
           return { data: null, error: new Error(bodyError) };

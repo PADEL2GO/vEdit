@@ -8,9 +8,6 @@ import Footer from "@/components/Footer";
 import SectionDivider from "@/components/SectionDivider";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
-import { LockedContentOverlay } from "@/components/LockedContentOverlay";
-import { PinGate } from "@/components/PinGate";
-import { usePinAccess } from "@/hooks/usePinAccess";
 import { SiteVisual } from "@/components/SiteVisual";
 import BrandName from "@/components/BrandName";
 import partnerP2GLogo from "@/assets/partners/p2g-logo-vereine.png";
@@ -168,8 +165,6 @@ const CourtImageCarousel = () => {
 };
 
 const FuerVereine = () => {
-  const { isUnlocked, isLoading, validatePin } = usePinAccess("vereine");
-  const [showPinDialog, setShowPinDialog] = useState(false);
   const { data: partnerTiles } = usePartnerTiles(true);
 
   return (
@@ -235,11 +230,6 @@ const FuerVereine = () => {
         </GalaxyHero>
 
 
-        {/* GESPERRTER BEREICH */}
-        <LockedContentOverlay
-          isLocked={!isUnlocked && !isLoading}
-          onRequestPin={() => setShowPinDialog(true)}
-          contactReason="vereine">
           
 
           {/* SEKTION: P2G als Full-Service Partner */}
@@ -798,17 +788,10 @@ const FuerVereine = () => {
             </div>
           </section>
 
-        </LockedContentOverlay>
       </main>
 
       <Footer />
 
-      <PinGate
-        open={showPinDialog}
-        onOpenChange={setShowPinDialog}
-        onValidate={validatePin}
-        pageTitle="Für Vereine" />
-      
     </>);
 
 };
