@@ -1,7 +1,7 @@
 project_id = "kfjfxfeidgjksxsubtjw"
 
 [functions.create-checkout-session]
-verify_jwt = true
+verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
@@ -46,7 +46,7 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.rewards-estimate]
-verify_jwt = true
+verify_jwt = false
 
 [functions.camera-webhook]
 verify_jwt = false

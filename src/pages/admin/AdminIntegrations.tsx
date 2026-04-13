@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, CheckCircle2, XCircle, Eye, EyeOff, Save, Plug } from "lucide-react";
 import { toast } from "sonner";
-import { invokeEdgeFunction } from "@/lib/edgeFunctionUtils";
+import { supabase } from "@/integrations/supabase/client";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -118,43 +118,45 @@ export default function AdminIntegrations() {
 
   const loadConfigs = async () => {
     setIsLoading(true);
-    const { data, error } = await invokeEdgeFunction<{ data: ServiceRow[] }>(
-      "integrations-admin-api", { maxRetries: 1 }
-    );
+    const { data, error } = await supabase
+      .from("site_integration_configs")
+      .select("service, config, updated_at");
+
     if (error || !data) {
-      toast.error("Fehler beim Laden der Konfigurationen");
+      toast.error("Fehler beim Laden der Konfigurationen", { description: error?.message });
       setIsLoading(false);
       return;
     }
-    for (const row of data.data) {
-      const c = row.config as Record<string, string | boolean>;
+
+    for (const row of data) {
+      const c = (row.config as Record<string, string>) ?? {};
       if (row.service === "stripe") {
         setStripe({
-          secret_key: (c.secret_key as string) ?? "",
-          webhook_secret: (c.webhook_secret as string) ?? "",
-          publishable_key: (c.publishable_key as string) ?? "",
-          mode: (c.mode as string) || "test",
-          has_secret_key: !!c.has_secret_key,
-          has_webhook_secret: !!c.has_webhook_secret,
+          secret_key: "",
+          webhook_secret: "",
+          publishable_key: c.publishable_key ?? "",
+          mode: c.mode || "test",
+          has_secret_key: !!c.secret_key,
+          has_webhook_secret: !!c.webhook_secret,
         });
       }
       if (row.service === "resend") {
         setResendState({
-          api_key: (c.api_key as string) ?? "",
-          from_email: (c.from_email as string) ?? "",
-          has_api_key: !!c.has_api_key,
+          api_key: "",
+          from_email: c.from_email ?? "",
+          has_api_key: !!c.api_key,
         });
       }
       if (row.service === "app") {
-        setAppState({ url: (c.url as string) ?? "" });
+        setAppState({ url: c.url ?? "" });
       }
       if (row.service === "paypal") {
         setPaypal({
-          client_id: (c.client_id as string) ?? "",
-          client_secret: (c.client_secret as string) ?? "",
-          mode: (c.mode as string) || "sandbox",
-          has_client_id: !!c.has_client_id,
-          has_client_secret: !!c.has_client_secret,
+          client_id: "",
+          client_secret: "",
+          mode: c.mode || "sandbox",
+          has_client_id: !!c.client_id,
+          has_client_secret: !!c.client_secret,
         });
       }
     }
@@ -162,18 +164,33 @@ export default function AdminIntegrations() {
   };
 
   // ── Save ──────────────────────────────────────────────────────────────────
-  const save = async (service: string, config: Record<string, string>) => {
+  const save = async (service: string, newConfig: Record<string, string>) => {
     setSaving(service);
-    const { error } = await invokeEdgeFunction("integrations-admin-api", {
-      body: { service, config },
-      maxRetries: 1,
-    });
+
+    // Fetch existing config first so we only overwrite non-empty fields
+    const { data: existing } = await supabase
+      .from("site_integration_configs")
+      .select("config")
+      .eq("service", service)
+      .single();
+
+    const current = (existing?.config as Record<string, string>) ?? {};
+    const merged: Record<string, string> = { ...current };
+    for (const [k, v] of Object.entries(newConfig)) {
+      if (v !== "" && v !== null && v !== undefined) {
+        merged[k] = v;
+      }
+    }
+
+    const { error } = await supabase
+      .from("site_integration_configs")
+      .upsert({ service, config: merged, updated_at: new Date().toISOString() });
+
     setSaving(null);
     if (error) {
       toast.error("Fehler beim Speichern", { description: error.message });
     } else {
       toast.success("Gespeichert", { description: `${service}-Konfiguration aktualisiert.` });
-      // Reload to get fresh masked values
       loadConfigs();
     }
   };
@@ -222,13 +239,13 @@ export default function AdminIntegrations() {
                 label="Secret Key"
                 value={stripe.secret_key}
                 onChange={(v) => setStripe(p => ({ ...p, secret_key: v }))}
-                hint={stripe.has_secret_key ? "••• Schlüssel hinterlegt — leer lassen um ihn beizubehalten" : "sk_live_... oder sk_test_..."}
+                hint={stripe.has_secret_key ? "Schlüssel hinterlegt — nur ausfüllen um ihn zu ändern" : "sk_live_... oder sk_test_..."}
               />
               <SecretInput
                 label="Webhook Secret"
                 value={stripe.webhook_secret}
                 onChange={(v) => setStripe(p => ({ ...p, webhook_secret: v }))}
-                hint={stripe.has_webhook_secret ? "••• Secret hinterlegt" : "whsec_..."}
+                hint={stripe.has_webhook_secret ? "Secret hinterlegt — nur ausfüllen um es zu ändern" : "whsec_..."}
               />
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
