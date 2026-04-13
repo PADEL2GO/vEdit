@@ -230,10 +230,15 @@ const DashboardHome = () => {
 
   // ── Feature tiles ──────────────────────────────────────────────────────────
 
-  const featureTiles = [
-    { to: "/dashboard/booking", icon: Calendar, label: "Court buchen", iconBg: "bg-[#C7F011]/20", iconColor: "text-[#C7F011]", border: "border-[#C7F011]/20", show: true },
-    { to: "/dashboard/rewards", icon: Coins, label: "Rewards", iconBg: "bg-amber-500/20", iconColor: "text-amber-300", border: "border-amber-500/20", show: true },
-    { to: "/dashboard/friends", icon: Users, label: "Freunde", iconBg: "bg-blue-500/20", iconColor: "text-blue-300", border: "border-blue-500/20", badge: friendRequests.length, show: true },
+  // Primary tiles — full-width 3-col row, solid vivid colors
+  const primaryTiles = [
+    { to: "/dashboard/booking", icon: Calendar, label: "Court buchen", cardBg: "bg-[#C7F011]", iconBg: "bg-black/15", iconColor: "text-black", labelColor: "text-black font-bold" },
+    { to: "/dashboard/rewards", icon: Coins, label: "Rewards", cardBg: "bg-amber-400", iconBg: "bg-black/15", iconColor: "text-black", labelColor: "text-black font-bold" },
+    { to: "/dashboard/friends", icon: Users, label: "Freunde", cardBg: "bg-blue-600", iconBg: "bg-white/20", iconColor: "text-white", labelColor: "text-white font-bold", badge: friendRequests.length },
+  ];
+
+  // Secondary tiles — feature-flag gated, compact 4-col row
+  const secondaryTiles = [
     { to: "/dashboard/p2g-points", icon: Gamepad2, label: "P2G Points", iconBg: "bg-purple-500/20", iconColor: "text-purple-300", border: "border-purple-500/20", show: features.p2g_enabled },
     { to: "/dashboard/league", icon: Trophy, label: "Liga", iconBg: "bg-yellow-500/20", iconColor: "text-yellow-300", border: "border-yellow-500/20", show: features.league_enabled },
     { to: "/dashboard/events", icon: Star, label: "Events", iconBg: "bg-rose-500/20", iconColor: "text-rose-300", border: "border-rose-500/20", show: features.events_enabled },
@@ -458,30 +463,48 @@ const DashboardHome = () => {
           )}
 
           {/* ── Feature Nav Hub ──────────────────────────────────────── */}
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Bereiche</h2>
+          {/* ── Primary Action Tiles ─────────────────────────────────── */}
+          <div className="grid grid-cols-3 gap-3">
+            {primaryTiles.map((tile) => (
+              <NavLink key={tile.to} to={tile.to} className="min-w-0">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`relative flex flex-col items-center justify-center gap-2.5 py-4 px-2 rounded-2xl transition-all cursor-pointer text-center ${tile.cardBg} shadow-lg`}
+                >
+                  {"badge" in tile && tile.badge != null && tile.badge > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center z-10">
+                      {tile.badge > 9 ? "9+" : tile.badge}
+                    </span>
+                  )}
+                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${tile.iconBg}`}>
+                    <tile.icon className={`w-5 h-5 ${tile.iconColor}`} />
+                  </div>
+                  <span className={`text-xs leading-tight w-full truncate px-1 ${tile.labelColor}`}>{tile.label}</span>
+                </motion.div>
+              </NavLink>
+            ))}
+          </div>
+
+          {/* ── Secondary Tiles ──────────────────────────────────────── */}
+          {secondaryTiles.length > 0 && (
             <div className="grid grid-cols-4 gap-2 sm:gap-3">
-              {featureTiles.map((tile) => (
+              {secondaryTiles.map((tile) => (
                 <NavLink key={tile.to} to={tile.to} className="min-w-0">
                   <motion.div
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
-                    className={`relative flex flex-col items-center justify-center gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-card border transition-colors cursor-pointer text-center ${tile.border} hover:brightness-110`}
+                    className={`relative flex flex-col items-center justify-center gap-2 p-2 sm:p-3 rounded-xl bg-card border transition-all cursor-pointer text-center hover:brightness-110 ${tile.border}`}
                   >
-                    {"badge" in tile && tile.badge != null && tile.badge > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center z-10">
-                        {tile.badge > 9 ? "9+" : tile.badge}
-                      </span>
-                    )}
-                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center ${tile.iconBg}`}>
-                      <tile.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${tile.iconColor}`} />
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${tile.iconBg}`}>
+                      <tile.icon className={`w-4 h-4 ${tile.iconColor}`} />
                     </div>
-                    <span className="text-[10px] sm:text-[11px] font-semibold leading-tight text-white/80 w-full truncate px-0.5">{tile.label}</span>
+                    <span className="text-[10px] sm:text-[11px] font-semibold leading-tight text-white/70 w-full truncate px-0.5">{tile.label}</span>
                   </motion.div>
                 </NavLink>
               ))}
             </div>
-          </div>
+          )}
 
           {/* ── Main Grid ─────────────────────────────────────────────── */}
           <div className="grid md:grid-cols-3 gap-5">
