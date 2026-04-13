@@ -189,16 +189,22 @@ const FuerPartner = () => {
           </div>
         </section>
 
-        {/* ═══ PARTNER LOGOS ══════════════════════════════════════════════════ */}
-        {partnerLogos.length > 0 && (
-          <section className="py-14 border-y border-white/8 overflow-hidden"
-            style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%)" }}>
-            <div className={`${CONTAINER} mb-8 text-center`}>
-              <p className="text-white/35 text-sm font-medium tracking-widest uppercase">Bereits dabei</p>
-            </div>
+        {/* ═══ UNSERE PARTNER ═════════════════════════════════════════════════ */}
+        <section className="py-12 border-y border-white/8 overflow-hidden"
+          style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.015) 0%, transparent 100%)" }}>
+          <div className={`${CONTAINER} mb-8 text-center`}>
+            <p className="text-white/35 text-xs font-bold tracking-widest uppercase">Unsere Partner</p>
+          </div>
+          {partnerLogos.length > 0 ? (
             <LogoCloud logos={partnerLogos} variant="dark" />
-          </section>
-        )}
+          ) : (
+            <div className="flex justify-center gap-10 opacity-20 px-8">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-10 w-24 rounded bg-white/20" />
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* ═══ TOUCHPOINTS – 5 PILL ICONS ════════════════════════════════════ */}
         <section className={SECTION}>
