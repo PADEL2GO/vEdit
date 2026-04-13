@@ -246,15 +246,15 @@ const DashboardHome = () => {
   return (
     <DashboardLayout>
       <Helmet>
-        <title>Dashboard | PADEL2GO</title>
+        <title>Mein P2G | PADEL2GO</title>
       </Helmet>
 
-      <div className="pb-16">
+      <div className="pb-24">
 
         {/* ── Welcome Hero ────────────────────────────────────────────── */}
         <div className="relative overflow-hidden bg-gradient-to-br from-primary/8 via-background to-background border-b border-border/50">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_#C7F011_0%,_transparent_55%)] opacity-10 pointer-events-none" />
-          <div className="container mx-auto px-4 py-8 md:py-10 relative z-10">
+          <div className="container mx-auto max-w-5xl px-4 py-8 md:py-10 relative z-10">
 
             {/* Profile identity */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-5 mb-7">
@@ -316,7 +316,7 @@ const DashboardHome = () => {
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-6 space-y-5">
+        <div className="container mx-auto max-w-5xl px-4 py-6 space-y-6">
 
           {/* ── Admin News Banners ────────────────────────────────────── */}
           <AnimatePresence>
@@ -484,15 +484,15 @@ const DashboardHome = () => {
           </div>
 
           {/* ── Main Grid ─────────────────────────────────────────────── */}
-          <div className="grid lg:grid-cols-3 gap-5">
+          <div className="grid md:grid-cols-3 gap-5">
 
-            {/* LEFT: 2/3 */}
-            <div className="lg:col-span-2 space-y-5">
+            {/* LEFT: 2/3 — order-2 on mobile so sidebar comes first */}
+            <div className="md:col-span-2 space-y-5 order-2 md:order-1">
 
               {/* Next booking */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Nächste Buchung</h2>
+              <section>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Nächste Buchung</h2>
                   <NavLink to="/dashboard/booking" className="text-xs text-primary flex items-center gap-0.5 hover:underline">
                     Alle <ChevronRight className="w-3 h-3" />
                   </NavLink>
@@ -542,36 +542,36 @@ const DashboardHome = () => {
                     </CardContent>
                   </Card>
                 )}
-              </div>
+              </section>
 
               {/* Court suggestions (city-based) */}
               {locations.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                <section>
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {profile?.shipping_city ? `Courts in ${profile.shipping_city}` : "Verfügbare Courts"}
                     </h2>
                     <NavLink to="/dashboard/booking" className="text-xs text-primary flex items-center gap-0.5 hover:underline">
                       Alle <ChevronRight className="w-3 h-3" />
                     </NavLink>
                   </div>
-                  <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     {locations.slice(0, 2).map((loc) => (
-                      <NavLink key={loc.id} to={`/dashboard/booking`}>
-                        <Card className="overflow-hidden hover:border-primary/30 transition-colors cursor-pointer">
+                      <NavLink key={loc.id} to="/dashboard/booking">
+                        <Card className="overflow-hidden hover:border-primary/30 transition-colors cursor-pointer h-full">
                           <CardContent className="p-0">
                             {loc.main_image_url ? (
                               <img src={loc.main_image_url} alt={loc.name}
-                                className="w-full h-24 object-cover" />
+                                className="w-full h-28 object-cover" />
                             ) : (
-                              <div className="w-full h-24 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                              <div className="w-full h-28 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
                                 <LayoutGrid className="w-8 h-8 text-primary/30" />
                               </div>
                             )}
                             <div className="p-3">
-                              <p className="font-semibold text-sm">{loc.name}</p>
-                              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />{loc.city}
+                              <p className="font-semibold text-sm leading-snug">{loc.name}</p>
+                              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                <MapPin className="w-3 h-3 shrink-0" />{loc.city}
                               </p>
                             </div>
                           </CardContent>
@@ -579,14 +579,14 @@ const DashboardHome = () => {
                       </NavLink>
                     ))}
                   </div>
-                </div>
+                </section>
               )}
 
               {/* Friend activity feed */}
               {friendActivity.length > 0 && (
-                <div>
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                    Aktivität deiner Freunde
+                <section>
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                    Freunde Aktivität
                   </h2>
                   <Card>
                     <CardContent className="p-4 space-y-3">
@@ -620,14 +620,14 @@ const DashboardHome = () => {
                       </NavLink>
                     </CardContent>
                   </Card>
-                </div>
+                </section>
               )}
 
               {/* Upcoming Events */}
               {upcomingEvents.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Kommende Events</h2>
+                <section>
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Kommende Events</h2>
                     {features.events_enabled && (
                       <NavLink to="/dashboard/events" className="text-xs text-primary flex items-center gap-0.5 hover:underline">
                         Alle <ChevronRight className="w-3 h-3" />
@@ -672,61 +672,51 @@ const DashboardHome = () => {
                       </motion.div>
                     ))}
                   </div>
-                </div>
+                </section>
               )}
 
             </div>
 
-            {/* RIGHT: 1/3 */}
-            <div className="space-y-5">
+            {/* RIGHT: 1/3 — order-1 on mobile so it appears above the long feed */}
+            <div className="space-y-5 order-1 md:order-2">
 
               {/* Level & Progress */}
               <Card>
                 <CardContent className="p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-bold">Dein Level</h2>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Dein Level</h2>
                     <NavLink to="/dashboard/rewards">
                       <Button variant="ghost" size="sm" className="text-xs text-primary h-7 px-2">
                         Details <ChevronRight className="w-3 h-3 ml-0.5" />
                       </Button>
                     </NavLink>
                   </div>
-                  <div className={`flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r ${levelInfo.bgGradient} border ${levelInfo.borderColor} mb-3`}>
+                  <div className={`flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r ${levelInfo.bgGradient} border ${levelInfo.borderColor} mb-4`}>
                     <span className="text-2xl">{levelEmoji}</span>
                     <div>
                       <p className={`font-bold text-sm ${levelInfo.textColor}`}>{levelInfo.name}</p>
-                      <p className="text-xs text-muted-foreground">{playCredits.toLocaleString("de")} Credits</p>
+                      <p className="text-xs text-muted-foreground">{playCredits.toLocaleString("de")} Play Credits</p>
                     </div>
                   </div>
                   {levelProgress.nextLevelName ? (
                     <>
-                      <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                      <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
                         <span>→ {levelProgress.nextLevelName}</span>
                         <span>{levelProgress.remaining.toLocaleString("de")} fehlen</span>
                       </div>
-                      <Progress value={levelProgress.percentage} className="h-1.5" />
+                      <Progress value={levelProgress.percentage} className="h-2 rounded-full" />
                     </>
                   ) : (
                     <p className="text-xs text-primary font-semibold text-center">🏆 Max Level!</p>
                   )}
-                  <div className="grid grid-cols-2 gap-2 mt-3">
-                    <div className="text-center p-2 rounded-lg bg-muted/50">
-                      <p className="text-base font-bold">{playCredits.toLocaleString("de")}</p>
-                      <p className="text-[10px] text-muted-foreground">Play Credits</p>
-                    </div>
-                    <div className="text-center p-2 rounded-lg bg-muted/50">
-                      <p className="text-base font-bold">{rewardCredits.toLocaleString("de")}</p>
-                      <p className="text-[10px] text-muted-foreground">Reward Credits</p>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
 
               {/* Weekly Streak Widget */}
-              <Card className={streak >= 4 ? "border-orange-500/30" : streak >= 2 ? "border-amber-500/20" : ""}>
+              <Card className={streak >= 4 ? "border-orange-500/40" : streak >= 2 ? "border-amber-500/30" : ""}>
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-bold flex items-center gap-1.5">
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
                       <Flame className={`w-4 h-4 ${streak >= 2 ? "text-orange-400" : "text-muted-foreground"}`} />
                       Wochenserie
                     </h2>
@@ -785,8 +775,8 @@ const DashboardHome = () => {
               <Card>
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-bold flex items-center gap-1.5">
-                      <Bell className="w-4 h-4" />
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                      <Bell className="w-3.5 h-3.5" />
                       Benachrichtigungen
                       {notifications.length > 0 && (
                         <Badge variant="destructive" className="text-[10px] h-4 px-1.5">{notifications.length}</Badge>

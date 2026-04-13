@@ -23,7 +23,7 @@ const DashboardNavigation = () => {
 
   // All possible nav items with their required feature flag
   const allNavItems = [
-    { name: "Übersicht", url: "/dashboard/home", feature: null },
+    { name: "Mein P2G", url: "/dashboard/home", feature: null },
     { name: "Booking", url: "/dashboard/booking", feature: null },
     { name: "Lobbys", url: "/lobbies", feature: "lobbies_enabled" },
     { name: "P2G Points", url: "/dashboard/p2g-points", feature: "p2g_enabled" },
