@@ -303,7 +303,7 @@ serve(async (req) => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "PADEL2GO <contact@padel2go.eu>",
+      from: "PADEL2GO <contact@padel2go-official.de>",
       to: [recipientEmail],
       subject: subjectLine,
       html: htmlContent,
