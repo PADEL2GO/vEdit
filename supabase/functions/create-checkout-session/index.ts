@@ -133,6 +133,22 @@ serve(async (req) => {
         logStep("Hold limit exceeded", { userId: user.id, activeHolds });
         throw new Error("Buchungslimit erreicht: Du hast bereits 3 offene Reservierungen.");
       }
+
+      // Daily confirmed booking cap: max 15 successful bookings per day (platform-wide).
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const { count: dailyConfirmed, error: dailyError } = await supabaseAdmin
+        .from("bookings")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "confirmed")
+        .gte("start_time", todayStart.toISOString());
+
+      if (dailyError) {
+        logStep("Error checking daily booking count", { error: dailyError.message });
+      } else if ((dailyConfirmed ?? 0) >= 15) {
+        logStep("Daily booking limit reached", { dailyConfirmed });
+        throw new Error("Tageslimit erreicht: Für heute sind bereits alle 15 verfügbaren Slots gebucht. Bitte versuche es morgen erneut.");
+      }
     }
 
     logStep("Booking verified", { 
