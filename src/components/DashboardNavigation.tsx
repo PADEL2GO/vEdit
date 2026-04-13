@@ -51,11 +51,12 @@ const DashboardNavigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <NavLink to="/dashboard/home" className="flex items-center shrink-0">
-            <img 
-              src={wordmark} 
-              alt="PADEL2GO" 
+          <NavLink to="/dashboard/home" className="flex items-center shrink-0 will-change-transform">
+            <img
+              src={wordmark}
+              alt="PADEL2GO"
               className="h-6 md:h-8 w-auto"
+              style={{ transform: "translateZ(0)" }}
             />
           </NavLink>
 
