@@ -129,9 +129,9 @@ serve(async (req) => {
 
       if (holdCountError) {
         logStep("Error checking active holds", { error: holdCountError.message });
-      } else if ((activeHolds ?? 0) >= 3) {
+      } else if ((activeHolds ?? 0) >= 10) {
         logStep("Hold limit exceeded", { userId: user.id, activeHolds });
-        throw new Error("Buchungslimit erreicht: Du hast bereits 3 offene Reservierungen.");
+        throw new Error("Buchungslimit erreicht: Du hast bereits 10 offene Reservierungen.");
       }
 
       // Daily confirmed booking cap: max 15 successful bookings per day (platform-wide).

@@ -168,9 +168,9 @@ export function useBookingLocation(slug: string | undefined) {
         .eq("status", "pending_payment")
         .gt("hold_expires_at", now);
 
-      if (count !== null && count >= 3) {
+      if (count !== null && count >= 10) {
         toast.error("Buchungslimit erreicht", {
-          description: "Du hast bereits 3 offene Reservierungen. Bezahle eine davon oder warte bis die Haltezeit (15 Min.) abläuft.",
+          description: "Du hast bereits 10 offene Reservierungen. Bezahle eine davon oder warte bis die Haltezeit (15 Min.) abläuft.",
         });
         setBooking(false);
         return;
