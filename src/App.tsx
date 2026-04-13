@@ -70,6 +70,7 @@ import AdminVouchers from "./pages/admin/AdminVouchers";
 import AdminLocationTeasers from "./pages/admin/AdminLocationTeasers";
 import AdminSkyPadelGallery from "./pages/admin/AdminSkyPadelGallery";
 import AdminPartnerTiles from "./pages/admin/AdminPartnerTiles";
+import AdminTouchpointSlides from "./pages/admin/AdminTouchpointSlides";
 import AdminRewardDefinitions from "./pages/admin/AdminRewardDefinitions";
 import AdminRewardApprovals from "./pages/admin/AdminRewardApprovals";
 import AdminCredits from "./pages/admin/AdminCredits";
@@ -137,6 +138,7 @@ const App = () => (
                   <Route path="/admin/location-teasers" element={<AdminLocationTeasers />} />
                   <Route path="/admin/skypadel-gallery" element={<AdminSkyPadelGallery />} />
                   <Route path="/admin/partner-tiles" element={<AdminPartnerTiles />} />
+                  <Route path="/admin/touchpoint-slides" element={<AdminTouchpointSlides />} />
                   <Route path="/admin/settings" element={<AdminSettings />} />
                   <Route path="/admin/reward-definitions" element={<AdminRewardDefinitions />} />
                   <Route path="/admin/reward-approvals" element={<AdminRewardApprovals />} />

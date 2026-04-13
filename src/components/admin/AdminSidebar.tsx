@@ -49,6 +49,7 @@ const menuItems = [
   { title: "Location Teasers", url: "/admin/location-teasers", icon: Megaphone },
   { title: "SkyPadel Galerie", url: "/admin/skypadel-gallery", icon: ImagePlus },
   { title: "Partner-Kacheln", url: "/admin/partner-tiles", icon: Palette },
+  { title: "Touchpoint Slides", url: "/admin/touchpoint-slides", icon: ImagePlus },
   { title: "Benutzer", url: "/admin/users", icon: Users },
   { title: "Mitteilungen", url: "/admin/notifications", icon: Bell },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },

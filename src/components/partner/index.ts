@@ -3,3 +3,4 @@ export { PartnerBenchmarksSection } from "./PartnerBenchmarksSection";
 export { PartnerMarketStatsSection } from "./PartnerMarketStatsSection";
 export { PartnerEcommerceSection } from "./PartnerEcommerceSection";
 export { PartnerTablesSection } from "./PartnerTablesSection";
+export { TouchpointCarousel } from "./TouchpointCarousel";

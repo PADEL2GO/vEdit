@@ -6,7 +6,7 @@ import SectionDivider from "@/components/SectionDivider";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
 import { LogoCloud } from "@/components/ui/logo-cloud";
-import { ArrowRight, Monitor, MapPin, Trophy, Gift, Zap, Package, Apple, GlassWater, Sparkles, Building2, TrendingUp, Shield } from "lucide-react";
+import { ArrowRight, Package, Apple, GlassWater, Sparkles, Building2, TrendingUp, Shield } from "lucide-react";
 import { BackgroundPaths } from "@/components/ui/background-paths";
 import {
   PartnerConceptSection,
@@ -14,17 +14,11 @@ import {
   PartnerMarketStatsSection,
   PartnerEcommerceSection,
   PartnerTablesSection,
+  TouchpointCarousel,
 } from "@/components/partner";
 import { usePartnerTiles } from "@/hooks/usePartnerTiles";
+import { usePartnerTouchpoints } from "@/hooks/usePartnerTouchpoints";
 import BrandName from "@/components/BrandName";
-
-const brandTouchpoints = [
-  { icon: MapPin, text: "Branding auf Courts, Netzen, Banden und Glaswänden" },
-  { icon: Monitor, text: "In-App-Präsenz: Banner, Featured-Partner, Sponsored Challenges" },
-  { icon: Gift, text: "Integration in P2G Rewards (Gutscheine, Produkte, Experiences)" },
-  { icon: Zap, text: "Platzierung in Vending-Machines (Equipment, Drinks, Snacks, Nutrition)" },
-  { icon: Trophy, text: "Aktivierungen bei League-Finals, Circuit-Events & Pop-Up-Nights" },
-];
 
 const useCases = [
   {
@@ -51,6 +45,7 @@ const useCases = [
 
 const FuerPartner = () => {
   const { data: partnerTiles } = usePartnerTiles();
+  const { data: touchpointSlides = [] } = usePartnerTouchpoints();
 
   const partnerLogos = (partnerTiles || [])
     .filter(t => t.logo_url)
@@ -106,7 +101,7 @@ const FuerPartner = () => {
 
         {/* ── BENEFITS ─────────────────────────────────────────── */}
 
-        {/* Brand Touchpoints */}
+        {/* Brand Touchpoints Carousel */}
         <section id="touchpoints" className="py-14 md:py-24">
           <div className="container mx-auto px-4">
             <motion.div
@@ -122,23 +117,7 @@ const FuerPartner = () => {
                 Physisch am Court, digital in der App und live bei Events.
               </p>
             </motion.div>
-            <div className="max-w-3xl mx-auto space-y-4">
-              {brandTouchpoints.map((touchpoint, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.08 }}
-                  className="flex items-center gap-4 p-5 rounded-xl bg-card border border-border hover:border-primary/30 transition-all duration-300"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <touchpoint.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <p className="text-lg">{touchpoint.text}</p>
-                </motion.div>
-              ))}
-            </div>
+            <TouchpointCarousel slides={touchpointSlides} />
           </div>
         </section>
 
