@@ -6,7 +6,7 @@ import SectionDivider from "@/components/SectionDivider";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
 import { LogoCloud } from "@/components/ui/logo-cloud";
-import { ArrowRight, Handshake, Monitor, MapPin, Trophy, Gift, Zap, Package, Apple, GlassWater, Sparkles, Building2, TrendingUp, Shield } from "lucide-react";
+import { ArrowRight, Monitor, MapPin, Trophy, Gift, Zap, Package, Apple, GlassWater, Sparkles, Building2, TrendingUp, Shield } from "lucide-react";
 import { BackgroundPaths } from "@/components/ui/background-paths";
 import {
   PartnerConceptSection,
@@ -21,7 +21,7 @@ import BrandName from "@/components/BrandName";
 const brandTouchpoints = [
   { icon: MapPin, text: "Branding auf Courts, Netzen, Banden und Glaswänden" },
   { icon: Monitor, text: "In-App-Präsenz: Banner, Featured-Partner, Sponsored Challenges" },
-  { icon: Gift, text: "Integration in P2G Rewards (z. B. Gutscheine, Produkte, Experiences als Reward)" },
+  { icon: Gift, text: "Integration in P2G Rewards (Gutscheine, Produkte, Experiences)" },
   { icon: Zap, text: "Platzierung in Vending-Machines (Equipment, Drinks, Snacks, Nutrition)" },
   { icon: Trophy, text: "Aktivierungen bei League-Finals, Circuit-Events & Pop-Up-Nights" },
 ];
@@ -66,6 +66,7 @@ const FuerPartner = () => {
       <Navigation />
 
       <main className="min-h-screen bg-background pt-20">
+
         {/* Hero */}
         <BackgroundPaths title="PADEL2GO für Marken – Sichtbarkeit direkt am Court.">
           <p className="text-lg md:text-2xl text-muted-foreground mb-10 max-w-3xl mx-auto">
@@ -86,26 +87,16 @@ const FuerPartner = () => {
               <span>Deutschlandweite Präsenz</span>
             </div>
           </div>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-            Zusammen wachsen.
-          </p>
         </BackgroundPaths>
 
         {/* Partner Logos */}
         {partnerLogos.length > 0 && (
           <section className="py-16 bg-white overflow-hidden">
-            <div className="container mx-auto px-4 mb-10">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center"
-              >
-                <p className="text-sm text-gray-500 mb-2">Bereits dabei</p>
-                <h3 className="text-2xl md:text-3xl font-bold text-gray-800">
-                  Mit diesen Partnern realisieren wir <BrandName variant="light" />
-                </h3>
-              </motion.div>
+            <div className="container mx-auto px-4 mb-10 text-center">
+              <p className="text-sm text-gray-500 mb-2">Bereits dabei</p>
+              <h3 className="text-2xl md:text-3xl font-bold text-gray-800">
+                Mit diesen Partnern realisieren wir <BrandName variant="light" />
+              </h3>
             </div>
             <LogoCloud logos={partnerLogos} variant="light" />
           </section>
@@ -113,44 +104,7 @@ const FuerPartner = () => {
 
         <SectionDivider variant="glow" />
 
-        <PartnerConceptSection />
-
-        <SectionDivider variant="glow" />
-
-        <PartnerBenchmarksSection />
-
-        <SectionDivider variant="glow" />
-
-        <PartnerMarketStatsSection />
-
-        <SectionDivider variant="glow" />
-
-        <PartnerEcommerceSection />
-
-        <SectionDivider variant="glow" />
-
-        {/* Physisch-digitaler Touchpoint */}
-        <section className="py-14 md:py-24 bg-card/30">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="max-w-4xl mx-auto text-center"
-            >
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-                <BrandName /> als <span className="text-gradient-lime">physisch-digitaler Touchpoint</span> für deine Marke
-              </h2>
-              <p className="text-base md:text-xl text-muted-foreground leading-relaxed">
-                PADEL2GO verbindet reale Courts in Vereinen mit einem digitalen Ökosystem aus App, League, Loyalty und Events.
-                Für Marken entsteht damit eine einzigartige Plattform: Du wirst sichtbar im echten Leben, bist Teil der Belohnungen
-                im Loyalty-Programm, präsent in Turnieren und Pop-Up-Events – und kannst deine Wirkung datenbasiert verstehen.
-              </p>
-            </motion.div>
-          </div>
-        </section>
-
-        <SectionDivider variant="glow" />
+        {/* ── BENEFITS ─────────────────────────────────────────── */}
 
         {/* Brand Touchpoints */}
         <section id="touchpoints" className="py-14 md:py-24">
@@ -159,11 +113,14 @@ const FuerPartner = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center max-w-2xl mx-auto mb-16"
+              className="text-center max-w-2xl mx-auto mb-12"
             >
               <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 Wo deine Marke auf <BrandName /> trifft
               </h2>
+              <p className="text-muted-foreground text-lg">
+                Physisch am Court, digital in der App und live bei Events.
+              </p>
             </motion.div>
             <div className="max-w-3xl mx-auto space-y-4">
               {brandTouchpoints.map((touchpoint, index) => (
@@ -172,7 +129,7 @@ const FuerPartner = () => {
                   initial={{ opacity: 0, x: -30 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: index * 0.08 }}
                   className="flex items-center gap-4 p-5 rounded-xl bg-card border border-border hover:border-primary/30 transition-all duration-300"
                 >
                   <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -187,41 +144,14 @@ const FuerPartner = () => {
 
         <SectionDivider variant="glow" />
 
-        <PartnerTablesSection />
-
-        <SectionDivider variant="glow" />
-
-        {/* Co-Growth */}
-        <section id="cogrowth" className="py-14 md:py-24 bg-card/30">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="max-w-4xl mx-auto text-center"
-            >
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-                <span className="text-gradient-lime">Co-Growth</span> statt klassischem Sponsoring
-              </h2>
-              <p className="text-base md:text-xl text-muted-foreground leading-relaxed">
-                Wir denken Partnerschaften nicht nur als Logo-Placement, sondern als gemeinsame Wachstumsreise.
-                Über Affiliate-/Revenue-Share-Modelle, Co-Kampagnen und integrierte Promotions sorgen wir dafür,
-                dass sowohl PADEL2GO als auch unsere Partner von steigender Nutzung profitieren.
-              </p>
-            </motion.div>
-          </div>
-        </section>
-
-        <SectionDivider variant="glow" />
-
         {/* Use Cases */}
-        <section id="usecases" className="py-14 md:py-24">
+        <section id="usecases" className="py-14 md:py-24 bg-card/30">
           <div className="container mx-auto px-4">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center max-w-2xl mx-auto mb-16"
+              className="text-center max-w-2xl mx-auto mb-12"
             >
               <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
                 Beispiele für <span className="text-gradient-lime">Partnerschaften</span>
@@ -251,6 +181,45 @@ const FuerPartner = () => {
             </div>
           </div>
         </section>
+
+        <SectionDivider variant="glow" />
+
+        {/* Concept */}
+        <PartnerConceptSection />
+
+        <SectionDivider variant="glow" />
+
+        {/* KPI Benchmarks */}
+        <PartnerBenchmarksSection />
+
+        <SectionDivider variant="glow" />
+
+        {/* ── ZAHLEN & DIAGRAMME ────────────────────────────────── */}
+
+        <section className="py-10 bg-card/30">
+          <div className="container mx-auto px-4 text-center">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-2xl md:text-4xl font-bold tracking-tight"
+            >
+              Der Markt – <span className="text-gradient-lime">die Zahlen</span>
+            </motion.h2>
+          </div>
+        </section>
+
+        <PartnerMarketStatsSection />
+
+        <SectionDivider variant="glow" />
+
+        <PartnerEcommerceSection />
+
+        <SectionDivider variant="glow" />
+
+        <PartnerTablesSection />
+
+        <SectionDivider variant="glow" />
 
         {/* CTA */}
         <section className="py-14 md:py-24 bg-card/30">
@@ -284,6 +253,7 @@ const FuerPartner = () => {
             </motion.div>
           </div>
         </section>
+
       </main>
 
       <Footer />
