@@ -70,46 +70,6 @@ function notificationIcon(type: string) {
   return <Icon className="w-4 h-4" />;
 }
 
-// ─── Sub-components ─────────────────────────────────────────────────────────
-
-const StatPill = ({
-  icon: Icon, label, value, colorClass = "text-primary",
-}: {
-  icon: React.ElementType; label: string; value: string | number; colorClass?: string;
-}) => (
-  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-background/40 border border-white/10 backdrop-blur-sm">
-    <Icon className={`w-4 h-4 shrink-0 ${colorClass}`} />
-    <div className="flex flex-col leading-none">
-      <span className={`text-sm font-bold ${colorClass}`}>{value}</span>
-      <span className="text-[10px] text-white/60">{label}</span>
-    </div>
-  </div>
-);
-
-const FeatureTile = ({
-  to, icon: Icon, label, badge, color,
-}: {
-  to: string; icon: React.ElementType; label: string; badge?: number; color: string;
-}) => (
-  <NavLink to={to}>
-    <motion.div
-      whileHover={{ scale: 1.04 }}
-      whileTap={{ scale: 0.96 }}
-      className="relative flex flex-col items-center justify-center gap-2 p-3 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors cursor-pointer text-center min-h-[80px]"
-    >
-      {badge != null && badge > 0 && (
-        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
-          {badge > 9 ? "9+" : badge}
-        </span>
-      )}
-      <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${color}`}>
-        <Icon className="w-4 h-4" />
-      </div>
-      <span className="text-[11px] font-semibold leading-tight">{label}</span>
-    </motion.div>
-  </NavLink>
-);
-
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 const DashboardHome = () => {
@@ -273,39 +233,65 @@ const DashboardHome = () => {
       <div className="pb-16">
 
         {/* ── Welcome Hero ────────────────────────────────────────────── */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background border-b border-border/50">
-          <div className="absolute inset-0 bg-gradient-hero opacity-40 pointer-events-none" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/8 via-background to-background border-b border-border/50">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_#C7F011_0%,_transparent_55%)] opacity-10 pointer-events-none" />
           <div className="container mx-auto px-4 py-8 md:py-10 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-              <div className="flex items-center gap-4">
-                <Avatar className="w-14 h-14 border-2 border-primary/30 shrink-0">
-                  <AvatarImage src={profile?.avatar_url ?? undefined} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-lg font-bold">
-                    {displayName.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm text-white/60">{getGreeting()}</p>
-                  <h1 className="text-2xl md:text-3xl font-bold">{displayName}</h1>
-                  <div className={`inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${levelInfo.borderColor} ${levelInfo.textColor}`}>
-                    <span>{levelEmoji}</span>
-                    <span>{levelInfo.name}</span>
-                    {streak >= 3 && (
-                      <span className="ml-1 flex items-center gap-0.5 text-orange-400">
-                        <Flame className="w-3 h-3" />{streak}
-                      </span>
-                    )}
+
+            {/* Profile identity */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5 mb-7">
+              <div className="relative shrink-0">
+                <div className="w-24 h-24 rounded-full ring-4 ring-primary/30 ring-offset-2 ring-offset-background overflow-hidden">
+                  <Avatar className="w-full h-full">
+                    <AvatarImage src={profile?.avatar_url ?? undefined} className="object-cover w-full h-full" />
+                    <AvatarFallback className="bg-primary/10 text-primary text-3xl font-bold w-full h-full flex items-center justify-center">
+                      {displayName.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                {streak >= 2 && (
+                  <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-orange-500 border-2 border-background flex items-center justify-center">
+                    <Flame className="w-4 h-4 text-white" />
                   </div>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-white/60 mb-1">{getGreeting()}</p>
+                <h1 className="text-3xl md:text-4xl font-bold">{displayName}</h1>
+                <div className={`inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-xs font-semibold border ${levelInfo.borderColor} ${levelInfo.textColor}`}>
+                  <span>{levelEmoji}</span>
+                  <span>{levelInfo.name}</span>
+                  {streak >= 3 && (
+                    <span className="ml-1.5 flex items-center gap-0.5 text-orange-400">
+                      <Flame className="w-3 h-3" />{streak}
+                    </span>
+                  )}
                 </div>
               </div>
+            </div>
 
-              <div className="flex flex-wrap gap-2">
-                <StatPill icon={Coins} label="Play Credits" value={playCredits.toLocaleString("de")} />
-                <StatPill icon={Zap} label="Reward Credits" value={rewardCredits.toLocaleString("de")} colorClass="text-amber-400" />
-                {skillStats?.skill_level ? (
-                  <StatPill icon={TrendingUp} label="Skill" value={skillStats.skill_level.toFixed(1)} colorClass="text-blue-400" />
-                ) : null}
-                <StatPill icon={Calendar} label="Buchungen / Monat" value={monthlyCount} colorClass="text-rose-400" />
+            {/* Stats — large number cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20">
+                <Coins className="w-5 h-5 text-primary mb-2" />
+                <p className="text-2xl font-bold text-primary leading-none">{playCredits.toLocaleString("de")}</p>
+                <p className="text-xs text-white/50 mt-1">Play Credits</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+                <Zap className="w-5 h-5 text-amber-400 mb-2" />
+                <p className="text-2xl font-bold text-amber-400 leading-none">{rewardCredits.toLocaleString("de")}</p>
+                <p className="text-xs text-white/50 mt-1">Reward Credits</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20">
+                <TrendingUp className="w-5 h-5 text-blue-400 mb-2" />
+                <p className="text-2xl font-bold text-blue-400 leading-none">
+                  {skillStats?.skill_level ? skillStats.skill_level.toFixed(1) : "–"}
+                </p>
+                <p className="text-xs text-white/50 mt-1">Skill Level</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20">
+                <Calendar className="w-5 h-5 text-rose-400 mb-2" />
+                <p className="text-2xl font-bold text-rose-400 leading-none">{monthlyCount}</p>
+                <p className="text-xs text-white/50 mt-1">Buchungen / Monat</p>
               </div>
             </div>
           </div>
@@ -451,6 +437,32 @@ const DashboardHome = () => {
               )}
             </div>
           )}
+
+          {/* ── Feature Nav Hub ──────────────────────────────────────── */}
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Bereiche</h2>
+            <div className="grid grid-cols-4 gap-3">
+              {featureTiles.map((tile) => (
+                <NavLink key={tile.to} to={tile.to}>
+                  <motion.div
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    className="relative flex flex-col items-center justify-center gap-2.5 p-3 sm:p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-colors cursor-pointer text-center min-h-[90px] sm:min-h-[100px]"
+                  >
+                    {tile.badge != null && tile.badge > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                        {tile.badge > 9 ? "9+" : tile.badge}
+                      </span>
+                    )}
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${tile.color}`}>
+                      <tile.icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-semibold leading-tight">{tile.label}</span>
+                  </motion.div>
+                </NavLink>
+              ))}
+            </div>
+          </div>
 
           {/* ── Main Grid ─────────────────────────────────────────────── */}
           <div className="grid lg:grid-cols-3 gap-5">
@@ -644,15 +656,6 @@ const DashboardHome = () => {
                 </div>
               )}
 
-              {/* Feature tiles */}
-              <div>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-2">Alle Bereiche</h2>
-                <div className="grid grid-cols-4 gap-2">
-                  {featureTiles.map((tile) => (
-                    <FeatureTile key={tile.to} {...tile} />
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* RIGHT: 1/3 */}
