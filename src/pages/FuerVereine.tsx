@@ -14,6 +14,7 @@ import partnerP2GLogo from "@/assets/partners/p2g-logo-vereine.png";
 import p2gIconLogo from "@/assets/p2g-icon-clean.png";
 import { usePartnerTiles } from "@/hooks/usePartnerTiles";
 import { useSkyPadelGallery } from "@/hooks/useSkyPadelGallery";
+import { useLocationTeasers } from "@/hooks/useLocationTeasers";
 import tennisPadelAerial from "@/assets/courts/tennis-padel-aerial.jpg";
 import padelNorway from "@/assets/courts/padel-norway.webp";
 import useEmblaCarousel from "embla-carousel-react";
@@ -46,7 +47,10 @@ import {
   Briefcase,
   LayoutGrid,
   Gem,
-  Star } from
+  Star,
+  MapPin,
+  ExternalLink,
+  Clock } from
 "lucide-react";
 
 // KI-Kamera Features
@@ -166,6 +170,7 @@ const CourtImageCarousel = () => {
 
 const FuerVereine = () => {
   const { data: partnerTiles } = usePartnerTiles(true);
+  const { data: clubTeasers = [] } = useLocationTeasers();
 
   return (
     <>
@@ -229,8 +234,102 @@ const FuerVereine = () => {
           </motion.a>
         </GalaxyHero>
 
+        {/* ═══ CLUB TEASERS — only rendered when at least one active teaser exists ══ */}
+        {clubTeasers.length > 0 && (
+          <section className="py-20 md:py-28 relative overflow-hidden"
+            style={{ background: "linear-gradient(180deg, transparent 0%, rgba(199,240,17,0.03) 50%, transparent 100%)" }}>
+            <div className="container mx-auto px-4 sm:px-6">
+              <div className="max-w-6xl mx-auto">
 
-          
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="text-center max-w-2xl mx-auto mb-14"
+                >
+                  <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#C7F011]/12 border border-[#C7F011]/25 text-[#C7F011] mb-6">
+                    <Building2 className="w-4 h-4" />
+                    <span className="text-sm font-bold tracking-wider uppercase">Unsere Vereine</span>
+                  </span>
+                  <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">
+                    Wo wir{" "}
+                    <span className="text-[#C7F011]">aufbauen</span>
+                  </h2>
+                  <p className="text-white/50 text-lg">
+                    Diese Vereine bringen Padel zu ihren Mitgliedern — mit PADEL2GO als Partner.
+                  </p>
+                </motion.div>
+
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {clubTeasers.map((club, i) => (
+                    <motion.div
+                      key={club.id}
+                      initial={{ opacity: 0, y: 40 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: i * 0.08, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                      className="group relative rounded-3xl border border-white/10 bg-white/[0.03] overflow-hidden hover:border-[#C7F011]/30 hover:bg-[#C7F011]/[0.04] transition-all duration-300 hover:-translate-y-1"
+                    >
+                      {/* Image */}
+                      {club.image_url ? (
+                        <div className="h-44 overflow-hidden">
+                          <img
+                            src={club.image_url}
+                            alt={club.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-44 bg-white/[0.04] flex items-center justify-center">
+                          <Building2 className="w-10 h-10 text-white/15" />
+                        </div>
+                      )}
+
+                      {/* Content */}
+                      <div className="p-6">
+                        <h3 className="text-lg font-bold text-white mb-1 leading-snug">{club.title}</h3>
+
+                        {club.city && (
+                          <div className="flex items-center gap-1.5 text-[#C7F011] text-sm font-medium mb-3">
+                            <MapPin className="w-3.5 h-3.5" />
+                            {club.city}
+                          </div>
+                        )}
+
+                        {club.description && (
+                          <p className="text-white/50 text-sm leading-relaxed mb-4 line-clamp-3">
+                            {club.description}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between mt-auto">
+                          {club.expected_date && (
+                            <span className="inline-flex items-center gap-1.5 text-xs text-white/35 font-medium">
+                              <Clock className="w-3.5 h-3.5" />
+                              {club.expected_date}
+                            </span>
+                          )}
+                          {club.club_url && (
+                            <a
+                              href={club.club_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-auto inline-flex items-center gap-1.5 text-xs text-[#C7F011]/70 hover:text-[#C7F011] transition-colors font-medium"
+                            >
+                              Zum Verein
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+              </div>
+            </div>
+          </section>
+        )}
 
           {/* SEKTION: P2G als Full-Service Partner */}
           <section className="relative min-h-[60vh] md:min-h-[80vh] lg:min-h-screen flex items-center overflow-hidden">
