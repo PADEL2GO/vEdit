@@ -228,7 +228,7 @@ const FuerPartner = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="max-w-3xl mx-auto text-center"
+              className="max-w-4xl mx-auto text-center"
             >
               <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
                 Padel als neuen <span className="text-gradient-lime">Brand-Channel</span> öffnen
@@ -237,6 +237,18 @@ const FuerPartner = () => {
                 Lass uns gemeinsam prüfen, wie PADEL2GO in deine Markenstrategie passt –
                 von nationaler Sichtbarkeit bis hyperlokalen Aktivierungen.
               </p>
+
+              {/* Calendly Embed */}
+              <div className="rounded-2xl overflow-hidden border border-border mb-8">
+                <iframe
+                  src="https://calendly.com/fsteinfelder-padel2go/marketing-padel2go"
+                  width="100%"
+                  height="700"
+                  frameBorder="0"
+                  title="Termin buchen"
+                />
+              </div>
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button variant="hero" size="xl" className="group" asChild>
                   <NavLink to="/faq-kontakt?reason=partner">
