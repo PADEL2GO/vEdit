@@ -74,3 +74,12 @@ verify_jwt = false
 
 [functions.lobby-api]
 verify_jwt = false
+
+[functions.voucher-validate]
+verify_jwt = false
+
+[functions.voucher-redeem]
+verify_jwt = false
+
+[functions.validate-pin]
+verify_jwt = false
