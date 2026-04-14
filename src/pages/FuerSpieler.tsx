@@ -77,6 +77,49 @@ const HeroBackground = ({ fallbackSrc }: { fallbackSrc: string }) => {
   );
 };
 
+// ─── KI-Analyse section background video (ki.video-1, autoplay muted loop) ───
+const KiSectionBackground = () => {
+  const { data: visual } = useSiteVisual("fuer-spieler.ki.video-1");
+  const url = visual?.image_url;
+  if (!url) return null;
+
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?\s]+)/);
+  const vmMatch = url.match(/vimeo\.com\/(\d+)/);
+
+  if (ytMatch) {
+    return (
+      <iframe
+        src={`https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&mute=1&loop=1&playlist=${ytMatch[1]}&controls=0&rel=0&modestbranding=1&playsinline=1`}
+        allow="autoplay; encrypted-media"
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ transform: "scale(1.15)" }}
+        title="KI section background"
+      />
+    );
+  }
+  if (vmMatch) {
+    return (
+      <iframe
+        src={`https://player.vimeo.com/video/${vmMatch[1]}?background=1&autoplay=1&loop=1&muted=1`}
+        allow="autoplay"
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ transform: "scale(1.15)" }}
+        title="KI section background"
+      />
+    );
+  }
+  return (
+    <video
+      src={url}
+      autoPlay
+      muted
+      loop
+      playsInline
+      className="absolute inset-0 w-full h-full object-cover object-center"
+    />
+  );
+};
+
 // ─── Inline video player – YouTube / Vimeo / image fallback ──────────────────
 const VideoEmbed = ({ visualKey, title }: { visualKey: string; title: string }) => {
   const { data: visual } = useSiteVisual(visualKey);
@@ -903,16 +946,21 @@ const FuerSpieler = () => {
         {/* ═══════════════════════════════════════════════════════════════════
             KI-ANALYSE
         ═══════════════════════════════════════════════════════════════════ */}
-        <section id="ki-analyse" className={`${SECTION} relative overflow-hidden`}
-          style={{ background: "linear-gradient(180deg, #000 0%, #00050f 50%, #000 100%)" }}
-        >
+        <section id="ki-analyse" className={`${SECTION} relative overflow-hidden`}>
+          {/* Background video (ki.video-1) — only renders when a URL is set in admin */}
+          <KiSectionBackground />
+          {/* Dark overlay so content stays readable over the video */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,5,15,0.78) 50%, rgba(0,0,0,0.82) 100%)" }}
+          />
           <div
             className="absolute inset-0 pointer-events-none"
             style={{ background: "radial-gradient(ellipse at 80% 50%, rgba(56,189,248,0.06) 0%, transparent 60%)" }}
           />
           <div className={`${CONTAINER} relative z-10`}>
             <div className={CONTENT}>
-              <div className="grid lg:grid-cols-2 gap-14 items-start">
+              <div className="grid lg:grid-cols-2 gap-14 items-stretch">
 
                 {/* LEFT – heading + stats */}
                 <motion.div
@@ -982,7 +1030,7 @@ const FuerSpieler = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.7, delay: 0.1 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4 content-start"
                 >
                   {kiFeatures.map((f, i) => (
                     <motion.div
