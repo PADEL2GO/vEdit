@@ -244,14 +244,6 @@ const appFeatures = [
   { icon: UserPlus, title: "Matching-Tool", desc: "Mitspieler finden, automatisch gematcht.", comingSoon: true, color: "text-pink-400", bg: "bg-pink-500/8", border: "border-pink-500/20" },
 ];
 
-const aiFeatures = [
-  { icon: Camera,   title: "Patentiertes Auto-Scoring", desc: "Kamera folgt dem Spielstand automatisch, korrigiert knappe Entscheidungen in Echtzeit." },
-  { icon: Activity, title: "Speed & Placement",         desc: "Ballgeschwindigkeit und Platzierung jedes Schlags — kontinuierlich gemessen." },
-  { icon: BarChart3,title: "Match IQ Report",           desc: "Winners, unforced Errors und erfolgreiche Taktiken nach jedem Match aufbereitet." },
-  { icon: Video,    title: "Auto Clip Generation",      desc: "Beste Rallyes werden automatisch erkannt, geschnitten und in der App gespeichert." },
-  { icon: Brain,    title: "Skill Assessment (WSA)",    desc: "KI-Benchmark: Aufschlag, Return, Drive, Drop, Volley und Dink standardisiert bewertet." },
-  { icon: Target,   title: "Drill Score 0–100",         desc: "Trainingsdrills von Profis bewertet mit Echtzeit-Score. Community-Leaderboard inklusive." },
-];
 
 const bookingSteps = [
   { step: "01", icon: MapPin, title: "Standort wählen", desc: "Court in der Nähe finden." },
@@ -944,116 +936,158 @@ const FuerSpieler = () => {
         </section>
 
         {/* ═══════════════════════════════════════════════════════════════════
-            KI-ANALYSE
+            KI-ANALYSE — DEINE PERFORMANCE (merged with Wingfield section)
         ═══════════════════════════════════════════════════════════════════ */}
         <section id="ki-analyse" className={`${SECTION} relative overflow-hidden`}>
-          {/* Background video (ki.video-1) — only renders when a URL is set in admin */}
           <KiSectionBackground />
-          {/* Dark overlay so content stays readable over the video */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,5,15,0.78) 50%, rgba(0,0,0,0.82) 100%)" }}
-          />
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(ellipse at 80% 50%, rgba(56,189,248,0.06) 0%, transparent 60%)" }}
-          />
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,5,15,0.80) 50%, rgba(0,0,0,0.85) 100%)" }} />
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(56,189,248,0.06) 0%, transparent 60%)" }} />
+
           <div className={`${CONTAINER} relative z-10`}>
             <div className={CONTENT}>
-              <div className="grid lg:grid-cols-2 gap-14 items-stretch">
 
-                {/* LEFT – heading + stats */}
-                <motion.div
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.7 }}
-                >
-                  <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-sky-500/12 border border-sky-500/25 text-sky-400 mb-6">
-                    <Brain className="w-4 h-4" />
-                    <span className="text-sm font-bold tracking-wider uppercase">KI-Analyse</span>
-                  </span>
-                  <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-6">
-                    Deine Performance.
-                    <br />
-                    <span className="text-sky-400">Live analysiert.</span>
-                  </h2>
-                  <p className="text-white/55 leading-relaxed mb-8 text-lg">
-                    Wingfield KI-Kameras erfassen jeden Ball, jeden Schritt, jede Entscheidung.
-                    Nach dem Match: Match IQ Reports, Speed & Placement-Daten,
-                    Head-2-Head Stats und ein standardisierter Skill-Benchmark —
-                    direkt in der App.
-                  </p>
-
-                  {/* Stats row */}
-                  <div className="grid grid-cols-3 gap-4 mb-8">
-                    {kiStats.map(s => (
-                      <div key={s.label} className="p-4 rounded-2xl border border-sky-500/15 text-center"
-                        style={{ background: "rgba(56,189,248,0.05)" }}>
-                        <p className="text-2xl font-black text-sky-400 mb-1 font-stat">{s.value}</p>
-                        <p className="text-white/45 text-xs">{s.label}</p>
-                      </div>
-                    ))}
+              {/* HEADING */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className={`${HEADING_CENTER} mb-4`}
+              >
+                <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-sky-500/12 border border-sky-500/25 text-sky-400 mb-6">
+                  <Brain className="w-4 h-4" />
+                  <span className="text-sm font-bold tracking-wider uppercase">KI-Analyse</span>
+                </span>
+                <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-5">
+                  Deine Performance.{" "}
+                  <span className="text-sky-400">Live analysiert.</span>
+                </h2>
+                <p className="text-white/55 text-lg leading-relaxed mb-7 max-w-2xl mx-auto">
+                  Wingfield KI-Kameras erfassen jeden Ball, jeden Schritt, jede Entscheidung —
+                  vollautomatisch, ohne Sensoren, ohne manuelle Eingabe. Das Ergebnis:
+                  Match IQ Reports, Speed & Placement-Daten, Head-2-Head Stats
+                  und ein messbarer Skill-Benchmark direkt in deiner App.
+                </p>
+                <div className="flex items-center justify-center gap-3 mb-10">
+                  <span className="text-sm text-white/40">Powered by</span>
+                  <div
+                    className="flex items-center gap-2 px-4 py-2 rounded-full"
+                    style={{ background: wingfield?.bg_color || "#3FBB7D" }}
+                  >
+                    {wingfield?.logo_url && (
+                      <img src={wingfield.logo_url} alt="Wingfield" className="h-5 w-auto object-contain" />
+                    )}
+                    <span className="text-xs font-bold text-white">Wingfield</span>
                   </div>
+                </div>
+              </motion.div>
 
-                  {/* Training card */}
-                  <div className="p-6 rounded-2xl border border-sky-500/20"
-                    style={{ background: "linear-gradient(135deg, rgba(56,189,248,0.08) 0%, rgba(56,189,248,0.02) 100%)" }}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-sky-500/15 flex items-center justify-center shrink-0">
-                        <Target className="w-5 h-5 text-sky-400" />
-                      </div>
-                      <h3 className="text-base font-bold text-white">Konkrete Verbesserungsvorschläge</h3>
-                    </div>
-                    <p className="text-white/45 text-sm leading-relaxed mb-4">
-                      Kein Bauchgefühl, sondern echte Daten. Der Wingfield Skill Assessment
-                      (WSA) benchmarkt dein Level messbar — Aufschlag, Return, Drive, Drop,
-                      Volley, Dink.
-                    </p>
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {["Match IQ", "Skill Assessment", "Speed & Placement", "Auto Scoring"].map(tag => (
-                        <span key={tag} className="px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-xs font-semibold border border-sky-500/20">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <NavLink
-                      to="/auth"
-                      className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-sky-400 text-black font-black text-sm hover:bg-sky-300 transition-all shadow-[0_0_25px_rgba(56,189,248,0.35)] hover:shadow-[0_0_40px_rgba(56,189,248,0.5)]"
-                    >
-                      Jetzt registrieren <ArrowRight className="w-4 h-4" />
-                    </NavLink>
+              {/* STATS */}
+              <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto mb-14">
+                {kiStats.map(s => (
+                  <div key={s.label} className="p-4 rounded-2xl border border-sky-500/15 text-center"
+                    style={{ background: "rgba(56,189,248,0.05)" }}>
+                    <p className="text-2xl font-black text-sky-400 mb-1 font-stat">{s.value}</p>
+                    <p className="text-white/45 text-xs">{s.label}</p>
                   </div>
-                </motion.div>
+                ))}
+              </div>
 
-                {/* RIGHT – feature grid */}
-                <motion.div
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.7, delay: 0.1 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-4 content-start"
-                >
-                  {kiFeatures.map((f, i) => (
-                    <motion.div
-                      key={f.title}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.1 + i * 0.07 }}
-                      className="p-5 rounded-2xl border border-white/6 hover:border-white/15 transition-all group"
-                      style={{ background: "rgba(255,255,255,0.03)" }}
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-white/5 group-hover:bg-white/8 flex items-center justify-center mb-3 transition-colors">
+              {/* DEMO VIDEOS */}
+              <div className="grid md:grid-cols-2 gap-5 mb-12">
+                {(["fuer-spieler.ki.video-1", "fuer-spieler.ki.video-2"] as const).map((key, i) => (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="aspect-video rounded-2xl overflow-hidden border"
+                    style={{ borderColor: "rgba(56,189,248,0.2)", background: "#0a0f1a", boxShadow: "0 0 40px rgba(56,189,248,0.07)" }}
+                  >
+                    <VideoEmbed visualKey={key} title={`KI-Analyse Demo ${i + 1}`} />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* FEATURE CARDS */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+                {kiFeatures.map((f, i) => (
+                  <motion.div
+                    key={f.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.07 }}
+                    className="p-5 rounded-2xl border border-white/6 hover:border-sky-500/25 hover:bg-sky-500/3 transition-all group"
+                    style={{ background: "rgba(255,255,255,0.02)" }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-11 h-11 rounded-xl bg-sky-500/10 group-hover:bg-sky-500/18 flex items-center justify-center shrink-0 transition-colors">
                         <f.icon className={`w-5 h-5 ${f.color}`} />
                       </div>
-                      <h3 className="text-sm font-bold text-white mb-1">{f.title}</h3>
-                      <p className="text-white/40 text-xs leading-relaxed">{f.desc}</p>
-                    </motion.div>
-                  ))}
-                </motion.div>
-
+                      <div>
+                        <h3 className="text-sm font-bold text-white mb-1">{f.title}</h3>
+                        <p className="text-white/40 text-xs leading-relaxed">{f.desc}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
+
+              {/* HOW IT WORKS */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="p-8 rounded-3xl border border-sky-500/20 mb-8"
+                style={{ background: "linear-gradient(135deg, rgba(56,189,248,0.07) 0%, rgba(56,189,248,0.02) 100%)" }}
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-sky-500/15 flex items-center justify-center shrink-0">
+                    <Camera className="w-6 h-6 text-sky-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">So funktioniert's</h3>
+                </div>
+                <p className="text-white/50 leading-relaxed">
+                  An unseren Standorten werden Wingfield-Kameras installiert, die dein Spiel vollautomatisch erfassen —
+                  kein QR-Code scannen, kein Setup. Die KI analysiert jeden Ballwechsel in Echtzeit,
+                  erkennt Schlagtypen, misst Speed & Placement und erstellt nach jedem Match einen
+                  vollständigen Match IQ Report. Auf Wunsch bewertet der Wingfield Skill Assessment (WSA)
+                  dein Niveau messbar über Aufschlag, Return, Drive, Drop, Volley und Dink.
+                </p>
+              </motion.div>
+
+              {/* ACTION VISUAL */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+              >
+                <WingfieldActionVisual />
+              </motion.div>
+
+              {/* CTA */}
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="text-center mt-10"
+              >
+                <NavLink
+                  to="/faq-kontakt"
+                  className="inline-flex items-center gap-2.5 px-9 py-4 rounded-full border border-sky-500/40 bg-sky-500/8 text-sky-400 font-black text-sm hover:bg-sky-500/18 hover:border-sky-500/60 transition-all"
+                >
+                  <Zap className="w-4 h-4" />
+                  Benachrichtigt werden
+                  <ArrowRight className="w-4 h-4" />
+                </NavLink>
+                <p className="text-white/30 text-xs mt-3">Wir informieren dich, sobald KI-Analyse an deinem Standort live geht.</p>
+              </motion.div>
+
             </div>
           </div>
         </section>
@@ -1163,148 +1197,6 @@ const FuerSpieler = () => {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════════════
-            WINGFIELD KI-KAMERAS
-        ═══════════════════════════════════════════════════════════════════ */}
-        <section className={`${SECTION} relative overflow-hidden`}
-          style={{ background: "linear-gradient(180deg, #000 0%, #001a0d 50%, #000 100%)" }}
-        >
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(63,187,125,0.08) 0%, transparent 60%)" }}
-          />
-          <div className={`${CONTAINER} relative z-10`}>
-            <div className={CONTENT}>
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className={`${HEADING_CENTER} mb-12`}
-              >
-                <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-emerald-500/12 border border-emerald-500/25 text-emerald-400 mb-5">
-                  <Camera className="w-4 h-4" />
-                  <span className="text-sm font-bold tracking-wider uppercase">Coming Soon</span>
-                </span>
-                <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-5">
-                  <span className="text-emerald-400">KI-Kamera</span> Analyse
-                </h2>
-                <p className="text-white/55 mb-7 text-lg leading-relaxed">
-                  Vollautomatische Spielanalyse auf dem Court —
-                  ohne Sensoren, ohne manuelle Eingabe.
-                </p>
-                {/* Wingfield badge */}
-                <div className="flex items-center justify-center gap-3">
-                  <span className="text-sm text-white/40">Powered by</span>
-                  <div
-                    className="flex items-center gap-2 px-4 py-2 rounded-full"
-                    style={{ background: wingfield?.bg_color || "#3FBB7D" }}
-                  >
-                    {wingfield?.logo_url && (
-                      <img src={wingfield.logo_url} alt="Wingfield" className="h-5 w-auto object-contain" />
-                    )}
-                    <span className="text-xs font-bold text-white">Wingfield</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Video carousel */}
-              <div className="grid md:grid-cols-2 gap-5 mb-12">
-                {(["fuer-spieler.ki.video-1", "fuer-spieler.ki.video-2"] as const).map((key, i) => (
-                  <motion.div
-                    key={key}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="aspect-video rounded-2xl overflow-hidden border"
-                    style={{
-                      borderColor: "rgba(63,187,125,0.25)",
-                      background: "#0a1a0f",
-                      boxShadow: "0 0 40px rgba(63,187,125,0.08)",
-                    }}
-                  >
-                    <VideoEmbed visualKey={key} title={`KI-Kamera Demo ${i + 1}`} />
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* AI features */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-                {aiFeatures.map((f, i) => (
-                  <motion.div
-                    key={f.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.07 }}
-                    className="p-5 rounded-2xl border border-dashed border-emerald-500/20 hover:border-emerald-500/40 hover:bg-emerald-500/4 transition-all group"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-11 h-11 rounded-xl bg-emerald-500/10 group-hover:bg-emerald-500/18 flex items-center justify-center shrink-0 transition-colors">
-                        <f.icon className="w-5 h-5 text-emerald-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-white mb-1">{f.title}</h3>
-                        <p className="text-white/40 text-xs leading-relaxed">{f.desc}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* How it works */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="p-8 rounded-3xl border border-emerald-500/20"
-                style={{ background: "linear-gradient(135deg, rgba(63,187,125,0.07) 0%, rgba(63,187,125,0.02) 100%)" }}
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 flex items-center justify-center shrink-0">
-                    <Camera className="w-6 h-6 text-emerald-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white">So funktioniert's</h3>
-                </div>
-                <p className="text-white/50 leading-relaxed">
-                  An unseren Standorten werden Wingfield-Kameras installiert, die dein Spiel automatisch erfassen.
-                  Die KI läuft im Hintergrund und liefert dir nach jedem Match detaillierte Statistiken,
-                  Heatmaps und personalisierte Verbesserungsvorschläge direkt in der App —
-                  einfach spielen und lernen.
-                </p>
-              </motion.div>
-
-              {/* Wingfield court action shot */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="mt-8"
-              >
-                <WingfieldActionVisual />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                className="text-center mt-10"
-              >
-                <NavLink
-                  to="/faq-kontakt"
-                  className="inline-flex items-center gap-2.5 px-9 py-4 rounded-full border border-emerald-500/40 bg-emerald-500/8 text-emerald-400 font-black text-sm hover:bg-emerald-500/18 hover:border-emerald-500/60 transition-all"
-                >
-                  <Zap className="w-4 h-4" />
-                  Benachrichtigt werden
-                  <ArrowRight className="w-4 h-4" />
-                </NavLink>
-                <p className="text-white/30 text-xs mt-3">Wir informieren dich, sobald KI-Analyse an deinem Standort live geht.</p>
-              </motion.div>
-            </div>
-          </div>
-        </section>
 
         {/* ═══════════════════════════════════════════════════════════════════
             APP COMING SOON
