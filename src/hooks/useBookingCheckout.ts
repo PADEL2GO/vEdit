@@ -423,16 +423,17 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
   const handlePayment = async () => {
     if (!booking) return;
 
-    // If voucher is valid, redeem directly
+    // Fully-free vouchers bypass Stripe; partial discounts go through Stripe with reduced price
     if (voucher.status === "valid") {
-      await redeemVoucher();
-      return;
+      const effectivePrice = applyVoucherDiscount(booking.price_cents, voucher.discountType, voucher.discountValue);
+      if (effectivePrice === 0) {
+        await redeemVoucher();
+        return;
+      }
     }
 
     setState("processing");
 
-    // Pass voucher_id for partial-discount vouchers so create-checkout-session
-    // can apply the discount and soft-reserve the use slot.
     const isPartialVoucher =
       voucher.status === "valid" &&
       applyVoucherDiscount(booking.price_cents, voucher.discountType, voucher.discountValue) > 0;
