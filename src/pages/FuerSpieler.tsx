@@ -281,25 +281,6 @@ const MarketplaceBanner = () => {
   );
 };
 
-// ─── KI App Screenshot – shown next to Wingfield action shot ─────────────────
-const WingfieldActionVisual = () => {
-  const { data: visual } = useSiteVisual("fuer-spieler.wingfield.action");
-  if (!visual?.image_url) {
-    return (
-      <div className="w-full aspect-video rounded-2xl border border-dashed border-emerald-500/25 flex flex-col items-center justify-center gap-3"
-        style={{ background: "rgba(63,187,125,0.04)" }}>
-        <Camera className="w-10 h-10 text-emerald-400/25" />
-        <span className="text-emerald-400/30 text-xs font-medium text-center px-4">Wingfield Action-Shot<br/>im Admin-Panel hochladen</span>
-      </div>
-    );
-  }
-  return (
-    <div className="w-full aspect-video rounded-2xl overflow-hidden border border-emerald-500/20">
-      <img src={visual.image_url} alt="Wingfield Court" className="w-full h-full object-cover" />
-    </div>
-  );
-};
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const SECTION = "py-20 md:py-28";
@@ -955,10 +936,16 @@ const FuerSpieler = () => {
                 viewport={{ once: true }}
                 className={`${HEADING_CENTER} mb-4`}
               >
-                <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-sky-500/12 border border-sky-500/25 text-sky-400 mb-6">
-                  <Brain className="w-4 h-4" />
-                  <span className="text-sm font-bold tracking-wider uppercase">KI-Analyse</span>
-                </span>
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-sky-500/12 border border-sky-500/25 text-sky-400">
+                    <Brain className="w-4 h-4" />
+                    <span className="text-sm font-bold tracking-wider uppercase">KI-Analyse</span>
+                  </span>
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/12 border border-amber-500/30 text-amber-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    <span className="text-sm font-bold tracking-wider uppercase">Coming Soon</span>
+                  </span>
+                </div>
                 <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-5">
                   Deine Performance.{" "}
                   <span className="text-sky-400">Live analysiert.</span>
@@ -1040,16 +1027,6 @@ const FuerSpieler = () => {
                   vollständigen Match IQ Report. Auf Wunsch bewertet der Wingfield Skill Assessment (WSA)
                   dein Niveau messbar über Aufschlag, Return, Drive, Drop, Volley und Dink.
                 </p>
-              </motion.div>
-
-              {/* ACTION VISUAL */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-              >
-                <WingfieldActionVisual />
               </motion.div>
 
               {/* CTA */}
