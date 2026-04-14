@@ -316,6 +316,89 @@ const Index = () => {
           </div>
         </SyntheticHero>
 
+        {/* ── SO KOMMT PADEL IN EUREN VEREIN ────────────────────── */}
+        <section className="py-14 md:py-20">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center max-w-3xl mx-auto mb-14"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6">
+                <Building2 className="w-4 h-4" />
+                <span className="text-sm font-medium">Für Vereine</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
+                So kommt Padel in{" "}
+                <span className="text-gradient-lime">euren Verein</span>
+              </h2>
+              <p className="text-base md:text-lg text-muted-foreground">
+                In 6 Schritten vom ersten Gespräch bis zum ersten Match
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                { icon: Search,       animation: "pulse" as const,  visualKey: "home.verein-steps.step-1", step: 1, title: "Vor-Ort Termin",             desc: "Standortcheck mit Flächenanalyse und Drohnen-Luftaufnahme – wir prüfen, welche Flächen für Padel Courts geeignet sind." },
+                { icon: FileCheck,    animation: "blink" as const,  visualKey: "home.verein-steps.step-2", step: 2, title: "Bauantrag & Genehmigung",    desc: "Wir übernehmen die Planung und unterstützen beim Bauantrag – inklusive aller technischen Unterlagen und Behördenkommunikation." },
+                { icon: Wrench,       animation: "bounce" as const, visualKey: "home.verein-steps.step-3", step: 3, title: "Court-Aufbau & Installation", desc: "Professionelle Montage der mobilen Padel Courts auf eurer Fläche – schlüsselfertig und spielbereit." },
+                { icon: Wifi,         animation: "glow" as const,   visualKey: "home.verein-steps.step-4", step: 4, title: "Digitales Setup",             desc: "App-Anbindung, Booking-System, KI-Kameras und Beleuchtung – der Court wird vollständig digitalisiert." },
+                { icon: PartyPopper,  animation: "bounce" as const, visualKey: "home.verein-steps.step-5", step: 5, title: "Eröffnung & Spielstart",      desc: "Feierliche Eröffnung mit Event, Marketing-Support und den ersten gebuchten Matches eurer Mitglieder." },
+                { icon: Settings,     animation: "spin" as const,   visualKey: "home.verein-steps.step-6", step: 6, title: "Laufender Betrieb",           desc: "Wartung, Saisonmanagement und technischer Support – wir kümmern uns, ihr kassiert Umsatzbeteiligung." },
+              ].map((item, index) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.08 * index }}
+                  className="group relative"
+                >
+                  <div className="overflow-hidden rounded-2xl mb-5 bg-card border border-border/50 h-36 md:h-44">
+                    <SiteVisual
+                      visualKey={item.visualKey}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      fallbackClassName="w-full h-full bg-card"
+                    />
+                  </div>
+                  <div className="text-center px-2">
+                    <div className="relative inline-block mb-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mx-auto">
+                        <AnimatedIcon animation={item.animation}>
+                          <item.icon className="w-6 h-6 text-primary-foreground" />
+                        </AnimatedIcon>
+                      </div>
+                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-card border border-border rounded-full flex items-center justify-center text-xs font-bold">
+                        {item.step}
+                      </span>
+                    </div>
+                    <h3 className="text-base md:text-lg font-bold mb-2">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mt-12"
+            >
+              <Button size="lg" variant="lime" asChild>
+                <NavLink to="/fuer-vereine">
+                  <Building2 className="w-5 h-5 mr-2" />
+                  Mehr für Vereine erfahren
+                </NavLink>
+              </Button>
+            </motion.div>
+          </div>
+        </section>
+
+        <SectionDivider variant="glow" />
+
         {/* ── LOCATION ROLLOUT ──────────────────────────────────── */}
         <LocationTeasersSection />
 
@@ -549,90 +632,6 @@ const Index = () => {
                 </motion.div>
               ))}
             </div>
-          </div>
-        </section>
-
-        <SectionDivider variant="glow" />
-
-        {/* ── SO KOMMT PADEL IN EUREN VEREIN ────────────────────── */}
-        <section className="py-14 md:py-20">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center max-w-3xl mx-auto mb-14"
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6">
-                <Building2 className="w-4 h-4" />
-                <span className="text-sm font-medium">Für Vereine</span>
-              </div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
-                So kommt Padel in{" "}
-                <span className="text-gradient-lime">euren Verein</span>
-              </h2>
-              <p className="text-base md:text-lg text-muted-foreground">
-                In 6 Schritten vom ersten Gespräch bis zum ersten Match
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                { icon: Search,       animation: "pulse" as const,  visualKey: "home.verein-steps.step-1", step: 1, title: "Vor-Ort Termin",             desc: "Standortcheck mit Flächenanalyse und Drohnen-Luftaufnahme – wir prüfen, welche Flächen für Padel Courts geeignet sind." },
-                { icon: FileCheck,    animation: "blink" as const,  visualKey: "home.verein-steps.step-2", step: 2, title: "Bauantrag & Genehmigung",    desc: "Wir übernehmen die Planung und unterstützen beim Bauantrag – inklusive aller technischen Unterlagen und Behördenkommunikation." },
-                { icon: Wrench,       animation: "bounce" as const, visualKey: "home.verein-steps.step-3", step: 3, title: "Court-Aufbau & Installation", desc: "Professionelle Montage der mobilen Padel Courts auf eurer Fläche – schlüsselfertig und spielbereit." },
-                { icon: Wifi,         animation: "glow" as const,   visualKey: "home.verein-steps.step-4", step: 4, title: "Digitales Setup",             desc: "App-Anbindung, Booking-System, KI-Kameras und Beleuchtung – der Court wird vollständig digitalisiert." },
-                { icon: PartyPopper,  animation: "bounce" as const, visualKey: "home.verein-steps.step-5", step: 5, title: "Eröffnung & Spielstart",      desc: "Feierliche Eröffnung mit Event, Marketing-Support und den ersten gebuchten Matches eurer Mitglieder." },
-                { icon: Settings,     animation: "spin" as const,   visualKey: "home.verein-steps.step-6", step: 6, title: "Laufender Betrieb",           desc: "Wartung, Saisonmanagement und technischer Support – wir kümmern uns, ihr kassiert Umsatzbeteiligung." },
-              ].map((item, index) => (
-                <motion.div
-                  key={item.step}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.08 * index }}
-                  className="group relative"
-                >
-                  {/* Image (admin-managed, shows placeholder until set) */}
-                  <div className="overflow-hidden rounded-2xl mb-5 bg-card border border-border/50 h-36 md:h-44">
-                    <SiteVisual
-                      visualKey={item.visualKey}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      fallbackClassName="w-full h-full bg-card"
-                    />
-                  </div>
-                  <div className="text-center px-2">
-                    <div className="relative inline-block mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mx-auto">
-                        <AnimatedIcon animation={item.animation}>
-                          <item.icon className="w-6 h-6 text-primary-foreground" />
-                        </AnimatedIcon>
-                      </div>
-                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-card border border-border rounded-full flex items-center justify-center text-xs font-bold">
-                        {item.step}
-                      </span>
-                    </div>
-                    <h3 className="text-base md:text-lg font-bold mb-2">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mt-12"
-            >
-              <Button size="lg" variant="lime" asChild>
-                <NavLink to="/fuer-vereine">
-                  <Building2 className="w-5 h-5 mr-2" />
-                  Mehr für Vereine erfahren
-                </NavLink>
-              </Button>
-            </motion.div>
           </div>
         </section>
 
