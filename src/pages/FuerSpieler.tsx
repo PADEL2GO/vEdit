@@ -221,18 +221,18 @@ const marketplaceItems = [
 ];
 
 const kiStats = [
-  { value: "2×", label: "Kameras pro Court" },
-  { value: "100%", label: "Automatisch" },
-  { value: "Live", label: "Echtzeit-Analyse" },
+  { value: "6+", label: "Schlagtypen analysiert" },
+  { value: "0–100", label: "Drill Score pro Übung" },
+  { value: "Auto", label: "Scoring & Clipping" },
 ];
 
 const kiFeatures = [
-  { icon: Activity, title: "Echtzeit-Tracking", desc: "Jeder Move live erfasst", color: "text-[#C7F011]" },
-  { icon: LineChart, title: "Match-Statistiken", desc: "Detaillierte Auswertung", color: "text-sky-400" },
-  { icon: Target, title: "Schwächen erkennen", desc: "Gezielte Verbesserung", color: "text-orange-400" },
-  { icon: Video, title: "Video-Highlights", desc: "Beste Momente gespeichert", color: "text-violet-400" },
-  { icon: Brain, title: "Training-Tipps", desc: "Personalisierte Empfehlungen", color: "text-pink-400" },
-  { icon: LineChart, title: "Fortschritt", desc: "Entwicklung über Zeit", color: "text-amber-400" },
+  { icon: Activity,   title: "Match IQ Report",       desc: "Winners, Fehler & erfolgreiche Strategien nach jedem Match automatisch aufbereitet.", color: "text-[#C7F011]" },
+  { icon: Target,     title: "Speed & Placement",     desc: "Geschwindigkeit und Platzierung jedes Balls gemessen — sieh, wie viel Druck du aufbaust.", color: "text-sky-400" },
+  { icon: LineChart,  title: "Head-2-Head Stats",     desc: "Direktvergleich gegen jeden Gegner: Wo gewinnst du, wo verlierst du Punkte?", color: "text-orange-400" },
+  { icon: Brain,      title: "Skill Assessment (WSA)", desc: "KI-Benchmark über Aufschlag, Return, Drive, Drop, Volley und Dink — standardisiert messbar.", color: "text-violet-400" },
+  { icon: Video,      title: "Auto Clip Generation",  desc: "Deine besten Ballwechsel werden automatisch geschnitten und gespeichert.", color: "text-pink-400" },
+  { icon: Trophy,     title: "Drills & Leaderboards", desc: "Kuratierte Trainings-Sets von Profis, bewertet mit Drill Score 0–100. Community-Rankings inklusive.", color: "text-amber-400" },
 ];
 
 const appFeatures = [
@@ -245,12 +245,12 @@ const appFeatures = [
 ];
 
 const aiFeatures = [
-  { icon: Camera, title: "Live-Kamera-Tracking", desc: "Automatisch erfasst – keine manuelle Eingabe." },
-  { icon: Activity, title: "Distance Tracking", desc: "Gelaufene Distanz pro Match." },
-  { icon: BarChart3, title: "Zonen-Coverage", desc: "Court-Positionierung visualisiert." },
-  { icon: Video, title: "Video-Highlights", desc: "Beste Ballwechsel automatisch geclippt." },
-  { icon: Brain, title: "KI-Spielanalyse", desc: "Persönliche Tipps aus deinen Match-Daten." },
-  { icon: Target, title: "Schlaganalyse", desc: "Aufschläge, Bandeja, Lobs ausgewertet." },
+  { icon: Camera,   title: "Patentiertes Auto-Scoring", desc: "Kamera folgt dem Spielstand automatisch, korrigiert knappe Entscheidungen in Echtzeit." },
+  { icon: Activity, title: "Speed & Placement",         desc: "Ballgeschwindigkeit und Platzierung jedes Schlags — kontinuierlich gemessen." },
+  { icon: BarChart3,title: "Match IQ Report",           desc: "Winners, unforced Errors und erfolgreiche Taktiken nach jedem Match aufbereitet." },
+  { icon: Video,    title: "Auto Clip Generation",      desc: "Beste Rallyes werden automatisch erkannt, geschnitten und in der App gespeichert." },
+  { icon: Brain,    title: "Skill Assessment (WSA)",    desc: "KI-Benchmark: Aufschlag, Return, Drive, Drop, Volley und Dink standardisiert bewertet." },
+  { icon: Target,   title: "Drill Score 0–100",         desc: "Trainingsdrills von Profis bewertet mit Echtzeit-Score. Community-Leaderboard inklusive." },
 ];
 
 const bookingSteps = [
@@ -979,9 +979,10 @@ const FuerSpieler = () => {
                     <span className="text-sky-400">Live analysiert.</span>
                   </h2>
                   <p className="text-white/55 leading-relaxed mb-8 text-lg">
-                    Wingfield KI-Kameras erfassen jeden deiner Moves.
-                    Nach dem Match: detaillierte Statistiken, Heatmaps und
-                    personalisierte Empfehlungen — direkt in der App.
+                    Wingfield KI-Kameras erfassen jeden Ball, jeden Schritt, jede Entscheidung.
+                    Nach dem Match: Match IQ Reports, Speed & Placement-Daten,
+                    Head-2-Head Stats und ein standardisierter Skill-Benchmark —
+                    direkt in der App.
                   </p>
 
                   {/* Stats row */}
@@ -1005,11 +1006,12 @@ const FuerSpieler = () => {
                       <h3 className="text-base font-bold text-white">Konkrete Verbesserungsvorschläge</h3>
                     </div>
                     <p className="text-white/45 text-sm leading-relaxed mb-4">
-                      Nicht Bauchgefühl, sondern Daten. Die KI zeigt dir genau,
-                      was du trainieren musst.
+                      Kein Bauchgefühl, sondern echte Daten. Der Wingfield Skill Assessment
+                      (WSA) benchmarkt dein Level messbar — Aufschlag, Return, Drive, Drop,
+                      Volley, Dink.
                     </p>
                     <div className="flex flex-wrap gap-2 mb-6">
-                      {["Schlaganalyse", "Heatmaps", "Laufwege", "Reaktionszeit"].map(tag => (
+                      {["Match IQ", "Skill Assessment", "Speed & Placement", "Auto Scoring"].map(tag => (
                         <span key={tag} className="px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-xs font-semibold border border-sky-500/20">
                           {tag}
                         </span>
