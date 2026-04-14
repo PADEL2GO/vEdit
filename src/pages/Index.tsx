@@ -30,14 +30,11 @@ import {
   ShoppingBag,
   CheckCircle,
 } from "lucide-react";
-import p2gAppIcon from "@/assets/p2g-app-icon.png";
 import wingfieldLogo from "@/assets/partners/wingfield.png";
 import { usePartnerTiles } from "@/hooks/usePartnerTiles";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
-import badgeAppStore from "@/assets/badge-app-store.png";
-import badgeGooglePlay from "@/assets/badge-google-play.png";
 import { EXPERT_LEVELS, getExpertLevelEmoji } from "@/lib/expertLevels";
 
 // ── Animated icon helper ──────────────────────────────────────────────────────
@@ -644,74 +641,6 @@ const Index = () => {
         {/* ── PARTNERS ──────────────────────────────────────────── */}
         <PartnerSections />
 
-        <SectionDivider variant="glow" />
-
-        {/* ── APP DOWNLOAD ──────────────────────────────────────── */}
-        <section className="py-14 md:py-24 bg-gradient-to-b from-background via-primary/5 to-background">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center max-w-2xl mx-auto"
-            >
-              <motion.div
-                className="mb-8 flex justify-center"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-              >
-                <img
-                  src={p2gAppIcon}
-                  alt="PADEL2GO App"
-                  className="w-20 h-20 md:w-28 md:h-28 rounded-3xl shadow-2xl"
-                />
-              </motion.div>
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
-                Hol dir die <BrandName /> App
-              </h2>
-              <p className="text-base md:text-lg text-muted-foreground mb-8">
-                Buche Courts, lass dein Spiel analysieren, sammle P2G Points
-                und steig im EU-Ranking auf – alles in einer App.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <motion.button
-                  onClick={() =>
-                    toast.info("App Store – App coming soon!", {
-                      description: "Die App wird in Kürze verfügbar sein.",
-                    })
-                  }
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="cursor-pointer"
-                >
-                  <img
-                    src={badgeAppStore}
-                    alt="Download on the App Store"
-                    className="h-12 sm:h-14 md:h-16 w-auto"
-                  />
-                </motion.button>
-                <motion.button
-                  onClick={() =>
-                    toast.info("Google Play – App coming soon!", {
-                      description: "Die App wird in Kürze verfügbar sein.",
-                    })
-                  }
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="cursor-pointer"
-                >
-                  <img
-                    src={badgeGooglePlay}
-                    alt="Get it on Google Play"
-                    className="h-12 sm:h-14 md:h-16 w-auto"
-                  />
-                </motion.button>
-              </div>
-            </motion.div>
-          </div>
-        </section>
 
       </main>
 

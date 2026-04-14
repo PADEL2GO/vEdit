@@ -15,8 +15,10 @@ import {
   Wallet, ShoppingBag, Target, Brain, Flame, Award,
   Activity, Video, Dumbbell, LineChart, Users,
   Camera, UserPlus, Trophy, CreditCard, Play,
-  CheckCircle, Star, ChevronRight
+  CheckCircle, Star, ChevronRight, Apple
 } from "lucide-react";
+import p2gAppIcon from "@/assets/p2g-app-icon.png";
+import iphoneMockup from "@/assets/iphone-mockup.png";
 
 // ─── Hero background: video URL → autoplay iframe/video; image URL → img; fallback → static asset ─
 const HeroBackground = ({ fallbackSrc }: { fallbackSrc: string }) => {
@@ -1250,6 +1252,126 @@ const FuerSpieler = () => {
                 </NavLink>
                 <p className="text-white/30 text-xs mt-3">Wir informieren dich, sobald KI-Analyse an deinem Standort live geht.</p>
               </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            APP COMING SOON
+        ═══════════════════════════════════════════════════════════════════ */}
+        <section className="py-24 md:py-36 relative overflow-hidden">
+          {/* Background */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.03] to-background pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-primary/6 rounded-full blur-[140px] pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-5xl mx-auto">
+              <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+                {/* Left: Text */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold mb-7">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    In Entwicklung
+                  </div>
+
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-5">
+                    Die App.<br />
+                    <span className="text-gradient-lime">Kommt bald.</span>
+                  </h2>
+
+                  <p className="text-base md:text-lg text-white/50 leading-relaxed mb-9">
+                    Courts buchen, Matches analysieren, P2G Points sammeln, Ligen beitreten —
+                    alles, was du für dein Padel brauchst, in einer App. Für iOS und Android.
+                  </p>
+
+                  {/* Feature list */}
+                  <div className="space-y-3 mb-10">
+                    {[
+                      { icon: Calendar,   label: "Court-Buchungen in Echtzeit" },
+                      { icon: Brain,      label: "KI-gestützte Match-Analyse" },
+                      { icon: Coins,      label: "P2G Points & Rewards einlösen" },
+                      { icon: Trophy,     label: "Ligen, Turniere & EU-Ranking" },
+                      { icon: Users,      label: "Community, Friends & Lobbies" },
+                    ].map(({ icon: Icon, label }) => (
+                      <div key={label} className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
+                          <Icon className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <span className="text-sm text-white/65">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* CTA */}
+                  <NavLink
+                    to="/faq-kontakt"
+                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-primary text-black font-bold text-sm hover:bg-primary/90 transition-all"
+                  >
+                    <Smartphone className="w-4 h-4" />
+                    Beim Launch benachrichtigt werden
+                    <ArrowRight className="w-4 h-4" />
+                  </NavLink>
+                  <p className="text-white/25 text-xs mt-3">Kein Spam. Nur ein Update, wenn es so weit ist.</p>
+                </motion.div>
+
+                {/* Right: Phone mockup */}
+                <motion.div
+                  initial={{ opacity: 0, x: 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.7, delay: 0.15 }}
+                  className="flex flex-col items-center justify-center gap-7"
+                >
+                  {/* App icon with glow */}
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    whileInView={{ scale: 1, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 }}
+                    className="relative"
+                  >
+                    <div className="absolute inset-0 bg-primary/30 blur-2xl rounded-full scale-150" />
+                    <img
+                      src={p2gAppIcon}
+                      alt="PADEL2GO App Icon"
+                      className="relative w-16 h-16 rounded-2xl shadow-xl"
+                    />
+                  </motion.div>
+
+                  {/* Phone */}
+                  <img
+                    src={iphoneMockup}
+                    alt="PADEL2GO App Vorschau"
+                    className="h-[320px] sm:h-[400px] md:h-[480px] w-auto object-contain drop-shadow-2xl"
+                  />
+
+                  {/* Platform indicators — non-clickable */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/8">
+                      <Apple className="w-4 h-4 text-white/40" />
+                      <div>
+                        <p className="text-[10px] text-white/30 leading-none">Bald im</p>
+                        <p className="text-xs font-semibold text-white/55 leading-tight mt-0.5">App Store</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/8">
+                      <Play className="w-4 h-4 text-white/40 fill-white/40" />
+                      <div>
+                        <p className="text-[10px] text-white/30 leading-none">Bald bei</p>
+                        <p className="text-xs font-semibold text-white/55 leading-tight mt-0.5">Google Play</p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+
+              </div>
             </div>
           </div>
         </section>

@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, MapPin, Calendar, Trophy, Apple, Play } from "lucide-react";
+import { ArrowRight, MapPin, Calendar, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import iphoneMockup from "@/assets/iphone-mockup.png";
@@ -130,44 +130,18 @@ const HeroSection = () => {
             </motion.div>
           </div>
 
-          {/* Right: iPhone Mockup with App Store Buttons */}
+          {/* Right: iPhone Mockup */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className="flex flex-col items-center lg:items-end gap-6"
           >
-            <img 
-              src={iphoneMockup} 
-              alt="PADEL2GO App" 
+            <img
+              src={iphoneMockup}
+              alt="PADEL2GO App"
               className="h-[220px] sm:h-[300px] md:h-[420px] lg:h-[520px] w-auto object-contain"
             />
-            
-            {/* App Store Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="flex items-center gap-3 px-5 py-6 bg-card/80 border-border hover:bg-card"
-              >
-                <Apple className="w-7 h-7" />
-                <div className="text-left">
-                  <span className="text-xs text-muted-foreground block">Download im</span>
-                  <span className="text-sm font-semibold">App Store</span>
-                </div>
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="flex items-center gap-3 px-5 py-6 bg-card/80 border-border hover:bg-card"
-              >
-                <Play className="w-7 h-7 fill-current" />
-                <div className="text-left">
-                  <span className="text-xs text-muted-foreground block">Jetzt bei</span>
-                  <span className="text-sm font-semibold">Google Play</span>
-                </div>
-              </Button>
-            </div>
           </motion.div>
         </div>
       </div>
