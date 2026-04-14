@@ -135,30 +135,17 @@ const fragmentShader = `
 const animateLines = (element: HTMLElement) => {
   element.innerHTML = "";
 
-  // Define exact lines for the hero
-  const lines = [
-    "Dein Padel. Dein Level.",
-    "Dein Spiel."
-  ];
+  // Define exact words for the hero headline
+  const words = "Dein Padel. Dein Level. Dein Spiel.".split(" ");
 
-  lines.forEach((line, lineIndex) => {
-    const words = line.split(" ");
-
-    words.forEach((word, wordIndex) => {
-      const span = document.createElement("span");
-      span.textContent = word + (wordIndex < words.length - 1 ? " " : "");
-      span.style.display = "inline-block";
-      span.style.opacity = "0";
-      span.style.transform = "translateY(20px)";
-      span.style.filter = "blur(8px)";
-      element.appendChild(span);
-    });
-
-    // Add line break after first line
-    if (lineIndex < lines.length - 1) {
-      const br = document.createElement("br");
-      element.appendChild(br);
-    }
+  words.forEach((word, wordIndex) => {
+    const span = document.createElement("span");
+    span.textContent = word + (wordIndex < words.length - 1 ? " " : "");
+    span.style.display = "inline-block";
+    span.style.opacity = "0";
+    span.style.transform = "translateY(20px)";
+    span.style.filter = "blur(8px)";
+    element.appendChild(span);
   });
 
   const spans = element.querySelectorAll("span");
