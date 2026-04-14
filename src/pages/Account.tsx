@@ -135,7 +135,7 @@ const Account = () => {
       toast.success("Erfolg", { description: "Profilbild aktualisiert!" });
     } catch (error: any) {
       console.error("Error uploading avatar:", error);
-      toast.error("Fehler", { description: "Konnte Profilbild nicht hochladen." });
+      toast.error("Fehler beim Hochladen", { description: error?.message || "Konnte Profilbild nicht hochladen." });
     } finally {
       setUploadingAvatar(false);
     }
