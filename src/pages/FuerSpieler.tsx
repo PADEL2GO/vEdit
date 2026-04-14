@@ -260,7 +260,7 @@ const MarketplaceBanner = () => {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mb-12 w-full h-40 rounded-3xl border border-amber-500/20 flex items-center justify-center gap-3"
+        className="mb-12 w-full h-72 rounded-3xl border border-amber-500/20 flex items-center justify-center gap-3"
         style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.06) 0%, rgba(251,191,36,0.02) 100%)" }}
       >
         <ShoppingBag className="w-8 h-8 text-amber-400/30" />
@@ -274,7 +274,7 @@ const MarketplaceBanner = () => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       className="mb-12 w-full rounded-3xl overflow-hidden border border-amber-500/20"
-      style={{ maxHeight: 200 }}
+      style={{ maxHeight: 260 }}
     >
       <img src={visual.image_url} alt="Marketplace" className="w-full h-full object-cover" />
     </motion.div>

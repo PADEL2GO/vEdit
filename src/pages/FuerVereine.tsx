@@ -50,59 +50,35 @@ import {
   Star,
   MapPin,
   ExternalLink,
-  Clock } from
-"lucide-react";
+  Clock,
+  Search,
+  FileCheck,
+  Wifi,
+  PartyPopper,
+  Settings,
+} from "lucide-react";
 
-// KI-Kamera Features
-const kiKameraFeatures = [
-{
-  icon: Video,
-  title: "2 Kameras pro Court",
-  description: "KI-Kamerasystem mit zwei Kameras für vollständige Court-Abdeckung. Automatisierte Spieleanalyse in Echtzeit – Ballbewegungen, Laufwege und Schlagdaten werden erfasst."
-},
-{
-  icon: QrCode,
-  title: "Start per QR-Code",
-  description: "Spieler scannen einfach den QR-Code am Court-Eingang, melden sich in der App an – und die Aufzeichnung startet automatisch. Keine komplizierte Technik, kein manuelles Setup."
-},
-{
-  icon: Brain,
-  title: "Match-Insights",
-  description: "Nach dem Spiel erhalten Spieler optional eine KI-gestützte Auswertung: Schlagstatistiken, Heatmaps, Ballverteilung und individuelle Verbesserungsvorschläge."
-},
-{
-  icon: Trophy,
-  title: "Punkte & Progress",
-  description: "Jedes Spiel zählt: Spieler sammeln automatisch Punkte basierend auf Aktivität, Spielhäufigkeit und Performance – sichtbar in ihrem persönlichen Spielerprofil."
-},
-{
-  icon: Coins,
-  title: "P2G-Credits",
-  description: "Credits werden nach jeder Session berechnet: Skill-Level × Match-Score = Credits. Je besser dein Spiel, desto mehr verdienst du."
-},
-{
-  icon: ShoppingBag,
-  title: "Einlösen im Ökosystem",
-  description: "Credits können im Marketplace für Equipment, Schläger, Bälle und Nutrition eingelöst werden – oder für vergünstigte Buchungen."
-},
-{
-  icon: TrendingUp,
-  title: "League",
-  description: "Ihre Anlage wird Teil des Netzwerks: Spieler können an überregionalen Ligen und saisonalen Challenges teilnehmen – direkt auf Ihren Courts."
-},
-{
-  icon: CircleCheck,
-  title: "Komplett optional",
-  description: "Das System ist ein Zusatzangebot: Wer nur spielen möchte, spielt normal. Wer tracken, analysieren und Credits sammeln möchte, aktiviert das Feature per App."
-}];
+const AnimatedIcon = ({
+  children,
+  animation = "pulse",
+}: {
+  children: React.ReactNode;
+  animation?: "pulse" | "spin" | "bounce" | "glow" | "blink";
+}) => {
+  const animations = {
+    pulse:  { scale: [1, 1.15, 1],      transition: { duration: 2, repeat: Infinity } },
+    spin:   { rotate: [0, 360],          transition: { duration: 8, repeat: Infinity, ease: "linear" as const } },
+    bounce: { y: [0, -5, 0],            transition: { duration: 1.5, repeat: Infinity } },
+    glow:   { opacity: [0.6, 1, 0.6],   transition: { duration: 2, repeat: Infinity } },
+    blink:  { opacity: [1, 0.3, 1],     transition: { duration: 0.8, repeat: Infinity } },
+  };
+  return (
+    <motion.div animate={animations[animation]} className="inline-flex">
+      {children}
+    </motion.div>
+  );
+};
 
-
-// Digitales Ökosystem Features
-const digitalFeatures = [
-{ icon: Smartphone, label: "App-Booking", visualKey: "fuer-vereine.oekosystem.app-booking" },
-{ icon: BarChart3, label: "Score-Tracking", visualKey: "fuer-vereine.oekosystem.score-tracking" },
-{ icon: Trophy, label: "League", visualKey: "fuer-vereine.oekosystem.league-circuit" },
-{ icon: Target, label: "Loyalty & Rewards", visualKey: "fuer-vereine.oekosystem.loyalty-rewards" }];
 
 
 
@@ -233,6 +209,89 @@ const FuerVereine = () => {
             <span>Termin buchen – kostenlos</span>
           </motion.a>
         </GalaxyHero>
+
+        {/* ── SO KOMMT PADEL IN EUREN VEREIN ────────────────────── */}
+        <section className="py-14 md:py-20">
+          <div className="container mx-auto px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center max-w-3xl mx-auto mb-14"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6">
+                <Building2 className="w-4 h-4" />
+                <span className="text-sm font-medium">Für Vereine</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
+                So kommt Padel in{" "}
+                <span className="text-gradient-lime">euren Verein</span>
+              </h2>
+              <p className="text-base md:text-lg text-muted-foreground">
+                In 6 Schritten vom ersten Gespräch bis zum ersten Match
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                { icon: Search,      animation: "pulse" as const,  visualKey: "home.verein-steps.step-1", step: 1, title: "Vor-Ort Termin",             desc: "Standortcheck mit Flächenanalyse und Drohnen-Luftaufnahme – wir prüfen, welche Flächen für Padel Courts geeignet sind." },
+                { icon: FileCheck,   animation: "blink" as const,  visualKey: "home.verein-steps.step-2", step: 2, title: "Bauantrag & Genehmigung",    desc: "Wir übernehmen die Planung und unterstützen beim Bauantrag – inklusive aller technischen Unterlagen und Behördenkommunikation." },
+                { icon: Wrench,      animation: "bounce" as const, visualKey: "home.verein-steps.step-3", step: 3, title: "Court-Aufbau & Installation", desc: "Professionelle Montage der mobilen Padel Courts auf eurer Fläche – schlüsselfertig und spielbereit." },
+                { icon: Wifi,        animation: "glow" as const,   visualKey: "home.verein-steps.step-4", step: 4, title: "Digitales Setup",             desc: "App-Anbindung, Booking-System, KI-Kameras und Beleuchtung – der Court wird vollständig digitalisiert." },
+                { icon: PartyPopper, animation: "bounce" as const, visualKey: "home.verein-steps.step-5", step: 5, title: "Eröffnung & Spielstart",      desc: "Feierliche Eröffnung mit Event, Marketing-Support und den ersten gebuchten Matches eurer Mitglieder." },
+                { icon: Settings,    animation: "spin" as const,   visualKey: "home.verein-steps.step-6", step: 6, title: "Laufender Betrieb",           desc: "Wartung, Saisonmanagement und technischer Support – wir kümmern uns, ihr kassiert Umsatzbeteiligung." },
+              ].map((item, index) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.08 * index }}
+                  className="group relative"
+                >
+                  <div className="overflow-hidden rounded-2xl mb-5 bg-card border border-border/50 h-36 md:h-44">
+                    <SiteVisual
+                      visualKey={item.visualKey}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      fallbackClassName="w-full h-full bg-card"
+                    />
+                  </div>
+                  <div className="text-center px-2">
+                    <div className="relative inline-block mb-4">
+                      <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mx-auto">
+                        <AnimatedIcon animation={item.animation}>
+                          <item.icon className="w-6 h-6 text-primary-foreground" />
+                        </AnimatedIcon>
+                      </div>
+                      <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-card border border-border rounded-full flex items-center justify-center text-xs font-bold">
+                        {item.step}
+                      </span>
+                    </div>
+                    <h3 className="text-base md:text-lg font-bold mb-2">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mt-12"
+            >
+              <Button size="lg" variant="lime" asChild>
+                <a href="#termin">
+                  <CalendarCheck className="w-5 h-5 mr-2" />
+                  Termin buchen – kostenlos
+                </a>
+              </Button>
+            </motion.div>
+          </div>
+        </section>
+
+        <SectionDivider variant="glow" />
 
         {/* ═══ CLUB TEASERS — only rendered when at least one active teaser exists ══ */}
         {clubTeasers.length > 0 && (
@@ -430,9 +489,12 @@ const FuerVereine = () => {
                   {(() => {
                     const skyPadel = partnerTiles?.find(t => t.slug === 'skypadel');
                     return (
-                      <div className="rounded-xl p-4 flex items-center justify-center shrink-0 w-48 md:w-56" style={{ backgroundColor: skyPadel?.bg_color || '#156184' }}>
+                      <div
+                        className="rounded-2xl p-3 md:p-6 h-20 md:h-36 w-36 md:w-56 flex items-center justify-center shrink-0 border border-border/30"
+                        style={{ backgroundColor: skyPadel?.bg_color || '#156184' }}
+                      >
                         {skyPadel?.logo_url ? (
-                          <img src={skyPadel.logo_url} alt="SkyPadel" className="max-h-16 w-auto object-contain" />
+                          <img src={skyPadel.logo_url} alt="SkyPadel" className="h-10 md:h-20 w-auto object-contain" />
                         ) : (
                           <span className="font-bold text-white text-xl">SkyPadel</span>
                         )}
@@ -495,105 +557,6 @@ const FuerVereine = () => {
             </div>
           </section>
 
-          <SectionDivider variant="glow" />
-
-          {/* SEKTION: Nutzen für euren Verein und eure Mitglieder */}
-          <section className="py-20 md:py-32 bg-gradient-to-b from-background via-primary/5 to-background">
-            <div className="container mx-auto px-4">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="max-w-5xl mx-auto">
-
-                <div className="text-center mb-16">
-                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-5">
-                    <Shield className="w-4 h-4" />
-                    Warum Vereine sich für P2G entscheiden
-                  </span>
-                  <h2 className="text-4xl md:text-6xl font-bold tracking-tight">
-                    Euer Verein gewinnt.<br />
-                    <span className="text-gradient-lime">Eure Mitglieder auch.</span>
-                  </h2>
-                </div>
-
-                {/* 6-Punkte-Raster mit zentralem Logo */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-                  {/* Linke Spalte */}
-                  <div className="space-y-4">
-                    {[
-                    { icon: Briefcase, title: "Keine Investitionskosten", description: "0€ für euren Verein – heute nicht, morgen nicht, niemals. P2G trägt alle Kosten für Court, Aufbau, Wartung und Betrieb." },
-                    { icon: LayoutGrid, title: "Keine eigene Organisation", description: "Buchungen, Wartung, Marketing – wir kümmern uns. Euer Verein konzentriert sich aufs Wesentliche." },
-                    { icon: Coins, title: "Zusätzliche Einnahmen", description: "Attraktive Umsatzbeteiligung – direkt auf euer Vereinskonto." },
-                    { icon: Package, title: "Starter-Equipment inklusive", description: "Jeder Verein erhält von uns ein Testschläger-Set und Bälle – damit kann sofort gespielt werden." }].
-                    map((item, index) =>
-                    <motion.div
-                      key={item.title}
-                      initial={{ opacity: 0, x: -30 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                      className="p-5 rounded-xl bg-background border border-border hover:border-primary/30 transition-all group">
-                      
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                            <item.icon className="w-5 h-5 text-primary" />
-                          </div>
-                          <div>
-                            <h4 className="font-bold mb-1">{item.title}</h4>
-                            <p className="text-sm text-muted-foreground">{item.description}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-
-                  {/* Zentrales Logo */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    className="flex items-center justify-center py-8 lg:py-0">
-                    
-                    <div className="relative">
-                      <div className="w-48 h-48 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/30 flex items-center justify-center shadow-2xl">
-                        <img src={p2gIconLogo} alt="PADEL2GO" className="w-36 h-36 md:w-48 md:h-48 object-contain" />
-                      </div>
-                      <div className="absolute inset-0 rounded-full border-2 border-primary/20 scale-110 animate-pulse" />
-                    </div>
-                  </motion.div>
-
-                  {/* Rechte Spalte */}
-                  <div className="space-y-4">
-                    {[
-                    { icon: Users, title: "Stärkung der Jugendarbeit", description: "Padel begeistert junge Menschen und stärkt eure Jugendabteilung nachhaltig." },
-                    { icon: TrendingUp, title: "Mitgliederzuwachs", description: "Vereine mit Padel berichten von bis zu 50% Mitgliederzuwachs – neue Zielgruppen erschließen." },
-                    { icon: Gem, title: "Alleinstellungsmerkmal", description: "Positioniert euren Verein als modernen, innovativen Sportverein in der Region." }].
-                    map((item, index) =>
-                    <motion.div
-                      key={item.title}
-                      initial={{ opacity: 0, x: 30 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                      className="p-5 rounded-xl bg-background border border-border hover:border-primary/30 transition-all group">
-                      
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                            <item.icon className="w-5 h-5 text-primary" />
-                          </div>
-                          <div>
-                            <h4 className="font-bold mb-1">{item.title}</h4>
-                            <p className="text-sm text-muted-foreground">{item.description}</p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </section>
 
           <SectionDivider variant="glow" />
 
@@ -752,93 +715,6 @@ const FuerVereine = () => {
             </div>
           </section>
 
-          {/* SEKTION: KI-Kameras & P2G-Liga */}
-          <section id="digital" className="py-14 md:py-24 bg-card/30">
-            <div className="container mx-auto px-4">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="max-w-4xl mx-auto">
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                  className="p-8 md:p-10 rounded-3xl bg-gradient-to-br from-primary/5 via-card to-card border border-primary/20">
-                  
-                  <div className="w-full max-w-md mx-auto mb-8 aspect-video rounded-2xl bg-muted border border-primary/20 overflow-hidden">
-                    <SiteVisual
-                      visualKey="fuer-vereine.ki-kamera"
-                      alt="KI-Kamera System"
-                      className="w-full h-full object-cover" />
-                  </div>
-
-                  <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mb-2">
-                    <h3 className="text-lg md:text-2xl lg:text-3xl font-bold flex items-center gap-3">
-                      <Target className="w-6 h-6 md:w-8 md:h-8 text-primary shrink-0" />
-                      NEU: KI-Kameras & P2G-Liga
-                    </h3>
-                    {(() => {
-                      const wingfield = partnerTiles?.find(t => t.slug === 'wingfield');
-                      return (
-                        <div className="flex items-center gap-2 px-4 py-2 rounded-full shrink-0" style={{ backgroundColor: wingfield?.bg_color || "#3FBB7D" }}>
-                          {wingfield?.logo_url ? (
-                            <img src={wingfield.logo_url} alt="Wingfield" className="h-5 w-auto object-contain" />
-                          ) : null}
-                          <span className="text-xs font-semibold text-white">Powered by Wingfield</span>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                  <p className="text-base text-muted-foreground mb-1 ml-11">
-                    (auch ohne <BrandName inline />-Court)
-                  </p>
-
-                  <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                    Sie betreiben bereits eigene Padel Courts und möchten ohne Court-Investition trotzdem unser digitales System nutzen?
-                    Dann bieten wir jetzt auch unser KI- & Plattform-Modul separat an.
-                  </p>
-
-                  <div className="grid sm:grid-cols-2 gap-4 mb-8">
-                    {kiKameraFeatures.map((item, index) =>
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.05 }}
-                      className="p-5 rounded-xl bg-background/50 border border-border/50 hover:border-primary/30 transition-colors group"
-                      whileHover={{ x: 5 }}>
-                      
-                        <div className="flex items-start gap-3 mb-2">
-                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                            <item.icon className="w-5 h-5 text-primary" />
-                          </div>
-                          <h4 className="font-semibold text-foreground pt-2">{item.title}</h4>
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed pl-13">
-                          {item.description}
-                        </p>
-                      </motion.div>
-                    )}
-                  </div>
-
-                  <div className="text-center pt-6 border-t border-border/50">
-                    <a
-                      href="#termin"
-                      className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white/20 border border-white/30 text-foreground hover:bg-white/30 transition-all font-medium">
-                      <CalendarCheck className="w-5 h-5" />
-                      Termin buchen – kostenlos
-                    </a>
-                  </div>
-                </motion.div>
-              </motion.div>
-            </div>
-          </section>
-
-          <SectionDivider variant="glow" />
 
           {/* SEKTION: Termin buchen */}
           <section id="termin" className="py-14 md:py-24 bg-gradient-to-b from-background via-primary/5 to-background">
