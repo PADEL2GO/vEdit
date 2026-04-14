@@ -994,23 +994,6 @@ const FuerSpieler = () => {
                 ))}
               </div>
 
-              {/* DEMO VIDEOS */}
-              <div className="grid md:grid-cols-2 gap-5 mb-12">
-                {(["fuer-spieler.ki.video-1", "fuer-spieler.ki.video-2"] as const).map((key, i) => (
-                  <motion.div
-                    key={key}
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="aspect-video rounded-2xl overflow-hidden border"
-                    style={{ borderColor: "rgba(56,189,248,0.2)", background: "#0a0f1a", boxShadow: "0 0 40px rgba(56,189,248,0.07)" }}
-                  >
-                    <VideoEmbed visualKey={key} title={`KI-Analyse Demo ${i + 1}`} />
-                  </motion.div>
-                ))}
-              </div>
-
               {/* FEATURE CARDS */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
                 {kiFeatures.map((f, i) => (
