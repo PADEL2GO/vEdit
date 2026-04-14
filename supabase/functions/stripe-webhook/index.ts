@@ -544,17 +544,17 @@ serve(async (req) => {
 
         logStep("Processing expired checkout", { sessionId: session.id, bookingId });
 
-        // Update booking to expired
+        // Cancel booking (unpaid — session expired)
         const { error: bookingError } = await supabaseAdmin
           .from("bookings")
-          .update({ status: "expired" })
+          .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
           .eq("id", bookingId)
-          .eq("status", "pending_payment"); // Only expire if still pending
+          .eq("status", "pending_payment"); // Only cancel if still unpaid
 
         if (bookingError) {
-          logStep("Failed to expire booking", { error: bookingError.message });
+          logStep("Failed to cancel expired booking", { error: bookingError.message });
         } else {
-          logStep("Booking expired", { bookingId });
+          logStep("Booking cancelled (unpaid session expired)", { bookingId });
         }
 
         // Update payment record
