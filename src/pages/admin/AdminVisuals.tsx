@@ -161,10 +161,11 @@ export default function AdminVisuals() {
 
                       {/* Actions */}
                       {isVideoKey(visual.key) ? (
-                        /* Video / URL mode */
+                        /* Video — URL input OR direct file upload */
                         <div className="space-y-2">
+                          {/* URL */}
                           <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Video className="h-3 w-3" /> YouTube-, Vimeo- oder .mp4-URL einfügen:
+                            <Link className="h-3 w-3" /> Link (YouTube, Vimeo, .mp4-URL)
                           </p>
                           <div className="flex gap-2">
                             <Input
@@ -181,10 +182,40 @@ export default function AdminVisuals() {
                               onClick={() => handleSaveUrl(visual.key)}
                               disabled={setUrlMutation.isPending}
                             >
-                              <Link className="h-3.5 w-3.5 mr-1" />
                               OK
                             </Button>
                           </div>
+
+                          {/* Divider */}
+                          <div className="flex items-center gap-2 py-0.5">
+                            <div className="flex-1 h-px bg-border" />
+                            <span className="text-[10px] text-muted-foreground">oder</span>
+                            <div className="flex-1 h-px bg-border" />
+                          </div>
+
+                          {/* Direct file upload */}
+                          <input
+                            type="file"
+                            accept="video/*"
+                            className="hidden"
+                            ref={(el) => { fileInputRefs.current[`${visual.key}__video`] = el; }}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleFileSelect(visual.key, file);
+                              e.target.value = "";
+                            }}
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full text-xs"
+                            onClick={() => fileInputRefs.current[`${visual.key}__video`]?.click()}
+                            disabled={isUploading}
+                          >
+                            <Upload className="h-3.5 w-3.5 mr-1" />
+                            {isUploading ? "Wird hochgeladen…" : "Video hochladen (.mp4, .webm)"}
+                          </Button>
+
                           {hasImage && (
                             <Button
                               variant="outline"
