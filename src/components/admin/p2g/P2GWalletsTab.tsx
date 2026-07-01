@@ -71,6 +71,9 @@ export function P2GWalletsTab() {
   const [adjustReason, setAdjustReason] = useState("");
   const [adjustType, setAdjustType] = useState<"reward" | "play">("reward");
   const [adjustMode, setAdjustMode] = useState<"add" | "subtract">("add");
+  const [valueMode, setValueMode] = useState<"relative" | "set">("relative");
+  const [targetValue, setTargetValue] = useState("");
+  const [lifetimeValue, setLifetimeValue] = useState("");
   const queryClient = useQueryClient();
 
   // Fetch all wallets
@@ -103,11 +106,33 @@ export function P2GWalletsTab() {
   const adjustMutation = useMutation({
     mutationFn: async () => {
       if (!selectedUserId) throw new Error("No user selected");
+      if (!adjustReason.trim()) throw new Error("Grund ist erforderlich");
+
+      if (valueMode === "set") {
+        const target = parseInt(targetValue);
+        if (isNaN(target) || target < 0) throw new Error("Invalid target value");
+        const lifetime = lifetimeValue.trim() === "" ? undefined : parseInt(lifetimeValue);
+        if (lifetime !== undefined && isNaN(lifetime)) throw new Error("Invalid lifetime value");
+
+        const { data, error } = await supabase.functions.invoke("admin-credits", {
+          body: {
+            action: "set_credits",
+            userId: selectedUserId,
+            creditType: adjustType.toUpperCase(),
+            targetValue: target,
+            lifetimeValue: lifetime,
+            reason: adjustReason,
+          },
+        });
+        if (error) throw error;
+        return data;
+      }
+
       const amount = parseInt(adjustAmount);
       if (isNaN(amount) || amount <= 0) throw new Error("Invalid amount");
-      
+
       const finalAmount = adjustMode === "subtract" ? -amount : amount;
-      
+
       const { data, error } = await supabase.functions.invoke("admin-credits", {
         body: {
           action: "adjust_credits",
@@ -125,6 +150,8 @@ export function P2GWalletsTab() {
       setAdjustDialogOpen(false);
       setAdjustAmount("");
       setAdjustReason("");
+      setTargetValue("");
+      setLifetimeValue("");
       queryClient.invalidateQueries({ queryKey: ["admin-wallets"] });
       queryClient.invalidateQueries({ queryKey: ["admin-wallet-details", selectedUserId] });
       queryClient.invalidateQueries({ queryKey: ["admin-credit-stats"] });
@@ -147,6 +174,7 @@ export function P2GWalletsTab() {
 
   const openAdjustDialog = (mode: "add" | "subtract") => {
     setAdjustMode(mode);
+    setValueMode("relative");
     setAdjustDialogOpen(true);
   };
 
@@ -345,10 +373,33 @@ export function P2GWalletsTab() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Credits {adjustMode === "add" ? "hinzufügen" : "abziehen"}
+              {valueMode === "set"
+                ? "Credits auf Wert setzen"
+                : `Credits ${adjustMode === "add" ? "hinzufügen" : "abziehen"}`}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Modus</Label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  type="button"
+                  variant={valueMode === "relative" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setValueMode("relative")}
+                >
+                  Anpassen (+/-)
+                </Button>
+                <Button
+                  type="button"
+                  variant={valueMode === "set" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setValueMode("set")}
+                >
+                  Auf Wert setzen
+                </Button>
+              </div>
+            </div>
             <div className="space-y-2">
               <Label>Credit-Typ</Label>
               <Select
@@ -364,17 +415,40 @@ export function P2GWalletsTab() {
                 </SelectContent>
               </Select>
             </div>
+            {valueMode === "set" ? (
+              <>
+                <div className="space-y-2">
+                  <Label>Zielwert</Label>
+                  <Input
+                    type="number"
+                    placeholder="z.B. 500"
+                    value={targetValue}
+                    onChange={(e) => setTargetValue(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Lifetime Credits (optional)</Label>
+                  <Input
+                    type="number"
+                    placeholder="Unverändert lassen wenn leer"
+                    value={lifetimeValue}
+                    onChange={(e) => setLifetimeValue(e.target.value)}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <Label>Betrag</Label>
+                <Input
+                  type="number"
+                  placeholder="z.B. 100"
+                  value={adjustAmount}
+                  onChange={(e) => setAdjustAmount(e.target.value)}
+                />
+              </div>
+            )}
             <div className="space-y-2">
-              <Label>Betrag</Label>
-              <Input
-                type="number"
-                placeholder="z.B. 100"
-                value={adjustAmount}
-                onChange={(e) => setAdjustAmount(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Grund (optional)</Label>
+              <Label>Grund</Label>
               <Textarea
                 placeholder="Interner Vermerk..."
                 value={adjustReason}
@@ -389,16 +463,24 @@ export function P2GWalletsTab() {
             </Button>
             <Button
               onClick={() => adjustMutation.mutate()}
-              disabled={adjustMutation.isPending || !adjustAmount}
+              disabled={
+                adjustMutation.isPending ||
+                !adjustReason.trim() ||
+                (valueMode === "set" ? !targetValue : !adjustAmount)
+              }
             >
               {adjustMutation.isPending ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : adjustMode === "add" ? (
+              ) : valueMode === "set" ? null : adjustMode === "add" ? (
                 <Plus className="w-4 h-4 mr-2" />
               ) : (
                 <Minus className="w-4 h-4 mr-2" />
               )}
-              {adjustMode === "add" ? "Hinzufügen" : "Abziehen"}
+              {valueMode === "set"
+                ? "Wert setzen"
+                : adjustMode === "add"
+                ? "Hinzufügen"
+                : "Abziehen"}
             </Button>
           </DialogFooter>
         </DialogContent>
