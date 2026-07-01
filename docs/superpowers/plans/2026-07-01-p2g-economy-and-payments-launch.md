@@ -10,6 +10,11 @@
 
 **Spec:** `docs/superpowers/specs/2026-07-01-p2g-economy-and-payments-launch-design.md`
 
+**Execution:** Subagent-driven, on branch `feature/p2g-economy-payments` (kept off `main` so
+half-built money code never auto-deploys to Vercel; merge to main when the epic is complete +
+reviewed). **Progress:** ✅ Task 1 done (migration `20260702000000`, commit `a041f357`) — the
+implementer correctly rewrote three `<` guards to `>=`/`>` for SQL-editor safety. Tasks 2–18 pending.
+
 **Testing note:** This repo has no unit-test harness (per CLAUDE.md). Verification per task = `npx tsc --noEmit -p tsconfig.app.json` + `npm run build` (frontend) / structural + brace checks (Deno functions) + the manual + adversarial checks called out. **Every new money/points edge-function path gets an adversarial correctness review before deploy** (as done for P1 wallet integrity and cancel-booking).
 
 **Deploy note:** New DB objects must be run in the Supabase SQL editor; changed edge functions redeployed; frontend auto-deploys via Vercel. Migrations must be ASCII + use named `$tag$` dollar-quotes + no `<` chars (the SQL editor mishandles bare `$$` and `<`).
