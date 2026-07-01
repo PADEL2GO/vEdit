@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Coins, Users, CheckCircle, Settings, Package, Trophy } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Coins, Users, CheckCircle, Settings, Package, Trophy, Loader2, Save } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { P2GDashboardTab } from "@/components/admin/p2g/P2GDashboardTab";
 import { P2GWalletsTab } from "@/components/admin/p2g/P2GWalletsTab";
 import { P2GApprovalsTab } from "@/components/admin/p2g/P2GApprovalsTab";
@@ -21,6 +29,179 @@ const TABS = [
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
+
+function P2GExchangeRateCard() {
+  const [creditsPerEuro, setCreditsPerEuro] = useState(100);
+  const [creditsMaxPercent, setCreditsMaxPercent] = useState(50);
+  const [creditsPaymentEnabled, setCreditsPaymentEnabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("site_settings")
+        .select("credits_per_euro, credits_payment_max_percent, feature_credits_payment_enabled")
+        .eq("id", "global")
+        .single();
+
+      if (error) throw error;
+
+      const d = data as any;
+      setCreditsPerEuro(d?.credits_per_euro ?? 100);
+      setCreditsMaxPercent(d?.credits_payment_max_percent ?? 50);
+      setCreditsPaymentEnabled(d?.feature_credits_payment_enabled ?? false);
+    } catch (error) {
+      console.error("Error fetching P2G Punktewert settings:", error);
+      toast.error("Fehler beim Laden der Punktewert-Einstellungen");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleCreditsPayment = async (enabled: boolean) => {
+    setIsToggling(true);
+    try {
+      const { error } = await supabase
+        .from("site_settings")
+        .update({ feature_credits_payment_enabled: enabled, updated_at: new Date().toISOString() })
+        .eq("id", "global");
+      if (error) throw error;
+      setCreditsPaymentEnabled(enabled);
+      toast.success(enabled ? "Punkte-Zahlung aktiviert" : "Punkte-Zahlung deaktiviert");
+    } catch (error) {
+      toast.error("Fehler beim Speichern");
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
+  const saveExchangeRate = async () => {
+    if (creditsPerEuro < 1) {
+      toast.error("Punkte pro Euro muss mindestens 1 sein");
+      return;
+    }
+    if (creditsMaxPercent < 1 || creditsMaxPercent > 100) {
+      toast.error("Max. Prozent muss zwischen 1 und 100 liegen");
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from("site_settings")
+        .update({
+          credits_per_euro: creditsPerEuro,
+          credits_payment_max_percent: creditsMaxPercent,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", "global");
+      if (error) throw error;
+      toast.success("Punktewert-Einstellungen gespeichert");
+    } catch (error) {
+      toast.error("Fehler beim Speichern");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="bg-card border-border">
+        <CardContent className="pt-6 flex items-center justify-center py-10">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const euroValue =
+    creditsPerEuro > 0
+      ? (100 / creditsPerEuro).toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : "0,00";
+
+  return (
+    <Card className="bg-card border-border">
+      <CardHeader className="pb-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className={`p-3 rounded-xl ${creditsPaymentEnabled ? "bg-primary/10" : "bg-muted"}`}>
+              <Coins className={`h-6 w-6 ${creditsPaymentEnabled ? "text-primary" : "text-muted-foreground"}`} />
+            </div>
+            <div>
+              <CardTitle className="text-lg text-foreground flex items-center gap-2">
+                P2G Punktewert
+                {creditsPaymentEnabled ? (
+                  <Badge variant="default" className="bg-green-500/20 text-green-600 border-green-500/30">
+                    Aktiv
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-muted-foreground">
+                    Inaktiv
+                  </Badge>
+                )}
+              </CardTitle>
+              <CardDescription className="mt-1">
+                Wechselkurs für P2G Punkte als Zahlungsmittel beim Buchungs-Checkout.
+              </CardDescription>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-sm text-muted-foreground">
+              {creditsPaymentEnabled ? "Aktiv" : "Inaktiv"}
+            </span>
+            <Switch
+              checked={creditsPaymentEnabled}
+              onCheckedChange={toggleCreditsPayment}
+              disabled={isToggling}
+            />
+            {isToggling && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="border-t border-border/50 pt-4 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-sm text-foreground">Punkte pro Euro</Label>
+            <p className="text-xs text-muted-foreground">Wie viele P2G Punkte einem Euro entsprechen.</p>
+            <Input
+              type="number"
+              min={1}
+              value={creditsPerEuro}
+              onChange={(e) => setCreditsPerEuro(Number(e.target.value))}
+              className="w-32"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-sm text-foreground">Max. Rabatt durch Punkte (%)</Label>
+            <p className="text-xs text-muted-foreground">
+              Wie viel Prozent des Buchungspreises maximal mit Punkten bezahlt werden kann.
+            </p>
+            <Input
+              type="number"
+              min={1}
+              max={100}
+              value={creditsMaxPercent}
+              onChange={(e) => setCreditsMaxPercent(Number(e.target.value))}
+              className="w-32"
+            />
+          </div>
+        </div>
+        <p className="text-sm font-medium text-foreground">
+          100 Punkte = {euroValue} €
+        </p>
+        <Button size="sm" onClick={saveExchangeRate} disabled={isSaving} className="gap-2">
+          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          Einstellungen speichern
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AdminP2GPoints() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -66,7 +247,10 @@ export default function AdminP2GPoints() {
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-0">
-            <P2GDashboardTab />
+            <div className="space-y-6">
+              <P2GExchangeRateCard />
+              <P2GDashboardTab />
+            </div>
           </TabsContent>
 
           <TabsContent value="wallets" className="mt-0">
