@@ -35,7 +35,7 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // Check if user is admin
+    // Check if user is admin (user_roles row OR superadmin email bypass)
     const { data: adminRole } = await supabaseAdmin
       .from("user_roles")
       .select("role")
@@ -43,7 +43,9 @@ serve(async (req) => {
       .eq("role", "admin")
       .single();
 
-    if (!adminRole) {
+    const isSuperadmin = user.email === "fsteinfelder@padel2go.eu";
+
+    if (!adminRole && !isSuperadmin) {
       throw new Error("Admin access required");
     }
 
@@ -210,10 +212,78 @@ serve(async (req) => {
 
       logStep("Credit adjustment complete", { userId, amount: points, newBalance });
 
-      return new Response(JSON.stringify({ 
-        success: true, 
+      return new Response(JSON.stringify({
+        success: true,
         newBalance,
         adjustment: points,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // SET credits to an absolute value (via service-role RPC)
+    if (action === "set_credits") {
+      const { userId, creditType, targetValue, lifetimeValue, reason } = body;
+
+      if (!userId) throw new Error("userId required");
+      if (!reason) throw new Error("reason required");
+      if (!["REWARD", "PLAY"].includes(creditType)) throw new Error("Invalid creditType");
+      if (typeof targetValue !== "number" || targetValue < 0) throw new Error("Invalid targetValue");
+
+      const { data: wallet } = await supabaseAdmin
+        .from("wallets")
+        .select("reward_credits, play_credits, lifetime_credits")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const current = creditType === "REWARD" ? (wallet?.reward_credits ?? 0) : (wallet?.play_credits ?? 0);
+      const delta = targetValue - current;
+
+      const { error: rpcError } = await supabaseAdmin.rpc("set_wallet_credits", {
+        p_user_id: userId,
+        p_credit_type: creditType,
+        p_value: targetValue,
+        p_lifetime: typeof lifetimeValue === "number" ? lifetimeValue : null,
+      });
+
+      if (rpcError) throw new Error(rpcError.message);
+
+      // Create ledger entry
+      const { error: ledgerError } = await supabaseAdmin.from("points_ledger").insert({
+        user_id: userId,
+        credit_type: creditType === "REWARD" ? "REWARD" : "SKILL",
+        delta_points: delta,
+        balance_after: targetValue,
+        entry_type: "ADMIN_SET",
+        description: `Admin set: ${reason}`,
+      });
+
+      if (ledgerError) throw ledgerError;
+
+      // Log admin activity
+      await supabaseAdmin.from("admin_activity_log").insert({
+        admin_user_id: user.id,
+        action: "CREDIT_SET",
+        target_type: "user",
+        target_id: userId,
+        details: { creditType, targetValue, delta, lifetimeValue, reason },
+      });
+
+      // Create notification for user
+      await supabaseAdmin.from("notifications").insert({
+        user_id: userId,
+        type: "credit_adjustment",
+        title: "P2G Punkte aktualisiert",
+        message: "Dein Punktestand wurde angepasst.",
+      });
+
+      logStep("Credit set complete", { userId, creditType, targetValue, delta });
+
+      return new Response(JSON.stringify({
+        success: true,
+        delta,
+        newBalance: targetValue,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
