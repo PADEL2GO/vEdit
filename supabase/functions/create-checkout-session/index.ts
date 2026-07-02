@@ -226,6 +226,26 @@ serve(async (req) => {
     const totalPriceCents = priceCents!;
     logStep("Price determined", { totalPriceCents });
 
+    // Serialize checkout per booking so only ONE attempt can ever hold a points reserve
+    // on this booking. claim_checkout runs the check+set under one row-locked txn, so a
+    // concurrent double-click loses here and is rejected BEFORE it releases/reserves
+    // anything — it has no reserve to refund and cannot clobber the winner's reserve.
+    const checkoutToken = crypto.randomUUID();
+    const { data: claimed, error: claimError } = await supabaseAdmin.rpc("claim_checkout", {
+      p_booking_id: booking.id,
+      p_token: checkoutToken,
+    });
+    if (claimError || claimed !== true) {
+      logStep("Checkout claim rejected — concurrent attempt in progress", { bookingId: booking.id, error: claimError?.message });
+      return new Response(JSON.stringify({
+        error: "checkout_in_progress",
+        message: "Ein Bezahlvorgang fuer diese Buchung laeuft bereits. Bitte einen Moment warten und erneut versuchen.",
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 409,
+      });
+    }
+
     // Idempotency: release any reserve left over from a PRIOR checkout attempt on
     // this booking (payment retry / re-click). The booking stores only the latest
     // reserve, so without this a prior reserve is orphaned — permanently losing the
@@ -419,9 +439,12 @@ serve(async (req) => {
         }
       }
       if (resetBooking) {
+        // Also clear the checkout claim so a legitimate sequential retry can re-claim
+        // immediately (no 2-minute staleness wait). Kept out of the resetBooking=false
+        // lost-race branch: there the reserve/claim belong to the request that won.
         await supabaseAdmin
           .from("bookings")
-          .update({ reserved_credits: 0, reserved_reward: 0, reserved_voucher_id: null })
+          .update({ reserved_credits: 0, reserved_reward: 0, reserved_voucher_id: null, checkout_claim: null, checkout_claimed_at: null })
           .eq("id", booking.id);
       }
     };
