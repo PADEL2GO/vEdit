@@ -411,6 +411,39 @@ serve(async (req) => {
     // request's own wallet/voucher hold and never zero the winner's reserve.
     const releaseReserves = async (opts?: { resetBooking?: boolean }) => {
       const resetBooking = opts?.resetBooking !== false;
+      if (resetBooking) {
+        // Persist WON: reserved_credits / reserved_reward / reserved_voucher_id on the
+        // booking row ARE this request's reserve. Refund via the idempotent RPC (mirrors
+        // how marketplace releaseOrder uses release_marketplace_order) instead of a manual
+        // refund_points + voucher decrement + column zero. The RPC refunds
+        // reserved_credits->play + reserved_reward->reward, decrements the soft-reserved
+        // voucher use, and zeroes the reserved_* columns — all row-locked and pending-only.
+        // Because it refunds FROM the booking columns (not this request's in-memory
+        // applied* values), it is a harmless no-op when the per-minute
+        // cleanup_expired_bookings cron already released the same reserve via the same RPC
+        // — so no double refund against the cron.
+        const { error: releaseError } = await supabaseAdmin.rpc("release_booking_reserves", {
+          p_booking_id: booking.id,
+        });
+        if (releaseError) {
+          logStep("Failed to release booking reserves", { bookingId: booking.id, error: releaseError.message });
+        } else {
+          logStep("Booking reserves released (idempotent)", { bookingId: booking.id, play: appliedPlay, reward: appliedReward, voucherId: appliedVoucherId ?? null });
+        }
+        // release_booking_reserves deliberately does NOT clear the checkout claim (it is
+        // also called at start-of-request to refund a PRIOR reserve, where clearing would
+        // drop the winner's fresh claim). Clear it here so a legitimate sequential retry
+        // can re-claim immediately (no 2-minute staleness wait).
+        await supabaseAdmin
+          .from("bookings")
+          .update({ checkout_claim: null, checkout_claimed_at: null })
+          .eq("id", booking.id);
+        return;
+      }
+      // Persist LOST: this request debited the wallet + soft-reserved the voucher but never
+      // wrote them onto the booking row (the reserved_* columns belong to the winning
+      // request), so refund only THIS request's own orphaned wallet debit and release its
+      // own voucher soft-reserve; never touch the booking columns.
       if ((appliedPlay > 0 || appliedReward > 0) && user) {
         const { error: refundError } = await supabaseAdmin.rpc("refund_points", {
           p_user_id: user.id,
@@ -437,15 +470,6 @@ serve(async (req) => {
             .eq("current_uses", vData.current_uses); // optimistic lock
           logStep("Voucher soft reserve released", { voucherId: appliedVoucherId });
         }
-      }
-      if (resetBooking) {
-        // Also clear the checkout claim so a legitimate sequential retry can re-claim
-        // immediately (no 2-minute staleness wait). Kept out of the resetBooking=false
-        // lost-race branch: there the reserve/claim belong to the request that won.
-        await supabaseAdmin
-          .from("bookings")
-          .update({ reserved_credits: 0, reserved_reward: 0, reserved_voucher_id: null, checkout_claim: null, checkout_claimed_at: null })
-          .eq("id", booking.id);
       }
     };
 
