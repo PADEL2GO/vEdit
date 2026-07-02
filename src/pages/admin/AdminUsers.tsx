@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -53,6 +53,8 @@ import {
   TrendingUp,
   TrendingDown,
   CircleDot,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -68,7 +70,10 @@ import { de } from "date-fns/locale";
 import { toast } from "sonner";
 
 interface UserWithDetails {
+  id: string;
   user_id: string;
+  email: string | null;
+  email_confirmed_at: string | null;
   display_name: string | null;
   username: string | null;
   avatar_url: string | null;
@@ -85,13 +90,12 @@ interface UserWithDetails {
   shipping_country: string | null;
   referral_code: string | null;
   roles: string[];
+  role: string | null;
   wallet?: {
     play_credits: number;
     reward_credits: number;
     lifetime_credits: number;
   };
-  matchCount?: number;
-  bookingCount?: number;
 }
 
 export default function AdminUsers() {
@@ -103,84 +107,40 @@ export default function AdminUsers() {
   const [userToDelete, setUserToDelete] = useState<UserWithDetails | null>(null);
   const queryClient = useQueryClient();
 
-  // Fetch all users with extended data
-  const { data: users, isLoading } = useQuery({
-    queryKey: ["admin-all-users-extended"],
+  const PER_PAGE = 25;
+  const [page, setPage] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Fetch ALL registered users (server-paginated over auth.users, enriched with profile/roles/wallet)
+  const { data: usersResult, isLoading } = useQuery({
+    queryKey: ["admin-all-users", page, debouncedSearch],
     queryFn: async () => {
-      // Get profiles
-      const { data: profiles, error } = await supabase
-        .from("profiles")
-        .select(`
-          user_id,
-          display_name,
-          username,
-          avatar_url,
-          age,
-          skill_self_rating,
-          games_played_self,
-          created_at,
-          email_verified_at,
-          phone_verified_at,
-          profile_completed_at,
-          shipping_address_line1,
-          shipping_city,
-          shipping_postal_code,
-          shipping_country,
-          referral_code
-        `)
-        .order("created_at", { ascending: false });
-
+      const { data, error } = await supabase.functions.invoke("admin-credits", {
+        body: { action: "list_all_users", page, perPage: PER_PAGE, search: debouncedSearch },
+      });
       if (error) throw error;
-
-      // Fetch roles
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("user_id, role");
-
-      const rolesMap = new Map<string, string[]>();
-      roles?.forEach((r) => {
-        if (!rolesMap.has(r.user_id)) {
-          rolesMap.set(r.user_id, []);
-        }
-        rolesMap.get(r.user_id)!.push(r.role);
-      });
-
-      // Fetch wallets
-      const { data: wallets } = await supabase
-        .from("wallets")
-        .select("user_id, play_credits, reward_credits, lifetime_credits");
-
-      const walletsMap = new Map(wallets?.map((w) => [w.user_id, w]));
-
-      // Fetch match counts
-      const { data: matchCounts } = await supabase
-        .from("match_analyses")
-        .select("user_id");
-
-      const matchCountMap = new Map<string, number>();
-      matchCounts?.forEach((m) => {
-        matchCountMap.set(m.user_id, (matchCountMap.get(m.user_id) || 0) + 1);
-      });
-
-      // Fetch booking counts
-      const { data: bookingCounts } = await supabase
-        .from("bookings")
-        .select("user_id");
-
-      const bookingCountMap = new Map<string, number>();
-      bookingCounts?.forEach((b) => {
-        bookingCountMap.set(b.user_id, (bookingCountMap.get(b.user_id) || 0) + 1);
-      });
-
-      return profiles?.map((p): UserWithDetails => ({
-        ...p,
-        roles: rolesMap.get(p.user_id) || [],
-        wallet: walletsMap.get(p.user_id) || { play_credits: 0, reward_credits: 0, lifetime_credits: 0 },
-        matchCount: matchCountMap.get(p.user_id) || 0,
-        bookingCount: bookingCountMap.get(p.user_id) || 0,
-      })) || [];
+      if (data?.error) throw new Error(data.error);
+      return data as {
+        users: UserWithDetails[];
+        total: number;
+        page: number;
+        perPage: number;
+        hasMore: boolean;
+      };
     },
   });
+
+  const users = usersResult?.users;
+  const total = usersResult?.total ?? 0;
+  const hasMore = usersResult?.hasMore ?? false;
 
   // Fetch user details (matches, bookings, ledger)
   const { data: userDetails, isLoading: isLoadingDetails } = useQuery({
@@ -227,7 +187,19 @@ export default function AdminUsers() {
         .eq("user_id", selectedUser.user_id)
         .maybeSingle();
 
-      return { matches, bookings, ledger, skillStats };
+      // Total match / booking counts (cheap, selected user only)
+      const [{ count: matchCount }, { count: bookingCount }] = await Promise.all([
+        supabase
+          .from("match_analyses")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", selectedUser.user_id),
+        supabase
+          .from("bookings")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", selectedUser.user_id),
+      ]);
+
+      return { matches, bookings, ledger, skillStats, matchCount: matchCount ?? 0, bookingCount: bookingCount ?? 0 };
     },
     enabled: !!selectedUser?.user_id,
   });
@@ -251,7 +223,7 @@ export default function AdminUsers() {
     },
     onSuccess: () => {
       toast.success("Rolle aktualisiert");
-      queryClient.invalidateQueries({ queryKey: ["admin-all-users-extended"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
     },
     onError: (error: Error) => {
       toast.error("Fehler: " + error.message);
@@ -273,21 +245,11 @@ export default function AdminUsers() {
       setUserToDelete(null);
       setDeleteConfirmText("");
       setSelectedUser(null);
-      queryClient.invalidateQueries({ queryKey: ["admin-all-users-extended"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
     },
     onError: (error: Error) => {
       toast.error("Fehler beim Löschen: " + error.message);
     },
-  });
-
-  const filteredUsers = users?.filter((user) => {
-    if (!searchQuery) return true;
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      user.display_name?.toLowerCase().includes(searchLower) ||
-      user.username?.toLowerCase().includes(searchLower) ||
-      user.user_id?.toLowerCase().includes(searchLower)
-    );
   });
 
   const openDeleteDialog = (user: UserWithDetails) => {
@@ -326,7 +288,7 @@ export default function AdminUsers() {
           </div>
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            <span className="text-lg font-semibold text-foreground">{users?.length || 0}</span>
+            <span className="text-lg font-semibold text-foreground">{total}</span>
           </div>
         </div>
 
@@ -349,13 +311,13 @@ export default function AdminUsers() {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-foreground">
-              Benutzerliste ({filteredUsers?.length || 0})
+              Benutzerliste ({total})
             </CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <p className="text-muted-foreground">Laden...</p>
-            ) : filteredUsers && filteredUsers.length > 0 ? (
+            ) : users && users.length > 0 ? (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -363,15 +325,13 @@ export default function AdminUsers() {
                       <TableHead className="text-muted-foreground">Benutzer</TableHead>
                       <TableHead className="text-muted-foreground">Username</TableHead>
                       <TableHead className="text-muted-foreground">Credits</TableHead>
-                      <TableHead className="text-muted-foreground">Matches</TableHead>
-                      <TableHead className="text-muted-foreground">Buchungen</TableHead>
                       <TableHead className="text-muted-foreground">Rollen</TableHead>
                       <TableHead className="text-muted-foreground">Registriert</TableHead>
                       <TableHead className="text-muted-foreground text-right">Aktionen</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map((user) => (
+                    {users.map((user) => (
                       <TableRow key={user.user_id} className="border-border">
                         <TableCell>
                           <div className="flex items-center gap-3">
@@ -381,9 +341,14 @@ export default function AdminUsers() {
                                 {user.display_name?.slice(0, 2).toUpperCase() || "??"}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="text-foreground font-medium">
-                              {user.display_name || "Unbekannt"}
-                            </span>
+                            <div className="min-w-0">
+                              <p className="text-foreground font-medium truncate">
+                                {user.display_name || "Unbekannt"}
+                              </p>
+                              {user.email && (
+                                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                              )}
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
@@ -395,18 +360,6 @@ export default function AdminUsers() {
                             <span className="text-foreground font-medium">
                               {(user.wallet?.reward_credits || 0) + (user.wallet?.play_credits || 0)}
                             </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Gamepad2 className="h-3.5 w-3.5 text-primary" />
-                            <span className="text-foreground">{user.matchCount || 0}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                            <span className="text-foreground">{user.bookingCount || 0}</span>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -531,6 +484,32 @@ export default function AdminUsers() {
                 Keine Benutzer gefunden
               </p>
             )}
+
+            {(page > 1 || hasMore) && (
+              <div className="flex items-center justify-between gap-2 flex-wrap pt-4">
+                <p className="text-sm text-muted-foreground">Seite {page}</p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page <= 1 || isLoading}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Zurück
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!hasMore || isLoading}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Weiter
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -589,11 +568,11 @@ export default function AdminUsers() {
                     </div>
                     <div className="p-3 bg-secondary/50 rounded-lg">
                       <p className="text-xs text-muted-foreground">Matches</p>
-                      <p className="text-xl font-bold text-foreground">{selectedUser.matchCount || 0}</p>
+                      <p className="text-xl font-bold text-foreground">{userDetails?.matchCount ?? 0}</p>
                     </div>
                     <div className="p-3 bg-secondary/50 rounded-lg">
                       <p className="text-xs text-muted-foreground">Buchungen</p>
-                      <p className="text-xl font-bold text-foreground">{selectedUser.bookingCount || 0}</p>
+                      <p className="text-xl font-bold text-foreground">{userDetails?.bookingCount ?? 0}</p>
                     </div>
                   </div>
 

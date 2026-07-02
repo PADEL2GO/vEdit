@@ -89,6 +89,144 @@ serve(async (req) => {
       });
     }
 
+    // LIST all registered users (server-paginated over auth.users, LEFT-JOIN profile/roles/wallet)
+    // so every registered user shows regardless of profile state
+    if (action === "list_all_users") {
+      const page = Math.max(1, parseInt(String(body.page ?? "1"), 10) || 1);
+      const perPage = Math.min(200, Math.max(1, parseInt(String(body.perPage ?? "50"), 10) || 50));
+      const search = typeof body.search === "string" ? body.search.trim().toLowerCase() : "";
+
+      const richProfileCols =
+        "user_id, display_name, username, avatar_url, age, skill_self_rating, games_played_self, email_verified_at, phone_verified_at, profile_completed_at, shipping_address_line1, shipping_city, shipping_postal_code, shipping_country, referral_code";
+
+      type AuthUser = { id: string; email?: string | null; created_at: string; email_confirmed_at?: string | null };
+
+      const enrichPage = async (authUsers: AuthUser[]) => {
+        const ids = authUsers.map((u) => u.id);
+        if (ids.length === 0) return [];
+
+        const [{ data: profiles }, { data: roles }, { data: wallets }] = await Promise.all([
+          supabaseAdmin.from("profiles").select(richProfileCols).in("user_id", ids),
+          supabaseAdmin.from("user_roles").select("user_id, role").in("user_id", ids),
+          supabaseAdmin.from("wallets").select("user_id, reward_credits, play_credits, lifetime_credits").in("user_id", ids),
+        ]);
+
+        const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+        const rolesMap = new Map<string, string[]>();
+        (roles ?? []).forEach((r) => {
+          const list = rolesMap.get(r.user_id) ?? [];
+          list.push(r.role);
+          rolesMap.set(r.user_id, list);
+        });
+        const walletMap = new Map((wallets ?? []).map((w) => [w.user_id, w]));
+
+        return authUsers.map((u) => {
+          const profile = profileMap.get(u.id) as Record<string, unknown> | undefined;
+          const wallet = walletMap.get(u.id) ?? { play_credits: 0, reward_credits: 0, lifetime_credits: 0 };
+          const userRoles = rolesMap.get(u.id) ?? [];
+          return {
+            id: u.id,
+            user_id: u.id,
+            email: u.email ?? null,
+            created_at: u.created_at,
+            email_confirmed_at: u.email_confirmed_at ?? null,
+            display_name: (profile?.display_name as string | null) ?? null,
+            username: (profile?.username as string | null) ?? null,
+            avatar_url: (profile?.avatar_url as string | null) ?? null,
+            age: (profile?.age as number | null) ?? null,
+            skill_self_rating: (profile?.skill_self_rating as number | null) ?? null,
+            games_played_self: (profile?.games_played_self as number | null) ?? null,
+            email_verified_at: (profile?.email_verified_at as string | null) ?? null,
+            phone_verified_at: (profile?.phone_verified_at as string | null) ?? null,
+            profile_completed_at: (profile?.profile_completed_at as string | null) ?? null,
+            shipping_address_line1: (profile?.shipping_address_line1 as string | null) ?? null,
+            shipping_city: (profile?.shipping_city as string | null) ?? null,
+            shipping_postal_code: (profile?.shipping_postal_code as string | null) ?? null,
+            shipping_country: (profile?.shipping_country as string | null) ?? null,
+            referral_code: (profile?.referral_code as string | null) ?? null,
+            roles: userRoles,
+            role: userRoles[0] ?? null,
+            reward_credits: wallet.reward_credits ?? 0,
+            play_credits: wallet.play_credits ?? 0,
+            lifetime_credits: wallet.lifetime_credits ?? 0,
+            credits: (wallet.reward_credits ?? 0) + (wallet.play_credits ?? 0),
+            wallet: {
+              play_credits: wallet.play_credits ?? 0,
+              reward_credits: wallet.reward_credits ?? 0,
+              lifetime_credits: wallet.lifetime_credits ?? 0,
+            },
+          };
+        });
+      };
+
+      if (search) {
+        // Search must cover email (auth-only) plus display_name/username (profiles),
+        // so scan all auth users once (bounded), filter, then enrich only the page slice.
+        const allAuthUsers: AuthUser[] = [];
+        const scanPerPage = 200;
+        let scanPage = 1;
+        while (scanPage <= 100) {
+          const { data: scanData, error: scanError } = await supabaseAdmin.auth.admin.listUsers({ page: scanPage, perPage: scanPerPage });
+          if (scanError) throw scanError;
+          const batch = ((scanData?.users ?? []) as AuthUser[]);
+          allAuthUsers.push(...batch);
+          if (batch.length < scanPerPage) break;
+          scanPage++;
+        }
+
+        const allIds = allAuthUsers.map((u) => u.id);
+        const { data: searchProfiles } = allIds.length > 0
+          ? await supabaseAdmin.from("profiles").select("user_id, display_name, username").in("user_id", allIds)
+          : { data: [] as Array<{ user_id: string; display_name: string | null; username: string | null }> };
+        const nameMap = new Map((searchProfiles ?? []).map((p) => [p.user_id, p]));
+
+        const matched = allAuthUsers.filter((u) => {
+          const p = nameMap.get(u.id);
+          return (
+            (u.email ?? "").toLowerCase().includes(search) ||
+            (p?.display_name ?? "").toLowerCase().includes(search) ||
+            (p?.username ?? "").toLowerCase().includes(search) ||
+            u.id.toLowerCase().includes(search)
+          );
+        });
+
+        const total = matched.length;
+        const start = (page - 1) * perPage;
+        const enriched = await enrichPage(matched.slice(start, start + perPage));
+
+        return new Response(JSON.stringify({
+          users: enriched,
+          total,
+          page,
+          perPage,
+          hasMore: start + perPage < total,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      const { data: listData, error: listError } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+      if (listError) throw listError;
+
+      const authUsers = ((listData?.users ?? []) as AuthUser[]);
+      const enriched = await enrichPage(authUsers);
+      const totalCount = (listData as { total?: number } | null)?.total;
+      const total = typeof totalCount === "number" ? totalCount : (page - 1) * perPage + authUsers.length;
+      const hasMore = typeof totalCount === "number" ? page * perPage < totalCount : authUsers.length === perPage;
+
+      return new Response(JSON.stringify({
+        users: enriched,
+        total,
+        page,
+        perPage,
+        hasMore,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     // GET single user wallet details
     if (action === "get_wallet") {
       const { userId } = body;
