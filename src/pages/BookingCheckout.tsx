@@ -104,7 +104,10 @@ const BookingCheckout = () => {
   const priceAfterVoucher = isVoucherApplied
     ? applyVoucherDiscount(booking.price_cents, voucher.discountType, voucher.discountValue)
     : booking.price_cents;
-  const pointsDiscountCents = Math.min(Math.floor(pointsToUse * centsPerPoint), priceAfterVoucher);
+  const pointsDiscountCents = Math.min(
+    Math.floor(pointsToUse * centsPerPoint),
+    Math.floor(priceAfterVoucher * maxPointsPercent / 100),
+  );
   const effectivePrice = Math.max(0, priceAfterVoucher - pointsDiscountCents);
   const isFullyFree = effectivePrice === 0;
   const availablePointsWorthEuro = (availablePoints * centsPerPoint / 100).toFixed(2);
