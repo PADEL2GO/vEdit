@@ -53,13 +53,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if user is admin
+    // Check if user is admin (has_role OR superadmin email bypass)
     const { data: isAdmin } = await supabaseUser.rpc("has_role", {
       _user_id: user.id,
       _role: "admin",
     });
 
-    if (!isAdmin) {
+    const isSuperadmin = user.email === "fsteinfelder@padel2go.eu";
+
+    if (!isAdmin && !isSuperadmin) {
       console.error("User is not admin:", user.id);
       return new Response(
         JSON.stringify({ error: "Forbidden - Admin access required" }),

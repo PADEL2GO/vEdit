@@ -60,14 +60,15 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     if (authError || !user) throw new Error("Unauthorized");
 
-    // 2. Admin role check
+    // 2. Admin role check (user_roles row OR superadmin email bypass)
     const { data: adminRole } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .eq("role", "admin")
       .maybeSingle();
-    if (!adminRole) throw new Error("Admin access required");
+    const isSuperadmin = user.email === "fsteinfelder@padel2go.eu";
+    if (!adminRole && !isSuperadmin) throw new Error("Admin access required");
 
     // 3. Parse transcript
     const body = await req.json().catch(() => ({}));

@@ -1886,6 +1886,12 @@ serve(async (req) => {
       if (!userId) throw new Error("userId required");
       if (confirmPhrase !== "DELETE") throw new Error("Confirmation phrase 'DELETE' required");
 
+      // Guard: never delete the superadmin account or strip its admin role
+      const { data: targetUserData } = await supabaseAdmin.auth.admin.getUserById(userId);
+      if (targetUserData?.user?.email === "fsteinfelder@padel2go.eu") {
+        throw new Error("Cannot delete the superadmin account");
+      }
+
       logStep("Deleting user", { userId, adminId: user.id });
 
       // Delete in order due to foreign key constraints
