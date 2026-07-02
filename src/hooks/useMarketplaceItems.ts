@@ -9,6 +9,7 @@ export interface MarketplaceItem {
   name: string;
   category: MarketplaceCategory;
   credit_cost: number;
+  price_cents: number | null;
   description: string | null;
   partner_name: string | null;
   image_url: string | null;
@@ -36,7 +37,7 @@ export const useMarketplaceItems = (category?: MarketplaceCategory) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as MarketplaceItem[];
+      return data as unknown as MarketplaceItem[];
     },
   });
 };

@@ -94,6 +94,7 @@ const AdminMarketplace = () => {
     name: "",
     category: "courtbooking",
     credit_cost: 0,
+    price_cents: 0,
     description: "",
     image_url: "",
     partner_name: "",
@@ -107,6 +108,7 @@ const AdminMarketplace = () => {
       name: "",
       category: "courtbooking",
       credit_cost: 0,
+      price_cents: 0,
       description: "",
       image_url: "",
       partner_name: "",
@@ -128,6 +130,7 @@ const AdminMarketplace = () => {
       name: item.name,
       category: item.category,
       credit_cost: item.credit_cost,
+      price_cents: item.price_cents ?? 0,
       description: item.description || "",
       image_url: item.image_url || "",
       partner_name: item.partner_name || "",
@@ -144,10 +147,16 @@ const AdminMarketplace = () => {
       return;
     }
 
+    if (!formData.price_cents || formData.price_cents <= 0) {
+      toast.error("Bitte gib einen gültigen Preis in Euro an");
+      return;
+    }
+
     const data: MarketplaceItemInput = {
       name: formData.name,
       category: formData.category as MarketplaceCategory,
       credit_cost: formData.credit_cost,
+      price_cents: formData.price_cents,
       description: formData.description,
       image_url: formData.image_url,
       partner_name: formData.partner_name || undefined,
@@ -474,15 +483,35 @@ const AdminMarketplace = () => {
               </p>
             </div>
 
-            {/* Credit Cost */}
-            <div className="space-y-2">
-              <Label>Credit-Kosten *</Label>
-              <Input
-                type="number"
-                min={1}
-                value={formData.credit_cost}
-                onChange={(e) => setFormData({ ...formData, credit_cost: parseInt(e.target.value) || 0 })}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Credit Cost */}
+              <div className="space-y-2">
+                <Label>Credit-Kosten *</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={formData.credit_cost}
+                  onChange={(e) => setFormData({ ...formData, credit_cost: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+
+              {/* Price (EUR) */}
+              <div className="space-y-2">
+                <Label>Preis (€) *</Label>
+                <Input
+                  type="number"
+                  min={0.01}
+                  step={0.01}
+                  value={formData.price_cents ? (formData.price_cents / 100).toFixed(2) : ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      price_cents: e.target.value ? Math.round(parseFloat(e.target.value) * 100) : 0,
+                    })
+                  }
+                  placeholder="0.00"
+                />
+              </div>
             </div>
 
             {/* Description */}

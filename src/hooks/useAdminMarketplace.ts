@@ -7,6 +7,7 @@ export interface MarketplaceItemInput {
   name: string;
   category: MarketplaceCategory;
   credit_cost: number;
+  price_cents: number;
   description: string;
   image_url: string;
   partner_name?: string;
@@ -28,7 +29,7 @@ export const useAdminMarketplaceItems = () => {
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
-      return data as MarketplaceItem[];
+      return data as unknown as MarketplaceItem[];
     },
   });
 };
