@@ -165,7 +165,13 @@ serve(async (req) => {
                   refundOk = true;
                   logStep("Marketplace: auto-refund issued for released paid order", { redemptionId, paymentIntentId });
                 } catch (refundErr) {
-                  logStep("CRITICAL: auto-refund failed for released paid order", { redemptionId, paymentIntentId, error: (refundErr as Error).message });
+                  // Return 500 so Stripe re-delivers and retries the refund (mp_refund idempotency
+                  // key makes the retry double-safe) rather than silently relying on a manual alert.
+                  logStep("CRITICAL: auto-refund failed for released paid order — returning 500 so Stripe retries", { redemptionId, paymentIntentId, error: (refundErr as Error).message });
+                  return new Response(JSON.stringify({ error: "marketplace_refund_failed" }), {
+                    status: 500,
+                    headers: { ...corsHeaders, "Content-Type": "application/json" },
+                  });
                 }
               }
 
@@ -594,16 +600,27 @@ serve(async (req) => {
                   refundOk = true;
                   logStep("Booking: auto-refund issued for cancelled paid booking", { bookingId, paymentIntentId });
                 } catch (refundErr) {
-                  logStep("CRITICAL: auto-refund failed for cancelled paid booking", { bookingId, paymentIntentId, error: (refundErr as Error).message });
+                  // Do NOT mark the payment refunded or return 200 on a failed refund — that would
+                  // silently strand the customer's money with a falsified DB state. Return 500 so
+                  // Stripe re-delivers; the bk_refund idempotency key makes the retry double-safe.
+                  logStep("CRITICAL: auto-refund failed for cancelled paid booking — returning 500 so Stripe retries", { bookingId, paymentIntentId, error: (refundErr as Error).message });
+                  return new Response(JSON.stringify({ error: "booking_refund_failed" }), {
+                    status: 500,
+                    headers: { ...corsHeaders, "Content-Type": "application/json" },
+                  });
                 }
               }
 
-              // Mark the payment row refunded so it reconciles with Stripe.
-              const { error: paymentRefundError } = await supabaseAdmin
-                .from("payments")
-                .update({ status: "refunded" })
-                .eq("stripe_checkout_session_id", session.id);
-              if (paymentRefundError) logStep("Booking: failed to mark payment refunded", { bookingId, error: paymentRefundError.message });
+              // Mark the payment row refunded ONLY when the refund actually succeeded, so the DB
+              // never falsely reads 'refunded'. A missing payment_intent (cannot auto-refund) falls
+              // through to the manual-intervention alert below without falsifying the payment state.
+              if (refundOk) {
+                const { error: paymentRefundError } = await supabaseAdmin
+                  .from("payments")
+                  .update({ status: "refunded" })
+                  .eq("stripe_checkout_session_id", session.id);
+                if (paymentRefundError) logStep("Booking: failed to mark payment refunded", { bookingId, error: paymentRefundError.message });
+              }
 
               try {
                 const resendApiKey = Deno.env.get("RESEND_API_KEY");
