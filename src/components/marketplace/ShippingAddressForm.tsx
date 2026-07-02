@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ShippingAddress } from "@/hooks/useMarketplaceRedeem";
+import type { ShippingAddress } from "@/hooks/useMarketplaceCheckout";
 
 interface ShippingAddressFormProps {
   address: ShippingAddress;
