@@ -74,7 +74,9 @@ serve(async (req) => {
     }
     logStep("Auth resolved", { userId: user?.id ?? "guest" });
 
-    const { booking_id, voucher_id, credits_to_use = 0 } = await req.json();
+    const body = await req.json();
+    const { booking_id, voucher_id } = body;
+    const pointsToUse: number = body.points_to_use ?? body.credits_to_use ?? 0;
     if (!booking_id) throw new Error("booking_id is required");
     logStep("Received booking_id", { booking_id });
 
@@ -310,10 +312,10 @@ serve(async (req) => {
       }
     }
 
-    // ── Apply credits discount (authenticated users only) ────────────────────
-    let appliedCredits = 0;
-    if (credits_to_use > 0 && !isGuestBooking && user) {
-      // Fetch settings: max percent + credits per euro (default 50 / 100)
+    // ── Apply points discount (play spent first, then reward; auth users only) ─
+    let appliedPlay = 0;
+    let appliedReward = 0;
+    if (pointsToUse > 0 && !isGuestBooking && user) {
       const { data: siteSettings } = await supabaseAdmin
         .from("site_settings")
         .select("feature_credits_payment_enabled, credits_payment_max_percent, credits_per_euro")
@@ -325,63 +327,80 @@ serve(async (req) => {
       const creditsPerEuro: number = (siteSettings as any)?.credits_per_euro ?? 100;
 
       if (!creditsEnabled) {
-        throw new Error("Credits-Zahlung ist aktuell nicht aktiviert");
+        throw new Error("Punkte-Zahlung ist aktuell nicht aktiviert");
       }
 
-      // Validate user has enough credits
       const { data: wallet } = await supabaseAdmin
         .from("wallets")
-        .select("play_credits")
+        .select("play_credits, reward_credits")
         .eq("user_id", user.id)
         .single();
 
-      const availableCredits = wallet?.play_credits ?? 0;
-      if (credits_to_use > availableCredits) {
-        throw new Error(`Nicht genug Credits. Verfügbar: ${availableCredits}`);
-      }
+      const availablePoints = (wallet?.play_credits ?? 0) + (wallet?.reward_credits ?? 0);
 
-      // Cap at max percent of ownerPaymentCents
-      // 100 credits = 1 euro = 100 cents → credits_value_cents = credits_to_use * (100 / creditsPerEuro)
-      const centsPerCredit = 100 / creditsPerEuro; // e.g. 1.0 at default rate
+      // 100 points = 1 euro = 100 cents at the default rate → centsPerPoint = 100 / credits_per_euro
+      const centsPerPoint = 100 / creditsPerEuro;
       const maxDiscountCents = Math.floor(ownerPaymentCents * maxPercent / 100);
-      const requestedDiscountCents = Math.floor(credits_to_use * centsPerCredit);
-      let actualDiscountCents = Math.min(requestedDiscountCents, maxDiscountCents);
-
-      // Apply Stripe's 50-cent minimum BEFORE deducting credits so users
-      // never lose credits for discount value that isn't actually granted
-      if (ownerPaymentCents - actualDiscountCents < 50) {
+      const requestedDiscountCents = Math.floor(pointsToUse * centsPerPoint);
+      let actualDiscountCents = Math.min(
+        requestedDiscountCents,
+        maxDiscountCents,
+        Math.floor(availablePoints * centsPerPoint),
+      );
+      // Never reserve points for a discount that can't actually be granted. Stripe
+      // cannot charge a remainder in the (0,50)c band, so if applying the full
+      // discount would leave such a remainder, trim the discount so exactly 50c
+      // remains to be charged. A remainder of 0 — points cover the whole amount — is
+      // fine and is handled by the free path below. Without this guard the user's
+      // points are burned for a discount that is never delivered AND they are then
+      // overcharged the 50c Stripe minimum on top. (Mirrors the pre-free-path clamp.)
+      const remainderIfApplied = ownerPaymentCents - actualDiscountCents;
+      if (remainderIfApplied > 0 && remainderIfApplied < 50) {
         actualDiscountCents = Math.max(0, ownerPaymentCents - 50);
       }
-      appliedCredits = Math.ceil(actualDiscountCents / centsPerCredit);
+      const appliedPoints = Math.ceil(actualDiscountCents / centsPerPoint);
 
-      if (appliedCredits > 0) {
-        // Atomic reserve — deducts from the wallet only if the balance suffices
-        const { data: reserved, error: reserveError } = await supabaseAdmin.rpc("reserve_play_credits", {
+      if (appliedPoints > 0) {
+        // Atomic reserve — spends play first, then reward, never overdrawing.
+        const { data: spent, error: reserveError } = await supabaseAdmin.rpc("reserve_points", {
           p_user_id: user.id,
-          p_amount: appliedCredits,
+          p_amount: appliedPoints,
         });
-        if (reserveError || reserved !== true) {
-          logStep("Credit reservation failed", { error: reserveError?.message, reserved });
-          throw new Error(`Nicht genug Credits. Verfügbar: ${availableCredits}`);
+        const row = Array.isArray(spent) ? spent[0] : spent;
+        const playSpent = (row as any)?.play_spent ?? 0;
+        const rewardSpent = (row as any)?.reward_spent ?? 0;
+
+        if (reserveError || playSpent + rewardSpent === 0) {
+          // Insufficient balance (or concurrent drain) — proceed with no discount.
+          logStep("Points reserve returned nothing — no discount", { error: reserveError?.message });
+        } else {
+          appliedPlay = playSpent;
+          appliedReward = rewardSpent;
+          ownerPaymentCents -= actualDiscountCents;
+          logStep("Points discount applied", {
+            pointsToUse, appliedPoints, appliedPlay, appliedReward, actualDiscountCents, newPrice: ownerPaymentCents,
+          });
         }
       }
-
-      ownerPaymentCents = Math.max(50, ownerPaymentCents - actualDiscountCents); // Stripe minimum 50 cents
-      logStep("Credits discount applied", { credits_to_use, appliedCredits, actualDiscountCents, newPrice: ownerPaymentCents });
     }
     // ─────────────────────────────────────────────────────────────────────────
 
-    // Compensation: undo reserves if checkout cannot proceed after they were taken
-    const releaseReserves = async () => {
-      if (appliedCredits > 0 && user) {
-        const { error: refundError } = await supabaseAdmin.rpc("refund_play_credits", {
+    // Compensation: undo reserves if checkout cannot proceed after they were taken.
+    // resetBooking=false is used when the persist LOST a concurrent race: the booking's
+    // reserved_* columns then belong to the request that won, so we must refund only THIS
+    // request's own wallet/voucher hold and never zero the winner's reserve.
+    const releaseReserves = async (opts?: { resetBooking?: boolean }) => {
+      const resetBooking = opts?.resetBooking !== false;
+      if ((appliedPlay > 0 || appliedReward > 0) && user) {
+        const { error: refundError } = await supabaseAdmin.rpc("refund_points", {
           p_user_id: user.id,
-          p_amount: appliedCredits,
+          p_play: appliedPlay,
+          p_reward: appliedReward,
         });
         if (refundError) {
-          logStep("Failed to refund reserved credits", { userId: user.id, error: refundError.message });
+          logStep("Failed to refund reserved points", { userId: user.id, error: refundError.message });
         } else {
-          logStep("Reserved credits refunded", { userId: user.id, credits: appliedCredits });
+          logStep("Reserved points refunded", { userId: user.id, play: appliedPlay, reward: appliedReward });
         }
       }
       if (appliedVoucherId) {
@@ -399,30 +418,241 @@ serve(async (req) => {
           logStep("Voucher soft reserve released", { voucherId: appliedVoucherId });
         }
       }
-      await supabaseAdmin
-        .from("bookings")
-        .update({ reserved_credits: 0, reserved_voucher_id: null })
-        .eq("id", booking.id);
+      if (resetBooking) {
+        await supabaseAdmin
+          .from("bookings")
+          .update({ reserved_credits: 0, reserved_reward: 0, reserved_voucher_id: null })
+          .eq("id", booking.id);
+      }
     };
 
     // Persist reserves on the booking so the webhook and auto-cancel cron can settle
     // or refund them. Guard on status so we never write a reserve onto a booking that
     // was confirmed/cancelled concurrently (that reserve would later be wrongly refunded).
+    // Also guard on reserved_*=0 / reserved_voucher_id IS NULL so only ONE writer wins:
+    // two concurrent requests each pass the no-op start release and each debit the wallet
+    // via reserve_points (which has no per-booking idempotency), but the booking stores a
+    // single last-writer-wins reserve — without this guard the loser's debit is orphaned
+    // and never refunded (permanent points loss). The start release_booking_reserves
+    // always zeroes these columns, so a legitimate (sequential) request/retry still passes.
     const { data: persisted, error: reserveUpdateError } = await supabaseAdmin
       .from("bookings")
-      .update({ reserved_credits: appliedCredits, reserved_voucher_id: appliedVoucherId ?? null })
+      .update({ reserved_credits: appliedPlay, reserved_reward: appliedReward, reserved_voucher_id: appliedVoucherId ?? null })
       .eq("id", booking.id)
       .eq("status", "pending_payment")
+      .eq("reserved_credits", 0)
+      .eq("reserved_reward", 0)
+      .is("reserved_voucher_id", null)
       .select("id");
 
     if (reserveUpdateError || !persisted || persisted.length === 0) {
-      logStep("Failed to persist reserves on booking (or no longer pending)", {
+      logStep("Failed to persist reserves on booking (no longer pending or a concurrent reserve won)", {
         error: reserveUpdateError?.message,
         rows: persisted?.length ?? 0,
       });
-      await releaseReserves();
+      // Refund only THIS request's own wallet/voucher hold; do NOT zero the booking's
+      // reserved_* — if a concurrent request won the persist, those columns are its
+      // reserve and zeroing them here would strand ITS credits instead.
+      await releaseReserves({ resetBooking: false });
       throw new Error("Buchung konnte nicht aktualisiert werden. Bitte versuche es erneut.");
     }
+
+    // ── Full-coverage path: points (or a 0-price booking) cover the whole amount ──
+    // Confirm without Stripe. Mirrors the webhook's confirmed-booking branch and the
+    // free voucher-redeem flow: settle → award → rewards trigger → confirmation email.
+    if (ownerPaymentCents <= 0) {
+      // Single settle codepath (same RPC the webhook uses): confirm + finalize
+      // credits_used from the LOCKED reserved_credits, only if still pending_payment.
+      // Returns false for a booking a concurrent call already settled — never award twice.
+      const { data: settled, error: settleError } = await supabaseAdmin.rpc("settle_booking_reserves", {
+        p_booking_id: booking.id,
+      });
+      if (settleError) {
+        logStep("Free path: settle failed — releasing reserves", { bookingId: booking.id, error: settleError.message });
+        await releaseReserves();
+        throw new Error("Buchung konnte nicht bestätigt werden. Bitte versuche es erneut.");
+      }
+      if (settled !== true) {
+        // This settle lost the race. Either (a) a concurrent request already confirmed
+        // the booking — its settle finalized credits_used from the booking's reserved_*,
+        // so THIS request's own reserve_points debit is redundant: it was never finalized
+        // onto the booking and (no Stripe session, status now 'confirmed' so the cron
+        // no-ops) never refunded — leaving the user's points silently lost; or (b) the
+        // auto-cancel cron already cancelled + refunded via release_booking_reserves.
+        // Re-read status to tell them apart: refund only in case (a); refunding in case
+        // (b) would double-credit the wallet.
+        const { data: current } = await supabaseAdmin
+          .from("bookings")
+          .select("status")
+          .eq("id", booking.id)
+          .single();
+        if (current?.status === "confirmed" && (appliedPlay > 0 || appliedReward > 0) && user) {
+          const { error: refundError } = await supabaseAdmin.rpc("refund_points", {
+            p_user_id: user.id,
+            p_play: appliedPlay,
+            p_reward: appliedReward,
+          });
+          if (refundError) {
+            logStep("Free path: failed to refund redundant reserve after lost settle race", { userId: user.id, error: refundError.message });
+          } else {
+            logStep("Free path: refunded redundant reserve after lost settle race", { userId: user.id, play: appliedPlay, reward: appliedReward });
+          }
+        } else {
+          logStep("Free path: already settled/cancelled — no refund needed", { bookingId: booking.id, status: current?.status });
+        }
+        return new Response(JSON.stringify({ url: null, free: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+      logStep("Free path: booking confirmed via points", { bookingId: booking.id, appliedPlay, appliedReward });
+
+      // A PRIOR partial-payment attempt on this same booking may have left a still-payable
+      // Stripe Checkout session (+ pending payment row) behind. Points now cover the whole
+      // amount and the booking is confirmed for free, so expire that leftover session —
+      // otherwise the user could still complete it (back button / second tab) within its
+      // 30-min window and be charged real cash for an already-free booking, and the webhook
+      // would then find the booking already confirmed (settle → false) and never refund.
+      // Best-effort: if the session was already completed/expired, expire() throws — swallow.
+      try {
+        const { data: priorPayment } = await supabaseAdmin
+          .from("payments")
+          .select("id, stripe_checkout_session_id, status")
+          .eq("booking_id", booking.id)
+          .maybeSingle();
+        if (priorPayment?.stripe_checkout_session_id && priorPayment.status === "pending") {
+          try {
+            const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+            await stripe.checkout.sessions.expire(priorPayment.stripe_checkout_session_id);
+            logStep("Free path: expired leftover Stripe session", { sessionId: priorPayment.stripe_checkout_session_id });
+          } catch (expireErr) {
+            logStep("Free path: could not expire leftover Stripe session (already completed/expired?)", { error: (expireErr as Error).message });
+          }
+          await supabaseAdmin
+            .from("payments")
+            .update({ status: "failed", updated_at: new Date().toISOString() })
+            .eq("id", priorPayment.id);
+        }
+      } catch (cleanupErr) {
+        logStep("Free path: leftover session cleanup failed", { error: (cleanupErr as Error).message });
+      }
+
+      // Award play credits for this booking (authenticated owner only) — mirror the webhook.
+      if (!isGuestBooking) try {
+        const { data: bk } = await supabaseAdmin
+          .from("bookings")
+          .select("start_time, end_time, user_id, play_credits_awarded")
+          .eq("id", booking.id)
+          .single();
+
+        if (bk && bk.play_credits_awarded === 0 && bk.user_id) {
+          const threeMonthsAgo = new Date();
+          threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+          const { data: prevBookings } = await supabaseAdmin
+            .from("bookings")
+            .select("start_time")
+            .eq("user_id", bk.user_id)
+            .eq("status", "confirmed")
+            .neq("id", booking.id)
+            .gte("start_time", threeMonthsAgo.toISOString());
+
+          const isoWeekKey = (d: Date): string => {
+            const dt = new Date(d);
+            dt.setHours(12, 0, 0, 0);
+            dt.setDate(dt.getDate() + 3 - ((dt.getDay() + 6) % 7));
+            const jan4 = new Date(dt.getFullYear(), 0, 4);
+            const wn = 1 + Math.round(((dt.getTime() - jan4.getTime()) / 86400000 - 3 + ((jan4.getDay() + 6) % 7)) / 7);
+            return `${dt.getFullYear()}-W${String(wn).padStart(2, "0")}`;
+          };
+
+          const weekSet = new Set((prevBookings || []).map(b => isoWeekKey(new Date(b.start_time))));
+          weekSet.add(isoWeekKey(new Date(bk.start_time)));
+
+          let weekStreak = 0;
+          const cursor = new Date();
+          for (let i = 0; i < 13; i++) {
+            if (!weekSet.has(isoWeekKey(cursor))) break;
+            weekStreak++;
+            cursor.setDate(cursor.getDate() - 7);
+          }
+
+          const multiplier = weekStreak >= 4 ? 2.5 : weekStreak === 3 ? 2.0 : weekStreak === 2 ? 1.5 : 1.0;
+          const hours = (new Date(bk.end_time).getTime() - new Date(bk.start_time).getTime()) / 3600000;
+          const roundedHours = Math.max(0.5, Math.round(hours * 2) / 2);
+          const creditsToAward = Math.round(roundedHours * 100 * multiplier);
+
+          const { error: awardError } = await supabaseAdmin.rpc("increment_play_and_lifetime", {
+            p_user_id: bk.user_id,
+            p_play_delta: creditsToAward,
+            p_lifetime_delta: creditsToAward,
+          });
+          if (awardError) {
+            logStep("Free path: failed to award play credits", { bookingId: booking.id, error: awardError.message });
+          } else {
+            await supabaseAdmin.from("bookings")
+              .update({ play_credits_awarded: creditsToAward })
+              .eq("id", booking.id);
+            logStep("Free path: play credits awarded", { bookingId: booking.id, creditsToAward, weekStreak, multiplier });
+          }
+        }
+      } catch (creditErr) {
+        logStep("Free path: failed to award play credits", { error: (creditErr as Error).message });
+      }
+
+      // Record voucher redemption if a partial-discount voucher was also applied.
+      if (appliedVoucherId) {
+        await supabaseAdmin.from("voucher_redemptions").insert({
+          voucher_id: appliedVoucherId,
+          booking_id: booking.id,
+          user_id: user?.id ?? "",
+        });
+        logStep("Free path: voucher redemption recorded", { voucherId: appliedVoucherId, bookingId: booking.id });
+      }
+
+      // Confirmation email — same call as the webhook's owner/guest branches.
+      // NOTE: BOOKING_PAID rewards are earned on the CASH charged (the webhook passes
+      // session.amount_total). On the free path no cash is charged — points covered the
+      // whole amount — so, exactly like the webhook's `&& priceCents` guard, we do NOT
+      // fire the bookingPaid rewards trigger here. Firing it with the full price would
+      // award reward points for money the user never paid.
+      if (!isGuestBooking && user) {
+        try {
+          await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseServiceKey}` },
+            body: JSON.stringify({ booking_id: booking.id, user_id: user.id, payment_type: "owner", amount_cents: 0 }),
+          });
+          logStep("Free path: owner confirmation email triggered", { userId: user.id });
+        } catch (emailErr) {
+          logStep("Free path: failed to send owner confirmation", { error: (emailErr as Error).message });
+        }
+      } else if (isGuestBooking) {
+        try {
+          await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseServiceKey}` },
+            body: JSON.stringify({
+              booking_id: booking.id,
+              guest_email: (booking as any).guest_email,
+              guest_name: (booking as any).guest_name || "Gast",
+              payment_type: "owner",
+              amount_cents: 0,
+            }),
+          });
+          logStep("Free path: guest confirmation email triggered", { guestEmail: (booking as any).guest_email });
+        } catch (emailErr) {
+          logStep("Free path: failed to send guest confirmation", { error: (emailErr as Error).message });
+        }
+      }
+
+      return new Response(JSON.stringify({ url: null, free: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // Remainder > 0 → charge it via Stripe (respect the 50-cent minimum).
+    ownerPaymentCents = Math.max(50, ownerPaymentCents);
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
@@ -494,7 +724,7 @@ serve(async (req) => {
               }
             : { user_id: user!.id }),
           ...(appliedVoucherId ? { voucher_id: appliedVoucherId } : {}),
-          ...(appliedCredits > 0 ? { credits_used: appliedCredits.toString() } : {}),
+          ...(appliedPlay + appliedReward > 0 ? { points_used: (appliedPlay + appliedReward).toString() } : {}),
         },
       });
     } catch (stripeErr) {
