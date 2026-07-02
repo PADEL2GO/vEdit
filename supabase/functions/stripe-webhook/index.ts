@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { Resend } from "npm:resend@4.0.0";
 
 // Stripe webhooks are server-to-server, minimal CORS needed
 const corsHeaders = {
@@ -12,6 +13,17 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
+
+// Untrusted values (guest/shipping/profile/email/reference/item fields) must never be
+// interpolated raw into the internal HTML fulfillment/alert emails — this neutralizes HTML/
+// content injection while leaving the value itself unchanged for safe input.
+const escapeHtml = (v: unknown): string =>
+  String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -72,9 +84,293 @@ serve(async (req) => {
 
         if (session.payment_status === "paid") {
           // ============================================
+          // MARKETPLACE PURCHASE (money +/- points)
+          // ============================================
+          if (paymentType === "marketplace_purchase") {
+            const redemptionId = session.metadata?.redemption_id;
+            if (!redemptionId) {
+              logStep("Marketplace session missing redemption_id", { sessionId: session.id });
+              break;
+            }
+
+            // Idempotent settle: flips pending -> success exactly once. A duplicate
+            // webhook (or an order a sibling expired/cron already cancelled) returns
+            // false, so we never re-ledger or re-ship.
+            const { data: settled, error: settleError } = await supabaseAdmin.rpc("settle_marketplace_order", {
+              p_order_id: redemptionId,
+            });
+            if (settleError) {
+              // Return non-2xx so Stripe RETRIES this PAID event. A `break` here returns 200,
+              // Stripe treats the event as delivered and stops retrying, and the still-pending
+              // order is then cron-cancelled + points-refunded + restocked at hold_expires_at —
+              // a single transient DB error would guarantee a paid-for-nothing order. Retrying
+              // lets a later attempt still settle it before the cron reclaims it.
+              logStep("CRITICAL: paid marketplace order settle failed — returning 500 so Stripe retries", { redemptionId, error: settleError.message });
+              return new Response(JSON.stringify({ error: "marketplace_settle_failed" }), {
+                status: 500,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              });
+            }
+            if (settled !== true) {
+              // settle returned false for one of two very different reasons:
+              //  1) benign duplicate — the order is already 'success' (re-delivered webhook).
+              //  2) paid-for-nothing — the cron backstop / expiry already released this order
+              //     (status 'cancelled', or the row is gone) before this delayed webhook landed,
+              //     so the points were refunded + stock restored while Stripe still holds the
+              //     card money. This must NEVER be silently skipped: refund the customer's card
+              //     and alert an admin to reconcile.
+              const { data: releasedOrder, error: reReadError } = await supabaseAdmin
+                .from("marketplace_redemptions")
+                .select("status, reference_code")
+                .eq("id", redemptionId)
+                .maybeSingle();
+
+              if (reReadError) {
+                // A failed re-read cannot distinguish a shipped duplicate ('success') from a
+                // genuinely released order. Refunding on that guess would refund an already-
+                // fulfilled order, so return 500 and let Stripe retry (mirrors settleError).
+                logStep("CRITICAL: marketplace order status re-read failed — returning 500 so Stripe retries", { redemptionId, error: reReadError.message });
+                return new Response(JSON.stringify({ error: "marketplace_reread_failed" }), {
+                  status: 500,
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                });
+              }
+
+              if (releasedOrder?.status === "success") {
+                // Not a blind skip: the first delivery's fulfillment side-effects (ledger +
+                // physical-ship email) may have failed transiently AFTER settle committed, so
+                // fall through to the idempotent fulfillment block below. It no-ops if the work
+                // already landed and otherwise finishes it (Stripe keeps retrying via 500).
+                logStep("Marketplace order already settled — verifying fulfillment", { redemptionId });
+              } else {
+                // Genuinely released: the cron backstop / expiry already cancelled this order
+                // (status 'cancelled', or the row is gone) while Stripe still holds the card
+                // money. Refund the customer + alert an admin (points/stock already reversed).
+                logStep("CRITICAL: paid marketplace order was already released — refunding customer", {
+                  redemptionId,
+                  status: releasedOrder?.status ?? "missing",
+                });
+
+              const paymentIntentId = typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : session.payment_intent?.id;
+              let refundOk = false;
+              if (paymentIntentId) {
+                try {
+                  // Idempotency key: a retried webhook can never create a second refund.
+                  await stripe.refunds.create(
+                    { payment_intent: paymentIntentId },
+                    { idempotencyKey: `mp_refund_${redemptionId}` },
+                  );
+                  refundOk = true;
+                  logStep("Marketplace: auto-refund issued for released paid order", { redemptionId, paymentIntentId });
+                } catch (refundErr) {
+                  // Return 500 so Stripe re-delivers and retries the refund (mp_refund idempotency
+                  // key makes the retry double-safe) rather than silently relying on a manual alert.
+                  logStep("CRITICAL: auto-refund failed for released paid order — returning 500 so Stripe retries", { redemptionId, paymentIntentId, error: (refundErr as Error).message });
+                  return new Response(JSON.stringify({ error: "marketplace_refund_failed" }), {
+                    status: 500,
+                    headers: { ...corsHeaders, "Content-Type": "application/json" },
+                  });
+                }
+              }
+
+              try {
+                const resendApiKey = Deno.env.get("RESEND_API_KEY");
+                if (resendApiKey) {
+                  const resend = new Resend(resendApiKey);
+                  await resend.emails.send({
+                    from: "Padel2Go <noreply@padel2go.eu>",
+                    to: ["contact@padel2go.eu"],
+                    subject: `KRITISCH: Bezahlte Marketplace-Bestellung storniert - ${releasedOrder?.reference_code ?? redemptionId}`,
+                    html: `
+                      <html>
+                        <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+                          <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                            <h1 style="color: #b00020; margin-bottom: 20px;">Bezahlte Bestellung wurde storniert</h1>
+                            <p>Eine per Karte bezahlte Marketplace-Bestellung wurde storniert, bevor der Zahlungs-Webhook eintraf. Punkte und Bestand wurden bereits zurueckgebucht.</p>
+                            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                              <p><strong>Referenz:</strong> ${escapeHtml(releasedOrder?.reference_code ?? redemptionId)}</p>
+                              <p><strong>Bestell-ID:</strong> ${redemptionId}</p>
+                              <p><strong>Status:</strong> ${escapeHtml(releasedOrder?.status ?? "nicht gefunden")}</p>
+                              <p><strong>Stripe Session:</strong> ${session.id}</p>
+                              <p><strong>Bezahlt (Cent):</strong> ${session.amount_total ?? 0}</p>
+                              <p><strong>Automatische Rueckerstattung:</strong> ${refundOk ? "ausgeloest" : "FEHLGESCHLAGEN - bitte manuell pruefen"}</p>
+                            </div>
+                          </div>
+                        </body>
+                      </html>
+                    `,
+                  });
+                  logStep("Marketplace: critical release alert emailed", { redemptionId });
+                } else {
+                  logStep("Marketplace: RESEND_API_KEY not configured — critical release alert not emailed", { redemptionId });
+                }
+              } catch (alertErr) {
+                logStep("Marketplace: critical release alert email failed", { redemptionId, error: (alertErr as Error).message });
+              }
+                break;
+              }
+            } else {
+              logStep("Marketplace order settled", { redemptionId });
+            }
+
+            const { data: order, error: orderReadError } = await supabaseAdmin
+              .from("marketplace_redemptions")
+              .select("user_id, item_id, quantity, play_spent, reward_spent, amount_cents, reference_code, guest_email, guest_name, shipping_address_line1, shipping_postal_code, shipping_city, shipping_country, fulfillment_notified_at")
+              .eq("id", redemptionId)
+              .single();
+
+            if (orderReadError || !order) {
+              // The order row drives the ledger + the physical-ship email. A discarded re-read
+              // error here (after settle already committed status='success') would skip the
+              // fulfillment email yet still return 200, so Stripe never retries and a paid
+              // physical order is never shipped. Return 500 so Stripe re-delivers this event.
+              logStep("CRITICAL: settled marketplace order re-read failed — returning 500 so Stripe retries", { redemptionId, error: orderReadError?.message });
+              return new Response(JSON.stringify({ error: "marketplace_fulfillment_reread_failed" }), {
+                status: 500,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              });
+            }
+
+            let item: { name: string; category: string; partner_name: string | null; product_type: string } | null = null;
+            if (order?.item_id) {
+              const { data: itemRow } = await supabaseAdmin
+                .from("marketplace_items")
+                .select("name, category, partner_name, product_type")
+                .eq("id", order.item_id)
+                .single();
+              item = itemRow as typeof item;
+            }
+
+            // Finalize the points spend in the ledger. The wallet was already debited at
+            // checkout by reserve_points; this records the movement (mirrors the free path).
+            // Gated on the settle-winner (settled === true) so a concurrent duplicate delivery
+            // that fell through on status='success' cannot double-insert the REDEMPTION row;
+            // the existence check below is defense-in-depth.
+            const pointsSpent = (order.play_spent ?? 0) + (order.reward_spent ?? 0);
+            const ledgerSourceId = order.reference_code ?? redemptionId;
+            if (settled === true && order.user_id && pointsSpent > 0) {
+              const { data: existingLedger } = await supabaseAdmin
+                .from("points_ledger")
+                .select("id")
+                .eq("source_id", ledgerSourceId)
+                .eq("entry_type", "REDEMPTION")
+                .limit(1);
+              if (!existingLedger || existingLedger.length === 0) {
+                const { data: postWallet } = await supabaseAdmin
+                  .from("wallets")
+                  .select("play_credits, reward_credits")
+                  .eq("user_id", order.user_id)
+                  .single();
+                const balanceAfter = (postWallet?.play_credits ?? 0) + (postWallet?.reward_credits ?? 0);
+                const { error: ledgerError } = await supabaseAdmin.from("points_ledger").insert({
+                  user_id: order.user_id,
+                  credit_type: "REWARD",
+                  delta_points: -pointsSpent,
+                  balance_after: balanceAfter,
+                  entry_type: "REDEMPTION",
+                  description: `Marketplace: ${item?.name ?? "Artikel"}`,
+                  source_type: "REDEMPTION",
+                  source_id: ledgerSourceId,
+                });
+                if (ledgerError) logStep("Marketplace: ledger insert failed", { redemptionId, error: ledgerError.message });
+              }
+            }
+
+            // Fulfillment email for physical products (mirrors the checkout free path). This is
+            // the ONLY ship signal, so it must survive transient failures: it is gated on
+            // fulfillment_notified_at (set only after a successful send) and a send failure
+            // returns 500 so Stripe re-delivers and this block retries until it lands.
+            // Atomically CLAIM the fulfillment notification (flip fulfillment_notified_at from
+            // NULL to now) so two concurrent duplicate webhook deliveries cannot both email the
+            // admin (a double physical-ship signal). Only the instance that wins the flip sends;
+            // the claim is released back to NULL if the send cannot complete, so it still retries.
+            let fulfillmentClaimed = false;
+            if (item?.product_type === "purchase" && !order.fulfillment_notified_at) {
+              const { data: notifyClaim } = await supabaseAdmin
+                .from("marketplace_redemptions")
+                .update({ fulfillment_notified_at: new Date().toISOString() })
+                .eq("id", redemptionId)
+                .is("fulfillment_notified_at", null)
+                .select("id");
+              fulfillmentClaimed = !!(notifyClaim && notifyClaim.length > 0);
+            }
+            if (fulfillmentClaimed) {
+              const resendApiKey = Deno.env.get("RESEND_API_KEY");
+              if (!resendApiKey) {
+                logStep("Marketplace: RESEND_API_KEY not configured — fulfillment email not sent, order stays in admin queue", { redemptionId });
+                // Release the claim so a later delivery re-sends once the key is configured.
+                await supabaseAdmin
+                  .from("marketplace_redemptions")
+                  .update({ fulfillment_notified_at: null })
+                  .eq("id", redemptionId);
+              } else {
+                try {
+                  let customerName = order?.guest_name || "Gast";
+                  if (order?.user_id) {
+                    const { data: profile } = await supabaseAdmin
+                      .from("profiles")
+                      .select("display_name, username")
+                      .eq("user_id", order.user_id)
+                      .single();
+                    customerName = profile?.display_name || profile?.username || "Unbekannt";
+                  }
+                  const customerEmail = session.customer_details?.email || session.customer_email || order?.guest_email || "";
+                  const formattedAddress = `${order?.shipping_address_line1 ?? ""}\n${order?.shipping_postal_code ?? ""} ${order?.shipping_city ?? ""}\n${order?.shipping_country ?? "Deutschland"}`;
+                  const resend = new Resend(resendApiKey);
+                  await resend.emails.send({
+                    from: "Padel2Go <noreply@padel2go.eu>",
+                    to: ["contact@padel2go.eu"],
+                    subject: `Neue Marketplace-Bestellung: ${item.name} - ${order?.reference_code ?? redemptionId}`,
+                    html: `
+                      <html>
+                        <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+                          <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                            <h1 style="color: #111; margin-bottom: 20px;">Neue Marketplace-Bestellung</h1>
+                            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                              <h2 style="color: #333; margin-top: 0;">Bestelldetails</h2>
+                              <p><strong>Referenz:</strong> ${escapeHtml(order?.reference_code ?? redemptionId)}</p>
+                              <p><strong>Produkt:</strong> ${escapeHtml(item.name)}</p>
+                              <p><strong>Kategorie:</strong> ${escapeHtml(item.category)}</p>
+                              <p><strong>Menge:</strong> ${order?.quantity ?? 1}</p>
+                              <p><strong>Bezahlt mit Punkten:</strong> ${pointsSpent}</p>
+                              <p><strong>Bezahlt bar (Cent):</strong> ${order?.amount_cents ?? session.amount_total ?? 0}</p>
+                            </div>
+                            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                              <h2 style="color: #333; margin-top: 0;">Kundeninformationen</h2>
+                              <p><strong>Name:</strong> ${escapeHtml(customerName)}</p>
+                              <p><strong>E-Mail:</strong> ${escapeHtml(customerEmail)}</p>
+                            </div>
+                            <div style="background: #e8f5e9; padding: 20px; border-radius: 8px;">
+                              <h2 style="color: #333; margin-top: 0;">Lieferadresse</h2>
+                              <p style="white-space: pre-line; margin: 0;">${escapeHtml(formattedAddress)}</p>
+                            </div>
+                          </div>
+                        </body>
+                      </html>
+                    `,
+                  });
+                  logStep("Marketplace: fulfillment email sent", { redemptionId });
+                } catch (emailError) {
+                  // Release the claim so the next Stripe delivery re-sends (this send did not land).
+                  await supabaseAdmin
+                    .from("marketplace_redemptions")
+                    .update({ fulfillment_notified_at: null })
+                    .eq("id", redemptionId);
+                  logStep("CRITICAL: marketplace fulfillment email failed — returning 500 so Stripe retries", { redemptionId, error: (emailError as Error).message });
+                  return new Response(JSON.stringify({ error: "marketplace_fulfillment_email_failed" }), {
+                    status: 500,
+                    headers: { ...corsHeaders, "Content-Type": "application/json" },
+                  });
+                }
+              }
+            }
+          }
+          // ============================================
           // LOBBY JOIN PAYMENT
           // ============================================
-          if (paymentType === "lobby_join") {
+          else if (paymentType === "lobby_join") {
             const lobbyId = session.metadata?.lobby_id;
             const lobbyMemberId = session.metadata?.lobby_member_id;
             const userId = session.metadata?.user_id;
@@ -213,7 +509,152 @@ serve(async (req) => {
               break;
             }
             if (settled !== true) {
-              logStep("Booking already settled or no longer pending — skipping confirm/award", { bookingId });
+              // settle returned false for one of two very different reasons:
+              //  1) benign duplicate — the booking is already 'confirmed' (re-delivered webhook).
+              //  2) paid-for-nothing — a sibling expired session / cron backstop already cancelled
+              //     this booking (status 'cancelled'/'expired', or the row is gone) before this
+              //     delayed webhook landed, so the reserves were already refunded while Stripe
+              //     still holds the card money. This must NEVER be silently skipped: refund the
+              //     customer's card and alert an admin to reconcile.
+              const { data: releasedBooking, error: reReadError } = await supabaseAdmin
+                .from("bookings")
+                .select("status")
+                .eq("id", bookingId)
+                .maybeSingle();
+
+              if (reReadError) {
+                // A failed re-read cannot distinguish a confirmed duplicate from a genuinely
+                // cancelled booking. Refunding on that guess would refund an already-confirmed
+                // booking, so return 500 and let Stripe retry (mirrors settleError handling).
+                logStep("CRITICAL: booking status re-read failed — returning 500 so Stripe retries", { bookingId, error: reReadError.message });
+                return new Response(JSON.stringify({ error: "booking_reread_failed" }), {
+                  status: 500,
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                });
+              }
+
+              if (releasedBooking?.status === "confirmed") {
+                // Benign duplicate: the first delivery already confirmed + awarded. No-op.
+                logStep("Booking already settled — duplicate webhook ignored", { bookingId });
+                break;
+              }
+
+              // A non-'confirmed' status is NOT proof of a paid-for-nothing release. A booking
+              // that an earlier delivery already confirmed + paid + awarded, and the user then
+              // CANCELLED (MyBookings, governed by the AGB policy — no refund <24h before start),
+              // is now 'cancelled' with the card money lawfully kept. Its payment row stays
+              // 'completed' (the cancel flow never touches payments). Re-read the payment for this
+              // session: only a payment that never completed (still 'pending'/'failed') is a
+              // genuine paid-for-nothing release this webhook must refund. If it already
+              // completed (or was already refunded), do NOT auto-refund — that would claw back
+              // money the business is entitled to keep.
+              const { data: paymentRow, error: paymentReadError } = await supabaseAdmin
+                .from("payments")
+                .select("status")
+                .eq("stripe_checkout_session_id", session.id)
+                .maybeSingle();
+
+              if (paymentReadError) {
+                // Can't tell a completed-then-cancelled booking from a never-completed one.
+                // Refunding on that guess could claw back money the business lawfully holds,
+                // so return 500 and let Stripe retry (mirrors settleError / status re-read).
+                logStep("CRITICAL: payment status re-read failed — returning 500 so Stripe retries", { bookingId, error: paymentReadError.message });
+                return new Response(JSON.stringify({ error: "payment_reread_failed" }), {
+                  status: 500,
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                });
+              }
+
+              if (paymentRow?.status === "completed" || paymentRow?.status === "refunded") {
+                // The booking was already confirmed + paid (and credits awarded) by an earlier
+                // delivery; any later cancellation is a post-confirmation user cancel governed by
+                // the AGB refund policy, not a paid-for-nothing release. Do NOT auto-refund.
+                logStep("Booking already confirmed+paid — later cancellation handled by cancel flow, no auto-refund", {
+                  bookingId,
+                  bookingStatus: releasedBooking?.status ?? "missing",
+                  paymentStatus: paymentRow?.status,
+                });
+                break;
+              }
+
+              // Genuinely released: the payment never completed and a sibling expired session /
+              // cron backstop already cancelled this booking (status 'cancelled'/'expired', or the
+              // row is gone) while Stripe still holds the card money. Refund the customer + alert
+              // an admin (reserves already reversed on cancel).
+              logStep("CRITICAL: paid booking was already cancelled — refunding customer", {
+                bookingId,
+                status: releasedBooking?.status ?? "missing",
+              });
+
+              const paymentIntentId = typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : session.payment_intent?.id;
+              let refundOk = false;
+              if (paymentIntentId) {
+                try {
+                  // Idempotency key: a retried webhook can never create a second refund.
+                  await stripe.refunds.create(
+                    { payment_intent: paymentIntentId },
+                    { idempotencyKey: `bk_refund_${bookingId}` },
+                  );
+                  refundOk = true;
+                  logStep("Booking: auto-refund issued for cancelled paid booking", { bookingId, paymentIntentId });
+                } catch (refundErr) {
+                  // Do NOT mark the payment refunded or return 200 on a failed refund — that would
+                  // silently strand the customer's money with a falsified DB state. Return 500 so
+                  // Stripe re-delivers; the bk_refund idempotency key makes the retry double-safe.
+                  logStep("CRITICAL: auto-refund failed for cancelled paid booking — returning 500 so Stripe retries", { bookingId, paymentIntentId, error: (refundErr as Error).message });
+                  return new Response(JSON.stringify({ error: "booking_refund_failed" }), {
+                    status: 500,
+                    headers: { ...corsHeaders, "Content-Type": "application/json" },
+                  });
+                }
+              }
+
+              // Mark the payment row refunded ONLY when the refund actually succeeded, so the DB
+              // never falsely reads 'refunded'. A missing payment_intent (cannot auto-refund) falls
+              // through to the manual-intervention alert below without falsifying the payment state.
+              if (refundOk) {
+                const { error: paymentRefundError } = await supabaseAdmin
+                  .from("payments")
+                  .update({ status: "refunded" })
+                  .eq("stripe_checkout_session_id", session.id);
+                if (paymentRefundError) logStep("Booking: failed to mark payment refunded", { bookingId, error: paymentRefundError.message });
+              }
+
+              try {
+                const resendApiKey = Deno.env.get("RESEND_API_KEY");
+                if (resendApiKey) {
+                  const resend = new Resend(resendApiKey);
+                  await resend.emails.send({
+                    from: "Padel2Go <noreply@padel2go.eu>",
+                    to: ["contact@padel2go.eu"],
+                    subject: `KRITISCH: Bezahlte Buchung storniert - ${bookingId}`,
+                    html: `
+                      <html>
+                        <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+                          <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                            <h1 style="color: #b00020; margin-bottom: 20px;">Bezahlte Buchung wurde storniert</h1>
+                            <p>Eine per Karte bezahlte Buchung wurde storniert, bevor der Zahlungs-Webhook eintraf. Die reservierten Credits wurden bereits zurueckgebucht.</p>
+                            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                              <p><strong>Buchungs-ID:</strong> ${bookingId}</p>
+                              <p><strong>Status:</strong> ${releasedBooking?.status ?? "nicht gefunden"}</p>
+                              <p><strong>Stripe Session:</strong> ${session.id}</p>
+                              <p><strong>Bezahlt (Cent):</strong> ${session.amount_total ?? 0}</p>
+                              <p><strong>Automatische Rueckerstattung:</strong> ${refundOk ? "ausgeloest" : "FEHLGESCHLAGEN - bitte manuell pruefen"}</p>
+                            </div>
+                          </div>
+                        </body>
+                      </html>
+                    `,
+                  });
+                  logStep("Booking: critical release alert emailed", { bookingId });
+                } else {
+                  logStep("Booking: RESEND_API_KEY not configured — critical release alert not emailed", { bookingId });
+                }
+              } catch (alertErr) {
+                logStep("Booking: critical release alert email failed", { bookingId, error: (alertErr as Error).message });
+              }
               break;
             }
             logStep("Booking confirmed", { bookingId });
@@ -394,6 +835,27 @@ serve(async (req) => {
 
       case "checkout.session.expired": {
         const session = event.data.object as Stripe.Checkout.Session;
+
+        // Marketplace: an abandoned/expired order must refund its reserved points and
+        // restore its reserved stock. The release RPC is idempotent + pending-only, so
+        // it is race-free against the cron backstop calling the same RPC.
+        if (session.metadata?.type === "marketplace_purchase") {
+          const redemptionId = session.metadata?.redemption_id;
+          if (!redemptionId) {
+            logStep("Marketplace expired session missing redemption_id", { sessionId: session.id });
+            break;
+          }
+          const { error: releaseError } = await supabaseAdmin.rpc("release_marketplace_order", {
+            p_order_id: redemptionId,
+          });
+          if (releaseError) {
+            logStep("Failed to release expired marketplace order", { redemptionId, error: releaseError.message });
+          } else {
+            logStep("Marketplace order released (points refunded, stock restored)", { redemptionId });
+          }
+          break;
+        }
+
         const bookingId = session.metadata?.booking_id;
 
         if (!bookingId) {

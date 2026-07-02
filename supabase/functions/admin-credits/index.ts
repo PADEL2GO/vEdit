@@ -35,7 +35,7 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // Check if user is admin
+    // Check if user is admin (user_roles row OR superadmin email bypass)
     const { data: adminRole } = await supabaseAdmin
       .from("user_roles")
       .select("role")
@@ -43,7 +43,9 @@ serve(async (req) => {
       .eq("role", "admin")
       .single();
 
-    if (!adminRole) {
+    const isSuperadmin = user.email === "fsteinfelder@padel2go.eu";
+
+    if (!adminRole && !isSuperadmin) {
       throw new Error("Admin access required");
     }
 
@@ -82,6 +84,144 @@ serve(async (req) => {
       }));
 
       return new Response(JSON.stringify({ wallets: enrichedWallets }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // LIST all registered users (server-paginated over auth.users, LEFT-JOIN profile/roles/wallet)
+    // so every registered user shows regardless of profile state
+    if (action === "list_all_users") {
+      const page = Math.max(1, parseInt(String(body.page ?? "1"), 10) || 1);
+      const perPage = Math.min(200, Math.max(1, parseInt(String(body.perPage ?? "50"), 10) || 50));
+      const search = typeof body.search === "string" ? body.search.trim().toLowerCase() : "";
+
+      const richProfileCols =
+        "user_id, display_name, username, avatar_url, age, skill_self_rating, games_played_self, email_verified_at, phone_verified_at, profile_completed_at, shipping_address_line1, shipping_city, shipping_postal_code, shipping_country, referral_code";
+
+      type AuthUser = { id: string; email?: string | null; created_at: string; email_confirmed_at?: string | null };
+
+      const enrichPage = async (authUsers: AuthUser[]) => {
+        const ids = authUsers.map((u) => u.id);
+        if (ids.length === 0) return [];
+
+        const [{ data: profiles }, { data: roles }, { data: wallets }] = await Promise.all([
+          supabaseAdmin.from("profiles").select(richProfileCols).in("user_id", ids),
+          supabaseAdmin.from("user_roles").select("user_id, role").in("user_id", ids),
+          supabaseAdmin.from("wallets").select("user_id, reward_credits, play_credits, lifetime_credits").in("user_id", ids),
+        ]);
+
+        const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+        const rolesMap = new Map<string, string[]>();
+        (roles ?? []).forEach((r) => {
+          const list = rolesMap.get(r.user_id) ?? [];
+          list.push(r.role);
+          rolesMap.set(r.user_id, list);
+        });
+        const walletMap = new Map((wallets ?? []).map((w) => [w.user_id, w]));
+
+        return authUsers.map((u) => {
+          const profile = profileMap.get(u.id) as Record<string, unknown> | undefined;
+          const wallet = walletMap.get(u.id) ?? { play_credits: 0, reward_credits: 0, lifetime_credits: 0 };
+          const userRoles = rolesMap.get(u.id) ?? [];
+          return {
+            id: u.id,
+            user_id: u.id,
+            email: u.email ?? null,
+            created_at: u.created_at,
+            email_confirmed_at: u.email_confirmed_at ?? null,
+            display_name: (profile?.display_name as string | null) ?? null,
+            username: (profile?.username as string | null) ?? null,
+            avatar_url: (profile?.avatar_url as string | null) ?? null,
+            age: (profile?.age as number | null) ?? null,
+            skill_self_rating: (profile?.skill_self_rating as number | null) ?? null,
+            games_played_self: (profile?.games_played_self as number | null) ?? null,
+            email_verified_at: (profile?.email_verified_at as string | null) ?? null,
+            phone_verified_at: (profile?.phone_verified_at as string | null) ?? null,
+            profile_completed_at: (profile?.profile_completed_at as string | null) ?? null,
+            shipping_address_line1: (profile?.shipping_address_line1 as string | null) ?? null,
+            shipping_city: (profile?.shipping_city as string | null) ?? null,
+            shipping_postal_code: (profile?.shipping_postal_code as string | null) ?? null,
+            shipping_country: (profile?.shipping_country as string | null) ?? null,
+            referral_code: (profile?.referral_code as string | null) ?? null,
+            roles: userRoles,
+            role: userRoles[0] ?? null,
+            reward_credits: wallet.reward_credits ?? 0,
+            play_credits: wallet.play_credits ?? 0,
+            lifetime_credits: wallet.lifetime_credits ?? 0,
+            credits: (wallet.reward_credits ?? 0) + (wallet.play_credits ?? 0),
+            wallet: {
+              play_credits: wallet.play_credits ?? 0,
+              reward_credits: wallet.reward_credits ?? 0,
+              lifetime_credits: wallet.lifetime_credits ?? 0,
+            },
+          };
+        });
+      };
+
+      if (search) {
+        // Search must cover email (auth-only) plus display_name/username (profiles),
+        // so scan all auth users once (bounded), filter, then enrich only the page slice.
+        const allAuthUsers: AuthUser[] = [];
+        const scanPerPage = 200;
+        let scanPage = 1;
+        while (scanPage <= 100) {
+          const { data: scanData, error: scanError } = await supabaseAdmin.auth.admin.listUsers({ page: scanPage, perPage: scanPerPage });
+          if (scanError) throw scanError;
+          const batch = ((scanData?.users ?? []) as AuthUser[]);
+          allAuthUsers.push(...batch);
+          if (batch.length < scanPerPage) break;
+          scanPage++;
+        }
+
+        const allIds = allAuthUsers.map((u) => u.id);
+        const { data: searchProfiles } = allIds.length > 0
+          ? await supabaseAdmin.from("profiles").select("user_id, display_name, username").in("user_id", allIds)
+          : { data: [] as Array<{ user_id: string; display_name: string | null; username: string | null }> };
+        const nameMap = new Map((searchProfiles ?? []).map((p) => [p.user_id, p]));
+
+        const matched = allAuthUsers.filter((u) => {
+          const p = nameMap.get(u.id);
+          return (
+            (u.email ?? "").toLowerCase().includes(search) ||
+            (p?.display_name ?? "").toLowerCase().includes(search) ||
+            (p?.username ?? "").toLowerCase().includes(search) ||
+            u.id.toLowerCase().includes(search)
+          );
+        });
+
+        const total = matched.length;
+        const start = (page - 1) * perPage;
+        const enriched = await enrichPage(matched.slice(start, start + perPage));
+
+        return new Response(JSON.stringify({
+          users: enriched,
+          total,
+          page,
+          perPage,
+          hasMore: start + perPage < total,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      const { data: listData, error: listError } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+      if (listError) throw listError;
+
+      const authUsers = ((listData?.users ?? []) as AuthUser[]);
+      const enriched = await enrichPage(authUsers);
+      const totalCount = (listData as { total?: number } | null)?.total;
+      const total = typeof totalCount === "number" ? totalCount : (page - 1) * perPage + authUsers.length;
+      const hasMore = typeof totalCount === "number" ? page * perPage < totalCount : authUsers.length === perPage;
+
+      return new Response(JSON.stringify({
+        users: enriched,
+        total,
+        page,
+        perPage,
+        hasMore,
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
@@ -210,10 +350,78 @@ serve(async (req) => {
 
       logStep("Credit adjustment complete", { userId, amount: points, newBalance });
 
-      return new Response(JSON.stringify({ 
-        success: true, 
+      return new Response(JSON.stringify({
+        success: true,
         newBalance,
         adjustment: points,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // SET credits to an absolute value (via service-role RPC)
+    if (action === "set_credits") {
+      const { userId, creditType, targetValue, lifetimeValue, reason } = body;
+
+      if (!userId) throw new Error("userId required");
+      if (!reason) throw new Error("reason required");
+      if (!["REWARD", "PLAY"].includes(creditType)) throw new Error("Invalid creditType");
+      if (typeof targetValue !== "number" || targetValue < 0) throw new Error("Invalid targetValue");
+
+      const { data: wallet } = await supabaseAdmin
+        .from("wallets")
+        .select("reward_credits, play_credits, lifetime_credits")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const current = creditType === "REWARD" ? (wallet?.reward_credits ?? 0) : (wallet?.play_credits ?? 0);
+      const delta = targetValue - current;
+
+      const { error: rpcError } = await supabaseAdmin.rpc("set_wallet_credits", {
+        p_user_id: userId,
+        p_credit_type: creditType,
+        p_value: targetValue,
+        p_lifetime: typeof lifetimeValue === "number" ? lifetimeValue : null,
+      });
+
+      if (rpcError) throw new Error(rpcError.message);
+
+      // Create ledger entry
+      const { error: ledgerError } = await supabaseAdmin.from("points_ledger").insert({
+        user_id: userId,
+        credit_type: creditType === "REWARD" ? "REWARD" : "SKILL",
+        delta_points: delta,
+        balance_after: targetValue,
+        entry_type: "ADMIN_SET",
+        description: `Admin set: ${reason}`,
+      });
+
+      if (ledgerError) throw ledgerError;
+
+      // Log admin activity
+      await supabaseAdmin.from("admin_activity_log").insert({
+        admin_user_id: user.id,
+        action: "CREDIT_SET",
+        target_type: "user",
+        target_id: userId,
+        details: { creditType, targetValue, delta, lifetimeValue, reason },
+      });
+
+      // Create notification for user
+      await supabaseAdmin.from("notifications").insert({
+        user_id: userId,
+        type: "credit_adjustment",
+        title: "P2G Punkte aktualisiert",
+        message: "Dein Punktestand wurde angepasst.",
+      });
+
+      logStep("Credit set complete", { userId, creditType, targetValue, delta });
+
+      return new Response(JSON.stringify({
+        success: true,
+        delta,
+        newBalance: targetValue,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -1816,6 +2024,12 @@ serve(async (req) => {
       if (!userId) throw new Error("userId required");
       if (confirmPhrase !== "DELETE") throw new Error("Confirmation phrase 'DELETE' required");
 
+      // Guard: never delete the superadmin account or strip its admin role
+      const { data: targetUserData } = await supabaseAdmin.auth.admin.getUserById(userId);
+      if (targetUserData?.user?.email === "fsteinfelder@padel2go.eu") {
+        throw new Error("Cannot delete the superadmin account");
+      }
+
       logStep("Deleting user", { userId, adminId: user.id });
 
       // Delete in order due to foreign key constraints
@@ -1993,6 +2207,127 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
+    }
+
+    // MARKETPLACE ANALYTICS: revenue + points redeemed as discount + per-referrer breakdown
+    if (action === "marketplace_analytics") {
+      const pageSize = 1000;
+      // Paginate so the 1000-row default cap never truncates the aggregate sums.
+      const fetchAll = async (
+        build: () => any,
+      ): Promise<Record<string, unknown>[]> => {
+        const rows: Record<string, unknown>[] = [];
+        let from = 0;
+        while (true) {
+          const { data, error } = await build().range(from, from + pageSize - 1);
+          if (error) throw error;
+          const batch = (data ?? []) as Record<string, unknown>[];
+          rows.push(...batch);
+          if (batch.length < pageSize) break;
+          from += pageSize;
+        }
+        return rows;
+      };
+
+      // Successful orders drive the revenue + points-redeemed KPIs.
+      const orders = await fetchAll(() =>
+        supabaseAdmin
+          .from("marketplace_redemptions")
+          .select("amount_cents, play_spent, reward_spent")
+          .eq("status", "success"),
+      );
+
+      let revenueCents = 0;
+      let pointsRedeemed = 0;
+      for (const o of orders) {
+        revenueCents += Number(o.amount_cents ?? 0) || 0;
+        pointsRedeemed += (Number(o.play_spent ?? 0) || 0) + (Number(o.reward_spent ?? 0) || 0);
+      }
+      const orderCount = orders.length;
+
+      // credits_per_euro drives the EUR value of referral points (centsPerPoint = 100 / rate).
+      const { data: settings } = await supabaseAdmin
+        .from("site_settings")
+        .select("credits_per_euro")
+        .eq("id", "global")
+        .single();
+      const creditsPerEuro = Number(settings?.credits_per_euro ?? 100) || 100;
+      const centsPerPoint = 100 / creditsPerEuro;
+
+      // Who referred whom -> number of referred users per referrer.
+      const attributions = await fetchAll(() =>
+        supabaseAdmin.from("referral_attributions").select("referrer_user_id"),
+      );
+      const referredCountMap = new Map<string, number>();
+      for (const a of attributions) {
+        const ref = a.referrer_user_id as string;
+        referredCountMap.set(ref, (referredCountMap.get(ref) ?? 0) + 1);
+      }
+
+      // Referral points each referrer earned (reward_instances of a referral_growth definition).
+      const { data: referralDefs } = await supabaseAdmin
+        .from("reward_definitions")
+        .select("key")
+        .eq("category", "referral_growth");
+      const referralKeys = ((referralDefs ?? []) as { key: string }[]).map((d) => d.key);
+
+      const pointsMap = new Map<string, number>();
+      if (referralKeys.length > 0) {
+        const instances = await fetchAll(() =>
+          supabaseAdmin
+            .from("reward_instances")
+            .select("user_id, points")
+            .in("definition_key", referralKeys)
+            .in("status", ["PENDING", "AVAILABLE", "CLAIMED"]),
+        );
+        for (const inst of instances) {
+          const uid = inst.user_id as string;
+          pointsMap.set(uid, (pointsMap.get(uid) ?? 0) + (Number(inst.points ?? 0) || 0));
+        }
+      }
+
+      // Display names for the referrer table.
+      const referrerIds = Array.from(referredCountMap.keys());
+      const profilesMap = new Map<string, { display_name: string | null; username: string | null }>();
+      if (referrerIds.length > 0) {
+        const { data: profiles } = await supabaseAdmin
+          .from("profiles")
+          .select("user_id, display_name, username")
+          .in("user_id", referrerIds);
+        ((profiles ?? []) as { user_id: string; display_name: string | null; username: string | null }[]).forEach(
+          (p) => profilesMap.set(p.user_id, { display_name: p.display_name, username: p.username }),
+        );
+      }
+
+      const referrers = referrerIds
+        .map((id) => {
+          const points = pointsMap.get(id) ?? 0;
+          const profile = profilesMap.get(id);
+          return {
+            user_id: id,
+            display_name: profile?.display_name ?? null,
+            username: profile?.username ?? null,
+            referred_count: referredCountMap.get(id) ?? 0,
+            points,
+            eur_value_cents: Math.round(points * centsPerPoint),
+          };
+        })
+        .sort((a, b) => b.points - a.points || b.referred_count - a.referred_count);
+
+      return new Response(
+        JSON.stringify({
+          revenue_cents: revenueCents,
+          order_count: orderCount,
+          points_redeemed: pointsRedeemed,
+          credits_per_euro: creditsPerEuro,
+          cents_per_point: centsPerPoint,
+          referrers,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        },
+      );
     }
 
     return new Response(JSON.stringify({ error: "Unknown action" }), {

@@ -131,7 +131,8 @@ serve(async (req) => {
     .eq("user_id", user.id)
     .eq("role", "admin")
     .maybeSingle();
-  if (!adminRole) return json(403, { error: "Admin access required" });
+  const isSuperadmin = user.email === "fsteinfelder@padel2go.eu";
+  if (!adminRole && !isSuperadmin) return json(403, { error: "Admin access required" });
 
   const apiKey = await resolveDeeplKey(client);
   if (!apiKey) {

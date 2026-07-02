@@ -7,6 +7,7 @@ export interface MarketplaceItemInput {
   name: string;
   category: MarketplaceCategory;
   credit_cost: number;
+  price_cents: number;
   description: string;
   image_url: string;
   partner_name?: string;
@@ -28,7 +29,7 @@ export const useAdminMarketplaceItems = () => {
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
-      return data as MarketplaceItem[];
+      return data as unknown as MarketplaceItem[];
     },
   });
 };
@@ -62,12 +63,17 @@ export const useAdminRedemptions = () => {
   return useQuery({
     queryKey: ["admin-marketplace-redemptions"],
     queryFn: async () => {
+      // Only PAID orders belong in the fulfillment queue. Orders sit at status
+      // 'pending' from checkout start until the payment webhook settles them, and
+      // abandoned ones become 'cancelled' — surfacing either would let an admin ship
+      // a never-paid item (indistinguishable by fulfillment_status alone).
       const { data, error } = await supabase
         .from("marketplace_redemptions")
         .select(`
           *,
           item:marketplace_items(name, category, product_type)
         `)
+        .eq("status", "success")
         .order("created_at", { ascending: false });
 
       if (error) throw error;

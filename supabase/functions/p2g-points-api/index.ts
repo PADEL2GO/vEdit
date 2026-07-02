@@ -363,7 +363,9 @@ serve(async (req) => {
         .eq("role", "admin")
         .maybeSingle();
 
-      if (!adminRole) {
+      const isSuperadmin = user.email === "fsteinfelder@padel2go.eu";
+
+      if (!adminRole && !isSuperadmin) {
         logStep("Skill credit denied - admin role required", { userId: user.id });
         return new Response(JSON.stringify({ error: "Admin access required" }), {
           status: 403,

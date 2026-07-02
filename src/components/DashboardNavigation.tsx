@@ -53,6 +53,10 @@ const DashboardNavigation = () => {
         { name: t("nav.uebersicht"), url: "/dashboard/home" },
         { name: t("nav.booking"), url: "/dashboard/booking" },
         { name: t("nav.lobbys"), url: "/lobbies" },
+        // Marketplace goes live independently of app_launched
+        ...(features.marketplace_enabled
+          ? [{ name: t("nav.marketplace"), url: "/dashboard/marketplace" }]
+          : []),
       ]
     : allNavItems
         .filter(item => !item.feature || features[item.feature as keyof typeof features])

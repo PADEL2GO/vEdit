@@ -102,15 +102,21 @@
     "affordableBadge": "Nur leistbare",
     "empty": {
       "affordable": "Keine leistbaren Produkte in dieser Kategorie. Sammle mehr Credits!",
-      "default": "Keine Produkte in dieser Kategorie verfügbar."
+      "default": "Keine Produkte in dieser Kategorie verfügbar.",
+      "seeYouSoonTitle": "Bald wieder für dich da",
+      "seeYouSoonDesc": "Aktuell sind keine Produkte verfügbar. Schau bald wieder vorbei – wir füllen den Store gerade auf!"
     },
     "shippingBadge": "Versand",
     "affordable": "Leistbar",
     "creditCost": "{{count}} Credits",
+    "price": "{{amount}} €",
+    "maxPointsDiscount": "Bis zu {{amount}} € Rabatt mit Punkten",
+    "balanceWorth": "Dein P2G-Guthaben: {{points}} Punkte (≈ {{amount}} €)",
     "button": {
       "outOfStock": "Nicht verfügbar",
       "redeem": "Einlösen",
-      "missingCredits": "Noch {{count}} Credits"
+      "missingCredits": "Noch {{count}} Credits",
+      "buy": "Kaufen"
     },
     "historyHeading": "Historie",
     "confirm": {
@@ -125,7 +131,18 @@
       "afterRedeem": "Nach Einlösung:",
       "cancel": "Abbrechen",
       "redeeming": "Wird eingelöst...",
-      "redeemNow": "Jetzt einlösen"
+      "redeemNow": "Jetzt einlösen",
+      "pointsDiscount": "Punkte-Rabatt",
+      "toPay": "Zu zahlen",
+      "freeHint": "Deine Punkte decken den vollen Preis – kein Bezahlvorgang nötig.",
+      "checkout": "Jetzt kaufen",
+      "checkingOut": "Wird verarbeitet...",
+      "points": {
+        "title": "Mit P2G-Punkten bezahlen",
+        "available": "Verfügbar: {{count}} Punkte ({{amount}} €)",
+        "none": "0 Punkte",
+        "discountLine": "{{count}} Punkte = {{amount}} € Rabatt (max. {{maxPercent}}% des Preises)"
+      }
     },
     "dateFormat": "d. MMM yyyy, HH:mm"
   },

@@ -717,7 +717,7 @@ serve(async (req) => {
           });
         }
 
-        // Check if user is admin
+        // Check if user is admin (user_roles row OR superadmin email bypass)
         const { data: adminRole } = await supabaseAdmin
           .from("user_roles")
           .select("role")
@@ -725,7 +725,9 @@ serve(async (req) => {
           .eq("role", "admin")
           .maybeSingle();
 
-        if (!adminRole) {
+        const isSuperadmin = user!.email === "fsteinfelder@padel2go.eu";
+
+        if (!adminRole && !isSuperadmin) {
           return new Response(JSON.stringify({ error: "Admin access required" }), {
             status: 403,
             headers: { ...corsHeaders, "Content-Type": "application/json" },

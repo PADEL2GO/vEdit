@@ -57,9 +57,9 @@
     "voucherRedeemButton": "Einlösen",
     "credits": {
       "title": "P2G Credits einlösen",
-      "available": "Verfügbar: {{count}} Credits",
+      "available": "Verfügbar: {{count}} Credits ({{amount}} €)",
       "noneSelected": "0 Credits",
-      "discountTemplate": "{{credits}} Credits = {{amount}} € Rabatt (max. 50% des Preises)"
+      "discountTemplate": "{{credits}} Credits = {{amount}} € Rabatt (max. {{maxPercent}}% des Preises)"
     },
     "guestUpsell": {
       "title": "Punkte sammeln & mehr Vorteile",

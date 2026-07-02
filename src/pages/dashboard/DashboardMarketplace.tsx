@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccountData } from "@/hooks/useAccountData";
 import { useMarketplaceItems, MarketplaceItem, MarketplaceCategory } from "@/hooks/useMarketplaceItems";
-import { useMarketplaceRedeem, ShippingAddress } from "@/hooks/useMarketplaceRedeem";
+import { useMarketplaceCheckout, ShippingAddress } from "@/hooks/useMarketplaceCheckout";
 import { useUserRedemptions } from "@/hooks/useUserRedemptions";
 import { useP2GPoints } from "@/hooks/useP2GPoints";
+import { usePointsValue } from "@/hooks/usePointsValue";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { ShippingAddressForm } from "@/components/marketplace/ShippingAddressForm";
 import { MarketplaceCreditsHeader, ReferralShareCard } from "@/components/p2g";
@@ -15,8 +15,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ShoppingBag, Gift, Loader2, Calendar, Sparkles, Ticket, Truck, CheckCircle, XCircle } from "lucide-react";
+import { ShoppingBag, Gift, Loader2, Calendar, Sparkles, Ticket, Truck, Coins } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 
@@ -48,19 +46,20 @@ type SortOption = "default" | "price-asc" | "price-desc";
 const DashboardMarketplace = () => {
   const { t, i18n } = useTranslation("p2g");
   const dateLocale = i18n.language === "en" ? enUS : de;
+  const numberLocale = i18n.language === "en" ? "en-US" : "de-DE";
   const { user } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { wallet, profile, loading: walletLoading } = useAccountData(user);
-  const { creditBreakdown, isCreditBreakdownLoading, dailyClaimStatus, isDailyClaimStatusLoading } = useP2GPoints();
+  const { creditBreakdown, isCreditBreakdownLoading } = useP2GPoints();
+  const { centsPerPoint, maxPercent, enabled: pointsEnabled } = usePointsValue();
   const [activeCategory, setActiveCategory] = useState<MarketplaceCategory>("courtbooking");
   const [sortBy, setSortBy] = useState<SortOption>("default");
-  const [showAffordableOnly, setShowAffordableOnly] = useState(searchParams.get("affordable") === "true");
   const { data: items, isLoading: itemsLoading } = useMarketplaceItems(activeCategory);
   const { data: redemptions } = useUserRedemptions();
-  const redeemMutation = useMarketplaceRedeem();
-  
+  const checkoutMutation = useMarketplaceCheckout();
+
   const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pointsToUse, setPointsToUse] = useState(0);
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     address_line1: "",
     postal_code: "",
@@ -72,20 +71,11 @@ const DashboardMarketplace = () => {
   const playCredits = wallet?.play_credits || 0;
   const rewardCredits = wallet?.reward_credits || 0;
   const totalCredits = playCredits + rewardCredits;
+  const balanceWorthEuro = (totalCredits * centsPerPoint / 100).toFixed(2);
 
-  // Update URL when toggle changes
-  useEffect(() => {
-    if (showAffordableOnly) {
-      searchParams.set("affordable", "true");
-    } else {
-      searchParams.delete("affordable");
-    }
-    setSearchParams(searchParams, { replace: true });
-  }, [showAffordableOnly, searchParams, setSearchParams]);
-
-  const handleRedeemClick = (item: MarketplaceItem) => {
+  const handleBuyClick = (item: MarketplaceItem) => {
     setSelectedItem(item);
-    // Pre-fill with saved address if available
+    setPointsToUse(0);
     if (item.product_type === "purchase" && profile) {
       setShippingAddress({
         address_line1: profile.shipping_address_line1 || "",
@@ -107,44 +97,50 @@ const DashboardMarketplace = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleConfirmRedeem = () => {
+  const handleConfirmCheckout = () => {
     if (!selectedItem) return;
-    
-    // Validate address for purchase products
-    if (selectedItem.product_type === "purchase" && !validateAddress()) {
-      return;
-    }
+    if (selectedItem.product_type === "purchase" && !validateAddress()) return;
 
-    redeemMutation.mutate({
+    checkoutMutation.mutate({
       itemId: selectedItem.id,
       itemName: selectedItem.name,
-      creditCost: selectedItem.credit_cost,
-      shippingAddress: selectedItem.product_type === "purchase" ? shippingAddress : undefined,
+      pointsToUse,
+      shipping: selectedItem.product_type === "purchase" ? shippingAddress : undefined,
     }, {
-      onSuccess: () => {
-        setConfirmOpen(false);
-        setSelectedItem(null);
-        setShippingAddress({ address_line1: "", postal_code: "", city: "", country: "DE" });
+      onSuccess: (data) => {
+        // The Stripe path redirects away inside the mutation; only close on the free path.
+        if (!data?.url) {
+          setConfirmOpen(false);
+          setSelectedItem(null);
+          setPointsToUse(0);
+          setShippingAddress({ address_line1: "", postal_code: "", city: "", country: "DE" });
+        }
       },
     });
   };
 
   const isLoading = walletLoading || itemsLoading;
 
-  // Filter and sort items
-  let filteredItems = items || [];
-  if (showAffordableOnly) {
-    filteredItems = filteredItems.filter(item => totalCredits >= item.credit_cost);
-  }
-  
-  const sortedItems = [...filteredItems].sort((a, b) => {
-    if (sortBy === "price-asc") return a.credit_cost - b.credit_cost;
-    if (sortBy === "price-desc") return b.credit_cost - a.credit_cost;
+  const sortedItems = [...(items || [])].sort((a, b) => {
+    const pa = a.price_cents ?? 0;
+    const pb = b.price_cents ?? 0;
+    if (sortBy === "price-asc") return pa - pb;
+    if (sortBy === "price-desc") return pb - pa;
     return 0;
   });
 
   const activeCategoryData = CATEGORIES.find(c => c.key === activeCategory);
-  const affordableCount = items?.filter(item => totalCredits >= item.credit_cost).length || 0;
+
+  // Selected-item points maths (mirrors useBookingCheckout / marketplace-checkout server side).
+  const selectedPriceCents = selectedItem?.price_cents ?? 0;
+  const selectedMaxPoints = pointsEnabled
+    ? Math.min(totalCredits, Math.floor(selectedPriceCents * maxPercent / 100 / centsPerPoint))
+    : 0;
+  const pointsDiscountCents = Math.min(
+    Math.floor(pointsToUse * centsPerPoint),
+    Math.floor(selectedPriceCents * maxPercent / 100),
+  );
+  const remainderCents = Math.max(0, selectedPriceCents - pointsDiscountCents);
 
   return (
     <DashboardLayout>
@@ -153,7 +149,7 @@ const DashboardMarketplace = () => {
       </Helmet>
 
       <div className="container mx-auto px-4 py-6 md:py-8 space-y-6 md:space-y-8">
-        {/* New Expert Level + Credits Breakdown Header */}
+        {/* Expert Level + Credits Breakdown Header */}
         <MarketplaceCreditsHeader
           playCredits={playCredits}
           rewardCredits={rewardCredits}
@@ -161,48 +157,43 @@ const DashboardMarketplace = () => {
           isLoading={walletLoading || isCreditBreakdownLoading}
         />
 
+        {/* Points balance + its € worth — always visible */}
+        <div className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+          <Coins className="w-5 h-5 text-primary shrink-0" />
+          <p className="text-sm">
+            {t("marketplacePage.balanceWorth", {
+              points: totalCredits.toLocaleString(numberLocale),
+              amount: balanceWorthEuro,
+            })}
+          </p>
+        </div>
+
         {/* Referral Section */}
         <ReferralShareCard />
 
-        {/* Category Tabs and Filters */}
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as MarketplaceCategory)} className="w-full sm:w-auto">
-              <TabsList className="grid w-full grid-cols-4 sm:w-auto sm:inline-flex">
-                {CATEGORIES.map(({ key, icon: Icon }) => (
-                  <TabsTrigger key={key} value={key} className="flex items-center gap-2">
-                    <Icon className="w-4 h-4 hidden sm:block" />
-                    <span className="text-xs sm:text-sm">{t(`marketplacePage.categories.${key}`)}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+        {/* Category Tabs and Sort */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as MarketplaceCategory)} className="w-full sm:w-auto">
+            <TabsList className="grid w-full grid-cols-4 sm:w-auto sm:inline-flex">
+              {CATEGORIES.map(({ key, icon: Icon }) => (
+                <TabsTrigger key={key} value={key} className="flex items-center gap-2">
+                  <Icon className="w-4 h-4 hidden sm:block" />
+                  <span className="text-xs sm:text-sm">{t(`marketplacePage.categories.${key}`)}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
-            <div className="flex items-center gap-4">
-              {/* Affordable Only Toggle */}
-              <div className="flex items-center gap-2">
-                <Switch 
-                  id="affordable-only" 
-                  checked={showAffordableOnly}
-                  onCheckedChange={setShowAffordableOnly}
-                />
-                <Label htmlFor="affordable-only" className="text-sm cursor-pointer">
-                  {t("marketplacePage.affordableOnly")}
-                </Label>
-              </div>
-
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder={t("marketplacePage.sort.placeholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">{t("marketplacePage.sort.default")}</SelectItem>
-                  <SelectItem value="price-asc">{t("marketplacePage.sort.priceAsc")}</SelectItem>
-                  <SelectItem value="price-desc">{t("marketplacePage.sort.priceDesc")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder={t("marketplacePage.sort.placeholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">{t("marketplacePage.sort.default")}</SelectItem>
+              <SelectItem value="price-asc">{t("marketplacePage.sort.priceAsc")}</SelectItem>
+              <SelectItem value="price-desc">{t("marketplacePage.sort.priceDesc")}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {isLoading ? (
@@ -217,30 +208,24 @@ const DashboardMarketplace = () => {
                   {activeCategoryData && <activeCategoryData.icon className="w-5 h-5 text-primary" />}
                   {t(`marketplacePage.categories.${activeCategory}`)}
                   <Badge variant="secondary" className="ml-2">{t("marketplacePage.productsCount", { count: sortedItems.length })}</Badge>
-                  {showAffordableOnly && (
-                    <Badge variant="outline" className="ml-2 text-green-400 border-green-400/30">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      {t("marketplacePage.affordableBadge")}
-                    </Badge>
-                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {sortedItems.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    {showAffordableOnly
-                      ? t("marketplacePage.empty.affordable")
-                      : t("marketplacePage.empty.default")
-                    }
+                  <div className="flex flex-col items-center gap-3 text-center py-12">
+                    <Sparkles className="w-10 h-10 text-primary/60" />
+                    <p className="text-lg font-semibold">{t("marketplacePage.empty.seeYouSoonTitle")}</p>
+                    <p className="text-sm text-muted-foreground max-w-md">{t("marketplacePage.empty.seeYouSoonDesc")}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {sortedItems.map((item) => {
-                      const canAfford = totalCredits >= item.credit_cost;
+                      const priceCents = item.price_cents ?? 0;
+                      const hasPrice = priceCents > 0;
                       const isOutOfStock = item.stock_quantity !== null && item.stock_quantity <= 0;
                       const isPurchase = item.product_type === "purchase";
-                      const missingCredits = item.credit_cost - totalCredits;
-                      
+                      const maxDiscountCents = pointsEnabled ? Math.floor(priceCents * maxPercent / 100) : 0;
+
                       return (
                         <div key={item.id} className="relative rounded-xl overflow-hidden bg-background/50 border border-border/30 flex flex-col">
                           <div className="absolute top-2 left-2 z-10 flex gap-1">
@@ -251,21 +236,6 @@ const DashboardMarketplace = () => {
                               <Badge variant="default" className="bg-primary/80 backdrop-blur-sm">
                                 <Truck className="w-3 h-3 mr-1" />
                                 {t("marketplacePage.shippingBadge")}
-                              </Badge>
-                            )}
-                          </div>
-
-                          {/* Affordability indicator */}
-                          <div className="absolute top-2 right-2 z-10">
-                            {canAfford ? (
-                              <Badge className="bg-green-500/80 backdrop-blur-sm">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                {t("marketplacePage.affordable")}
-                              </Badge>
-                            ) : (
-                              <Badge variant="destructive" className="bg-destructive/80 backdrop-blur-sm">
-                                <XCircle className="w-3 h-3 mr-1" />
-                                -{missingCredits}
                               </Badge>
                             )}
                           </div>
@@ -286,24 +256,28 @@ const DashboardMarketplace = () => {
                               )}
                             </div>
 
-                            <div className="space-y-3">
-                              <Badge variant="outline" className="text-primary border-primary">
-                                {t("marketplacePage.creditCost", { count: item.credit_cost })}
-                              </Badge>
+                            <div className="space-y-2">
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-xl font-bold text-primary">
+                                  {t("marketplacePage.price", { amount: (priceCents / 100).toFixed(2) })}
+                                </span>
+                              </div>
+                              {maxDiscountCents > 0 && (
+                                <p className="text-xs text-muted-foreground">
+                                  {t("marketplacePage.maxPointsDiscount", { amount: (maxDiscountCents / 100).toFixed(2) })}
+                                </p>
+                              )}
 
                               <Button
-                                onClick={() => handleRedeemClick(item)}
-                                disabled={!canAfford || isOutOfStock || redeemMutation.isPending}
+                                onClick={() => handleBuyClick(item)}
+                                disabled={!hasPrice || isOutOfStock || checkoutMutation.isPending}
                                 className="w-full"
-                                variant={canAfford && !isOutOfStock ? "lime" : "secondary"}
+                                variant={hasPrice && !isOutOfStock ? "lime" : "secondary"}
                                 size="sm"
                               >
                                 {isOutOfStock
                                   ? t("marketplacePage.button.outOfStock")
-                                  : canAfford
-                                    ? t("marketplacePage.button.redeem")
-                                    : t("marketplacePage.button.missingCredits", { count: missingCredits })
-                                }
+                                  : t("marketplacePage.button.buy")}
                               </Button>
                             </div>
                           </div>
@@ -315,7 +289,7 @@ const DashboardMarketplace = () => {
               </CardContent>
             </Card>
 
-            {/* Historie (previously "Meine Einlösungen") */}
+            {/* Historie */}
             {redemptions && redemptions.length > 0 && (
               <Card className="bg-card/50 backdrop-blur-sm border-border/50">
                 <CardHeader>
@@ -335,7 +309,9 @@ const DashboardMarketplace = () => {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-destructive">-{redemption.credit_cost}</p>
+                          {redemption.credit_cost > 0 && (
+                            <p className="font-semibold text-destructive">-{redemption.credit_cost}</p>
+                          )}
                           {redemption.reference_code && (
                             <p className="text-xs text-muted-foreground font-mono">{redemption.reference_code}</p>
                           )}
@@ -361,7 +337,7 @@ const DashboardMarketplace = () => {
                 : t("marketplacePage.confirm.descDefault")}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedItem && (
             <div className="py-4 space-y-4">
               {selectedItem.image_url && (
@@ -393,31 +369,79 @@ const DashboardMarketplace = () => {
                   />
                 </div>
               )}
-              
+
+              {/* P2G points discount */}
+              {pointsEnabled && selectedMaxPoints > 0 && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Coins className="w-4 h-4 text-primary" />
+                      <span className="font-semibold text-sm">{t("marketplacePage.confirm.points.title")}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {t("marketplacePage.confirm.points.available", {
+                        count: totalCredits.toLocaleString(numberLocale),
+                        amount: balanceWorthEuro,
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min={0}
+                      max={selectedMaxPoints}
+                      step={10}
+                      value={pointsToUse}
+                      onChange={e => setPointsToUse(Number(e.target.value))}
+                      className="flex-1 accent-primary"
+                    />
+                    <span className="text-sm font-bold text-primary w-20 text-right">
+                      {pointsToUse > 0
+                        ? `−${(pointsDiscountCents / 100).toFixed(2)} €`
+                        : t("marketplacePage.confirm.points.none")}
+                    </span>
+                  </div>
+                  {pointsToUse > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {t("marketplacePage.confirm.points.discountLine", {
+                        count: pointsToUse.toLocaleString(numberLocale),
+                        amount: (pointsDiscountCents / 100).toFixed(2),
+                        maxPercent,
+                      })}
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="space-y-2 border-t pt-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t("marketplacePage.confirm.price")}</span>
-                  <span className="font-semibold">{t("marketplacePage.creditCost", { count: selectedItem.credit_cost })}</span>
+                  <span className="font-semibold">{t("marketplacePage.price", { amount: (selectedPriceCents / 100).toFixed(2) })}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t("marketplacePage.confirm.balance")}</span>
-                  <span className="font-semibold">{t("marketplacePage.creditCost", { count: totalCredits })}</span>
-                </div>
+                {pointsDiscountCents > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{t("marketplacePage.confirm.pointsDiscount")}</span>
+                    <span className="font-semibold text-primary">−{(pointsDiscountCents / 100).toFixed(2)} €</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm border-t pt-2">
-                  <span className="text-muted-foreground">{t("marketplacePage.confirm.afterRedeem")}</span>
-                  <span className="font-semibold text-primary">{t("marketplacePage.creditCost", { count: totalCredits - selectedItem.credit_cost })}</span>
+                  <span className="text-muted-foreground">{t("marketplacePage.confirm.toPay")}</span>
+                  <span className="font-semibold text-primary">{t("marketplacePage.price", { amount: (remainderCents / 100).toFixed(2) })}</span>
                 </div>
+                {remainderCents <= 0 && (
+                  <p className="text-xs text-muted-foreground pt-1">{t("marketplacePage.confirm.freeHint")}</p>
+                )}
               </div>
             </div>
           )}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>{t("marketplacePage.confirm.cancel")}</Button>
-            <Button variant="lime" onClick={handleConfirmRedeem} disabled={redeemMutation.isPending}>
-              {redeemMutation.isPending ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("marketplacePage.confirm.redeeming")}</>
+            <Button variant="lime" onClick={handleConfirmCheckout} disabled={checkoutMutation.isPending}>
+              {checkoutMutation.isPending ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t("marketplacePage.confirm.checkingOut")}</>
               ) : (
-                t("marketplacePage.confirm.redeemNow")
+                t("marketplacePage.confirm.checkout")
               )}
             </Button>
           </DialogFooter>

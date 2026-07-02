@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "title": "P2G Marketplace | Padel2Go",
+    "description": "Entdecke Equipment, Gutscheine und Extras im Padel2Go Marketplace. Bequem als Gast per Karte oder PayPal bezahlen."
+  },
+  "hero": {
+    "badge": "P2G Marketplace",
+    "title": "Der",
+    "titleHighlight": "Padel2Go Store",
+    "description": "Equipment, Gutscheine und exklusive Extras – bequem online bestellen und bar bezahlen."
+  },
+  "upsell": {
+    "title": "Punkte sammeln & Freunde werben",
+    "body": "Erstelle ein kostenloses Konto, um bei jedem Kauf P2G-Punkte zu sammeln und Freunde zu werben.",
+    "cta": "Jetzt kostenlos registrieren →"
+  },
+  "empty": {
+    "title": "Bald wieder für dich da",
+    "description": "Aktuell sind keine Produkte verfügbar. Schau bald wieder vorbei – wir füllen den Store gerade auf!"
+  },
+  "item": {
+    "shippingBadge": "Versand",
+    "pointsOnlyBadge": "Nur mit P2G-Punkten",
+    "outOfStock": "Nicht verfügbar",
+    "buy": "Kaufen",
+    "price": "{{amount}} €"
+  },
+  "checkoutDialog": {
+    "title": "Bestellung abschließen",
+    "descriptionPurchase": "Gib deine E-Mail-Adresse und Lieferadresse ein.",
+    "descriptionDefault": "Gib deine E-Mail-Adresse ein, um fortzufahren.",
+    "from": "von {{partner}}",
+    "willShip": "Wird versendet",
+    "emailLabel": "E-Mail-Adresse",
+    "emailPlaceholder": "deine@email.de",
+    "nameLabel": "Name (optional)",
+    "namePlaceholder": "Dein Name",
+    "deliveryAddress": "Lieferadresse",
+    "totalLabel": "Gesamtpreis",
+    "cancel": "Abbrechen",
+    "submit": "Weiter zur Zahlung",
+    "submitting": "Wird verarbeitet...",
+    "loginHint": "Du hast schon ein Konto?",
+    "loginLink": "Anmelden",
+    "errors": {
+      "email": "Bitte gib eine gültige E-Mail-Adresse ein.",
+      "required": "Pflichtfeld"
+    }
+  },
+  "success": {
+    "metaTitle": "Vielen Dank für deinen Kauf | Padel2Go",
+    "metaDescription": "Deine Bestellung im Padel2Go Marketplace war erfolgreich.",
+    "title": "Vielen Dank für deinen Kauf",
+    "subtitle": "Deine Bestellung ist bei uns eingegangen.",
+    "note": "Du erhältst in Kürze eine Bestätigung per E-Mail – wir versenden deine Bestellung schnellstmöglich.",
+    "referenceLabel": "Bestellreferenz",
+    "backToStore": "Zurück zum Marketplace",
+    "toDashboard": "Zum Dashboard"
+  },
+  "cancelled": {
+    "toast": "Zahlung abgebrochen"
+  }
+}
