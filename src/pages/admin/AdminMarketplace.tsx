@@ -49,7 +49,11 @@ import {
   ShoppingCart,
   Upload,
   Image as ImageIcon,
+  Euro,
+  Coins,
+  Users,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import {
   useAdminMarketplaceItems,
   useCreateMarketplaceItem,
@@ -74,12 +78,46 @@ const CATEGORY_LABELS: Record<MarketplaceCategory, string> = {
   events: "Events",
 };
 
+interface MarketplaceReferrer {
+  user_id: string;
+  display_name: string | null;
+  username: string | null;
+  referred_count: number;
+  points: number;
+  eur_value_cents: number;
+}
+
+interface MarketplaceAnalytics {
+  revenue_cents: number;
+  order_count: number;
+  points_redeemed: number;
+  credits_per_euro: number;
+  cents_per_point: number;
+  referrers: MarketplaceReferrer[];
+}
+
+const formatEuro = (cents: number) =>
+  new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(
+    (cents || 0) / 100,
+  );
+
 const AdminMarketplace = () => {
   const { data: items, isLoading } = useAdminMarketplaceItems();
   const createMutation = useCreateMarketplaceItem();
   const updateMutation = useUpdateMarketplaceItem();
   const deleteMutation = useDeleteMarketplaceItem();
   const toggleStatusMutation = useToggleMarketplaceItemStatus();
+
+  const { data: analytics, isLoading: analyticsLoading } = useQuery({
+    queryKey: ["admin-marketplace-analytics"],
+    queryFn: async (): Promise<MarketplaceAnalytics> => {
+      const { data, error } = await supabase.functions.invoke("admin-credits", {
+        body: { action: "marketplace_analytics" },
+      });
+      if (error) throw error;
+      return data as MarketplaceAnalytics;
+    },
+  });
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -250,6 +288,113 @@ const AdminMarketplace = () => {
             <Plus className="w-4 h-4 mr-2" />
             Neues Produkt
           </Button>
+        </div>
+
+        {/* Analytics */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Umsätze & Analytics</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Euro className="w-4 h-4" />
+                  Umsatz (bezahlt)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analyticsLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    {formatEuro(analytics?.revenue_cents ?? 0)}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <ShoppingCart className="w-4 h-4" />
+                  Bestellungen
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analyticsLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    {analytics?.order_count ?? 0}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Coins className="w-4 h-4" />
+                  Eingelöste Punkte
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analyticsLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    {(analytics?.points_redeemed ?? 0).toLocaleString("de-DE")}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Empfehlungen (Referrals)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {analyticsLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : !analytics?.referrers.length ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Noch keine Empfehlungen.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nutzer</TableHead>
+                        <TableHead className="text-right">Geworben</TableHead>
+                        <TableHead className="text-right">Punkte</TableHead>
+                        <TableHead className="text-right">Wert (€)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {analytics.referrers.map((r) => (
+                        <TableRow key={r.user_id}>
+                          <TableCell className="font-medium">
+                            {r.display_name || r.username || r.user_id.slice(0, 8)}
+                          </TableCell>
+                          <TableCell className="text-right">{r.referred_count}</TableCell>
+                          <TableCell className="text-right font-mono">
+                            {r.points.toLocaleString("de-DE")}
+                          </TableCell>
+                          <TableCell className="text-right font-mono">
+                            {formatEuro(r.eur_value_cents)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Filters */}

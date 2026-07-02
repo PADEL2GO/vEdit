@@ -2209,6 +2209,127 @@ serve(async (req) => {
       });
     }
 
+    // MARKETPLACE ANALYTICS: revenue + points redeemed as discount + per-referrer breakdown
+    if (action === "marketplace_analytics") {
+      const pageSize = 1000;
+      // Paginate so the 1000-row default cap never truncates the aggregate sums.
+      const fetchAll = async (
+        build: () => any,
+      ): Promise<Record<string, unknown>[]> => {
+        const rows: Record<string, unknown>[] = [];
+        let from = 0;
+        while (true) {
+          const { data, error } = await build().range(from, from + pageSize - 1);
+          if (error) throw error;
+          const batch = (data ?? []) as Record<string, unknown>[];
+          rows.push(...batch);
+          if (batch.length < pageSize) break;
+          from += pageSize;
+        }
+        return rows;
+      };
+
+      // Successful orders drive the revenue + points-redeemed KPIs.
+      const orders = await fetchAll(() =>
+        supabaseAdmin
+          .from("marketplace_redemptions")
+          .select("amount_cents, play_spent, reward_spent")
+          .eq("status", "success"),
+      );
+
+      let revenueCents = 0;
+      let pointsRedeemed = 0;
+      for (const o of orders) {
+        revenueCents += Number(o.amount_cents ?? 0) || 0;
+        pointsRedeemed += (Number(o.play_spent ?? 0) || 0) + (Number(o.reward_spent ?? 0) || 0);
+      }
+      const orderCount = orders.length;
+
+      // credits_per_euro drives the EUR value of referral points (centsPerPoint = 100 / rate).
+      const { data: settings } = await supabaseAdmin
+        .from("site_settings")
+        .select("credits_per_euro")
+        .eq("id", "global")
+        .single();
+      const creditsPerEuro = Number(settings?.credits_per_euro ?? 100) || 100;
+      const centsPerPoint = 100 / creditsPerEuro;
+
+      // Who referred whom -> number of referred users per referrer.
+      const attributions = await fetchAll(() =>
+        supabaseAdmin.from("referral_attributions").select("referrer_user_id"),
+      );
+      const referredCountMap = new Map<string, number>();
+      for (const a of attributions) {
+        const ref = a.referrer_user_id as string;
+        referredCountMap.set(ref, (referredCountMap.get(ref) ?? 0) + 1);
+      }
+
+      // Referral points each referrer earned (reward_instances of a referral_growth definition).
+      const { data: referralDefs } = await supabaseAdmin
+        .from("reward_definitions")
+        .select("key")
+        .eq("category", "referral_growth");
+      const referralKeys = ((referralDefs ?? []) as { key: string }[]).map((d) => d.key);
+
+      const pointsMap = new Map<string, number>();
+      if (referralKeys.length > 0) {
+        const instances = await fetchAll(() =>
+          supabaseAdmin
+            .from("reward_instances")
+            .select("user_id, points")
+            .in("definition_key", referralKeys)
+            .in("status", ["PENDING", "AVAILABLE", "CLAIMED"]),
+        );
+        for (const inst of instances) {
+          const uid = inst.user_id as string;
+          pointsMap.set(uid, (pointsMap.get(uid) ?? 0) + (Number(inst.points ?? 0) || 0));
+        }
+      }
+
+      // Display names for the referrer table.
+      const referrerIds = Array.from(referredCountMap.keys());
+      const profilesMap = new Map<string, { display_name: string | null; username: string | null }>();
+      if (referrerIds.length > 0) {
+        const { data: profiles } = await supabaseAdmin
+          .from("profiles")
+          .select("user_id, display_name, username")
+          .in("user_id", referrerIds);
+        ((profiles ?? []) as { user_id: string; display_name: string | null; username: string | null }[]).forEach(
+          (p) => profilesMap.set(p.user_id, { display_name: p.display_name, username: p.username }),
+        );
+      }
+
+      const referrers = referrerIds
+        .map((id) => {
+          const points = pointsMap.get(id) ?? 0;
+          const profile = profilesMap.get(id);
+          return {
+            user_id: id,
+            display_name: profile?.display_name ?? null,
+            username: profile?.username ?? null,
+            referred_count: referredCountMap.get(id) ?? 0,
+            points,
+            eur_value_cents: Math.round(points * centsPerPoint),
+          };
+        })
+        .sort((a, b) => b.points - a.points || b.referred_count - a.referred_count);
+
+      return new Response(
+        JSON.stringify({
+          revenue_cents: revenueCents,
+          order_count: orderCount,
+          points_redeemed: pointsRedeemed,
+          credits_per_euro: creditsPerEuro,
+          cents_per_point: centsPerPoint,
+          referrers,
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        },
+      );
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
