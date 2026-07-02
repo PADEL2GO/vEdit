@@ -57,9 +57,9 @@
     "voucherRedeemButton": "Apply",
     "credits": {
       "title": "Redeem P2G Credits",
-      "available": "Available: {{count}} credits",
+      "available": "Available: {{count}} credits (€{{amount}})",
       "noneSelected": "0 credits",
-      "discountTemplate": "{{credits}} credits = €{{amount}} discount (max. 50% of price)"
+      "discountTemplate": "{{credits}} credits = €{{amount}} discount (max. {{maxPercent}}% of price)"
     },
     "guestUpsell": {
       "title": "Earn points & more benefits",

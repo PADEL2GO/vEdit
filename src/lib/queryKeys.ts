@@ -51,6 +51,7 @@ export const QUERY_KEYS = {
   siteVisuals: "site-visuals",
   siteVisual: "site-visual",
   siteSettings: "site-settings",
+  pointsValue: "points-value",
   
   // Notifications
   notifications: "notifications",

@@ -48,10 +48,12 @@ const BookingCheckout = () => {
     setVoucherCode,
     validateVoucher,
     clearVoucher,
-    creditsToUse,
-    setCreditsToUse,
-    availableCredits,
-    maxCreditsForBooking,
+    pointsToUse,
+    setPointsToUse,
+    availablePoints,
+    maxPointsForBooking,
+    centsPerPoint,
+    maxPointsPercent,
     isGuest,
     handlePayment,
     formatTimeLeft,
@@ -102,10 +104,10 @@ const BookingCheckout = () => {
   const priceAfterVoucher = isVoucherApplied
     ? applyVoucherDiscount(booking.price_cents, voucher.discountType, voucher.discountValue)
     : booking.price_cents;
-  // 100 credits = €1 = 100 cents
-  const creditsDiscountCents = Math.min(creditsToUse, Math.floor(priceAfterVoucher * 0.5));
-  const effectivePrice = Math.max(0, priceAfterVoucher - creditsDiscountCents);
+  const pointsDiscountCents = Math.min(Math.floor(pointsToUse * centsPerPoint), priceAfterVoucher);
+  const effectivePrice = Math.max(0, priceAfterVoucher - pointsDiscountCents);
   const isFullyFree = effectivePrice === 0;
+  const availablePointsWorthEuro = (availablePoints * centsPerPoint / 100).toFixed(2);
 
   return (
     <>
@@ -264,7 +266,7 @@ const BookingCheckout = () => {
                 </Collapsible>
 
                 {/* ── P2G Credits Discount — only for authenticated users ── */}
-                {!isGuest && maxCreditsForBooking > 0 && (
+                {!isGuest && maxPointsForBooking > 0 && (
                   <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -272,30 +274,34 @@ const BookingCheckout = () => {
                         <span className="font-semibold text-sm">{t("checkout.credits.title")}</span>
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {t("checkout.credits.available", { count: availableCredits.toLocaleString(numberLocale) })}
+                        {t("checkout.credits.available", {
+                          count: availablePoints.toLocaleString(numberLocale),
+                          amount: availablePointsWorthEuro,
+                        })}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
                       <input
                         type="range"
                         min={0}
-                        max={maxCreditsForBooking}
+                        max={maxPointsForBooking}
                         step={10}
-                        value={creditsToUse}
-                        onChange={e => setCreditsToUse(Number(e.target.value))}
+                        value={pointsToUse}
+                        onChange={e => setPointsToUse(Number(e.target.value))}
                         className="flex-1 accent-primary"
                       />
                       <span className="text-sm font-bold text-primary w-20 text-right">
-                        {creditsToUse > 0
-                          ? `−${(creditsToUse / 100).toFixed(2)} €`
+                        {pointsToUse > 0
+                          ? `−${(pointsDiscountCents / 100).toFixed(2)} €`
                           : t("checkout.credits.noneSelected")}
                       </span>
                     </div>
-                    {creditsToUse > 0 && (
+                    {pointsToUse > 0 && (
                       <p className="text-xs text-muted-foreground">
                         {t("checkout.credits.discountTemplate", {
-                          credits: creditsToUse.toLocaleString(numberLocale),
-                          amount: (creditsToUse / 100).toFixed(2),
+                          credits: pointsToUse.toLocaleString(numberLocale),
+                          amount: (pointsDiscountCents / 100).toFixed(2),
+                          maxPercent: maxPointsPercent,
                         })}
                       </p>
                     )}
@@ -398,7 +404,7 @@ const BookingCheckout = () => {
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       {isFullyFree ? t("checkout.pay.confirming") : t("checkout.pay.redirecting")}
                     </>
-                  ) : isFullyFree && isVoucherApplied ? (
+                  ) : isFullyFree ? (
                     <>
                       <Ticket className="w-4 h-4 mr-2" />
                       {t("checkout.pay.bookFree")}
@@ -406,9 +412,9 @@ const BookingCheckout = () => {
                   ) : (
                     <>
                       <CreditCard className="w-4 h-4 mr-2" />
-                      {creditsToUse > 0
+                      {pointsToUse > 0
                         ? t("checkout.pay.creditsTemplate", {
-                            credits: creditsToUse.toLocaleString(numberLocale),
+                            credits: pointsToUse.toLocaleString(numberLocale),
                             amount: formatPrice(effectivePrice, booking.currency),
                           })
                         : isVoucherApplied
@@ -454,7 +460,7 @@ const BookingCheckout = () => {
                 )}
 
                 <p className="text-xs text-center text-muted-foreground">
-                  {isFullyFree && isVoucherApplied
+                  {isFullyFree
                     ? t("checkout.footnote.free")
                     : t("checkout.footnote.secure")}
                 </p>
