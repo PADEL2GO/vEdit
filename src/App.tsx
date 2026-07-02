@@ -13,6 +13,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import { RequireAuth } from "@/components/RequireAuth";
 import { RequireAppLaunched } from "@/components/RequireAppLaunched";
+import { RequireMarketplaceEnabled } from "@/components/RequireMarketplaceEnabled";
 import { ClubLayout } from "./components/club/ClubLayout";
 
 // Route-level code splitting: each page is its own lazy chunk so first-time
@@ -197,9 +198,14 @@ const App = () => (
                   {/* Locked until app_launched = true */}
                   <Route path="/dashboard/rewards" element={<DashboardRewards />} />
                   <Route path="/dashboard/p2g-points" element={<DashboardP2GPoints />} />
-                  <Route path="/dashboard/marketplace" element={<DashboardMarketplace />} />
                   <Route path="/dashboard/league" element={<DashboardLeague />} />
                   <Route path="/dashboard/events" element={<DashboardEvents />} />
+                </Route>
+
+                {/* Marketplace — gated independently by feature_marketplace_enabled
+                    so the store can go live before app_launched flips */}
+                <Route element={<RequireMarketplaceEnabled />}>
+                  <Route path="/dashboard/marketplace" element={<DashboardMarketplace />} />
                 </Route>
               </Route>
 
