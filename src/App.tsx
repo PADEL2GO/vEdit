@@ -29,6 +29,7 @@ const League = lazy(() => import("./pages/League"));
 const Events = lazy(() => import("./pages/Events"));
 const EventDetail = lazy(() => import("./pages/EventDetail"));
 const Marketplace = lazy(() => import("./pages/Marketplace"));
+const MarketplaceSuccess = lazy(() => import("./pages/MarketplaceSuccess"));
 const UeberUns = lazy(() => import("./pages/UeberUns"));
 const FaqKontakt = lazy(() => import("./pages/FaqKontakt"));
 const Impressum = lazy(() => import("./pages/Impressum"));
@@ -132,6 +133,7 @@ const App = () => (
               <Route path="/events" element={<Events />} />
               <Route path="/events/:slug" element={<EventDetail />} />
               <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/marketplace/success" element={<MarketplaceSuccess />} />
               <Route path="/ueber-uns" element={<UeberUns />} />
               <Route path="/faq-kontakt" element={<FaqKontakt />} />
               <Route path="/impressum" element={<Impressum />} />

@@ -46,5 +46,18 @@
       "email": "Bitte gib eine gültige E-Mail-Adresse ein.",
       "required": "Pflichtfeld"
     }
+  },
+  "success": {
+    "metaTitle": "Vielen Dank für deinen Kauf | Padel2Go",
+    "metaDescription": "Deine Bestellung im Padel2Go Marketplace war erfolgreich.",
+    "title": "Vielen Dank für deinen Kauf",
+    "subtitle": "Deine Bestellung ist bei uns eingegangen.",
+    "note": "Du erhältst in Kürze eine Bestätigung per E-Mail – wir versenden deine Bestellung schnellstmöglich.",
+    "referenceLabel": "Bestellreferenz",
+    "backToStore": "Zurück zum Marketplace",
+    "toDashboard": "Zum Dashboard"
+  },
+  "cancelled": {
+    "toast": "Zahlung abgebrochen"
   }
 }

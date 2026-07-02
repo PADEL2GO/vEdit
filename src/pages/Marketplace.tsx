@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
@@ -31,6 +33,16 @@ const Marketplace = () => {
   const { t } = useTranslation("marketplace");
   const { data: items, isLoading } = useMarketplaceItems();
   const checkoutMutation = useMarketplaceCheckout();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("checkout") === "cancelled") {
+      toast(t("cancelled.toast"));
+      const next = new URLSearchParams(searchParams);
+      next.delete("checkout");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams, t]);
 
   const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
