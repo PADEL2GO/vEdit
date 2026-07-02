@@ -106,26 +106,41 @@ $mp_restore_stock$;
 REVOKE ALL ON FUNCTION public.marketplace_restore_stock(uuid, integer) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.marketplace_restore_stock(uuid, integer) TO service_role;
 
--- insert_marketplace_order: create the pending order. For a logged-in user it first
--- takes a per-(user,item) transaction advisory lock and rejects (returns NULL) when a
--- STILL-LIVE order for the same item already exists, so a double-submit cannot create two
--- independent orders (double points debited / double physical ship). The guard must cover
--- the whole payable life of a pending order (until hold_expires_at, past the 30-min Stripe
--- session), not just the first couple of minutes, otherwise two simultaneously-payable
--- orders could coexist. A recent success is also blocked briefly to swallow a rapid
--- free-path double-click. This is the marketplace equivalent of claim_checkout, adapted to
--- the one-row-per-request model. Guests (user_id NULL) are cash-only and self-heal via
--- release, so they skip the lock and just insert.
-CREATE OR REPLACE FUNCTION public.insert_marketplace_order(p_order jsonb)
-RETURNS uuid
+-- insert_marketplace_order: create the pending order AND reserve the points in ONE txn.
+-- For a logged-in user it first takes a per-(user,item) transaction advisory lock and
+-- rejects (returns no row) when a STILL-LIVE order for the same item already exists, so a
+-- double-submit cannot create two independent orders (double points debited / double
+-- physical ship). The guard must cover the whole payable life of a pending order (until
+-- hold_expires_at, past the 30-min Stripe session), not just the first couple of minutes,
+-- otherwise two simultaneously-payable orders could coexist. A recent success is also
+-- blocked briefly to swallow a rapid free-path double-click. This is the marketplace
+-- equivalent of claim_checkout, adapted to the one-row-per-request model. Guests
+-- (user_id NULL) are cash-only and self-heal via release, so they skip the lock and just
+-- insert.
+--
+-- The point debit (reserve_points) runs HERE, AFTER the duplicate guard, in the SAME
+-- transaction as the insert -- never as a separate pre-insert RPC. That closes a
+-- wrong-money hole: previously the wallet was debited in its own committed txn before the
+-- row existed, so a rejected duplicate, or a failed insert, left points debited with no
+-- durable row keyed to them and only a best-effort out-of-band refund_points (a logged
+-- failure = permanently stranded points) to recover. Now a duplicate returns before any
+-- debit, and any insert failure rolls the debit back with the txn. The actual play/reward
+-- split reserve took is written onto the row (release/settle read those columns) and
+-- returned so the caller can correct the discount if a concurrent spend left the wallet
+-- short (reserve then takes 0).
+DROP FUNCTION IF EXISTS public.insert_marketplace_order(jsonb);
+CREATE OR REPLACE FUNCTION public.insert_marketplace_order(p_order jsonb, p_reserve integer DEFAULT 0)
+RETURNS TABLE (order_id uuid, play_reserved integer, reward_reserved integer)
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $mp_insert_order$
 DECLARE
-  v_user uuid := NULLIF(p_order->>'user_id', '')::uuid;
-  v_item uuid := (p_order->>'item_id')::uuid;
-  v_id   uuid;
+  v_user   uuid := NULLIF(p_order->>'user_id', '')::uuid;
+  v_item   uuid := (p_order->>'item_id')::uuid;
+  v_id     uuid;
+  v_play   integer := 0;
+  v_reward integer := 0;
 BEGIN
   IF v_user IS NOT NULL THEN
     PERFORM pg_advisory_xact_lock(hashtextextended(v_user::text || ':' || v_item::text, 0));
@@ -139,20 +154,31 @@ BEGIN
           OR (status = 'success' AND created_at > now() - interval '2 minutes')
         )
     ) THEN
-      RETURN NULL;
+      RETURN;
     END IF;
+  END IF;
+
+  IF v_user IS NOT NULL AND COALESCE(p_reserve, 0) > 0 THEN
+    SELECT r.play_spent, r.reward_spent INTO v_play, v_reward
+    FROM public.reserve_points(v_user, p_reserve) AS r;
   END IF;
 
   INSERT INTO public.marketplace_redemptions
   SELECT * FROM jsonb_populate_record(NULL::public.marketplace_redemptions, p_order)
   RETURNING id INTO v_id;
 
-  RETURN v_id;
+  UPDATE public.marketplace_redemptions
+  SET play_spent   = v_play,
+      reward_spent = v_reward,
+      credit_cost  = v_play + v_reward
+  WHERE id = v_id;
+
+  RETURN QUERY SELECT v_id, v_play, v_reward;
 END;
 $mp_insert_order$;
 
-REVOKE ALL ON FUNCTION public.insert_marketplace_order(jsonb) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.insert_marketplace_order(jsonb) TO service_role;
+REVOKE ALL ON FUNCTION public.insert_marketplace_order(jsonb, integer) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.insert_marketplace_order(jsonb, integer) TO service_role;
 
 -- settle_marketplace_order: confirm a PAID pending order. Row-locked + idempotent +
 -- pending-only, so a duplicate/retried webhook (or a session a sibling already settled)

@@ -139,9 +139,14 @@ serve(async (req) => {
     }
 
     // ── Points discount (logged-in only; guests are cash-only) ─────────────────
+    // The wallet debit itself happens ATOMICALLY inside insert_marketplace_order (same txn
+    // as the order row), never here — see that RPC. Here we only size the discount and the
+    // number of points to reserve; actualDiscountCents stays provisional until the RPC
+    // reports how many points it actually took.
     let appliedPlay = 0;
     let appliedReward = 0;
     let actualDiscountCents = 0;
+    let pointsToReserve = 0;
 
     if (user && pointsToUse > 0) {
       const { data: siteSettings } = await supabaseAdmin
@@ -180,47 +185,16 @@ serve(async (req) => {
       if (remainderIfApplied > 0 && remainderIfApplied < 50) {
         actualDiscountCents = Math.max(0, priceCents - 50);
       }
-      const appliedPoints = Math.ceil(actualDiscountCents / centsPerPoint);
-
-      if (appliedPoints > 0) {
-        const { data: spent, error: reserveError } = await supabaseAdmin.rpc("reserve_points", {
-          p_user_id: user.id,
-          p_amount: appliedPoints,
-        });
-        const row = Array.isArray(spent) ? spent[0] : spent;
-        const playSpent = (row as any)?.play_spent ?? 0;
-        const rewardSpent = (row as any)?.reward_spent ?? 0;
-
-        if (reserveError || playSpent + rewardSpent === 0) {
-          logStep("Points reserve returned nothing — no discount", { error: reserveError?.message });
-          actualDiscountCents = 0;
-        } else {
-          appliedPlay = playSpent;
-          appliedReward = rewardSpent;
-          logStep("Points discount reserved", { appliedPoints, appliedPlay, appliedReward, actualDiscountCents });
-        }
-      } else {
+      pointsToReserve = Math.ceil(actualDiscountCents / centsPerPoint);
+      if (pointsToReserve <= 0) {
+        pointsToReserve = 0;
         actualDiscountCents = 0;
       }
     }
 
-    const remainderCents = priceCents - actualDiscountCents;
-
-    // Compensation helper — return points that were already deducted by reserve_points.
-    const refundReservedPoints = async () => {
-      if ((appliedPlay > 0 || appliedReward > 0) && user) {
-        const { error: refundError } = await supabaseAdmin.rpc("refund_points", {
-          p_user_id: user.id,
-          p_play: appliedPlay,
-          p_reward: appliedReward,
-        });
-        if (refundError) {
-          logStep("Failed to refund reserved points", { userId: user.id, error: refundError.message });
-        } else {
-          logStep("Reserved points refunded", { userId: user.id, play: appliedPlay, reward: appliedReward });
-        }
-      }
-    };
+    // Provisional: assumes the reserve inside insert_marketplace_order takes the full
+    // pointsToReserve. Recomputed from that RPC's authoritative result before any charge.
+    let remainderCents = priceCents - actualDiscountCents;
 
     // ── Create the PENDING order row (mirrors bookings: the order exists before the
     // webhook so we never oversell and never pay-without-a-row). ────────────────
@@ -233,10 +207,12 @@ serve(async (req) => {
       id: orderId,
       user_id: user?.id ?? null,
       item_id: itemId,
-      credit_cost: appliedPlay + appliedReward,
+      // Point columns are overwritten by insert_marketplace_order with the ACTUAL amounts it
+      // reserves in-txn; amount_cents is provisional (the Stripe path re-persists the charge).
+      credit_cost: 0,
       amount_cents: Math.max(0, remainderCents),
-      play_spent: appliedPlay,
-      reward_spent: appliedReward,
+      play_spent: 0,
+      reward_spent: 0,
       quantity,
       status: "pending",
       reference_code: referenceCode,
@@ -255,24 +231,46 @@ serve(async (req) => {
       redemptionData.shipping_country = shipping.country || "DE";
     }
 
-    // Create the pending order under a per-(user,item) advisory lock so a rapid
-    // double-submit is rejected here (NULL) instead of creating a second independent
-    // order (double points debited / double physical ship). Guests self-heal via release.
-    const { data: insertedId, error: orderError } = await supabaseAdmin.rpc(
+    // Create the pending order AND reserve the points under one per-(user,item) advisory
+    // lock, in a single transaction: a rapid double-submit is rejected here (no row) BEFORE
+    // any debit, and a failed insert rolls the debit back — so no rollback path can strand
+    // debited-but-unrecorded points (previously a best-effort refund_points could silently
+    // lose them). Guests self-heal via release.
+    const { data: insertResult, error: orderError } = await supabaseAdmin.rpc(
       "insert_marketplace_order",
-      { p_order: redemptionData },
+      { p_order: redemptionData, p_reserve: pointsToReserve },
     );
 
     if (orderError) {
-      logStep("Failed to create pending order — refunding points", { error: orderError.message });
-      await refundReservedPoints();
+      logStep("Failed to create pending order", { error: orderError.message });
       return json({ error: "Fehler beim Erstellen der Bestellung – bitte erneut versuchen" }, 500);
     }
-    if (!insertedId) {
-      logStep("Duplicate marketplace checkout rejected — refunding points", { userId: user?.id ?? "guest", itemId });
-      await refundReservedPoints();
+    const insertedRow = Array.isArray(insertResult) ? insertResult[0] : insertResult;
+    if (!insertedRow || !(insertedRow as any).order_id) {
+      logStep("Duplicate marketplace checkout rejected", { userId: user?.id ?? "guest", itemId });
       return json({ error: "Ein Bezahlvorgang für diesen Artikel läuft bereits. Bitte einen Moment warten." }, 409);
     }
+
+    // The RPC reserved the points in-txn and reports what it ACTUALLY took (a concurrent
+    // spend can leave the wallet short → it takes 0 → no discount). Correct the discount and
+    // the remainder from that authoritative result before any charge/free-path decision.
+    appliedPlay = (insertedRow as any).play_reserved ?? 0;
+    appliedReward = (insertedRow as any).reward_reserved ?? 0;
+    if (appliedPlay + appliedReward === 0) {
+      actualDiscountCents = 0;
+    }
+    remainderCents = priceCents - actualDiscountCents;
+
+    // Atomic, idempotent rollback of a still-pending order: cancels it, refunds the reserved
+    // points (from the row) and restores any reserved stock in one guarded step. Pending-only,
+    // so it races safely with the cron backstop calling the same RPC — a silent failure here
+    // is reclaimed by the cron, never double-applied.
+    const releaseOrder = async () => {
+      const { error: releaseError } = await supabaseAdmin.rpc("release_marketplace_order", {
+        p_order_id: orderId,
+      });
+      if (releaseError) logStep("Failed to release order — cron backstop will reclaim", { orderId, error: releaseError.message });
+    };
 
     // Reserve the unit(s) via an ATOMIC column-relative decrement (never a stale-read
     // absolute write) so concurrent buyers can never oversell.
@@ -284,48 +282,23 @@ serve(async (req) => {
 
       if (decError || decremented !== true) {
         logStep("Stock reservation lost race — rolling back", { itemId, quantity, error: decError?.message });
-        // Stock was NOT decremented for this order, so it must NOT go through the
-        // stock-restoring release RPC. Terminalize the row FIRST (delete, else a guarded
-        // cancel) and only refund the reserved points once it is terminal, so the cron
-        // backstop can never re-refund the points or restore a unit that was never taken.
-        const { data: deleted, error: deleteError } = await supabaseAdmin
-          .from("marketplace_redemptions")
-          .delete()
-          .eq("id", orderId)
-          .eq("status", "pending")
-          .select("id");
-        let terminalized = !deleteError && Array.isArray(deleted) && deleted.length > 0;
-        if (!terminalized) {
-          const { data: cancelled } = await supabaseAdmin
-            .from("marketplace_redemptions")
-            .update({ status: "cancelled", fulfillment_status: "cancelled" })
-            .eq("id", orderId)
-            .eq("status", "pending")
-            .select("id");
-          terminalized = Array.isArray(cancelled) && cancelled.length > 0;
-        }
-        if (terminalized) {
-          await refundReservedPoints();
-        } else {
-          logStep("Lost-race rollback could not terminalize order — cron backstop will release", { orderId });
-        }
+        // Route the rollback through the stock_reserved-aware, idempotent release RPC — NOT
+        // a DELETE. release restores stock ONLY when the decrement actually committed
+        // (stock_reserved=true) and no-ops the restore otherwise, so it is correct for BOTH
+        // a genuinely-lost race (nothing taken) AND the false-negative decError case where
+        // marketplace_decrement_stock COMMITTED (stock 5->4, stock_reserved=true) but the
+        // .rpc() call surfaced a transport error. A DELETE here would drop the only row
+        // carrying stock_reserved=true and permanently deflate inventory, and remove the
+        // artifact the cron backstop needs to refund the reserved points. release also
+        // refunds those points from the row, so a transient failure just leaves the row
+        // pending for the per-minute cron to reclaim.
+        await releaseOrder();
         return json({ error: "Item ist ausverkauft" }, 409);
       }
 
       // stock_reserved is set atomically inside marketplace_decrement_stock (same txn as
       // the decrement), so a crash can never leave a decremented-but-unflagged order.
     }
-
-    // Atomic, idempotent rollback of a still-pending order whose stock WAS reserved:
-    // cancels it, refunds the reserved points and restores the reserved stock in one
-    // guarded step. Pending-only, so it races safely with the cron backstop calling the
-    // same RPC — a silent failure here is reclaimed by the cron, never double-applied.
-    const releaseOrder = async () => {
-      const { error: releaseError } = await supabaseAdmin.rpc("release_marketplace_order", {
-        p_order_id: orderId,
-      });
-      if (releaseError) logStep("Failed to release order — cron backstop will reclaim", { orderId, error: releaseError.message });
-    };
 
     // ── FULL COVERAGE (logged-in): points cover the whole price → skip Stripe. ──
     if (user && remainderCents <= 0) {
