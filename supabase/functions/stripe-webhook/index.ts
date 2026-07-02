@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { Resend } from "npm:resend@4.0.0";
 
 // Stripe webhooks are server-to-server, minimal CORS needed
 const corsHeaders = {
@@ -72,9 +73,225 @@ serve(async (req) => {
 
         if (session.payment_status === "paid") {
           // ============================================
+          // MARKETPLACE PURCHASE (money +/- points)
+          // ============================================
+          if (paymentType === "marketplace_purchase") {
+            const redemptionId = session.metadata?.redemption_id;
+            if (!redemptionId) {
+              logStep("Marketplace session missing redemption_id", { sessionId: session.id });
+              break;
+            }
+
+            // Idempotent settle: flips pending -> success exactly once. A duplicate
+            // webhook (or an order a sibling expired/cron already cancelled) returns
+            // false, so we never re-ledger or re-ship.
+            const { data: settled, error: settleError } = await supabaseAdmin.rpc("settle_marketplace_order", {
+              p_order_id: redemptionId,
+            });
+            if (settleError) {
+              // Return non-2xx so Stripe RETRIES this PAID event. A `break` here returns 200,
+              // Stripe treats the event as delivered and stops retrying, and the still-pending
+              // order is then cron-cancelled + points-refunded + restocked at hold_expires_at —
+              // a single transient DB error would guarantee a paid-for-nothing order. Retrying
+              // lets a later attempt still settle it before the cron reclaims it.
+              logStep("CRITICAL: paid marketplace order settle failed — returning 500 so Stripe retries", { redemptionId, error: settleError.message });
+              return new Response(JSON.stringify({ error: "marketplace_settle_failed" }), {
+                status: 500,
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+              });
+            }
+            if (settled !== true) {
+              // settle returned false for one of two very different reasons:
+              //  1) benign duplicate — the order is already 'success' (re-delivered webhook).
+              //  2) paid-for-nothing — the cron backstop / expiry already released this order
+              //     (status 'cancelled', or the row is gone) before this delayed webhook landed,
+              //     so the points were refunded + stock restored while Stripe still holds the
+              //     card money. This must NEVER be silently skipped: refund the customer's card
+              //     and alert an admin to reconcile.
+              const { data: releasedOrder, error: reReadError } = await supabaseAdmin
+                .from("marketplace_redemptions")
+                .select("status, reference_code")
+                .eq("id", redemptionId)
+                .maybeSingle();
+
+              if (reReadError) {
+                // A failed re-read cannot distinguish a shipped duplicate ('success') from a
+                // genuinely released order. Refunding on that guess would refund an already-
+                // fulfilled order, so return 500 and let Stripe retry (mirrors settleError).
+                logStep("CRITICAL: marketplace order status re-read failed — returning 500 so Stripe retries", { redemptionId, error: reReadError.message });
+                return new Response(JSON.stringify({ error: "marketplace_reread_failed" }), {
+                  status: 500,
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                });
+              }
+
+              if (releasedOrder?.status === "success") {
+                logStep("Marketplace order already settled — duplicate webhook skipped", { redemptionId });
+                break;
+              }
+
+              logStep("CRITICAL: paid marketplace order was already released — refunding customer", {
+                redemptionId,
+                status: releasedOrder?.status ?? "missing",
+              });
+
+              const paymentIntentId = typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : session.payment_intent?.id;
+              let refundOk = false;
+              if (paymentIntentId) {
+                try {
+                  // Idempotency key: a retried webhook can never create a second refund.
+                  await stripe.refunds.create(
+                    { payment_intent: paymentIntentId },
+                    { idempotencyKey: `mp_refund_${redemptionId}` },
+                  );
+                  refundOk = true;
+                  logStep("Marketplace: auto-refund issued for released paid order", { redemptionId, paymentIntentId });
+                } catch (refundErr) {
+                  logStep("CRITICAL: auto-refund failed for released paid order", { redemptionId, paymentIntentId, error: (refundErr as Error).message });
+                }
+              }
+
+              try {
+                const resendApiKey = Deno.env.get("RESEND_API_KEY");
+                if (resendApiKey) {
+                  const resend = new Resend(resendApiKey);
+                  await resend.emails.send({
+                    from: "Padel2Go <noreply@padel2go.eu>",
+                    to: ["contact@padel2go.eu"],
+                    subject: `KRITISCH: Bezahlte Marketplace-Bestellung storniert - ${releasedOrder?.reference_code ?? redemptionId}`,
+                    html: `
+                      <html>
+                        <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+                          <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                            <h1 style="color: #b00020; margin-bottom: 20px;">Bezahlte Bestellung wurde storniert</h1>
+                            <p>Eine per Karte bezahlte Marketplace-Bestellung wurde storniert, bevor der Zahlungs-Webhook eintraf. Punkte und Bestand wurden bereits zurueckgebucht.</p>
+                            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                              <p><strong>Referenz:</strong> ${releasedOrder?.reference_code ?? redemptionId}</p>
+                              <p><strong>Bestell-ID:</strong> ${redemptionId}</p>
+                              <p><strong>Status:</strong> ${releasedOrder?.status ?? "nicht gefunden"}</p>
+                              <p><strong>Stripe Session:</strong> ${session.id}</p>
+                              <p><strong>Bezahlt (Cent):</strong> ${session.amount_total ?? 0}</p>
+                              <p><strong>Automatische Rueckerstattung:</strong> ${refundOk ? "ausgeloest" : "FEHLGESCHLAGEN - bitte manuell pruefen"}</p>
+                            </div>
+                          </div>
+                        </body>
+                      </html>
+                    `,
+                  });
+                  logStep("Marketplace: critical release alert emailed", { redemptionId });
+                } else {
+                  logStep("Marketplace: RESEND_API_KEY not configured — critical release alert not emailed", { redemptionId });
+                }
+              } catch (alertErr) {
+                logStep("Marketplace: critical release alert email failed", { redemptionId, error: (alertErr as Error).message });
+              }
+              break;
+            }
+            logStep("Marketplace order settled", { redemptionId });
+
+            const { data: order } = await supabaseAdmin
+              .from("marketplace_redemptions")
+              .select("user_id, item_id, quantity, play_spent, reward_spent, amount_cents, reference_code, guest_email, guest_name, shipping_address_line1, shipping_postal_code, shipping_city, shipping_country")
+              .eq("id", redemptionId)
+              .single();
+
+            let item: { name: string; category: string; partner_name: string | null; product_type: string } | null = null;
+            if (order?.item_id) {
+              const { data: itemRow } = await supabaseAdmin
+                .from("marketplace_items")
+                .select("name, category, partner_name, product_type")
+                .eq("id", order.item_id)
+                .single();
+              item = itemRow as typeof item;
+            }
+
+            // Finalize the points spend in the ledger. The wallet was already debited at
+            // checkout by reserve_points; this records the movement (mirrors the free path).
+            const pointsSpent = (order?.play_spent ?? 0) + (order?.reward_spent ?? 0);
+            if (order?.user_id && pointsSpent > 0) {
+              const { data: postWallet } = await supabaseAdmin
+                .from("wallets")
+                .select("play_credits, reward_credits")
+                .eq("user_id", order.user_id)
+                .single();
+              const balanceAfter = (postWallet?.play_credits ?? 0) + (postWallet?.reward_credits ?? 0);
+              const { error: ledgerError } = await supabaseAdmin.from("points_ledger").insert({
+                user_id: order.user_id,
+                credit_type: "REWARD",
+                delta_points: -pointsSpent,
+                balance_after: balanceAfter,
+                entry_type: "REDEMPTION",
+                description: `Marketplace: ${item?.name ?? "Artikel"}`,
+                source_type: "REDEMPTION",
+                source_id: order.reference_code ?? redemptionId,
+              });
+              if (ledgerError) logStep("Marketplace: ledger insert failed", { redemptionId, error: ledgerError.message });
+            }
+
+            // Fulfillment email for physical products (mirrors the checkout free path).
+            if (item?.product_type === "purchase") {
+              try {
+                const resendApiKey = Deno.env.get("RESEND_API_KEY");
+                if (resendApiKey) {
+                  let customerName = order?.guest_name || "Gast";
+                  if (order?.user_id) {
+                    const { data: profile } = await supabaseAdmin
+                      .from("profiles")
+                      .select("display_name, username")
+                      .eq("user_id", order.user_id)
+                      .single();
+                    customerName = profile?.display_name || profile?.username || "Unbekannt";
+                  }
+                  const customerEmail = session.customer_details?.email || session.customer_email || order?.guest_email || "";
+                  const formattedAddress = `${order?.shipping_address_line1 ?? ""}\n${order?.shipping_postal_code ?? ""} ${order?.shipping_city ?? ""}\n${order?.shipping_country ?? "Deutschland"}`;
+                  const resend = new Resend(resendApiKey);
+                  await resend.emails.send({
+                    from: "Padel2Go <noreply@padel2go.eu>",
+                    to: ["contact@padel2go.eu"],
+                    subject: `Neue Marketplace-Bestellung: ${item.name} - ${order?.reference_code ?? redemptionId}`,
+                    html: `
+                      <html>
+                        <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+                          <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                            <h1 style="color: #111; margin-bottom: 20px;">Neue Marketplace-Bestellung</h1>
+                            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                              <h2 style="color: #333; margin-top: 0;">Bestelldetails</h2>
+                              <p><strong>Referenz:</strong> ${order?.reference_code ?? redemptionId}</p>
+                              <p><strong>Produkt:</strong> ${item.name}</p>
+                              <p><strong>Kategorie:</strong> ${item.category}</p>
+                              <p><strong>Menge:</strong> ${order?.quantity ?? 1}</p>
+                              <p><strong>Bezahlt mit Punkten:</strong> ${pointsSpent}</p>
+                              <p><strong>Bezahlt bar (Cent):</strong> ${order?.amount_cents ?? session.amount_total ?? 0}</p>
+                            </div>
+                            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                              <h2 style="color: #333; margin-top: 0;">Kundeninformationen</h2>
+                              <p><strong>Name:</strong> ${customerName}</p>
+                              <p><strong>E-Mail:</strong> ${customerEmail}</p>
+                            </div>
+                            <div style="background: #e8f5e9; padding: 20px; border-radius: 8px;">
+                              <h2 style="color: #333; margin-top: 0;">Lieferadresse</h2>
+                              <p style="white-space: pre-line; margin: 0;">${formattedAddress}</p>
+                            </div>
+                          </div>
+                        </body>
+                      </html>
+                    `,
+                  });
+                  logStep("Marketplace: fulfillment email sent", { redemptionId });
+                } else {
+                  logStep("Marketplace: RESEND_API_KEY not configured — skipping email");
+                }
+              } catch (emailError) {
+                logStep("Marketplace: fulfillment email failed", { error: (emailError as Error).message });
+              }
+            }
+          }
+          // ============================================
           // LOBBY JOIN PAYMENT
           // ============================================
-          if (paymentType === "lobby_join") {
+          else if (paymentType === "lobby_join") {
             const lobbyId = session.metadata?.lobby_id;
             const lobbyMemberId = session.metadata?.lobby_member_id;
             const userId = session.metadata?.user_id;
@@ -394,6 +611,27 @@ serve(async (req) => {
 
       case "checkout.session.expired": {
         const session = event.data.object as Stripe.Checkout.Session;
+
+        // Marketplace: an abandoned/expired order must refund its reserved points and
+        // restore its reserved stock. The release RPC is idempotent + pending-only, so
+        // it is race-free against the cron backstop calling the same RPC.
+        if (session.metadata?.type === "marketplace_purchase") {
+          const redemptionId = session.metadata?.redemption_id;
+          if (!redemptionId) {
+            logStep("Marketplace expired session missing redemption_id", { sessionId: session.id });
+            break;
+          }
+          const { error: releaseError } = await supabaseAdmin.rpc("release_marketplace_order", {
+            p_order_id: redemptionId,
+          });
+          if (releaseError) {
+            logStep("Failed to release expired marketplace order", { redemptionId, error: releaseError.message });
+          } else {
+            logStep("Marketplace order released (points refunded, stock restored)", { redemptionId });
+          }
+          break;
+        }
+
         const bookingId = session.metadata?.booking_id;
 
         if (!bookingId) {
