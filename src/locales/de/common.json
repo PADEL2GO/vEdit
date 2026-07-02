@@ -1,6 +1,7 @@
 {
   "points": "Punkte",
   "latestNews": "Aktuelles",
+  "comingSoon": "Bald wieder für dich da",
   "languageSwitch": {
     "label": "Sprache",
     "de": "Deutsch",
@@ -8,6 +9,7 @@
   },
   "nav": {
     "home": "Home",
+    "events": "Events",
     "players": "Spieler",
     "clubs": "Vereine",
     "partners": "Partner",

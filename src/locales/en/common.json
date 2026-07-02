@@ -1,6 +1,7 @@
 {
   "points": "points",
   "latestNews": "Latest news",
+  "comingSoon": "See you soon",
   "languageSwitch": {
     "label": "Language",
     "de": "Deutsch",
@@ -8,6 +9,7 @@
   },
   "nav": {
     "home": "Home",
+    "events": "Events",
     "players": "Players",
     "clubs": "Clubs",
     "partners": "Partners",

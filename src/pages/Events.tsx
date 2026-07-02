@@ -92,7 +92,7 @@ const benefits = [
 ];
 
 const Events = () => {
-  const { t } = useTranslation("events");
+  const { t } = useTranslation(["events", "common"]);
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -374,10 +374,14 @@ const Events = () => {
                 className="text-center py-20"
               >
                 <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
-                  <CalendarX className="w-10 h-10 text-muted-foreground" />
+                  {showPast ? (
+                    <CalendarX className="w-10 h-10 text-muted-foreground" />
+                  ) : (
+                    <Sparkles className="w-10 h-10 text-primary/60" />
+                  )}
                 </div>
                 <h3 className="text-xl font-bold mb-2">
-                  {showPast ? t("list.emptyTitlePast") : t("list.emptyTitleUpcoming")}
+                  {showPast ? t("list.emptyTitlePast") : t("comingSoon", { ns: "common" })}
                 </h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                   {showPast
