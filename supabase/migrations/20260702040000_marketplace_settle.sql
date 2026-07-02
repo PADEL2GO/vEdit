@@ -32,6 +32,15 @@ ALTER TABLE public.marketplace_redemptions
 ALTER TABLE public.marketplace_redemptions
   ADD COLUMN IF NOT EXISTS stock_reserved boolean DEFAULT false;
 
+-- Idempotency marker for the paid-order fulfillment notification (the physical-ship email
+-- to contact@padel2go.eu). Set ONLY after that email actually sends, so a retried Stripe
+-- webhook re-attempts an interrupted send instead of silently dropping it -- the settle
+-- transition is consumed once, but fulfillment must be able to complete across retries.
+-- Distinct from fulfillment_status (which drives the admin ship queue): a notified order
+-- stays 'pending' there until an admin marks it shipped.
+ALTER TABLE public.marketplace_redemptions
+  ADD COLUMN IF NOT EXISTS fulfillment_notified_at timestamptz;
+
 CREATE INDEX IF NOT EXISTS idx_marketplace_redemptions_pending_hold
   ON public.marketplace_redemptions(hold_expires_at)
   WHERE status = 'pending';
