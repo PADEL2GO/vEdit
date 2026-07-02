@@ -790,7 +790,8 @@ serve(async (req) => {
     await supabaseAdmin
       .from("bookings")
       .update({ hold_expires_at: expiresAtIso, expires_at: expiresAtIso })
-      .eq("id", booking.id);
+      .eq("id", booking.id)
+      .eq("status", "pending_payment");
     logStep("Booking expiry set", { expiresAt: expiresAtIso });
 
     // Check for existing payment record and upsert

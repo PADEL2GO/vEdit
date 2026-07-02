@@ -492,7 +492,141 @@ serve(async (req) => {
               break;
             }
             if (settled !== true) {
-              logStep("Booking already settled or no longer pending — skipping confirm/award", { bookingId });
+              // settle returned false for one of two very different reasons:
+              //  1) benign duplicate — the booking is already 'confirmed' (re-delivered webhook).
+              //  2) paid-for-nothing — a sibling expired session / cron backstop already cancelled
+              //     this booking (status 'cancelled'/'expired', or the row is gone) before this
+              //     delayed webhook landed, so the reserves were already refunded while Stripe
+              //     still holds the card money. This must NEVER be silently skipped: refund the
+              //     customer's card and alert an admin to reconcile.
+              const { data: releasedBooking, error: reReadError } = await supabaseAdmin
+                .from("bookings")
+                .select("status")
+                .eq("id", bookingId)
+                .maybeSingle();
+
+              if (reReadError) {
+                // A failed re-read cannot distinguish a confirmed duplicate from a genuinely
+                // cancelled booking. Refunding on that guess would refund an already-confirmed
+                // booking, so return 500 and let Stripe retry (mirrors settleError handling).
+                logStep("CRITICAL: booking status re-read failed — returning 500 so Stripe retries", { bookingId, error: reReadError.message });
+                return new Response(JSON.stringify({ error: "booking_reread_failed" }), {
+                  status: 500,
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                });
+              }
+
+              if (releasedBooking?.status === "confirmed") {
+                // Benign duplicate: the first delivery already confirmed + awarded. No-op.
+                logStep("Booking already settled — duplicate webhook ignored", { bookingId });
+                break;
+              }
+
+              // A non-'confirmed' status is NOT proof of a paid-for-nothing release. A booking
+              // that an earlier delivery already confirmed + paid + awarded, and the user then
+              // CANCELLED (MyBookings, governed by the AGB policy — no refund <24h before start),
+              // is now 'cancelled' with the card money lawfully kept. Its payment row stays
+              // 'completed' (the cancel flow never touches payments). Re-read the payment for this
+              // session: only a payment that never completed (still 'pending'/'failed') is a
+              // genuine paid-for-nothing release this webhook must refund. If it already
+              // completed (or was already refunded), do NOT auto-refund — that would claw back
+              // money the business is entitled to keep.
+              const { data: paymentRow, error: paymentReadError } = await supabaseAdmin
+                .from("payments")
+                .select("status")
+                .eq("stripe_checkout_session_id", session.id)
+                .maybeSingle();
+
+              if (paymentReadError) {
+                // Can't tell a completed-then-cancelled booking from a never-completed one.
+                // Refunding on that guess could claw back money the business lawfully holds,
+                // so return 500 and let Stripe retry (mirrors settleError / status re-read).
+                logStep("CRITICAL: payment status re-read failed — returning 500 so Stripe retries", { bookingId, error: paymentReadError.message });
+                return new Response(JSON.stringify({ error: "payment_reread_failed" }), {
+                  status: 500,
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                });
+              }
+
+              if (paymentRow?.status === "completed" || paymentRow?.status === "refunded") {
+                // The booking was already confirmed + paid (and credits awarded) by an earlier
+                // delivery; any later cancellation is a post-confirmation user cancel governed by
+                // the AGB refund policy, not a paid-for-nothing release. Do NOT auto-refund.
+                logStep("Booking already confirmed+paid — later cancellation handled by cancel flow, no auto-refund", {
+                  bookingId,
+                  bookingStatus: releasedBooking?.status ?? "missing",
+                  paymentStatus: paymentRow?.status,
+                });
+                break;
+              }
+
+              // Genuinely released: the payment never completed and a sibling expired session /
+              // cron backstop already cancelled this booking (status 'cancelled'/'expired', or the
+              // row is gone) while Stripe still holds the card money. Refund the customer + alert
+              // an admin (reserves already reversed on cancel).
+              logStep("CRITICAL: paid booking was already cancelled — refunding customer", {
+                bookingId,
+                status: releasedBooking?.status ?? "missing",
+              });
+
+              const paymentIntentId = typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : session.payment_intent?.id;
+              let refundOk = false;
+              if (paymentIntentId) {
+                try {
+                  // Idempotency key: a retried webhook can never create a second refund.
+                  await stripe.refunds.create(
+                    { payment_intent: paymentIntentId },
+                    { idempotencyKey: `bk_refund_${bookingId}` },
+                  );
+                  refundOk = true;
+                  logStep("Booking: auto-refund issued for cancelled paid booking", { bookingId, paymentIntentId });
+                } catch (refundErr) {
+                  logStep("CRITICAL: auto-refund failed for cancelled paid booking", { bookingId, paymentIntentId, error: (refundErr as Error).message });
+                }
+              }
+
+              // Mark the payment row refunded so it reconciles with Stripe.
+              const { error: paymentRefundError } = await supabaseAdmin
+                .from("payments")
+                .update({ status: "refunded" })
+                .eq("stripe_checkout_session_id", session.id);
+              if (paymentRefundError) logStep("Booking: failed to mark payment refunded", { bookingId, error: paymentRefundError.message });
+
+              try {
+                const resendApiKey = Deno.env.get("RESEND_API_KEY");
+                if (resendApiKey) {
+                  const resend = new Resend(resendApiKey);
+                  await resend.emails.send({
+                    from: "Padel2Go <noreply@padel2go.eu>",
+                    to: ["contact@padel2go.eu"],
+                    subject: `KRITISCH: Bezahlte Buchung storniert - ${bookingId}`,
+                    html: `
+                      <html>
+                        <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
+                          <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                            <h1 style="color: #b00020; margin-bottom: 20px;">Bezahlte Buchung wurde storniert</h1>
+                            <p>Eine per Karte bezahlte Buchung wurde storniert, bevor der Zahlungs-Webhook eintraf. Die reservierten Credits wurden bereits zurueckgebucht.</p>
+                            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                              <p><strong>Buchungs-ID:</strong> ${bookingId}</p>
+                              <p><strong>Status:</strong> ${releasedBooking?.status ?? "nicht gefunden"}</p>
+                              <p><strong>Stripe Session:</strong> ${session.id}</p>
+                              <p><strong>Bezahlt (Cent):</strong> ${session.amount_total ?? 0}</p>
+                              <p><strong>Automatische Rueckerstattung:</strong> ${refundOk ? "ausgeloest" : "FEHLGESCHLAGEN - bitte manuell pruefen"}</p>
+                            </div>
+                          </div>
+                        </body>
+                      </html>
+                    `,
+                  });
+                  logStep("Booking: critical release alert emailed", { bookingId });
+                } else {
+                  logStep("Booking: RESEND_API_KEY not configured — critical release alert not emailed", { bookingId });
+                }
+              } catch (alertErr) {
+                logStep("Booking: critical release alert email failed", { bookingId, error: (alertErr as Error).message });
+              }
               break;
             }
             logStep("Booking confirmed", { bookingId });
