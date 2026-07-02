@@ -27,6 +27,7 @@ const Rewards = lazy(() => import("./pages/Rewards"));
 const League = lazy(() => import("./pages/League"));
 const Events = lazy(() => import("./pages/Events"));
 const EventDetail = lazy(() => import("./pages/EventDetail"));
+const Marketplace = lazy(() => import("./pages/Marketplace"));
 const UeberUns = lazy(() => import("./pages/UeberUns"));
 const FaqKontakt = lazy(() => import("./pages/FaqKontakt"));
 const Impressum = lazy(() => import("./pages/Impressum"));
@@ -129,6 +130,7 @@ const App = () => (
               <Route path="/league" element={<League />} />
               <Route path="/events" element={<Events />} />
               <Route path="/events/:slug" element={<EventDetail />} />
+              <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/ueber-uns" element={<UeberUns />} />
               <Route path="/faq-kontakt" element={<FaqKontakt />} />
               <Route path="/impressum" element={<Impressum />} />

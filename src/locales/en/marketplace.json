@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "title": "P2G Marketplace | Padel2Go",
+    "description": "Discover equipment, vouchers and extras in the Padel2Go Marketplace. Pay as a guest by card or PayPal."
+  },
+  "hero": {
+    "badge": "P2G Marketplace",
+    "title": "The",
+    "titleHighlight": "Padel2Go Store",
+    "description": "Equipment, vouchers and exclusive extras – order online and pay by card or PayPal."
+  },
+  "upsell": {
+    "title": "Earn points & refer friends",
+    "body": "Create a free account to earn P2G points on every purchase and refer friends for discounts.",
+    "cta": "Register for free →"
+  },
+  "empty": {
+    "title": "See you soon",
+    "description": "No products are available right now. Check back soon – we're restocking the store!"
+  },
+  "item": {
+    "shippingBadge": "Shipping",
+    "pointsOnlyBadge": "Points only",
+    "outOfStock": "Unavailable",
+    "buy": "Buy",
+    "price": "€{{amount}}"
+  },
+  "checkoutDialog": {
+    "title": "Complete your order",
+    "descriptionPurchase": "Enter your email address and shipping address.",
+    "descriptionDefault": "Enter your email address to continue.",
+    "from": "from {{partner}}",
+    "willShip": "Will be shipped",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@email.com",
+    "nameLabel": "Name (optional)",
+    "namePlaceholder": "Your name",
+    "deliveryAddress": "Shipping address",
+    "totalLabel": "Total",
+    "cancel": "Cancel",
+    "submit": "Continue to payment",
+    "submitting": "Processing...",
+    "loginHint": "Already have an account?",
+    "loginLink": "Sign in",
+    "errors": {
+      "email": "Please enter a valid email address.",
+      "required": "Required field"
+    }
+  }
+}
