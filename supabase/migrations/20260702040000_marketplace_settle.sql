@@ -310,6 +310,9 @@ BEGIN
 END;
 $mp_cleanup$;
 
+REVOKE ALL ON FUNCTION public.cleanup_expired_marketplace_orders() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.cleanup_expired_marketplace_orders() TO service_role;
+
 SELECT cron.unschedule('cleanup-expired-marketplace-orders') WHERE EXISTS (
   SELECT 1 FROM cron.job WHERE jobname = 'cleanup-expired-marketplace-orders'
 );
