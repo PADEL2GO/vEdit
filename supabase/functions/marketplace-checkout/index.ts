@@ -279,7 +279,7 @@ serve(async (req) => {
     if (tracksStock) {
       const { data: decremented, error: decError } = await supabaseAdmin.rpc(
         "marketplace_decrement_stock",
-        { p_item_id: itemId, p_quantity: quantity },
+        { p_item_id: itemId, p_quantity: quantity, p_order_id: orderId },
       );
 
       if (decError || decremented !== true) {
@@ -312,13 +312,8 @@ serve(async (req) => {
         return json({ error: "Item ist ausverkauft" }, 409);
       }
 
-      // Mark that THIS order truly decremented stock, so release_marketplace_order only
-      // restocks orders that reserved units (never a NULL-stock or lost-race order).
-      const { error: reservedError } = await supabaseAdmin
-        .from("marketplace_redemptions")
-        .update({ stock_reserved: true })
-        .eq("id", orderId);
-      if (reservedError) logStep("Failed to flag stock_reserved", { orderId, error: reservedError.message });
+      // stock_reserved is set atomically inside marketplace_decrement_stock (same txn as
+      // the decrement), so a crash can never leave a decremented-but-unflagged order.
     }
 
     // Atomic, idempotent rollback of a still-pending order whose stock WAS reserved:

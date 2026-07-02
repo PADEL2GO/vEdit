@@ -39,7 +39,8 @@ CREATE INDEX IF NOT EXISTS idx_marketplace_redemptions_pending_hold
 -- marketplace_decrement_stock: reserve units with an ATOMIC guarded decrement. The
 -- row is locked FOR UPDATE so concurrent buyers serialize; a stale absolute write can
 -- no longer clobber a sibling decrement (the oversell bug). NULL stock = unlimited.
-CREATE OR REPLACE FUNCTION public.marketplace_decrement_stock(p_item_id uuid, p_quantity integer)
+DROP FUNCTION IF EXISTS public.marketplace_decrement_stock(uuid, integer);
+CREATE OR REPLACE FUNCTION public.marketplace_decrement_stock(p_item_id uuid, p_quantity integer, p_order_id uuid)
 RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -70,12 +71,20 @@ BEGIN
       updated_at     = now()
   WHERE id = p_item_id;
 
+  -- Flag the order as stock-reserved in the SAME transaction as the decrement. A separate
+  -- post-decrement flag write could fail (or the process could die) after the stock was
+  -- already taken, leaving a decremented-but-unflagged order that release never restocks
+  -- (permanent inventory deflation). Doing it here makes decrement+flag atomic.
+  UPDATE public.marketplace_redemptions
+  SET stock_reserved = true
+  WHERE id = p_order_id;
+
   RETURN true;
 END;
 $mp_decrement_stock$;
 
-REVOKE ALL ON FUNCTION public.marketplace_decrement_stock(uuid, integer) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.marketplace_decrement_stock(uuid, integer) TO service_role;
+REVOKE ALL ON FUNCTION public.marketplace_decrement_stock(uuid, integer, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.marketplace_decrement_stock(uuid, integer, uuid) TO service_role;
 
 -- marketplace_restore_stock: give units back with an ATOMIC column-relative increment
 -- (never a stale-read absolute value, which would create phantom units under concurrency).
