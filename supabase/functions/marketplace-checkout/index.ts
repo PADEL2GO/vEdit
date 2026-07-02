@@ -35,6 +35,17 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[MARKETPLACE-CHECKOUT] ${step}${detailsStr}`);
 };
 
+// Untrusted values (guest/shipping/profile/email/reference/item fields) must never be
+// interpolated raw into the internal HTML fulfillment email — this neutralizes HTML/content
+// injection while leaving the value itself unchanged for safe input.
+const escapeHtml = (v: unknown): string =>
+  String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
 // CSPRNG reference code (not Math.random) — this code identifies the order for fulfilment.
 const generateReferenceCode = (): string => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // 36 chars
@@ -355,21 +366,21 @@ serve(async (req) => {
                       <h1 style="color: #111; margin-bottom: 20px;">Neue Marketplace-Bestellung</h1>
                       <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                         <h2 style="color: #333; margin-top: 0;">Bestelldetails</h2>
-                        <p><strong>Referenz:</strong> ${referenceCode}</p>
-                        <p><strong>Produkt:</strong> ${item.name}</p>
-                        <p><strong>Kategorie:</strong> ${item.category}</p>
+                        <p><strong>Referenz:</strong> ${escapeHtml(referenceCode)}</p>
+                        <p><strong>Produkt:</strong> ${escapeHtml(item.name)}</p>
+                        <p><strong>Kategorie:</strong> ${escapeHtml(item.category)}</p>
                         <p><strong>Menge:</strong> ${quantity}</p>
                         <p><strong>Bezahlt mit Punkten:</strong> ${appliedPlay + appliedReward}</p>
                         <p><strong>Bezahlt bar (Cent):</strong> ${Math.max(0, remainderCents)}</p>
                       </div>
                       <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                         <h2 style="color: #333; margin-top: 0;">Kundeninformationen</h2>
-                        <p><strong>Name:</strong> ${displayName}</p>
-                        <p><strong>E-Mail:</strong> ${effectiveEmail}</p>
+                        <p><strong>Name:</strong> ${escapeHtml(displayName)}</p>
+                        <p><strong>E-Mail:</strong> ${escapeHtml(effectiveEmail)}</p>
                       </div>
                       <div style="background: #e8f5e9; padding: 20px; border-radius: 8px;">
                         <h2 style="color: #333; margin-top: 0;">Lieferadresse</h2>
-                        <p style="white-space: pre-line; margin: 0;">${formattedAddress}</p>
+                        <p style="white-space: pre-line; margin: 0;">${escapeHtml(formattedAddress)}</p>
                       </div>
                     </div>
                   </body>

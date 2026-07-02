@@ -14,6 +14,17 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
 };
 
+// Untrusted values (guest/shipping/profile/email/reference/item fields) must never be
+// interpolated raw into the internal HTML fulfillment/alert emails — this neutralizes HTML/
+// content injection while leaving the value itself unchanged for safe input.
+const escapeHtml = (v: unknown): string =>
+  String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -173,9 +184,9 @@ serve(async (req) => {
                             <h1 style="color: #b00020; margin-bottom: 20px;">Bezahlte Bestellung wurde storniert</h1>
                             <p>Eine per Karte bezahlte Marketplace-Bestellung wurde storniert, bevor der Zahlungs-Webhook eintraf. Punkte und Bestand wurden bereits zurueckgebucht.</p>
                             <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
-                              <p><strong>Referenz:</strong> ${releasedOrder?.reference_code ?? redemptionId}</p>
+                              <p><strong>Referenz:</strong> ${escapeHtml(releasedOrder?.reference_code ?? redemptionId)}</p>
                               <p><strong>Bestell-ID:</strong> ${redemptionId}</p>
-                              <p><strong>Status:</strong> ${releasedOrder?.status ?? "nicht gefunden"}</p>
+                              <p><strong>Status:</strong> ${escapeHtml(releasedOrder?.status ?? "nicht gefunden")}</p>
                               <p><strong>Stripe Session:</strong> ${session.id}</p>
                               <p><strong>Bezahlt (Cent):</strong> ${session.amount_total ?? 0}</p>
                               <p><strong>Automatische Rueckerstattung:</strong> ${refundOk ? "ausgeloest" : "FEHLGESCHLAGEN - bitte manuell pruefen"}</p>
@@ -313,21 +324,21 @@ serve(async (req) => {
                             <h1 style="color: #111; margin-bottom: 20px;">Neue Marketplace-Bestellung</h1>
                             <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                               <h2 style="color: #333; margin-top: 0;">Bestelldetails</h2>
-                              <p><strong>Referenz:</strong> ${order?.reference_code ?? redemptionId}</p>
-                              <p><strong>Produkt:</strong> ${item.name}</p>
-                              <p><strong>Kategorie:</strong> ${item.category}</p>
+                              <p><strong>Referenz:</strong> ${escapeHtml(order?.reference_code ?? redemptionId)}</p>
+                              <p><strong>Produkt:</strong> ${escapeHtml(item.name)}</p>
+                              <p><strong>Kategorie:</strong> ${escapeHtml(item.category)}</p>
                               <p><strong>Menge:</strong> ${order?.quantity ?? 1}</p>
                               <p><strong>Bezahlt mit Punkten:</strong> ${pointsSpent}</p>
                               <p><strong>Bezahlt bar (Cent):</strong> ${order?.amount_cents ?? session.amount_total ?? 0}</p>
                             </div>
                             <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                               <h2 style="color: #333; margin-top: 0;">Kundeninformationen</h2>
-                              <p><strong>Name:</strong> ${customerName}</p>
-                              <p><strong>E-Mail:</strong> ${customerEmail}</p>
+                              <p><strong>Name:</strong> ${escapeHtml(customerName)}</p>
+                              <p><strong>E-Mail:</strong> ${escapeHtml(customerEmail)}</p>
                             </div>
                             <div style="background: #e8f5e9; padding: 20px; border-radius: 8px;">
                               <h2 style="color: #333; margin-top: 0;">Lieferadresse</h2>
-                              <p style="white-space: pre-line; margin: 0;">${formattedAddress}</p>
+                              <p style="white-space: pre-line; margin: 0;">${escapeHtml(formattedAddress)}</p>
                             </div>
                           </div>
                         </body>
