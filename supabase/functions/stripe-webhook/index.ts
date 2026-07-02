@@ -228,11 +228,12 @@ serve(async (req) => {
 
             // Finalize the points spend in the ledger. The wallet was already debited at
             // checkout by reserve_points; this records the movement (mirrors the free path).
-            // Runs on the fresh settle AND on a retry (a re-read/email failure re-delivers the
-            // webhook), so an existence check keeps it single-insert.
+            // Gated on the settle-winner (settled === true) so a concurrent duplicate delivery
+            // that fell through on status='success' cannot double-insert the REDEMPTION row;
+            // the existence check below is defense-in-depth.
             const pointsSpent = (order.play_spent ?? 0) + (order.reward_spent ?? 0);
             const ledgerSourceId = order.reference_code ?? redemptionId;
-            if (order.user_id && pointsSpent > 0) {
+            if (settled === true && order.user_id && pointsSpent > 0) {
               const { data: existingLedger } = await supabaseAdmin
                 .from("points_ledger")
                 .select("id")
@@ -264,10 +265,29 @@ serve(async (req) => {
             // the ONLY ship signal, so it must survive transient failures: it is gated on
             // fulfillment_notified_at (set only after a successful send) and a send failure
             // returns 500 so Stripe re-delivers and this block retries until it lands.
+            // Atomically CLAIM the fulfillment notification (flip fulfillment_notified_at from
+            // NULL to now) so two concurrent duplicate webhook deliveries cannot both email the
+            // admin (a double physical-ship signal). Only the instance that wins the flip sends;
+            // the claim is released back to NULL if the send cannot complete, so it still retries.
+            let fulfillmentClaimed = false;
             if (item?.product_type === "purchase" && !order.fulfillment_notified_at) {
+              const { data: notifyClaim } = await supabaseAdmin
+                .from("marketplace_redemptions")
+                .update({ fulfillment_notified_at: new Date().toISOString() })
+                .eq("id", redemptionId)
+                .is("fulfillment_notified_at", null)
+                .select("id");
+              fulfillmentClaimed = !!(notifyClaim && notifyClaim.length > 0);
+            }
+            if (fulfillmentClaimed) {
               const resendApiKey = Deno.env.get("RESEND_API_KEY");
               if (!resendApiKey) {
                 logStep("Marketplace: RESEND_API_KEY not configured — fulfillment email not sent, order stays in admin queue", { redemptionId });
+                // Release the claim so a later delivery re-sends once the key is configured.
+                await supabaseAdmin
+                  .from("marketplace_redemptions")
+                  .update({ fulfillment_notified_at: null })
+                  .eq("id", redemptionId);
               } else {
                 try {
                   let customerName = order?.guest_name || "Gast";
@@ -314,15 +334,13 @@ serve(async (req) => {
                       </html>
                     `,
                   });
-                  // Mark notified ONLY after a successful send, so an interrupted send is
-                  // retried by the next Stripe delivery rather than silently lost.
-                  await supabaseAdmin
-                    .from("marketplace_redemptions")
-                    .update({ fulfillment_notified_at: new Date().toISOString() })
-                    .eq("id", redemptionId);
                   logStep("Marketplace: fulfillment email sent", { redemptionId });
                 } catch (emailError) {
-                  // Do NOT swallow: a paid physical order with no ship signal must re-deliver.
+                  // Release the claim so the next Stripe delivery re-sends (this send did not land).
+                  await supabaseAdmin
+                    .from("marketplace_redemptions")
+                    .update({ fulfillment_notified_at: null })
+                    .eq("id", redemptionId);
                   logStep("CRITICAL: marketplace fulfillment email failed — returning 500 so Stripe retries", { redemptionId, error: (emailError as Error).message });
                   return new Response(JSON.stringify({ error: "marketplace_fulfillment_email_failed" }), {
                     status: 500,
