@@ -311,12 +311,20 @@ $mp_cleanup$;
 REVOKE ALL ON FUNCTION public.cleanup_expired_marketplace_orders() FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.cleanup_expired_marketplace_orders() TO service_role;
 
-SELECT cron.unschedule('cleanup-expired-marketplace-orders') WHERE EXISTS (
-  SELECT 1 FROM cron.job WHERE jobname = 'cleanup-expired-marketplace-orders'
-);
-
-SELECT cron.schedule(
-  'cleanup-expired-marketplace-orders',
-  '* * * * *',
-  $mp_cron$SELECT public.cleanup_expired_marketplace_orders()$mp_cron$
-);
+-- Schedule the pg_cron backstop only if pg_cron is enabled (schema "cron" exists), so
+-- this migration does not fail on projects without the extension. The webhook expired
+-- branch releases orders regardless; the cron is only a missed-webhook safety net.
+DO $cron_setup$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'cron') THEN
+    IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'cleanup-expired-marketplace-orders') THEN
+      PERFORM cron.unschedule('cleanup-expired-marketplace-orders');
+    END IF;
+    PERFORM cron.schedule(
+      'cleanup-expired-marketplace-orders',
+      '* * * * *',
+      'SELECT public.cleanup_expired_marketplace_orders()'
+    );
+  END IF;
+END
+$cron_setup$;
