@@ -54,34 +54,53 @@ serve(async (req) => {
 
     logStep("Request", { action, adminId: user.id });
 
-    // GET all user wallets with profile info
+    // GET all user wallets with profile info.
+    // Lists EVERY registered user (auth.users), not only users who already have a
+    // wallet row — otherwise a user who never earned/spent points is invisible and
+    // cannot be topped up. Wallet balances default to 0 for users without a wallet.
     if (action === "list_wallets") {
-      const { data: wallets, error } = await supabaseAdmin
+      const perPage = 1000;
+      let page = 1;
+      const authUsers: { id: string; email: string | null }[] = [];
+      while (true) {
+        const { data: list, error: listErr } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+        if (listErr) throw listErr;
+        const batch = list?.users ?? [];
+        for (const u of batch) authUsers.push({ id: u.id, email: u.email ?? null });
+        if (batch.length < perPage) break;
+        page++;
+        if (page > 50) break; // safety cap (~50k users)
+      }
+
+      const { data: wallets } = await supabaseAdmin
         .from("wallets")
-        .select(`
-          user_id,
-          play_credits,
-          reward_credits,
-          lifetime_credits,
-          updated_at
-        `)
-        .order("lifetime_credits", { ascending: false });
+        .select("user_id, play_credits, reward_credits, lifetime_credits, updated_at");
+      const walletsMap = new Map((wallets ?? []).map(w => [w.user_id, w]));
 
-      if (error) throw error;
-
-      // Get profiles for display names
-      const userIds = wallets?.map(w => w.user_id) || [];
       const { data: profiles } = await supabaseAdmin
         .from("profiles")
-        .select("user_id, display_name, username, avatar_url")
-        .in("user_id", userIds);
+        .select("user_id, display_name, username, avatar_url");
+      const profilesMap = new Map((profiles ?? []).map(p => [p.user_id, p]));
 
-      const profilesMap = new Map(profiles?.map(p => [p.user_id, p]));
+      const enrichedWallets = authUsers.map(u => {
+        const w = walletsMap.get(u.id);
+        const p = profilesMap.get(u.id);
+        return {
+          user_id: u.id,
+          email: u.email,
+          play_credits: w?.play_credits ?? 0,
+          reward_credits: w?.reward_credits ?? 0,
+          lifetime_credits: w?.lifetime_credits ?? 0,
+          updated_at: w?.updated_at ?? null,
+          // Fall back to the email as the display handle so users without a profile
+          // are still identifiable and searchable in the admin table.
+          profile: p
+            ? { display_name: p.display_name, username: p.username, avatar_url: p.avatar_url }
+            : { display_name: null, username: u.email, avatar_url: null },
+        };
+      });
 
-      const enrichedWallets = wallets?.map(w => ({
-        ...w,
-        profile: profilesMap.get(w.user_id) || null,
-      }));
+      enrichedWallets.sort((a, b) => (b.lifetime_credits - a.lifetime_credits));
 
       return new Response(JSON.stringify({ wallets: enrichedWallets }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
