@@ -114,6 +114,33 @@
     },
     "player": "Player"
   },
+  "meinP2g": {
+    "greeting": "Hi {{name}}",
+    "playerFallback": "Player",
+    "subtitle": "Great to see you back.",
+    "points": {
+      "label": "Your P2G points",
+      "worth": "≈ {{amount}} EUR value",
+      "details": "Points details"
+    },
+    "cta": {
+      "book": "Book court"
+    },
+    "nextBooking": {
+      "heading": "Your next court",
+      "empty": "No upcoming booking yet"
+    },
+    "quickActions": {
+      "book": "Book",
+      "marketplace": "Marketplace",
+      "events": "Events",
+      "myBookings": "My bookings"
+    },
+    "events": {
+      "heading": "Upcoming events",
+      "all": "All"
+    }
+  },
   "booking": {
     "meta": {
       "title": "Booking | Padel2Go Dashboard"

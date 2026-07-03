@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, User, Settings, Users, Building2, MessageCircle, Coins, CalendarDays } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu, X, LogOut, User, Settings, Building2, Coins, CalendarDays } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,8 +17,7 @@ import { NotificationCenter } from "@/components/notifications";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useClubAuth } from "@/hooks/useClubAuth";
-import { useFriendships } from "@/hooks/useFriendships";
-import { useUnreadChatCount, useChatRealtime } from "@/hooks/useChat";
+import { useChatRealtime } from "@/hooks/useChat";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import { useAccountData } from "@/hooks/useAccountData";
 import { usePointsValue } from "@/hooks/usePointsValue";
@@ -32,18 +30,12 @@ const DashboardNavigation = () => {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdminAuth();
   const { isClubUser } = useClubAuth();
-  const { pendingReceived } = useFriendships();
-  const pendingReceivedCount = pendingReceived.length;
-  const unreadChats = useUnreadChatCount();
   const { canSee } = useFeatureToggles();
   const { wallet, profile } = useAccountData(user);
   const { centsPerPoint } = usePointsValue();
 
-  // Notifications are released alongside friends/chat — friend-request
-  // signals would otherwise be invisible until launch.
-  const showNotifications = true;
-
-  // Live chat updates everywhere
+  // Live chat updates everywhere (chat page relies on this for realtime data,
+  // even though the nav no longer surfaces a chat icon)
   useChatRealtime();
 
   const totalCredits = (wallet?.play_credits || 0) + (wallet?.reward_credits || 0);
@@ -62,16 +54,12 @@ const DashboardNavigation = () => {
   // everyone, demo for admins only), so hidden features drop out for both.
   const dashboardItems = [
     { name: t("nav.meinP2G"), url: "/dashboard/home", show: true },
-    { name: t("nav.lobbys"), url: "/lobbies", show: canSee("lobbies") },
-    { name: t("nav.p2gPoints"), url: "/dashboard/p2g-points", show: canSee("p2g") },
+    { name: t("nav.booking"), url: "/dashboard/booking", show: true },
     { name: t("nav.marketplace"), url: "/dashboard/marketplace", show: canSee("marketplace") },
-    { name: t("nav.league"), url: "/dashboard/league", show: canSee("league") },
     { name: t("nav.events"), url: "/dashboard/events", show: canSee("events") },
   ]
     .filter((item) => item.show)
     .map(({ show, ...item }) => item);
-
-  const showFriends = canSee("friends");
 
   const handleLogout = async () => {
     await signOut();
@@ -111,41 +99,7 @@ const DashboardNavigation = () => {
 
             {/* Desktop-only icon actions */}
             <div className="hidden lg:flex items-center gap-2">
-              {showNotifications && <NotificationCenter />}
-
-              <Button
-                variant="ghost"
-                size="icon"
-                asChild
-                className="relative rounded-full border border-border/50 bg-background/60 backdrop-blur-xl hover:bg-primary/10 hover:text-primary"
-              >
-                <NavLink to="/dashboard/chat">
-                  <MessageCircle className="w-4 h-4" />
-                  {unreadChats > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
-                      {unreadChats > 9 ? "9+" : unreadChats}
-                    </span>
-                  )}
-                </NavLink>
-              </Button>
-
-              {showFriends && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  asChild
-                  className="relative rounded-full border border-border/50 bg-background/60 backdrop-blur-xl hover:bg-primary/10 hover:text-primary"
-                >
-                  <NavLink to="/dashboard/friends">
-                    <Users className="w-4 h-4" />
-                    {pendingReceivedCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
-                        {pendingReceivedCount > 9 ? "9+" : pendingReceivedCount}
-                      </span>
-                    )}
-                  </NavLink>
-                </Button>
-              )}
+              <NotificationCenter />
             </div>
 
             {/* Profile menu */}
@@ -234,32 +188,6 @@ const DashboardNavigation = () => {
                   {item.name}
                 </NavLink>
               ))}
-              <div className="flex flex-col gap-2 pt-4 mt-2 border-t border-border/50">
-                <Button variant="ghost" className="w-full justify-start rounded-xl hover:bg-primary/10 hover:text-primary" asChild>
-                  <NavLink to="/dashboard/chat" onClick={() => setIsOpen(false)}>
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    {t("actions.chat")}
-                    {unreadChats > 0 && (
-                      <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                        {unreadChats}
-                      </span>
-                    )}
-                  </NavLink>
-                </Button>
-                {showFriends && (
-                  <Button variant="ghost" className="w-full justify-start rounded-xl hover:bg-primary/10 hover:text-primary" asChild>
-                    <NavLink to="/dashboard/friends" onClick={() => setIsOpen(false)}>
-                      <Users className="w-4 h-4 mr-2" />
-                      {t("actions.freunde")}
-                      {pendingReceivedCount > 0 && (
-                        <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                          {pendingReceivedCount}
-                        </span>
-                      )}
-                    </NavLink>
-                  </Button>
-                )}
-              </div>
             </div>
           </motion.div>
         )}
