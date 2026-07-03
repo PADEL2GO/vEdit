@@ -36,31 +36,18 @@ const DashboardNavigation = () => {
   const allNavItems = [
     { name: t("nav.meinP2G"), url: "/dashboard/home", feature: null },
     { name: t("nav.booking"), url: "/dashboard/booking", feature: null },
-    { name: t("nav.lobbys"), url: "/lobbies", feature: null },
+    { name: t("nav.lobbys"), url: "/lobbies", feature: "lobbies_enabled" },
     { name: t("nav.p2gPoints"), url: "/dashboard/p2g-points", feature: "p2g_enabled" },
     { name: t("nav.marketplace"), url: "/dashboard/marketplace", feature: "marketplace_enabled" },
     { name: t("nav.league"), url: "/dashboard/league", feature: "league_enabled" },
     { name: t("nav.events"), url: "/dashboard/events", feature: "events_enabled" },
   ];
 
-  // Admins see everything; before launch non-admins see Übersicht + Booking + Lobbys
-  // (Lobbys is permanently released alongside Friends + Chat);
-  // after launch filter by individual feature flags
-  const dashboardItems = isAdmin
-    ? allNavItems.map(({ feature, ...item }) => item)
-    : !features.app_launched
-    ? [
-        { name: t("nav.uebersicht"), url: "/dashboard/home" },
-        { name: t("nav.booking"), url: "/dashboard/booking" },
-        { name: t("nav.lobbys"), url: "/lobbies" },
-        // Marketplace goes live independently of app_launched
-        ...(features.marketplace_enabled
-          ? [{ name: t("nav.marketplace"), url: "/dashboard/marketplace" }]
-          : []),
-      ]
-    : allNavItems
-        .filter(item => !item.feature || features[item.feature as keyof typeof features])
-        .map(({ feature, ...item }) => item);
+  // The _enabled getters fold in the 3-state visibility model (visible for everyone,
+  // demo for admins only), so a single filter covers admins and regular users alike.
+  const dashboardItems = allNavItems
+    .filter(item => !item.feature || features[item.feature as keyof typeof features])
+    .map(({ feature, ...item }) => item);
 
   const handleLogout = async () => {
     await signOut();
