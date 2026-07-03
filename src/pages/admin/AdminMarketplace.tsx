@@ -130,7 +130,7 @@ const AdminMarketplace = () => {
   // Form state
   const [formData, setFormData] = useState<Partial<MarketplaceItemInput>>({
     name: "",
-    category: "courtbooking",
+    category: "equipment",
     credit_cost: 0,
     price_cents: 0,
     description: "",
@@ -143,7 +143,7 @@ const AdminMarketplace = () => {
   const resetForm = () => {
     setFormData({
       name: "",
-      category: "courtbooking",
+      category: "equipment",
       credit_cost: 0,
       price_cents: 0,
       description: "",

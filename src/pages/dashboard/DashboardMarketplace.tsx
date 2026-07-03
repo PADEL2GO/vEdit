@@ -44,7 +44,9 @@ const DashboardMarketplace = () => {
   const { creditBreakdown, isCreditBreakdownLoading } = useP2GPoints();
   const { centsPerPoint, maxPercent, enabled: pointsEnabled } = usePointsValue();
   const [sortBy, setSortBy] = useState<SortOption>("default");
-  const { data: items, isLoading: itemsLoading } = useMarketplaceItems("equipment");
+  // Show ALL active marketplace items in one list (equipment shop) — not filtered by
+  // category, so anything the admin adds appears (ready-to-run).
+  const { data: items, isLoading: itemsLoading } = useMarketplaceItems();
   const { data: redemptions } = useUserRedemptions();
   const checkoutMutation = useMarketplaceCheckout();
 
