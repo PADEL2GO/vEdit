@@ -10,14 +10,18 @@
     "uebersicht": "Overview"
   },
   "actions": {
-    "club": "Club",
     "clubPortal": "Club Portal",
     "admin": "Admin",
-    "profil": "Profile",
     "logout": "Logout",
     "chat": "Chat",
-    "freunde": "Friends",
-    "ausloggen": "Log out"
+    "freunde": "Friends"
+  },
+  "menu": {
+    "account": "Account",
+    "myBookings": "My Bookings"
+  },
+  "points": {
+    "worth": "≈ €{{amount}}"
   },
   "notifications": {
     "title": "Notifications",

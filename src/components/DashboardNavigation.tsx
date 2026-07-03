@@ -1,8 +1,17 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, User, Settings, Users, Building2, MessageCircle } from "lucide-react";
+import { Menu, X, LogOut, User, Settings, Users, Building2, MessageCircle, Coins, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { NavLink } from "@/components/NavLink";
 import { TubelightNavBar } from "@/components/ui/tubelight-navbar";
 import { NotificationCenter } from "@/components/notifications";
@@ -12,18 +21,23 @@ import { useClubAuth } from "@/hooks/useClubAuth";
 import { useFriendships } from "@/hooks/useFriendships";
 import { useUnreadChatCount, useChatRealtime } from "@/hooks/useChat";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
+import { useAccountData } from "@/hooks/useAccountData";
+import { usePointsValue } from "@/hooks/usePointsValue";
 import wordmark from "@/assets/padel2go-wordmark.png";
 
 const DashboardNavigation = () => {
-  const { t } = useTranslation("dashboardnav");
+  const { t, i18n } = useTranslation("dashboardnav");
+  const numberLocale = i18n.language === "en" ? "en-US" : "de-DE";
   const [isOpen, setIsOpen] = useState(false);
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const { isAdmin } = useAdminAuth();
   const { isClubUser } = useClubAuth();
   const { pendingReceived } = useFriendships();
   const pendingReceivedCount = pendingReceived.length;
   const unreadChats = useUnreadChatCount();
-  const features = useFeatureToggles();
+  const { canSee } = useFeatureToggles();
+  const { wallet, profile } = useAccountData(user);
+  const { centsPerPoint } = usePointsValue();
 
   // Notifications are released alongside friends/chat — friend-request
   // signals would otherwise be invisible until launch.
@@ -32,35 +46,32 @@ const DashboardNavigation = () => {
   // Live chat updates everywhere
   useChatRealtime();
 
-  // All possible nav items with their required feature flag
-  const allNavItems = [
-    { name: t("nav.meinP2G"), url: "/dashboard/home", feature: null },
-    { name: t("nav.booking"), url: "/dashboard/booking", feature: null },
-    { name: t("nav.lobbys"), url: "/lobbies", feature: null },
-    { name: t("nav.p2gPoints"), url: "/dashboard/p2g-points", feature: "p2g_enabled" },
-    { name: t("nav.marketplace"), url: "/dashboard/marketplace", feature: "marketplace_enabled" },
-    { name: t("nav.league"), url: "/dashboard/league", feature: "league_enabled" },
-    { name: t("nav.events"), url: "/dashboard/events", feature: "events_enabled" },
-  ];
+  const totalCredits = (wallet?.play_credits || 0) + (wallet?.reward_credits || 0);
+  const balanceWorthEuro = (totalCredits * centsPerPoint / 100).toFixed(2);
 
-  // Admins see everything; before launch non-admins see Übersicht + Booking + Lobbys
-  // (Lobbys is permanently released alongside Friends + Chat);
-  // after launch filter by individual feature flags
-  const dashboardItems = isAdmin
-    ? allNavItems.map(({ feature, ...item }) => item)
-    : !features.app_launched
-    ? [
-        { name: t("nav.uebersicht"), url: "/dashboard/home" },
-        { name: t("nav.booking"), url: "/dashboard/booking" },
-        { name: t("nav.lobbys"), url: "/lobbies" },
-        // Marketplace goes live independently of app_launched
-        ...(features.marketplace_enabled
-          ? [{ name: t("nav.marketplace"), url: "/dashboard/marketplace" }]
-          : []),
-      ]
-    : allNavItems
-        .filter(item => !item.feature || features[item.feature as keyof typeof features])
-        .map(({ feature, ...item }) => item);
+  const accountName = profile.display_name || profile.username || user?.email || t("menu.account");
+  const initials =
+    accountName
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?";
+
+  // Feature-gated nav links: canSee folds in the 3-state model (visible for
+  // everyone, demo for admins only), so hidden features drop out for both.
+  const dashboardItems = [
+    { name: t("nav.meinP2G"), url: "/dashboard/home", show: true },
+    { name: t("nav.lobbys"), url: "/lobbies", show: canSee("lobbies") },
+    { name: t("nav.p2gPoints"), url: "/dashboard/p2g-points", show: canSee("p2g") },
+    { name: t("nav.marketplace"), url: "/dashboard/marketplace", show: canSee("marketplace") },
+    { name: t("nav.league"), url: "/dashboard/league", show: canSee("league") },
+    { name: t("nav.events"), url: "/dashboard/events", show: canSee("events") },
+  ]
+    .filter((item) => item.show)
+    .map(({ show, ...item }) => item);
+
+  const showFriends = canSee("friends");
 
   const handleLogout = async () => {
     await signOut();
@@ -69,13 +80,13 @@ const DashboardNavigation = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex items-center justify-between h-16 md:h-20 gap-2">
           {/* Logo */}
           <NavLink to="/dashboard/home" className="flex items-center shrink-0 will-change-transform">
             <img
               src={wordmark}
               alt="PADEL2GO"
-              className="h-6 md:h-8 w-auto"
+              className="h-5 sm:h-6 md:h-8 w-auto"
               style={{ transform: "translateZ(0)" }}
             />
           </NavLink>
@@ -85,99 +96,120 @@ const DashboardNavigation = () => {
             <TubelightNavBar items={dashboardItems} />
           </div>
 
-          {/* Desktop User Actions */}
-          <div className="hidden lg:flex items-center gap-3">
-            {showNotifications && <NotificationCenter />}
+          {/* Right cluster */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* P2G points balance + its euro worth — always visible */}
+            <div className="flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 sm:px-3 sm:py-1.5">
+              <Coins className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-sm font-semibold tabular-nums leading-none">
+                {totalCredits.toLocaleString(numberLocale)}
+              </span>
+              <span className="hidden sm:inline text-xs text-muted-foreground whitespace-nowrap leading-none">
+                {t("points.worth", { amount: balanceWorthEuro })}
+              </span>
+            </div>
 
-            {/* Chat Link with Unread Badge */}
-            <Button
-              variant="ghost"
-              size="icon"
-              asChild
-              className="relative rounded-full border border-border/50 bg-background/60 backdrop-blur-xl hover:bg-primary/10 hover:text-primary"
-            >
-              <NavLink to="/dashboard/chat">
-                <MessageCircle className="w-4 h-4" />
-                {unreadChats > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
-                    {unreadChats > 9 ? "9+" : unreadChats}
-                  </span>
-                )}
-              </NavLink>
-            </Button>
+            {/* Desktop-only icon actions */}
+            <div className="hidden lg:flex items-center gap-2">
+              {showNotifications && <NotificationCenter />}
 
-            {/* Friends Link with Pending-Requests Badge */}
-            <Button
-              variant="ghost"
-              size="icon"
-              asChild
-              className="relative rounded-full border border-border/50 bg-background/60 backdrop-blur-xl hover:bg-primary/10 hover:text-primary"
-            >
-              <NavLink to="/dashboard/friends">
-                <Users className="w-4 h-4" />
-                {pendingReceivedCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
-                    {pendingReceivedCount > 9 ? "9+" : pendingReceivedCount}
-                  </span>
-                )}
-              </NavLink>
-            </Button>
-
-            {isClubUser && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="icon"
                 asChild
-                className="rounded-full px-4 border border-border/50 bg-background/60 backdrop-blur-xl hover:bg-yellow-500/10 hover:text-yellow-500"
+                className="relative rounded-full border border-border/50 bg-background/60 backdrop-blur-xl hover:bg-primary/10 hover:text-primary"
               >
-                <NavLink to="/club">
-                  <Building2 className="w-4 h-4 mr-2" />
-                  {t("actions.club")}
+                <NavLink to="/dashboard/chat">
+                  <MessageCircle className="w-4 h-4" />
+                  {unreadChats > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
+                      {unreadChats > 9 ? "9+" : unreadChats}
+                    </span>
+                  )}
                 </NavLink>
               </Button>
-            )}
-            {isAdmin && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                asChild
-                className="rounded-full px-4 border border-border/50 bg-background/60 backdrop-blur-xl hover:bg-primary/10 hover:text-primary"
-              >
-                <NavLink to="/admin">
-                  <Settings className="w-4 h-4 mr-2" />
-                  {t("actions.admin")}
-                </NavLink>
-              </Button>
-            )}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              asChild
-              className="rounded-full px-4 border border-border/50 bg-background/60 backdrop-blur-xl hover:bg-primary/10 hover:text-primary"
+
+              {showFriends && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                  className="relative rounded-full border border-border/50 bg-background/60 backdrop-blur-xl hover:bg-primary/10 hover:text-primary"
+                >
+                  <NavLink to="/dashboard/friends">
+                    <Users className="w-4 h-4" />
+                    {pendingReceivedCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
+                        {pendingReceivedCount > 9 ? "9+" : pendingReceivedCount}
+                      </span>
+                    )}
+                  </NavLink>
+                </Button>
+              )}
+            </div>
+
+            {/* Profile menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/50 shrink-0">
+                  <Avatar className="w-9 h-9 border border-border/50">
+                    <AvatarImage src={profile.avatar_url || undefined} alt={accountName} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="truncate">{accountName}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <NavLink to="/dashboard/booking" className="cursor-pointer">
+                    <CalendarDays className="w-4 h-4 mr-2" />
+                    {t("menu.myBookings")}
+                  </NavLink>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <NavLink to="/account" className="cursor-pointer">
+                    <User className="w-4 h-4 mr-2" />
+                    {t("menu.account")}
+                  </NavLink>
+                </DropdownMenuItem>
+                {isClubUser && (
+                  <DropdownMenuItem asChild>
+                    <NavLink to="/club" className="cursor-pointer">
+                      <Building2 className="w-4 h-4 mr-2" />
+                      {t("actions.clubPortal")}
+                    </NavLink>
+                  </DropdownMenuItem>
+                )}
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <NavLink to="/admin" className="cursor-pointer">
+                      <Settings className="w-4 h-4 mr-2" />
+                      {t("actions.admin")}
+                    </NavLink>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  {t("actions.logout")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="lg:hidden p-2 text-foreground rounded-full hover:bg-primary/10 transition-colors shrink-0"
+              onClick={() => setIsOpen(!isOpen)}
             >
-              <NavLink to="/account">
-                <User className="w-4 h-4 mr-2" />
-                {t("actions.profil")}
-              </NavLink>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="rounded-full px-4 border border-border/50 bg-background/60 backdrop-blur-xl hover:bg-destructive/10 hover:text-destructive"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              {t("actions.logout")}
-            </Button>
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="lg:hidden p-2 text-foreground rounded-full hover:bg-primary/10 transition-colors"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
         </div>
       </div>
 
@@ -214,43 +246,19 @@ const DashboardNavigation = () => {
                     )}
                   </NavLink>
                 </Button>
-                <Button variant="ghost" className="w-full justify-start rounded-xl hover:bg-primary/10 hover:text-primary" asChild>
-                  <NavLink to="/dashboard/friends" onClick={() => setIsOpen(false)}>
-                    <Users className="w-4 h-4 mr-2" />
-                    {t("actions.freunde")}
-                    {pendingReceivedCount > 0 && (
-                      <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                        {pendingReceivedCount}
-                      </span>
-                    )}
-                  </NavLink>
-                </Button>
-                {isClubUser && (
-                  <Button variant="ghost" className="w-full justify-start rounded-xl hover:bg-yellow-500/10 hover:text-yellow-500" asChild>
-                    <NavLink to="/club" onClick={() => setIsOpen(false)}>
-                      <Building2 className="w-4 h-4 mr-2" /> {t("actions.clubPortal")}
-                    </NavLink>
-                  </Button>
-                )}
-                {isAdmin && (
+                {showFriends && (
                   <Button variant="ghost" className="w-full justify-start rounded-xl hover:bg-primary/10 hover:text-primary" asChild>
-                    <NavLink to="/admin" onClick={() => setIsOpen(false)}>
-                      <Settings className="w-4 h-4 mr-2" /> {t("actions.admin")}
+                    <NavLink to="/dashboard/friends" onClick={() => setIsOpen(false)}>
+                      <Users className="w-4 h-4 mr-2" />
+                      {t("actions.freunde")}
+                      {pendingReceivedCount > 0 && (
+                        <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
+                          {pendingReceivedCount}
+                        </span>
+                      )}
                     </NavLink>
                   </Button>
                 )}
-                <Button variant="ghost" className="w-full justify-start rounded-xl hover:bg-primary/10 hover:text-primary" asChild>
-                  <NavLink to="/account" onClick={() => setIsOpen(false)}>
-                    <User className="w-4 h-4 mr-2" /> {t("actions.profil")}
-                  </NavLink>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start rounded-xl hover:bg-destructive/10 hover:text-destructive" 
-                  onClick={() => { handleLogout(); setIsOpen(false); }}
-                >
-                  <LogOut className="w-4 h-4 mr-2" /> {t("actions.ausloggen")}
-                </Button>
               </div>
             </div>
           </motion.div>

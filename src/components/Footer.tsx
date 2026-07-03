@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { NavLink } from "@/components/NavLink";
 import BrandName from "@/components/BrandName";
 import { useAuth } from "@/hooks/useAuth";
-import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import LanguageSwitch from "@/components/LanguageSwitch";
 import {
   WhatsAppIcon,
@@ -15,32 +14,26 @@ import {
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const { user } = useAuth();
-  const { app_launched } = useFeatureToggles();
   const { t } = useTranslation("common");
   const whatsappUrl = useWhatsAppUrl();
   const isLoggedIn = !!user;
 
-  // Plattform-Links sind an die Admin-Freigabe (feature_app_launched) gekoppelt:
-  // nicht eingeloggte Besucher sehen die Spalte nur, wenn die Plattform freigegeben ist.
-  // Lobbies wird bewusst nicht verlinkt (Seite bleibt erreichbar).
-  let platformLinks: Array<{ label: string; href: string }> = [];
-
-  if (isLoggedIn) {
-    platformLinks = [
-      { label: t("footer.links.bookCourt"), href: "/booking" },
-      { label: t("footer.links.events"), href: "/events" },
-      { label: t("footer.links.league"), href: "/league" },
-      { label: t("footer.links.rewards"), href: "/rewards" },
-    ];
-  } else if (app_launched) {
-    platformLinks = [
-      { label: t("footer.links.bookCourt"), href: "/booking" },
-      { label: t("footer.links.signUp"), href: "/auth" },
-      { label: t("footer.links.events"), href: "/events" },
-      { label: t("footer.links.league"), href: "/league" },
-      { label: t("footer.links.rewards"), href: "/rewards" },
-    ];
-  }
+  // Plattform-Links verweisen auf oeffentliche Marketing-Seiten.
+  // Nicht eingeloggte Besucher sehen zusaetzlich den Registrieren-Link.
+  const platformLinks: Array<{ label: string; href: string }> = isLoggedIn
+    ? [
+        { label: t("footer.links.bookCourt"), href: "/booking" },
+        { label: t("footer.links.events"), href: "/events" },
+        { label: t("footer.links.league"), href: "/league" },
+        { label: t("footer.links.rewards"), href: "/rewards" },
+      ]
+    : [
+        { label: t("footer.links.bookCourt"), href: "/booking" },
+        { label: t("footer.links.signUp"), href: "/auth" },
+        { label: t("footer.links.events"), href: "/events" },
+        { label: t("footer.links.league"), href: "/league" },
+        { label: t("footer.links.rewards"), href: "/rewards" },
+      ];
 
   const showPlatformColumn = platformLinks.length > 0;
 

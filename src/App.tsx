@@ -12,8 +12,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import CookieConsentBanner from "@/components/CookieConsentBanner";
 import { RequireAuth } from "@/components/RequireAuth";
-import { RequireAppLaunched } from "@/components/RequireAppLaunched";
-import { RequireMarketplaceEnabled } from "@/components/RequireMarketplaceEnabled";
+import { RequireFeature } from "@/components/RequireFeature";
 import { ClubLayout } from "./components/club/ClubLayout";
 
 // Route-level code splitting: each page is its own lazy chunk so first-time
@@ -155,14 +154,33 @@ const App = () => (
                 <Route path="/dashboard/home" element={<DashboardHome />} />
                 <Route path="/dashboard/booking" element={<DashboardBooking />} />
 
-                {/* Friends + Chat + Lobbies — released to everyone, pre- and post-launch */}
+                {/* Friends + Chat — released to everyone */}
                 <Route path="/dashboard/friends" element={<DashboardFriends />} />
                 <Route path="/dashboard/chat" element={<DashboardChat />} />
-                <Route path="/lobbies" element={<Lobbies />} />
-                <Route path="/lobbies/:id" element={<Lobbies />} />
 
-                {/* Club portal — gated by ClubLayout itself (isClubUser check) so club
-                    members and managers can use the panel pre-launch too. */}
+                {/* Feature-gated player routes — 3-state visibility (visible / demo / hidden).
+                    canSee shows "demo" features to admins only; "hidden" redirects everyone. */}
+                <Route element={<RequireFeature feature="lobbies" />}>
+                  <Route path="/lobbies" element={<Lobbies />} />
+                  <Route path="/lobbies/:id" element={<Lobbies />} />
+                </Route>
+                <Route element={<RequireFeature feature="rewards" />}>
+                  <Route path="/dashboard/rewards" element={<DashboardRewards />} />
+                </Route>
+                <Route element={<RequireFeature feature="p2g" />}>
+                  <Route path="/dashboard/p2g-points" element={<DashboardP2GPoints />} />
+                </Route>
+                <Route element={<RequireFeature feature="league" />}>
+                  <Route path="/dashboard/league" element={<DashboardLeague />} />
+                </Route>
+                <Route element={<RequireFeature feature="events" />}>
+                  <Route path="/dashboard/events" element={<DashboardEvents />} />
+                </Route>
+                <Route element={<RequireFeature feature="marketplace" />}>
+                  <Route path="/dashboard/marketplace" element={<DashboardMarketplace />} />
+                </Route>
+
+                {/* Club portal — gated by ClubLayout itself (isClubUser check). */}
                 <Route path="/club" element={<ClubLayout />}>
                   <Route index element={<ClubDashboard />} />
                   <Route path="bookings" element={<ClubBookings />} />
@@ -171,44 +189,30 @@ const App = () => (
                   <Route path="court" element={<ClubCourtFeatures />} />
                 </Route>
 
-                {/* Admin Routes — always accessible to admins (RequireAppLaunched lets admins through) */}
-                <Route element={<RequireAppLaunched />}>
-                  <Route path="/admin" element={<AdminOverview />} />
-                  <Route path="/admin/bookings" element={<AdminBookings />} />
-                  <Route path="/admin/courts" element={<AdminCourts />} />
-                  <Route path="/admin/events" element={<AdminEvents />} />
-                  <Route path="/admin/marketplace" element={<AdminMarketplace />} />
-                  <Route path="/admin/p2g-points" element={<AdminP2GPoints />} />
-                  <Route path="/admin/users" element={<AdminUsers />} />
-                  <Route path="/admin/notifications" element={<AdminNotifications />} />
-                  <Route path="/admin/analytics" element={<AdminAnalytics />} />
-                  <Route path="/admin/utilization" element={<AdminUtilization />} />
-                  <Route path="/admin/visuals" element={<AdminVisuals />} />
-                  <Route path="/admin/features" element={<AdminFeatures />} />
-                  <Route path="/admin/club-owners" element={<AdminClubOwners />} />
-                  <Route path="/admin/clubs" element={<AdminClubs />} />
-                  <Route path="/admin/vouchers" element={<AdminVouchers />} />
-                  <Route path="/admin/location-teasers" element={<AdminLocationTeasers />} />
-                  <Route path="/admin/skypadel-gallery" element={<AdminSkyPadelGallery />} />
-                  <Route path="/admin/partner-tiles" element={<AdminPartnerTiles />} />
-                  <Route path="/admin/touchpoint-slides" element={<AdminTouchpointSlides />} />
-                  <Route path="/admin/qr-panel" element={<AdminQrPanel />} />
-                  <Route path="/admin/news" element={<AdminNews />} />
-                  <Route path="/admin/settings" element={<AdminSettings />} />
-                  <Route path="/admin/integrations" element={<AdminIntegrations />} />
-
-                  {/* Locked until app_launched = true */}
-                  <Route path="/dashboard/rewards" element={<DashboardRewards />} />
-                  <Route path="/dashboard/p2g-points" element={<DashboardP2GPoints />} />
-                  <Route path="/dashboard/league" element={<DashboardLeague />} />
-                  <Route path="/dashboard/events" element={<DashboardEvents />} />
-                </Route>
-
-                {/* Marketplace — gated independently by feature_marketplace_enabled
-                    so the store can go live before app_launched flips */}
-                <Route element={<RequireMarketplaceEnabled />}>
-                  <Route path="/dashboard/marketplace" element={<DashboardMarketplace />} />
-                </Route>
+                {/* Admin Routes — admin-only via AdminLayout, which redirects non-admins. */}
+                <Route path="/admin" element={<AdminOverview />} />
+                <Route path="/admin/bookings" element={<AdminBookings />} />
+                <Route path="/admin/courts" element={<AdminCourts />} />
+                <Route path="/admin/events" element={<AdminEvents />} />
+                <Route path="/admin/marketplace" element={<AdminMarketplace />} />
+                <Route path="/admin/p2g-points" element={<AdminP2GPoints />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/notifications" element={<AdminNotifications />} />
+                <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                <Route path="/admin/utilization" element={<AdminUtilization />} />
+                <Route path="/admin/visuals" element={<AdminVisuals />} />
+                <Route path="/admin/features" element={<AdminFeatures />} />
+                <Route path="/admin/club-owners" element={<AdminClubOwners />} />
+                <Route path="/admin/clubs" element={<AdminClubs />} />
+                <Route path="/admin/vouchers" element={<AdminVouchers />} />
+                <Route path="/admin/location-teasers" element={<AdminLocationTeasers />} />
+                <Route path="/admin/skypadel-gallery" element={<AdminSkyPadelGallery />} />
+                <Route path="/admin/partner-tiles" element={<AdminPartnerTiles />} />
+                <Route path="/admin/touchpoint-slides" element={<AdminTouchpointSlides />} />
+                <Route path="/admin/qr-panel" element={<AdminQrPanel />} />
+                <Route path="/admin/news" element={<AdminNews />} />
+                <Route path="/admin/settings" element={<AdminSettings />} />
+                <Route path="/admin/integrations" element={<AdminIntegrations />} />
               </Route>
 
               {/* Public Profile */}

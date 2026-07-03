@@ -4,15 +4,18 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Rocket, Trophy, Calendar, Loader2, Coins, Globe, ShoppingCart, Save, Eye, EyeOff } from "lucide-react";
+import { Rocket, Trophy, Calendar, Loader2, Coins, ShoppingCart, Save, Eye, EyeOff, DoorOpen, Gift, Shuffle, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+type FeatureState = "visible" | "demo" | "hidden";
+
 interface FeatureConfig {
-  key: string;
+  name: string;
   title: string;
   description: string;
   route: string;
@@ -20,47 +23,88 @@ interface FeatureConfig {
 }
 
 const FEATURES: FeatureConfig[] = [
-  // Lobbys are permanently released to all users (no longer gated).
   {
-    key: "feature_p2g_enabled",
-    title: "P2G Points",
-    description: "Sammle P2G Credits durch Buchungen und KI-Matches. Löse sie gegen exklusive Prämien ein.",
-    route: "/dashboard/p2g-points",
-    icon: Coins,
+    name: "lobbies",
+    title: "Lobbies",
+    description: "Spontane Spielrunden erstellen und beitreten. User finden offene Slots bei Courts in der Nähe.",
+    route: "/lobbies",
+    icon: DoorOpen,
   },
   {
-    key: "feature_marketplace_enabled",
-    title: "Marketplace",
-    description: "Exklusiver Shop für Mitglieder. Equipment, Merchandise und Member-Only Deals.",
-    route: "/dashboard/marketplace",
-    icon: ShoppingCart,
-  },
-  {
-    key: "feature_league_enabled",
-    title: "League",
+    name: "league",
+    title: "Liga",
     description: "Rangliste und Spieler-Statistiken. Vergleiche dich mit anderen Spielern und steige im Ranking auf.",
     route: "/dashboard/league",
     icon: Trophy,
   },
   {
-    key: "feature_events_enabled",
+    name: "events",
     title: "Events",
     description: "Padel-Events mit DJ, Food & Community. Von Day-Drinking Sessions bis zu Partner-Activations.",
-    route: "/events",
+    route: "/dashboard/events",
     icon: Calendar,
+  },
+  {
+    name: "rewards",
+    title: "Rewards",
+    description: "Prämien-Katalog zum Einlösen von P2G-Punkten.",
+    route: "/dashboard/rewards",
+    icon: Gift,
+  },
+  {
+    name: "matching",
+    title: "Matching",
+    description: "KI-gestütztes Spieler-Matching nach Level und Verfügbarkeit.",
+    route: "/dashboard/matching",
+    icon: Shuffle,
+  },
+  {
+    name: "p2g",
+    title: "P2G-Punkte",
+    description: "Sammle P2G-Punkte durch Buchungen und KI-Matches. Löse sie gegen exklusive Prämien ein.",
+    route: "/dashboard/p2g-points",
+    icon: Coins,
+  },
+  {
+    name: "marketplace",
+    title: "Marktplatz",
+    description: "Exklusiver Shop für Mitglieder. Equipment, Merchandise und Member-Only Deals.",
+    route: "/dashboard/marketplace",
+    icon: ShoppingCart,
+  },
+  {
+    name: "friends",
+    title: "Freunde",
+    description: "Freunde einladen, Freundeslisten verwalten und gemeinsam spielen.",
+    route: "/dashboard/friends",
+    icon: Users,
   },
 ];
 
+const STATE_OPTIONS: { value: FeatureState; label: string }[] = [
+  { value: "visible", label: "Für alle sichtbar" },
+  { value: "demo", label: "Demo (nur Admin)" },
+  { value: "hidden", label: "Aus" },
+];
+
+const STATE_BADGE: Record<FeatureState, { label: string; className: string }> = {
+  visible: { label: "Live", className: "bg-green-500/20 text-green-600 border-green-500/30" },
+  demo: { label: "Demo", className: "bg-amber-500/20 text-amber-600 border-amber-500/30" },
+  hidden: { label: "Aus", className: "text-muted-foreground" },
+};
+
 export default function AdminFeatures() {
   const queryClient = useQueryClient();
-  const [featureStates, setFeatureStates] = useState<Record<string, boolean>>({
-    feature_app_launched: false,
-    feature_courts_public_enabled: false,
-    feature_lobbies_enabled: false,
-    feature_league_enabled: false,
-    feature_events_enabled: false,
-    feature_p2g_enabled: false,
-    feature_marketplace_enabled: false,
+  const [courtsPublicEnabled, setCourtsPublicEnabled] = useState(false);
+  const [featureVisibility, setFeatureVisibility] = useState<Record<string, FeatureState>>({
+    lobbies: "hidden",
+    league: "hidden",
+    events: "hidden",
+    rewards: "hidden",
+    matching: "hidden",
+    p2g: "hidden",
+    marketplace: "hidden",
+    friends: "hidden",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
@@ -79,21 +123,25 @@ export default function AdminFeatures() {
     try {
       const { data, error } = await supabase
         .from("site_settings")
-        .select("feature_app_launched, feature_courts_public_enabled, feature_lobbies_enabled, feature_league_enabled, feature_events_enabled, feature_p2g_enabled, feature_marketplace_enabled, feature_credits_payment_enabled, credits_payment_max_percent, credits_per_euro")
+        .select(
+          "feature_courts_public_enabled, feature_lobbies_state, feature_league_state, feature_events_state, feature_rewards_state, feature_matching_state, feature_p2g_state, feature_marketplace_state, feature_friends_state, feature_credits_payment_enabled, credits_payment_max_percent, credits_per_euro"
+        )
         .eq("id", "global")
         .single();
 
       if (error) throw error;
 
       const d = data as any;
-      setFeatureStates({
-        feature_app_launched: d?.feature_app_launched ?? false,
-        feature_courts_public_enabled: d?.feature_courts_public_enabled ?? false,
-        feature_lobbies_enabled: d?.feature_lobbies_enabled ?? false,
-        feature_league_enabled: d?.feature_league_enabled ?? false,
-        feature_events_enabled: d?.feature_events_enabled ?? false,
-        feature_p2g_enabled: d?.feature_p2g_enabled ?? false,
-        feature_marketplace_enabled: d?.feature_marketplace_enabled ?? false,
+      setCourtsPublicEnabled(d?.feature_courts_public_enabled ?? false);
+      setFeatureVisibility({
+        lobbies: d?.feature_lobbies_state ?? "hidden",
+        league: d?.feature_league_state ?? "hidden",
+        events: d?.feature_events_state ?? "hidden",
+        rewards: d?.feature_rewards_state ?? "hidden",
+        matching: d?.feature_matching_state ?? "hidden",
+        p2g: d?.feature_p2g_state ?? "hidden",
+        marketplace: d?.feature_marketplace_state ?? "hidden",
+        friends: d?.feature_friends_state ?? "hidden",
       });
       setCreditsPaymentEnabled(d?.feature_credits_payment_enabled ?? false);
       setCreditsMaxPercent(d?.credits_payment_max_percent ?? 50);
@@ -106,18 +154,16 @@ export default function AdminFeatures() {
     }
   };
 
-  const toggleFeature = async (key: string, enabled: boolean) => {
-    setSavingKey(key);
+  const toggleCourtsPublic = async (enabled: boolean) => {
+    setSavingKey("feature_courts_public_enabled");
     try {
       const { data: userData } = await supabase.auth.getUser();
-      
-      const timestampKey = key.replace("_enabled", "_updated_at");
-      
+
       const { error } = await supabase
         .from("site_settings")
         .update({
-          [key]: enabled,
-          [timestampKey]: new Date().toISOString(),
+          feature_courts_public_enabled: enabled,
+          feature_courts_public_updated_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           updated_by: userData.user?.id,
         })
@@ -125,20 +171,51 @@ export default function AdminFeatures() {
 
       if (error) throw error;
 
-      setFeatureStates(prev => ({ ...prev, [key]: enabled }));
-
-      if (key === "feature_courts_public_enabled") {
-        queryClient.invalidateQueries({ queryKey: ["site-settings", "feature_courts_public_enabled"] });
-        queryClient.invalidateQueries({ queryKey: ["dashboard-locations"] });
-      }
+      setCourtsPublicEnabled(enabled);
+      queryClient.invalidateQueries({ queryKey: ["site-settings", "feature_courts_public_enabled"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-locations"] });
 
       toast.success(
-        enabled 
-          ? "Feature aktiviert – jetzt für alle User sichtbar" 
+        enabled
+          ? "Feature aktiviert – jetzt für alle User sichtbar"
           : "Feature deaktiviert – Coming Soon Overlay wird angezeigt"
       );
     } catch (error) {
       console.error("Error toggling feature:", error);
+      toast.error("Fehler beim Aktualisieren des Features");
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
+  const updateFeatureState = async (name: string, state: FeatureState) => {
+    setSavingKey(name);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const column = `feature_${name}_state`;
+
+      const { error } = await supabase
+        .from("site_settings")
+        .update({
+          [column]: state,
+          updated_at: new Date().toISOString(),
+          updated_by: userData.user?.id,
+        })
+        .eq("id", "global");
+
+      if (error) throw error;
+
+      setFeatureVisibility(prev => ({ ...prev, [name]: state }));
+      queryClient.invalidateQueries({ queryKey: ["feature-toggles"] });
+
+      const messages: Record<FeatureState, string> = {
+        visible: "Feature ist jetzt für alle User sichtbar",
+        demo: "Feature ist jetzt im Demo-Modus – nur Admins sehen es",
+        hidden: "Feature ist jetzt ausgeblendet",
+      };
+      toast.success(messages[state]);
+    } catch (error) {
+      console.error("Error updating feature state:", error);
       toast.error("Fehler beim Aktualisieren des Features");
     } finally {
       setSavingKey(null);
@@ -209,56 +286,17 @@ export default function AdminFeatures() {
             Feature-Steuerung
           </h1>
           <p className="text-muted-foreground mt-1">
-            Schalte Features für eingeloggte User frei oder zeige "Coming Soon" an
+            Steuere pro Feature, ob es für alle sichtbar, nur im Admin-Demo-Modus oder komplett ausgeblendet ist
           </p>
         </div>
 
-        {/* ── Master Launch Toggle ─────────────────────────── */}
-        <Card className={`border-2 ${featureStates.feature_app_launched ? "border-green-500/60 bg-green-500/5" : "border-amber-500/60 bg-amber-500/5"}`}>
-          <CardContent className="pt-6">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-xl ${featureStates.feature_app_launched ? "bg-green-500/20" : "bg-amber-500/20"}`}>
-                  <Globe className={`h-7 w-7 ${featureStates.feature_app_launched ? "text-green-500" : "text-amber-500"}`} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-xl font-bold text-foreground">App freischalten</h2>
-                    {featureStates.feature_app_launched ? (
-                      <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Live</Badge>
-                    ) : (
-                      <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30">Vor-Launch</Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground max-w-xl">
-                    {featureStates.feature_app_launched
-                      ? "Die App ist freigeschaltet. Alle eingeloggten User haben Zugriff auf alle Bereiche (soweit die einzelnen Features unten aktiviert sind)."
-                      : "Vor-Launch-Modus aktiv. Eingeloggte User sehen nur Buchung & Account. Alle anderen Seiten sind gesperrt. Admins haben immer vollen Zugriff."}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="text-sm font-medium text-muted-foreground">
-                  {featureStates.feature_app_launched ? "Aktiv" : "Gesperrt"}
-                </span>
-                <Switch
-                  checked={featureStates.feature_app_launched}
-                  onCheckedChange={(checked) => toggleFeature("feature_app_launched", checked)}
-                  disabled={savingKey === "feature_app_launched"}
-                />
-                {savingKey === "feature_app_launched" && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* ── Courts visibility toggle ─────────────────────── */}
-        <Card className={`border-2 ${featureStates.feature_courts_public_enabled ? "border-green-500/60 bg-green-500/5" : "border-blue-500/60 bg-blue-500/5"}`}>
+        <Card className={`border-2 ${courtsPublicEnabled ? "border-green-500/60 bg-green-500/5" : "border-blue-500/60 bg-blue-500/5"}`}>
           <CardContent className="pt-6">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-xl ${featureStates.feature_courts_public_enabled ? "bg-green-500/20" : "bg-blue-500/20"}`}>
-                  {featureStates.feature_courts_public_enabled ? (
+                <div className={`p-3 rounded-xl ${courtsPublicEnabled ? "bg-green-500/20" : "bg-blue-500/20"}`}>
+                  {courtsPublicEnabled ? (
                     <Eye className="h-7 w-7 text-green-500" />
                   ) : (
                     <EyeOff className="h-7 w-7 text-blue-500" />
@@ -267,14 +305,14 @@ export default function AdminFeatures() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h2 className="text-xl font-bold text-foreground">Courts für User sichtbar</h2>
-                    {featureStates.feature_courts_public_enabled ? (
+                    {courtsPublicEnabled ? (
                       <Badge className="bg-green-500/20 text-green-600 border-green-500/30">Sichtbar</Badge>
                     ) : (
                       <Badge className="bg-blue-500/20 text-blue-600 border-blue-500/30">Nur Admins</Badge>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground max-w-xl">
-                    {featureStates.feature_courts_public_enabled
+                    {courtsPublicEnabled
                       ? "Alle Online-Courts sind für eingeloggte User und Besucher sichtbar und buchbar."
                       : "Nur Admins sehen die buchbaren Courts. User und Besucher sehen auf den Buchungsseiten ein „Bald verfügbar“. Ideal um vor Launch alles selbst zu testen."}
                   </p>
@@ -282,11 +320,11 @@ export default function AdminFeatures() {
               </div>
               <div className="flex items-center gap-3 shrink-0">
                 <span className="text-sm font-medium text-muted-foreground">
-                  {featureStates.feature_courts_public_enabled ? "Aktiv" : "Versteckt"}
+                  {courtsPublicEnabled ? "Aktiv" : "Versteckt"}
                 </span>
                 <Switch
-                  checked={featureStates.feature_courts_public_enabled}
-                  onCheckedChange={(checked) => toggleFeature("feature_courts_public_enabled", checked)}
+                  checked={courtsPublicEnabled}
+                  onCheckedChange={toggleCourtsPublic}
                   disabled={savingKey === "feature_courts_public_enabled"}
                 />
                 {savingKey === "feature_courts_public_enabled" && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
@@ -298,29 +336,24 @@ export default function AdminFeatures() {
         <div className="grid gap-6">
           {FEATURES.map((feature) => {
             const Icon = feature.icon;
-            const isEnabled = featureStates[feature.key];
-            const isSaving = savingKey === feature.key;
+            const state = featureVisibility[feature.name] ?? "hidden";
+            const isSaving = savingKey === feature.name;
+            const badge = STATE_BADGE[state];
 
             return (
-              <Card key={feature.key} className="bg-card border-border">
+              <Card key={feature.name} className="bg-card border-border">
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-xl ${isEnabled ? "bg-primary/10" : "bg-muted"}`}>
-                        <Icon className={`h-6 w-6 ${isEnabled ? "text-primary" : "text-muted-foreground"}`} />
+                      <div className={`p-3 rounded-xl ${state === "visible" ? "bg-primary/10" : "bg-muted"}`}>
+                        <Icon className={`h-6 w-6 ${state === "visible" ? "text-primary" : "text-muted-foreground"}`} />
                       </div>
                       <div>
                         <CardTitle className="text-lg text-foreground flex items-center gap-2">
                           {feature.title}
-                          {isEnabled ? (
-                            <Badge variant="default" className="bg-green-500/20 text-green-600 border-green-500/30">
-                              Live
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-muted-foreground">
-                              Coming Soon
-                            </Badge>
-                          )}
+                          <Badge variant="outline" className={badge.className}>
+                            {badge.label}
+                          </Badge>
                         </CardTitle>
                         <CardDescription className="mt-1">
                           {feature.description}
@@ -330,22 +363,28 @@ export default function AdminFeatures() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                    <div className="space-y-1">
-                      <Label className="text-sm text-muted-foreground">
-                        Route: <code className="px-1.5 py-0.5 rounded bg-muted text-foreground text-xs">{feature.route}</code>
-                      </Label>
-                    </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-border/50">
+                    <Label className="text-sm text-muted-foreground">
+                      Route: <code className="px-1.5 py-0.5 rounded bg-muted text-foreground text-xs">{feature.route}</code>
+                    </Label>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-muted-foreground">
-                        {isEnabled ? "Aktiv" : "Gesperrt"}
-                      </span>
-                      <Switch
-                        checked={isEnabled}
-                        onCheckedChange={(checked) => toggleFeature(feature.key, checked)}
+                      <Select
+                        value={state}
+                        onValueChange={(value) => updateFeatureState(feature.name, value as FeatureState)}
                         disabled={isSaving}
-                      />
-                      {isSaving && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+                      >
+                        <SelectTrigger className="w-full sm:w-[200px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {STATE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {isSaving && <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" />}
                     </div>
                   </div>
                 </CardContent>
@@ -435,11 +474,12 @@ export default function AdminFeatures() {
                 <Rocket className="h-4 w-4 text-primary" />
               </div>
               <div className="text-sm text-muted-foreground">
-                <p className="font-medium text-foreground mb-1">Wie funktioniert es?</p>
+                <p className="font-medium text-foreground mb-1">Wie funktionieren die 3 Zustände?</p>
                 <p>
-                  Wenn ein Feature <strong>deaktiviert</strong> ist, sehen eingeloggte User statt des 
-                  Inhalts einen "Coming Soon" Overlay mit einer kurzen Beschreibung. 
-                  Admins können alle Features immer sehen.
+                  <strong>Für alle sichtbar</strong>: Nav-Link und Route sind für jeden eingeloggten User erreichbar.{" "}
+                  <strong>Demo (nur Admin)</strong>: Nav-Link und Route existieren, aber nur Admins können sie sehen –
+                  ideal um ein Feature vor dem Launch selbst zu testen. <strong>Aus</strong>: Nav-Link ist verborgen und
+                  die Route leitet weg, niemand kommt mehr hin (auch Admins nicht).
                 </p>
               </div>
             </div>

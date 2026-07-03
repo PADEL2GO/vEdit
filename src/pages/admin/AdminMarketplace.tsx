@@ -130,7 +130,7 @@ const AdminMarketplace = () => {
   // Form state
   const [formData, setFormData] = useState<Partial<MarketplaceItemInput>>({
     name: "",
-    category: "courtbooking",
+    category: "equipment",
     credit_cost: 0,
     price_cents: 0,
     description: "",
@@ -138,13 +138,12 @@ const AdminMarketplace = () => {
     partner_name: "",
     stock_quantity: null,
     sort_order: 0,
-    product_type: "rental",
   });
 
   const resetForm = () => {
     setFormData({
       name: "",
-      category: "courtbooking",
+      category: "equipment",
       credit_cost: 0,
       price_cents: 0,
       description: "",
@@ -152,7 +151,6 @@ const AdminMarketplace = () => {
       partner_name: "",
       stock_quantity: null,
       sort_order: 0,
-      product_type: "rental",
     });
     setEditingItem(null);
   };
@@ -174,7 +172,6 @@ const AdminMarketplace = () => {
       partner_name: item.partner_name || "",
       stock_quantity: item.stock_quantity,
       sort_order: item.sort_order,
-      product_type: item.product_type || "rental",
     });
     setDialogOpen(true);
   };
@@ -200,7 +197,7 @@ const AdminMarketplace = () => {
       partner_name: formData.partner_name || undefined,
       stock_quantity: formData.stock_quantity,
       sort_order: formData.sort_order || 0,
-      product_type: formData.product_type as ProductType,
+      product_type: "purchase",
     };
 
     if (editingItem) {
@@ -605,27 +602,6 @@ const AdminMarketplace = () => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            {/* Product Type */}
-            <div className="space-y-2">
-              <Label>Produktart *</Label>
-              <Select
-                value={formData.product_type}
-                onValueChange={(v) => setFormData({ ...formData, product_type: v as ProductType })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(PRODUCT_TYPE_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Verleih: User erhält Code für Automaten. Kauf: Versand erforderlich.
-              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
