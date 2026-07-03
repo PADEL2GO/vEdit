@@ -1,26 +1,43 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
-export interface FeatureToggles {
-  app_launched: boolean;
-  lobbies_enabled: boolean;
-  league_enabled: boolean;
-  events_enabled: boolean;
-  p2g_enabled: boolean;
-  marketplace_enabled: boolean;
-  isLoading: boolean;
-}
+export type FeatureName =
+  | "lobbies"
+  | "league"
+  | "events"
+  | "rewards"
+  | "matching"
+  | "p2g"
+  | "marketplace"
+  | "friends";
 
-// Shared React Query cache: the 7 consumers (RequireAppLaunched, Footer,
-// DashboardNavigation, dashboard pages) now share a single cached fetch of the
-// rarely-changing feature flags instead of each firing its own DB round trip.
+export type FeatureState = "visible" | "demo" | "hidden";
+
+const FEATURE_NAMES: FeatureName[] = [
+  "lobbies",
+  "league",
+  "events",
+  "rewards",
+  "matching",
+  "p2g",
+  "marketplace",
+  "friends",
+];
+
+// 3-state feature model: each feature_<name>_state column is "visible" (everyone),
+// "demo" (admins only) or "hidden" (nobody). canSee folds in admin identity.
 export const useFeatureToggles = () => {
+  const { isAdmin } = useAdminAuth();
+
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["feature-toggles"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("site_settings")
-        .select("feature_app_launched, feature_lobbies_enabled, feature_league_enabled, feature_events_enabled, feature_p2g_enabled, feature_marketplace_enabled")
+        .select(
+          "feature_lobbies_state, feature_league_state, feature_events_state, feature_rewards_state, feature_matching_state, feature_p2g_state, feature_marketplace_state, feature_friends_state"
+        )
         .eq("id", "global")
         .maybeSingle();
       if (error) throw error;
@@ -29,13 +46,30 @@ export const useFeatureToggles = () => {
     staleTime: 5 * 60 * 1000, // feature flags rarely change
   });
 
+  const row = data as any;
+
+  const states = FEATURE_NAMES.reduce((acc, name) => {
+    const value = row?.[`feature_${name}_state`];
+    acc[name] = value === "visible" || value === "demo" ? value : "hidden";
+    return acc;
+  }, {} as Record<FeatureName, FeatureState>);
+
+  const canSee = (feature: FeatureName): boolean => {
+    const state = states[feature];
+    return state === "visible" || (state === "demo" && isAdmin);
+  };
+
   return {
-    app_launched: data?.feature_app_launched ?? false,
-    lobbies_enabled: data?.feature_lobbies_enabled ?? false,
-    league_enabled: data?.feature_league_enabled ?? false,
-    events_enabled: data?.feature_events_enabled ?? false,
-    p2g_enabled: data?.feature_p2g_enabled ?? false,
-    marketplace_enabled: (data as any)?.feature_marketplace_enabled ?? false,
+    states,
+    canSee,
+    lobbies_enabled: canSee("lobbies"),
+    league_enabled: canSee("league"),
+    events_enabled: canSee("events"),
+    rewards_enabled: canSee("rewards"),
+    matching_enabled: canSee("matching"),
+    p2g_enabled: canSee("p2g"),
+    marketplace_enabled: canSee("marketplace"),
+    friends_enabled: canSee("friends"),
     isLoading,
     refetch,
   };
