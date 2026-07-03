@@ -44,7 +44,7 @@ const DashboardMarketplace = () => {
   const { creditBreakdown, isCreditBreakdownLoading } = useP2GPoints();
   const { centsPerPoint, maxPercent, enabled: pointsEnabled } = usePointsValue();
   const [sortBy, setSortBy] = useState<SortOption>("default");
-  const { data: items, isLoading: itemsLoading } = useMarketplaceItems();
+  const { data: items, isLoading: itemsLoading } = useMarketplaceItems("equipment");
   const { data: redemptions } = useUserRedemptions();
   const checkoutMutation = useMarketplaceCheckout();
 
