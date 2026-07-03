@@ -163,6 +163,7 @@ export default function AdminFeatures() {
         .from("site_settings")
         .update({
           feature_courts_public_enabled: enabled,
+          feature_courts_public_updated_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           updated_by: userData.user?.id,
         })
