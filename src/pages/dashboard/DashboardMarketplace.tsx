@@ -3,18 +3,17 @@ import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccountData } from "@/hooks/useAccountData";
-import { useMarketplaceItems, MarketplaceItem, MarketplaceCategory } from "@/hooks/useMarketplaceItems";
+import { useMarketplaceItems, MarketplaceItem } from "@/hooks/useMarketplaceItems";
 import { useMarketplaceCheckout, ShippingAddress } from "@/hooks/useMarketplaceCheckout";
 import { useUserRedemptions } from "@/hooks/useUserRedemptions";
 import { useP2GPoints } from "@/hooks/useP2GPoints";
 import { usePointsValue } from "@/hooks/usePointsValue";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { ShippingAddressForm } from "@/components/marketplace/ShippingAddressForm";
-import { MarketplaceCreditsHeader, ReferralShareCard } from "@/components/p2g";
+import { MarketplaceCreditsHeader } from "@/components/p2g";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -30,16 +29,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ShoppingBag, Gift, Loader2, Calendar, Sparkles, Ticket, Truck, Coins } from "lucide-react";
+import { ShoppingBag, Gift, Loader2, Sparkles, Truck, Coins } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { de, enUS } from "date-fns/locale";
-
-const CATEGORIES: { key: MarketplaceCategory; icon: typeof Calendar }[] = [
-  { key: "courtbooking", icon: Calendar },
-  { key: "equipment", icon: ShoppingBag },
-  { key: "other", icon: Sparkles },
-  { key: "events", icon: Ticket },
-];
 
 type SortOption = "default" | "price-asc" | "price-desc";
 
@@ -51,9 +43,8 @@ const DashboardMarketplace = () => {
   const { wallet, profile, loading: walletLoading } = useAccountData(user);
   const { creditBreakdown, isCreditBreakdownLoading } = useP2GPoints();
   const { centsPerPoint, maxPercent, enabled: pointsEnabled } = usePointsValue();
-  const [activeCategory, setActiveCategory] = useState<MarketplaceCategory>("courtbooking");
   const [sortBy, setSortBy] = useState<SortOption>("default");
-  const { data: items, isLoading: itemsLoading } = useMarketplaceItems(activeCategory);
+  const { data: items, isLoading: itemsLoading } = useMarketplaceItems();
   const { data: redemptions } = useUserRedemptions();
   const checkoutMutation = useMarketplaceCheckout();
 
@@ -129,8 +120,6 @@ const DashboardMarketplace = () => {
     return 0;
   });
 
-  const activeCategoryData = CATEGORIES.find(c => c.key === activeCategory);
-
   // Selected-item points maths (mirrors useBookingCheckout / marketplace-checkout server side).
   const selectedPriceCents = selectedItem?.price_cents ?? 0;
   const selectedMaxPoints = pointsEnabled
@@ -168,22 +157,8 @@ const DashboardMarketplace = () => {
           </p>
         </div>
 
-        {/* Referral Section */}
-        <ReferralShareCard />
-
-        {/* Category Tabs and Sort */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as MarketplaceCategory)} className="w-full sm:w-auto">
-            <TabsList className="grid w-full grid-cols-4 sm:w-auto sm:inline-flex">
-              {CATEGORIES.map(({ key, icon: Icon }) => (
-                <TabsTrigger key={key} value={key} className="flex items-center gap-2">
-                  <Icon className="w-4 h-4 hidden sm:block" />
-                  <span className="text-xs sm:text-sm">{t(`marketplacePage.categories.${key}`)}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-
+        {/* Sort */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
           <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder={t("marketplacePage.sort.placeholder")} />
@@ -205,8 +180,8 @@ const DashboardMarketplace = () => {
             <Card className="bg-card/50 backdrop-blur-sm border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  {activeCategoryData && <activeCategoryData.icon className="w-5 h-5 text-primary" />}
-                  {t(`marketplacePage.categories.${activeCategory}`)}
+                  <ShoppingBag className="w-5 h-5 text-primary" />
+                  {t("marketplacePage.categories.equipment")}
                   <Badge variant="secondary" className="ml-2">{t("marketplacePage.productsCount", { count: sortedItems.length })}</Badge>
                 </CardTitle>
               </CardHeader>
