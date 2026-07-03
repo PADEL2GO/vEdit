@@ -48,7 +48,6 @@ CREATE INDEX IF NOT EXISTS idx_marketplace_redemptions_pending_hold
 -- marketplace_decrement_stock: reserve units with an ATOMIC guarded decrement. The
 -- row is locked FOR UPDATE so concurrent buyers serialize; a stale absolute write can
 -- no longer clobber a sibling decrement (the oversell bug). NULL stock = unlimited.
-DROP FUNCTION IF EXISTS public.marketplace_decrement_stock(uuid, integer);
 CREATE OR REPLACE FUNCTION public.marketplace_decrement_stock(p_item_id uuid, p_quantity integer, p_order_id uuid)
 RETURNS boolean
 LANGUAGE plpgsql
@@ -137,7 +136,6 @@ GRANT EXECUTE ON FUNCTION public.marketplace_restore_stock(uuid, integer) TO ser
 -- split reserve took is written onto the row (release/settle read those columns) and
 -- returned so the caller can correct the discount if a concurrent spend left the wallet
 -- short (reserve then takes 0).
-DROP FUNCTION IF EXISTS public.insert_marketplace_order(jsonb);
 CREATE OR REPLACE FUNCTION public.insert_marketplace_order(p_order jsonb, p_reserve integer DEFAULT 0)
 RETURNS TABLE (order_id uuid, play_reserved integer, reward_reserved integer)
 LANGUAGE plpgsql
