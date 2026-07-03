@@ -86,3 +86,6 @@ verify_jwt = false
 
 [functions.marketplace-checkout]
 verify_jwt = false
+
+[functions.cancel-booking]
+verify_jwt = false
