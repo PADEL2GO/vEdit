@@ -225,8 +225,11 @@
     "reservedRemaining": "Reserviert — {{time}} verbleibend",
     "payNow": "Jetzt bezahlen",
     "cancelSuccessTitle": "Buchung storniert",
-    "cancelSuccessDesc": "Deine Buchung wurde erfolgreich storniert.",
-    "cancelErrorDesc": "Die Buchung konnte nicht storniert werden."
+    "cancelSuccessDesc": "Rückerstattung veranlasst.",
+    "cancelErrorDesc": "Die Buchung konnte nicht storniert werden.",
+    "cancelConfirmTitle": "Buchung wirklich stornieren?",
+    "cancelConfirmDesc": "Der Betrag wird zurückerstattet.",
+    "cancelConfirmAbort": "Abbrechen"
   },
   "locationCard": {
     "fromPrice": "ab {{price}}€",

@@ -14,9 +14,20 @@ import {
   Timer
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import { useCancelBooking } from "@/hooks/useCancelBooking";
 import { format, isPast } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
@@ -77,7 +88,7 @@ export const MyBookings = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(true);
-  const [cancelling, setCancelling] = useState<string | null>(null);
+  const cancelBooking = useCancelBooking();
 
   useEffect(() => {
     if (user) {
@@ -126,34 +137,6 @@ export const MyBookings = () => {
     }
   };
 
-  const handleCancel = async (bookingId: string) => {
-    setCancelling(bookingId);
-    try {
-      const { error } = await supabase
-        .from("bookings")
-        .update({ 
-          status: "cancelled",
-          cancelled_at: new Date().toISOString()
-        })
-        .eq("id", bookingId);
-
-      if (error) throw error;
-
-      toast.success(t("myBookings.cancelSuccessTitle"), {
-        description: t("myBookings.cancelSuccessDesc"),
-      });
-
-      fetchBookings();
-    } catch (error: any) {
-      console.error("Error cancelling booking:", error);
-      toast.error(t("common.errorTitle"), {
-        description: t("myBookings.cancelErrorDesc"),
-      });
-    } finally {
-      setCancelling(null);
-    }
-  };
-
   // Only show pending_payment if hold hasn't expired yet
   const pendingPaymentBookings = bookings.filter(
     b => b.status === "pending_payment" 
@@ -164,20 +147,23 @@ export const MyBookings = () => {
     b => b.status === "confirmed" && !isPast(new Date(b.start_time))
   );
   const pastBookings = bookings.filter(b => {
+    // Cancelled bookings are hidden entirely.
+    if (b.status === "cancelled") return false;
+
     // Completed confirmed bookings: always show
     if (b.status === "confirmed" && isPast(new Date(b.start_time))) {
       return true;
     }
-    
-    // Cancelled/expired: only show if < 30 min since cancellation/creation
-    if (b.status === "cancelled" || b.status === "expired") {
-      const relevantTime = b.cancelled_at 
-        ? new Date(b.cancelled_at) 
+
+    // Expired: only show if < 30 min since creation
+    if (b.status === "expired") {
+      const relevantTime = b.cancelled_at
+        ? new Date(b.cancelled_at)
         : new Date(b.created_at);
       const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
       return relevantTime > thirtyMinutesAgo;
     }
-    
+
     return false;
   });
 
@@ -296,20 +282,40 @@ export const MyBookings = () => {
                                 }}
                                 variant="lime"
                               />
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                onClick={() => handleCancel(booking.id)}
-                                disabled={cancelling === booking.id}
-                              >
-                                {cancelling === booking.id ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <X className="w-4 h-4" />
-                                )}
-                                <span className="ml-1 hidden sm:inline">{t("myBookings.cancel")}</span>
-                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    disabled={cancelBooking.isPending}
+                                  >
+                                    {cancelBooking.isPending && cancelBooking.variables === booking.id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <X className="w-4 h-4" />
+                                    )}
+                                    <span className="ml-1 hidden sm:inline">{t("myBookings.cancel")}</span>
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>{t("myBookings.cancelConfirmTitle")}</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      {t("myBookings.cancelConfirmDesc")}
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>{t("myBookings.cancelConfirmAbort")}</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => cancelBooking.mutate(booking.id, { onSuccess: () => fetchBookings() })}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      {t("myBookings.cancel")}
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </div>
                           </div>
                         </motion.div>

@@ -8,8 +8,20 @@ import DashboardMetricCard from "@/components/dashboard/DashboardMetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { LocationCard } from "@/components/booking/LocationCard";
 import { LobbyActionButton } from "@/components/lobby";
+import { useCancelBooking } from "@/hooks/useCancelBooking";
 import {
   Calendar,
   Clock,
@@ -242,8 +254,8 @@ const DashboardBooking = () => {
     return true;
   }) || [];
   
-  const pastBookings = bookings?.filter(b => 
-    isPast(parseISO(b.start_time)) || b.status === "cancelled"
+  const pastBookings = bookings?.filter(b =>
+    b.status !== "cancelled" && isPast(parseISO(b.start_time))
   ).reverse() || [];
 
   // Group past bookings by month
@@ -559,6 +571,7 @@ const UpcomingBookingCard = ({ booking, getStatusBadge }: { booking: any; getSta
   const dateLocale = i18n.language === "en" ? enUS : de;
   const isPending = booking.status === "pending_payment";
   const { countdownTimeLeft, isExpired } = useCountdown(isPending ? booking.hold_expires_at : null);
+  const cancelBooking = useCancelBooking();
 
   if (isPending && isExpired) return null;
 
@@ -628,6 +641,40 @@ const UpcomingBookingCard = ({ booking, getStatusBadge }: { booking: any; getSta
             }}
             variant="outline"
           />
+        )}
+        {!isPending && booking.status === "confirmed" && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                disabled={cancelBooking.isPending}
+              >
+                {cancelBooking.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                ) : (
+                  <X className="w-4 h-4 mr-1" />
+                )}
+                {t("booking.cancel.button")}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("booking.cancel.confirmTitle")}</AlertDialogTitle>
+                <AlertDialogDescription>{t("booking.cancel.confirmDesc")}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("booking.cancel.confirmAbort")}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => cancelBooking.mutate(booking.id)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {t("booking.cancel.confirmAction")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
         {(booking as any).play_credits_awarded > 0 ? (
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
