@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Calendar, ArrowRight, Loader2, Coins, Gift, UserPlus, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import { LobbyActionButton, type BookingForLobby } from "@/components/lobby";
 
 interface EarnedReward {
@@ -25,6 +26,7 @@ const BookingSuccess = () => {
   const [totalEarned, setTotalEarned] = useState(0);
   const [recentBooking, setRecentBooking] = useState<BookingForLobby | null>(null);
   const { user } = useAuth();
+  const { canSee } = useFeatureToggles();
   const sessionId = searchParams.get("session_id");
   const isGuest = searchParams.get("guest") === "1" || !user;
 
@@ -181,8 +183,8 @@ const BookingSuccess = () => {
                     </motion.div>
                   )}
 
-                  {/* Lobby CTA — turn this booking into a lobby */}
-                  {!isGuest && recentBooking && (
+                  {/* Lobby CTA — turn this booking into a lobby (hidden while lobbies feature isn't visible to this user) */}
+                  {!isGuest && recentBooking && canSee("lobbies") && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
