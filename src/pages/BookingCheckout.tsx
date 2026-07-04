@@ -36,7 +36,6 @@ const BookingCheckout = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("booking");
   const dateLocale = i18n.language === "en" ? enUS : de;
-  const numberLocale = i18n.language === "en" ? "en" : "de";
   const {
     booking,
     state,
@@ -48,12 +47,6 @@ const BookingCheckout = () => {
     setVoucherCode,
     validateVoucher,
     clearVoucher,
-    pointsToUse,
-    setPointsToUse,
-    availablePoints,
-    maxPointsForBooking,
-    centsPerPoint,
-    maxPointsPercent,
     isGuest,
     handlePayment,
     formatTimeLeft,
@@ -104,13 +97,11 @@ const BookingCheckout = () => {
   const priceAfterVoucher = isVoucherApplied
     ? applyVoucherDiscount(booking.price_cents, voucher.discountType, voucher.discountValue)
     : booking.price_cents;
-  const pointsDiscountCents = Math.min(
-    Math.floor(pointsToUse * centsPerPoint),
-    Math.floor(priceAfterVoucher * maxPointsPercent / 100),
-  );
-  const effectivePrice = Math.max(0, priceAfterVoucher - pointsDiscountCents);
+  // Court bookings are money-only — P2G points cannot discount a booking. The price
+  // is the (optionally voucher-reduced) court price; only a genuinely 0-price booking
+  // or a fully-free voucher is free.
+  const effectivePrice = priceAfterVoucher;
   const isFullyFree = effectivePrice === 0;
-  const availablePointsWorthEuro = (availablePoints * centsPerPoint / 100).toFixed(2);
 
   return (
     <>
@@ -268,49 +259,6 @@ const BookingCheckout = () => {
                   </CollapsibleContent>
                 </Collapsible>
 
-                {/* ── P2G Credits Discount — only for authenticated users ── */}
-                {!isGuest && maxPointsForBooking > 0 && (
-                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Coins className="w-4 h-4 text-primary" />
-                        <span className="font-semibold text-sm">{t("checkout.credits.title")}</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {t("checkout.credits.available", {
-                          count: availablePoints.toLocaleString(numberLocale),
-                          amount: availablePointsWorthEuro,
-                        })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="range"
-                        min={0}
-                        max={maxPointsForBooking}
-                        step={10}
-                        value={pointsToUse}
-                        onChange={e => setPointsToUse(Number(e.target.value))}
-                        className="flex-1 accent-primary"
-                      />
-                      <span className="text-sm font-bold text-primary w-20 text-right">
-                        {pointsToUse > 0
-                          ? `−${(pointsDiscountCents / 100).toFixed(2)} €`
-                          : t("checkout.credits.noneSelected")}
-                      </span>
-                    </div>
-                    {pointsToUse > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        {t("checkout.credits.discountTemplate", {
-                          credits: pointsToUse.toLocaleString(numberLocale),
-                          amount: (pointsDiscountCents / 100).toFixed(2),
-                          maxPercent: maxPointsPercent,
-                        })}
-                      </p>
-                    )}
-                  </div>
-                )}
-
                 {/* Guest: upsell to create account for points */}
                 {isGuest && (
                   <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 flex items-start gap-3">
@@ -415,12 +363,7 @@ const BookingCheckout = () => {
                   ) : (
                     <>
                       <CreditCard className="w-4 h-4 mr-2" />
-                      {pointsToUse > 0
-                        ? t("checkout.pay.creditsTemplate", {
-                            credits: pointsToUse.toLocaleString(numberLocale),
-                            amount: formatPrice(effectivePrice, booking.currency),
-                          })
-                        : isVoucherApplied
+                      {isVoucherApplied
                         ? t("checkout.pay.voucherTemplate", {
                             discount: voucher.discountLabel,
                             amount: formatPrice(effectivePrice, booking.currency),
