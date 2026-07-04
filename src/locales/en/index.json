@@ -89,6 +89,28 @@
       }
     ]
   },
+  "network": {
+    "badge": "For players",
+    "titlePart1": "One network.",
+    "titlePart2": "All the perks.",
+    "subtitle": "Book, play, collect — become part of something bigger.",
+    "courtsEyebrow": "Across Germany",
+    "courtsBadge": "Powered by SkyPadel",
+    "courtsTitle": "The best courts. Always near you.",
+    "courtsDescription": "SkyPadel quality — spread across Germany.",
+    "paybackPoints": "+250",
+    "paybackPointsLabel": "P2G POINTS",
+    "paybackTitle": "Payback on every booking.",
+    "paybackDescription": "Collecting points runs automatically. Just play.",
+    "marketTitle": "Top equipment in the Marketplace.",
+    "marketTagMoney": "With money",
+    "marketTagPoints": "With P2G Points",
+    "marketDescription": "Rackets, balls, merch — pay however you like.",
+    "eventsBadge": "P2G Network",
+    "eventsTitle": "Events & drops you'll only find here.",
+    "eventsDescription": "Every court is community.",
+    "eventsCta": "Become part of something bigger"
+  },
   "audience": {
     "badge": "Something for everyone",
     "titlePart1": "Who is",

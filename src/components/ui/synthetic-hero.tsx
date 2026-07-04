@@ -3,7 +3,6 @@ import { useMemo, useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { Badge } from "@/components/ui/badge";
 import p2gIconLogo from "@/assets/p2g-icon-logo.png";
 
 // Extend THREE.ShaderMaterial for r3f
@@ -140,12 +139,17 @@ const animateLines = (element: HTMLElement) => {
 
   words.forEach((word, wordIndex) => {
     const span = document.createElement("span");
-    span.textContent = word + (wordIndex < words.length - 1 ? " " : "");
+    span.textContent = word;
     span.style.display = "inline-block";
     span.style.opacity = "0";
     span.style.transform = "translateY(20px)";
     span.style.filter = "blur(8px)";
+    // Headline emphasis (matches design): "Level." lime, "Spiel." italic
+    if (word === "Level.") span.style.color = "hsl(71 91% 51%)";
+    if (word === "Spiel.") span.style.fontStyle = "italic";
     element.appendChild(span);
+    // Real space between the inline-block word spans (renders + allows wrapping)
+    if (wordIndex < words.length - 1) element.appendChild(document.createTextNode(" "));
   });
 
   const spans = element.querySelectorAll("span");
@@ -300,15 +304,16 @@ const SyntheticHero = ({
           )}
 
           {/* Badge */}
-          <div ref={badgeWrapperRef} className="flex items-center gap-3">
-            <Badge
-              variant="outline"
-              className="px-3 py-1.5 text-xs font-semibold bg-primary/10 border-primary/20 text-primary backdrop-blur-sm"
-            >
+          <div ref={badgeWrapperRef} className="flex flex-wrap items-center justify-center gap-3">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary backdrop-blur-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              </span>
               {badgeLabel}
-            </Badge>
+            </span>
             <span className="h-4 w-px bg-border" />
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground font-stat tracking-wide">
               {badgeText}
             </span>
           </div>
@@ -340,12 +345,12 @@ const SyntheticHero = ({
               ].map((item, index) => (
                 <div
                   key={item.label}
-                  className="flex flex-col items-center p-2 sm:p-3 md:p-4 rounded-xl bg-card/50 backdrop-blur-sm border border-primary/20 min-w-[56px] sm:min-w-[64px] md:min-w-[80px]"
+                  className="flex flex-col items-center gap-1 p-3 md:p-4 rounded-2xl bg-white/[0.04] backdrop-blur-sm border border-primary/30 min-w-[56px] sm:min-w-[64px] md:min-w-[80px]"
                 >
-                  <span className="text-xl md:text-3xl font-bold text-primary tabular-nums">
+                  <span className="font-stat text-2xl md:text-3xl font-bold text-primary">
                     {String(item.value).padStart(2, "0")}
                   </span>
-                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider mt-1">
+                  <span className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-[0.14em]">
                     {item.label}
                   </span>
                 </div>

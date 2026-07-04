@@ -1,6 +1,11 @@
 {
   "points": "points",
   "latestNews": "Latest news",
+  "newsBadge": "News",
+  "newsHeadingPre": "Latest from the",
+  "newsHeadingAccent": "P2G world",
+  "newsReadMore": "Read more",
+  "newsToSource": "To source",
   "comingSoon": "See you soon",
   "languageSwitch": {
     "label": "Language",

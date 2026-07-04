@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, CalendarClock, ExternalLink, ChevronDown } from "lucide-react";
+import { MapPin, CalendarClock, ChevronDown, ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLocationTeasers } from "@/hooks/useLocationTeasers";
 import { localized } from "@/lib/localized";
@@ -19,22 +19,20 @@ export function LocationTeasersSection() {
 
   return (
     <>
-      <section className="py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background" />
+      <section id="standorte" className="py-16 md:py-24 relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           {/* Header */}
           <motion.div
-            className="text-center mb-12 md:mb-16"
+            className="flex flex-col items-center gap-4 text-center mb-12 md:mb-16"
             initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
             whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              <MapPin className="w-4 h-4" />
+            <span className="font-stat text-xs uppercase tracking-[0.2em] text-primary">
               {t("locationTeasers.eyebrow")}
             </span>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4" style={{ lineHeight: 1.1 }}>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground" style={{ lineHeight: 1.1 }}>
               {t("locationTeasers.titlePart1")}<span className="text-primary">2</span>{t("locationTeasers.titlePart2")}
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto" style={{ textWrap: "pretty" }}>
@@ -43,7 +41,7 @@ export function LocationTeasersSection() {
           </motion.div>
 
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {teasers.map((teaser, i) => {
               const isExpanded = expandedId === teaser.id;
               const title = localized(teaser, "title", i18n.language);
@@ -52,7 +50,7 @@ export function LocationTeasersSection() {
               return (
                 <motion.div
                   key={teaser.id}
-                  className="group relative rounded-2xl overflow-hidden bg-card border border-border shadow-md hover:shadow-xl transition-shadow duration-300"
+                  className="group relative flex flex-col rounded-2xl overflow-hidden bg-gradient-card border border-border/60 hover:border-primary/30 transition-colors duration-300"
                   initial={{ opacity: 0, y: 24, filter: "blur(4px)" }}
                   whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   viewport={{ once: true, amount: 0.2 }}
@@ -63,7 +61,7 @@ export function LocationTeasersSection() {
                   }}
                 >
                   {/* Image */}
-                  <div className="aspect-[16/10] overflow-hidden bg-muted">
+                  <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                     {teaser.image_url ? (
                       <img
                         src={teaser.image_url}
@@ -76,23 +74,30 @@ export function LocationTeasersSection() {
                         <MapPin className="w-12 h-12 text-muted-foreground/30" />
                       </div>
                     )}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/70" />
+                    {teaser.expected_date && (
+                      <span className="absolute top-3.5 left-3.5 inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-background/70 backdrop-blur-sm border border-primary/35 rounded-full px-3 py-1.5">
+                        <CalendarClock className="w-3.5 h-3.5" />
+                        {localized(teaser, "expected_date", i18n.language)}
+                      </span>
+                    )}
                   </div>
 
                   {/* Content */}
-                  <div className="p-5">
+                  <div className="flex flex-col gap-2.5 p-5 md:p-6">
                     {teaser.city && (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary mb-2">
-                        <MapPin className="w-3.5 h-3.5" />
-                        {localized(teaser, "city", i18n.language)}
+                      <span className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                        <MapPin className="w-3.5 h-3.5 text-primary" />
+                        <span className="font-stat">{localized(teaser, "city", i18n.language)}</span>
                       </span>
                     )}
-                    <h3 className="text-lg font-semibold text-foreground mb-1.5" style={{ lineHeight: 1.2 }}>
+                    <h3 className="text-xl font-bold text-foreground font-display" style={{ lineHeight: 1.2 }}>
                       {title}
                     </h3>
 
                     {/* Expandable description */}
                     {teaser.description && (
-                      <div className="mb-3">
+                      <div>
                         <AnimatePresence initial={false}>
                           {isExpanded ? (
                             <motion.p
@@ -124,26 +129,18 @@ export function LocationTeasersSection() {
                       </div>
                     )}
 
-                    {/* Date & Club Link */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      {teaser.expected_date && (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/15 text-primary px-2.5 py-1 rounded-full">
-                          <CalendarClock className="w-3.5 h-3.5" />
-                          {localized(teaser, "expected_date", i18n.language)}
-                        </span>
-                      )}
-                      {teaser.club_url && (
-                        <a
-                          href={teaser.club_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs font-medium bg-secondary text-foreground px-2.5 py-1 rounded-full hover:bg-secondary/80 transition-colors"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                          {t("locationTeasers.toClub")}
-                        </a>
-                      )}
-                    </div>
+                    {/* Club Link */}
+                    {teaser.club_url && (
+                      <a
+                        href={teaser.club_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group/link mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-primary"
+                      >
+                        {t("locationTeasers.toClub")}
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover/link:translate-x-1" />
+                      </a>
+                    )}
                   </div>
                 </motion.div>
               );
