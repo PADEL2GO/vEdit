@@ -48,9 +48,6 @@ import { toast } from "sonner";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { NavLink } from "react-router-dom";
 import { formatPrice } from "@/lib/pricing";
-import { useWeeklyBookingStreak } from "@/hooks/useWeeklyBookingStreak";
-import { getStreakLabel, getStreakColor, calculateBookingPoints } from "@/lib/bookingCredits";
-import { Flame, Coins, Zap } from "lucide-react";
 
 const useCountdown = (targetDate: string | null) => {
   const [countdownTimeLeft, setCountdownTimeLeft] = useState("");
@@ -100,8 +97,6 @@ const DashboardBooking = () => {
   const dateLocale = i18n.language === "en" ? enUS : de;
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { data: streakData } = useWeeklyBookingStreak(user?.id);
-  const weekStreak = streakData?.weekStreak ?? 0;
   const { canSeeCourts, publicEnabled, isAdmin, loading: visibilityLoading } = useCourtsVisibility();
   const [locations, setLocations] = useState<LocationWithAvailability[]>([]);
   const [locationsLoading, setLocationsLoading] = useState(true);
@@ -311,35 +306,6 @@ const DashboardBooking = () => {
             <p className="text-muted-foreground mb-4 max-w-lg">
               {t("booking.hero.subtitle")}
             </p>
-
-            {/* Streak + Points Banner */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border ${
-                weekStreak >= 4 ? "bg-orange-500/10 border-orange-500/30 text-orange-400" :
-                weekStreak >= 2 ? "bg-amber-500/10 border-amber-500/30 text-amber-400" :
-                "bg-primary/10 border-primary/20 text-primary"
-              }`}>
-                <Flame className="w-4 h-4" />
-                {weekStreak === 0
-                  ? t("booking.streakBanner.start")
-                  : t("booking.streakBanner.weeksInRow", { count: weekStreak, unit: weekStreak === 1 ? t("booking.streakBanner.weekUnitSingular") : t("booking.streakBanner.weekUnitPlural") })}
-                {weekStreak >= 2 && (
-                  <span className="ml-1 font-bold">{getStreakLabel(weekStreak)} {t("booking.streakBanner.multiplier")}</span>
-                )}
-              </div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-primary/10 border border-primary/20 text-primary">
-                <Coins className="w-4 h-4" />
-                {weekStreak >= 2
-                  ? t("booking.streakBanner.pointsPerHour", { points: Math.round(100 * (streakData?.multiplier ?? 1)) })
-                  : t("booking.streakBanner.pointsPerHourDefault")}
-              </div>
-              {streakData?.multiplierWillIncrease && (
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-green-500/10 border border-green-500/20 text-green-400">
-                  <Zap className="w-4 h-4" />
-                  {t("booking.streakBanner.nextWeek", { label: getStreakLabel(weekStreak + 1) })}
-                </div>
-              )}
-            </div>
 
             {nextBooking && (
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm mb-4">
@@ -676,17 +642,6 @@ const UpcomingBookingCard = ({ booking, getStatusBadge }: { booking: any; getSta
             </AlertDialogContent>
           </AlertDialog>
         )}
-        {(booking as any).play_credits_awarded > 0 ? (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-            <Coins className="w-3 h-3" />
-            {t("booking.card.pointsEarned", { points: (booking as any).play_credits_awarded })}
-          </span>
-        ) : booking.status === "confirmed" ? (
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <Coins className="w-3 h-3" />
-            {t("booking.card.points", { points: calculateBookingPoints(booking.start_time, booking.end_time, 0) })}
-          </span>
-        ) : null}
       </div>
     </div>
   );

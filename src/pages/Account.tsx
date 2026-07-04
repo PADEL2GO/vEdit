@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { LogOut, Loader2, Zap, Trash2 } from "lucide-react";
+import { LogOut, Loader2, Trash2, Coins, ShoppingBag, ArrowRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -14,16 +14,11 @@ import { useAccountData } from "@/hooks/useAccountData";
 import { supabase } from "@/integrations/supabase/client";
 import { resizeAvatarToSquare } from "@/lib/resizeImage";
 import { MyBookings } from "@/components/booking/MyBookings";
-import {
-  AccountRewardsCard,
-  AccountSkillLevel,
-  AccountProfileForm,
-} from "@/components/account";
-import { DUMMY_ANALYTICS_EMAIL } from "@/lib/constants";
-import { LevelUpAnimation, MyGamesSection } from "@/components/p2g";
+import { AccountProfileForm } from "@/components/account";
+import { LevelUpAnimation, ExpertLevelsGrid } from "@/components/p2g";
 import { getExpertLevel, getProgressToNextLevel, getExpertLevelEmoji } from "@/lib/expertLevels";
 import { useLevelUpDetection } from "@/hooks/useLevelUpDetection";
-import { useP2GPoints } from "@/hooks/useP2GPoints";
+import { usePointsValue } from "@/hooks/usePointsValue";
 
 const Account = () => {
   const navigate = useNavigate();
@@ -32,22 +27,26 @@ const Account = () => {
   const { user, loading: authLoading, signOut } = useAuth();
 
   // Use extracted hook for data fetching
-  const { loading, profile, setProfile, wallet, skillStats, analytics } = useAccountData(user);
-  
-  // Fetch match history for stats tab
-  const { matchHistory, isSkillsLoading, summary, isSummaryLoading } = useP2GPoints();
+  const { loading, profile, setProfile, wallet } = useAccountData(user);
+  const { centsPerPoint } = usePointsValue();
 
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
 
-  const isDummyAccount = user?.email === DUMMY_ANALYTICS_EMAIL;
-
-  // Get expert level based on play credits (auto-updates via React Query)
-  const playCredits = summary?.play_credits ?? wallet?.play_credits ?? 0;
+  // Expert level is derived from play credits, but we only ever DISPLAY the
+  // level/badge — never the raw play-credits number.
+  const playCredits = wallet?.play_credits ?? 0;
   const expertLevel = getExpertLevel(playCredits);
   const progress = getProgressToNextLevel(playCredits);
+
+  // Combined, redeemable P2G points total + its euro worth.
+  const redeemableCredits = (wallet?.play_credits ?? 0) + (wallet?.reward_credits ?? 0);
+  const euroWorth = ((redeemableCredits * centsPerPoint) / 100).toLocaleString(numberLocale, {
+    style: "currency",
+    currency: "EUR",
+  });
 
   // Level up detection
   const { showLevelUp, newLevel, previousLevel, closeLevelUp } = useLevelUpDetection({
@@ -233,24 +232,16 @@ const Account = () => {
                     <span className="text-lg">{getExpertLevelEmoji(expertLevel.name)}</span>
                     <span className="text-sm font-semibold text-white">{expertLevel.name}</span>
                   </div>
-                  {/* Play Credits Badge */}
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm">
-                    <Zap className="w-4 h-4 text-yellow-300" />
-                    <span className="text-sm font-semibold text-white">
-                      {(summary?.play_credits ?? wallet.play_credits).toLocaleString(numberLocale)} {t("page.playCredits")}
-                    </span>
-                  </div>
                 </div>
                 <Button variant="ghost" onClick={handleLogout} className="text-white/80 hover:text-white hover:bg-white/10">
                   <LogOut className="w-4 h-4 mr-2" /> {t("page.logout")}
                 </Button>
               </div>
 
-              {/* Progress to next level */}
+              {/* Progress to next expert level (level progress only, no raw credits) */}
               {progress.nextLevelName && (
                 <div className="mt-4">
-                  <div className="flex justify-between text-xs text-white/70 mb-1">
-                    <span>{playCredits.toLocaleString(numberLocale)} {t("page.playCredits")}</span>
+                  <div className="flex justify-end text-xs text-white/70 mb-1">
                     <span>{t("page.progressRemaining", { remaining: progress.remaining.toLocaleString(numberLocale), level: progress.nextLevelName })}</span>
                   </div>
                   <div className="h-2 bg-white/20 rounded-full overflow-hidden">
@@ -270,11 +261,10 @@ const Account = () => {
         {/* Tab Content */}
         <div className="container mx-auto px-4 max-w-2xl py-8">
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-y-1">
+            <TabsList className="grid w-full grid-cols-3 gap-y-1">
               <TabsTrigger value="profile">{t("page.tabs.profile")}</TabsTrigger>
               <TabsTrigger value="bookings">{t("page.tabs.bookings")}</TabsTrigger>
               <TabsTrigger value="p2g-points" className="text-xs sm:text-sm">{t("page.tabs.p2gPoints")}</TabsTrigger>
-              <TabsTrigger value="stats">{t("page.tabs.stats")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-6">
@@ -315,20 +305,50 @@ const Account = () => {
             </TabsContent>
 
             <TabsContent value="p2g-points" className="space-y-6">
-              <AccountRewardsCard wallet={wallet} />
-            </TabsContent>
+              {/* Combined, redeemable P2G points total + euro worth */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-card border border-border rounded-2xl p-6"
+              >
+                <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-primary" /> {t("points.title")}
+                </h2>
 
-            <TabsContent value="stats" className="space-y-6">
-              <AccountSkillLevel 
-                skillStats={skillStats} 
-                analytics={analytics} 
-                isDummyAccount={isDummyAccount}
-                wallet={wallet}
-              />
-              <MyGamesSection 
-                matchHistory={matchHistory || []} 
-                isLoading={isSkillsLoading} 
-              />
+                <div className="bg-gradient-to-r from-emerald-500/20 to-emerald-500/5 rounded-xl p-4 border border-emerald-500/30">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                          {t("points.redeemableBadge")}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{t("points.balance")}</p>
+                      <p className="text-4xl font-bold text-emerald-400">{redeemableCredits.toLocaleString(numberLocale)}</p>
+                      <p className="text-sm text-muted-foreground mt-1">≈ {euroWorth}</p>
+                    </div>
+                    <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                      <Coins className="w-7 h-7 text-emerald-400" />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground mt-3">{t("points.redeemableNote")}</p>
+
+                  <div className="mt-4 pt-3 border-t border-emerald-500/20">
+                    <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+                      <Link to="/dashboard/marketplace" className="flex items-center justify-center gap-2">
+                        <ShoppingBag className="w-4 h-4" />
+                        <span>{t("points.redeemCta")}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Expert Levels — display level/badge only, computed from play credits */}
+              <ExpertLevelsGrid currentPoints={playCredits} />
             </TabsContent>
           </Tabs>
         </div>

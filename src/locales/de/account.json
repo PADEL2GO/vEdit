@@ -34,6 +34,13 @@
       "profileSaveFailed": "Konnte Profil nicht speichern."
     }
   },
+  "points": {
+    "title": "P2G Points",
+    "redeemableBadge": "Einlösbar",
+    "balance": "Einlösbares Guthaben",
+    "redeemableNote": "Diese Points kannst du im Marketplace einlösen.",
+    "redeemCta": "Im Marketplace einlösen"
+  },
   "profileForm": {
     "title": "Profil",
     "avatarAlt": "Avatar",
