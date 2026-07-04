@@ -114,7 +114,9 @@ Masken:
 - [ ] Live-Ranking-Tabelle mit Spielern
 - [ ] League-Vorteile Karten-Grid
 
-### ⬜ Events — `/events`
+> 🟨 **Handover-Brief für beide Event-Seiten:** [`docs/handovers/events.md`](handovers/events.md) (2026-07-04). Warte auf Claude-Design-Ergebnis.
+
+### 🟨 Events — `/events`
 `src/pages/Events.tsx` · Event-Übersicht mit Filter, Liste und Newsletter
 
 Masken:
@@ -127,7 +129,7 @@ Masken:
 - [ ] Benefits-Grid
 - [ ] Newsletter- und Event-planen-Panel
 
-### ⬜ EventDetail — `/events/:slug`
+### 🟨 EventDetail — `/events/:slug`
 `src/pages/EventDetail.tsx` · Detailansicht eines Events mit Tickets und Line-up
 
 Masken:
@@ -291,7 +293,10 @@ Masken:
 
 ## 📅 Booking-Flow
 
-### ⬜ Booking — `/booking`
+> 🟨 **Handover-Brief für den gesamten Booking-Flow:** [`docs/handovers/booking.md`](handovers/booking.md) (2026-07-04). Ziel: sehr interaktiv/icon-reich, aber simpel; Gast-Buchung prominent. Warte auf Claude-Design-Ergebnis.
+> **Bereits erledigt (Code, live):** Booking als Tab in der öffentlichen Navi nach „Home" eingefügt (`Navigation.tsx`). Gäste sind nicht login-gesperrt — Sichtbarkeit hängt am Flag `feature_courts_public_enabled` (Admin → Features / SQL).
+
+### 🟨 Booking — `/booking`
 `src/pages/Booking.tsx` · Standort-Übersicht mit Verfügbarkeit und eigenen Buchungen
 
 Masken:
@@ -755,5 +760,8 @@ Masken:
 ---
 
 ## 📌 Aktueller Fokus
-- ✅ **Homepage (`/`)** — umgesetzt & Build ✓ (2026-07-04). Liegt bei Florian zur visuellen Sichtung. Offen: Migration ausführen (siehe Homepage-Eintrag).
-- ➡️ **Nächste Seite:** offen — Florian wählt & liefert das nächste Claude-Design. Claude schreibt bei Bedarf vorab den Handover-Brief.
+- ✅ **Homepage (`/`)** — umgesetzt, Build ✓ & **live auf Vercel deployed** (Commits f991779 + 5b35407, 2026-07-04). Inkl. Fix „einheitliche Seitenabstände" (alle Sektionen `max-w-[1200px] px-5`). Florian sichtet in der Live-Version. Offen: Migration ausführen (siehe Homepage-Eintrag).
+- **Workflow ab jetzt:** Seite umsetzen → `vite build` → Push auf `main` → Vercel auto-deployt → Florian sichtet live (keine Screenshots).
+- 🟨 **Booking** — Handover-Brief erstellt ([`docs/handovers/booking.md`](handovers/booking.md)); Nav-Tab nach „Home" eingebaut & live. Warte auf Claude-Design. Offen für Gäste-Sichtbarkeit: Flag `feature_courts_public_enabled` = true (Admin → Features).
+- 🟨 **Events** — Handover-Brief erstellt ([`docs/handovers/events.md`](handovers/events.md)). Warte auf Claude-Design.
+- ➡️ **Nächste Seite:** Florian liefert Claude-Design für Booking und/oder Events; dann Umsetzung.

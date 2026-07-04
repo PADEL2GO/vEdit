@@ -32,6 +32,7 @@ const PublicNavigation = () => {
 
   const navItems = [
     { label: t("nav.home"), href: "/" },
+    { label: t("nav.bookCourt"), href: "/booking" },
     { label: t("nav.events"), href: "/events" },
     { label: t("nav.players"), href: "/fuer-spieler" },
     { label: t("nav.clubs"), href: "/fuer-vereine" },
