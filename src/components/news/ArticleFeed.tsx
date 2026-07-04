@@ -126,7 +126,7 @@ export function ArticleFeed({ surface, placement }: ArticleFeedProps) {
   if (placement === "public") {
     return (
       <section id="news" className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
+        <div className="mx-auto max-w-[1200px] px-5">
           <div className="flex flex-col items-center gap-4 text-center mb-12 md:mb-16">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">
               <Newspaper className="w-3.5 h-3.5" />
@@ -136,7 +136,7 @@ export function ArticleFeed({ surface, placement }: ArticleFeedProps) {
               {t("newsHeadingPre")} <span className="text-gradient-lime">{t("newsHeadingAccent")}</span>
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
             {articles.map((article, i) => (
               <PublicArticleCard key={article.id} article={article} index={i} />
             ))}

@@ -58,7 +58,7 @@ const revealProps = (delay = 0) => ({
 
 // ── Partner components (admin-managed via partner_tiles table) ────────────────
 const PartnerGrid = ({ tiles }: { tiles: import("@/hooks/usePartnerTiles").PartnerTile[] }) => (
-  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full max-w-4xl mx-auto">
+  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full">
     {tiles.map((tile, index) => {
       const card = (
         <motion.div
@@ -93,7 +93,7 @@ const LocalPartnerSection = ({ tiles }: { tiles: import("@/hooks/usePartnerTiles
   if (!tiles.length) return null;
   const fallback = t("partners.regionFallback");
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4">
       {tiles.map((tile, index) => {
         const region = tile.region || fallback;
         const description = localized(tile, "description", i18n.language);
@@ -138,7 +138,7 @@ const PartnerSections = () => {
 
   return (
     <section id="partner" className="py-16 md:py-24 bg-background">
-      <div className="container mx-auto px-4 flex flex-col items-center">
+      <div className="mx-auto max-w-[1200px] px-5 flex flex-col items-center">
         {/* Equipment partners */}
         <motion.div {...revealProps()} className="flex flex-col items-center gap-3.5 text-center mb-11">
           <span className="font-stat text-xs uppercase tracking-[0.2em] text-primary">{t("partners.kicker")}</span>
@@ -149,7 +149,7 @@ const PartnerSections = () => {
         </motion.div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full">
             {Array.from({ length: 8 }).map((_, i) => (
               <Skeleton key={i} className="h-24 rounded-2xl" />
             ))}
@@ -255,7 +255,7 @@ const Index = () => {
 
         {/* ── SO KOMMT PADEL IN EUREN VEREIN ────────────────────── */}
         <section id="vereine" className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-[1200px] px-5">
             <motion.div {...revealProps()} className="flex flex-col items-center gap-4 text-center max-w-3xl mx-auto mb-14">
               <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">
                 <Building2 className="w-3.5 h-3.5" />
@@ -326,7 +326,7 @@ const Index = () => {
 
         {/* ── EIN NETWORK. ALLE VORTEILE. (Bento) ───────────────── */}
         <section id="plattform" className="py-16 md:py-24 relative overflow-hidden bg-gradient-hero">
-          <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-[1200px] px-5">
             <motion.div {...revealProps()} className="flex flex-col items-center gap-4 text-center max-w-2xl mx-auto mb-14">
               <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">
                 <Zap className="w-3.5 h-3.5" />
@@ -338,7 +338,7 @@ const Index = () => {
               <p className="text-base md:text-lg text-muted-foreground max-w-xl">{t("network.subtitle")}</p>
             </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
               {/* Courts — image tile */}
               <motion.div {...revealProps()} className="lg:col-span-7 relative min-h-[400px] rounded-2xl overflow-hidden border border-border/60">
                 <div className="absolute inset-0">
@@ -440,7 +440,7 @@ const Index = () => {
           </div>
           <div className="absolute inset-0 z-[1] bg-gradient-to-b from-background via-background/60 to-background" />
 
-          <div className="container mx-auto px-4 relative z-10">
+          <div className="mx-auto max-w-[1200px] px-5 relative z-10">
             <motion.div {...revealProps()} className="flex flex-col items-center gap-4 text-center max-w-2xl mx-auto mb-12">
               <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">
                 <User className="w-3.5 h-3.5" />

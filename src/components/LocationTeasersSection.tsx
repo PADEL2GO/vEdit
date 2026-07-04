@@ -20,7 +20,7 @@ export function LocationTeasersSection() {
   return (
     <>
       <section id="standorte" className="py-16 md:py-24 relative overflow-hidden">
-        <div className="container mx-auto px-4 relative z-10">
+        <div className="mx-auto max-w-[1200px] px-5 relative z-10">
           {/* Header */}
           <motion.div
             className="flex flex-col items-center gap-4 text-center mb-12 md:mb-16"
@@ -41,7 +41,7 @@ export function LocationTeasersSection() {
           </motion.div>
 
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {teasers.map((teaser, i) => {
               const isExpanded = expandedId === teaser.id;
               const title = localized(teaser, "title", i18n.language);
