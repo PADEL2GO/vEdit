@@ -225,8 +225,11 @@
     "reservedRemaining": "Reserved — {{time}} remaining",
     "payNow": "Pay now",
     "cancelSuccessTitle": "Booking cancelled",
-    "cancelSuccessDesc": "Your booking has been cancelled successfully.",
-    "cancelErrorDesc": "The booking could not be cancelled."
+    "cancelSuccessDesc": "Refund has been initiated.",
+    "cancelErrorDesc": "The booking could not be cancelled.",
+    "cancelConfirmTitle": "Really cancel this booking?",
+    "cancelConfirmDesc": "The amount will be refunded.",
+    "cancelConfirmAbort": "Cancel"
   },
   "locationCard": {
     "fromPrice": "from €{{price}}",

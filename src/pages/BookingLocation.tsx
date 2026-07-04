@@ -12,12 +12,14 @@ import { BookingSummary } from "@/components/booking/BookingSummary";
 import { GuestCheckoutModal } from "@/components/booking/GuestCheckoutModal";
 import { useBookingLocation } from "@/hooks/useBookingLocation";
 import { useCourtsVisibility } from "@/hooks/useCourtsVisibility";
+import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 
 const BookingLocation = () => {
   const { t } = useTranslation("booking");
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { canSeeCourts, publicEnabled, isAdmin, loading: visibilityLoading } = useCourtsVisibility();
+  const { canSee } = useFeatureToggles();
 
 
   const {
@@ -151,7 +153,7 @@ const BookingLocation = () => {
                 onLobbyEnabledChange={setLobbyEnabled}
                 lobbySettings={lobbySettings}
                 onLobbySettingsChange={setLobbySettings}
-                lobbiesFeatureEnabled={true}
+                lobbiesFeatureEnabled={canSee("lobbies")}
               />
             </div>
           </motion.div>

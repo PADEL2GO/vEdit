@@ -203,6 +203,13 @@
       "pointsEarned": "+{{points}} points earned",
       "points": "+{{points}} points",
       "timeRange": "{{start}} - {{end}}"
+    },
+    "cancel": {
+      "button": "Cancel",
+      "confirmTitle": "Really cancel this booking?",
+      "confirmDesc": "The amount will be refunded.",
+      "confirmAbort": "Cancel",
+      "confirmAction": "Cancel booking"
     }
   }
 }

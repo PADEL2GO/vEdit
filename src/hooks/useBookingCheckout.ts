@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { invokeEdgeFunction } from "@/lib/edgeFunctionUtils";
 import { applyVoucherDiscount } from "@/lib/pricing";
-import { usePointsValue } from "@/hooks/usePointsValue";
 export interface BookingDetails {
   id: string;
   start_time: string;
@@ -62,12 +61,6 @@ export interface UseBookingCheckoutReturn {
   setVoucherCode: (code: string) => void;
   validateVoucher: () => Promise<void>;
   clearVoucher: () => void;
-  pointsToUse: number;
-  setPointsToUse: (n: number) => void;
-  availablePoints: number;
-  maxPointsForBooking: number;
-  centsPerPoint: number;
-  maxPointsPercent: number;
   isGuest: boolean;
   handlePayment: () => Promise<void>;
   formatTimeLeft: (seconds: number) => string;
@@ -77,7 +70,6 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { centsPerPoint, maxPercent, enabled: pointsEnabled } = usePointsValue();
 
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [state, setState] = useState<CheckoutState>("loading");
@@ -85,8 +77,6 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [stripeUrl, setStripeUrl] = useState<string | null>(null);
   const [rewardsEstimate, setRewardsEstimate] = useState<RewardsEstimate | null>(null);
-  const [pointsToUse, setPointsToUse] = useState(0);
-  const [availablePoints, setAvailablePoints] = useState(0);
   const [voucher, setVoucher] = useState<VoucherState>({
     code: "",
     status: "idle",
@@ -291,18 +281,6 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
       setBooking(data);
       setState("ready");
 
-      // Fetch combined wallet balance (play + reward credits) — authenticated users only
-      if (user && !isGuest) {
-        supabase
-          .from("wallets")
-          .select("play_credits, reward_credits")
-          .eq("user_id", user.id)
-          .maybeSingle()
-          .then(({ data: wallet }) => {
-            setAvailablePoints((wallet?.play_credits ?? 0) + (wallet?.reward_credits ?? 0));
-          });
-      }
-
       // Fetch rewards estimate only for authenticated users (guests don't earn points)
       if (isGuest) return;
       invokeEdgeFunction<RewardsEstimate>("rewards-estimate", {
@@ -376,7 +354,6 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
         body: {
           booking_id: booking.id,
           ...(isPartialVoucher && voucher.voucherId ? { voucher_id: voucher.voucherId } : {}),
-          ...(pointsToUse > 0 ? { points_to_use: pointsToUse } : {}),
         },
         maxRetries: 2,
         retryDelayMs: 1500,
@@ -433,11 +410,6 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const ownerPrice = booking ? booking.price_cents : 0;
-  const maxPointsForBooking = pointsEnabled
-    ? Math.min(availablePoints, Math.floor(ownerPrice * maxPercent / 100 / centsPerPoint))
-    : 0;
-
   return {
     booking,
     state,
@@ -449,12 +421,6 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
     setVoucherCode,
     validateVoucher,
     clearVoucher,
-    pointsToUse,
-    setPointsToUse,
-    availablePoints,
-    maxPointsForBooking,
-    centsPerPoint,
-    maxPointsPercent: maxPercent,
     isGuest,
     handlePayment,
     formatTimeLeft,

@@ -76,7 +76,11 @@ serve(async (req) => {
 
     const body = await req.json();
     const { booking_id, voucher_id } = body;
-    const pointsToUse: number = body.points_to_use ?? body.credits_to_use ?? 0;
+    // Court bookings are MONEY-ONLY: P2G points are never redeemable for court
+    // bookings (only for marketplace equipment). Force to 0 so the reserve_points
+    // block below stays inert — no points discount, no reserved points, no
+    // points-only free path — regardless of any points_to_use sent by the client.
+    const pointsToUse = 0;
     if (!booking_id) throw new Error("booking_id is required");
     logStep("Received booking_id", { booking_id });
 

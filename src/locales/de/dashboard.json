@@ -203,6 +203,13 @@
       "pointsEarned": "+{{points}} Punkte verdient",
       "points": "+{{points}} Punkte",
       "timeRange": "{{start}} - {{end}} Uhr"
+    },
+    "cancel": {
+      "button": "Stornieren",
+      "confirmTitle": "Buchung wirklich stornieren?",
+      "confirmDesc": "Der Betrag wird zurückerstattet.",
+      "confirmAbort": "Abbrechen",
+      "confirmAction": "Stornieren"
     }
   }
 }

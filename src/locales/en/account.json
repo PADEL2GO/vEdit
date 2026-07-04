@@ -34,6 +34,13 @@
       "profileSaveFailed": "Could not save profile."
     }
   },
+  "points": {
+    "title": "P2G Points",
+    "redeemableBadge": "Redeemable",
+    "balance": "Redeemable balance",
+    "redeemableNote": "You can redeem these points in the marketplace.",
+    "redeemCta": "Redeem in Marketplace"
+  },
   "profileForm": {
     "title": "Profile",
     "avatarAlt": "Avatar",

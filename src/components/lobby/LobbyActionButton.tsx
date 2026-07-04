@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Users, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLobbyByBookingMap } from "@/hooks/useLobbies";
+import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import { CreateLobbyDialog, type BookingForLobby } from "./CreateLobbyDialog";
 
 interface LobbyActionButtonProps {
@@ -26,6 +27,7 @@ export function LobbyActionButton({
   const { t } = useTranslation("social");
   const navigate = useNavigate();
   const { data: lobbyMap } = useLobbyByBookingMap();
+  const { canSee } = useFeatureToggles();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const existing = lobbyMap?.get(booking.id);
@@ -42,6 +44,12 @@ export function LobbyActionButton({
         {t("lobbyActionButton.openLobby")}
       </Button>
     );
+  }
+
+  // Create-lobby entry point stays hidden while the lobbies feature isn't
+  // visible to this user (hidden/demo-for-admins-only, per canSee).
+  if (!canSee("lobbies")) {
+    return null;
   }
 
   return (
