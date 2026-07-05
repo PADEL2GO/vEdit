@@ -216,12 +216,12 @@ serve(async (req) => {
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td style="padding: 40px 20px;">
-        <table role="presentation" style="max-width: 520px; margin: 0 auto; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+        <table role="presentation" style="max-width: 520px; margin: 0 auto; background: #101010; border: 1px solid rgba(199,240,17,0.18); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
           <!-- Header -->
           <tr>
             <td style="padding: 32px 32px 24px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
-              <div style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">
-                🎾 PADEL2GO
+              <div style="font-size: 28px; font-weight: 800; color: #FAFAFA; letter-spacing: -0.5px;">
+                PADEL<span style="color: #C7F011;">2</span>GO
               </div>
             </td>
           </tr>
@@ -231,8 +231,8 @@ serve(async (req) => {
             <td style="padding: 32px;">
               <!-- Success Icon & Title -->
               <div style="text-align: center; margin-bottom: 24px;">
-                <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
-                <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #22c55e;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🎾</div>
+                <h1 style="margin: 0; font-size: 24px; font-weight: 800; color: #C7F011;">
                   ${headerText}
                 </h1>
                 <p style="margin: 12px 0 0; color: #94a3b8; font-size: 15px;">
@@ -278,11 +278,11 @@ serve(async (req) => {
               </div>
 
               <!-- Payment Info -->
-              <div style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+              <div style="background: rgba(199,240,17,0.08); border: 1px solid rgba(199,240,17,0.25); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                   <div>
                     <div style="color: #94a3b8; font-size: 13px; margin-bottom: 4px;">Bezahlt</div>
-                    <div style="color: #22c55e; font-size: 24px; font-weight: 700;">${paidAmount} €</div>
+                    <div style="color: #C7F011; font-size: 24px; font-weight: 800;">${paidAmount} €</div>
                   </div>
                   <div style="text-align: right;">
                     <div style="color: #94a3b8; font-size: 13px; margin-bottom: 4px;">Buchungsnr.</div>
@@ -293,7 +293,7 @@ serve(async (req) => {
 
               <!-- CTA Button -->
               <div style="text-align: center; margin-bottom: 16px;">
-                <a href="${bookingUrl}" style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                <a href="${bookingUrl}" style="display: inline-block; background: #C7F011; color: #000000; text-decoration: none; padding: 14px 32px; border-radius: 999px; font-weight: 700; font-size: 15px; box-shadow: 0 4px 20px rgba(199,240,17,0.35);">
                   Buchung ansehen
                 </a>
               </div>

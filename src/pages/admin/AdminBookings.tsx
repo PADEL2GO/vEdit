@@ -123,6 +123,9 @@ export default function AdminBookings() {
           club_id,
           club_booked_by_user_id,
           booked_for_member_name,
+          guest_name,
+          guest_email,
+          guest_phone,
           allocation_minutes,
           is_free_allocation,
           courts (id, name),
@@ -493,9 +496,28 @@ export default function AdminBookings() {
                           <TableCell className="text-foreground">
                             {booking.courts?.name}
                           </TableCell>
-                          {/* User (Owner) */}
+                          {/* User (Owner) / Gast */}
                           <TableCell className="text-foreground">
-                            {booking.profiles?.display_name || booking.profiles?.username || "-"}
+                            {booking.profiles?.display_name || booking.profiles?.username ? (
+                              booking.profiles?.display_name || booking.profiles?.username
+                            ) : booking.guest_email || booking.guest_name ? (
+                              <div className="flex flex-col gap-0.5">
+                                <span className="inline-flex items-center gap-1.5">
+                                  {booking.guest_name || "Gast"}
+                                  <Badge variant="outline" className="text-[10px] py-0 border-primary/40 text-primary">Gast</Badge>
+                                </span>
+                                {booking.guest_email && (
+                                  <a href={`mailto:${booking.guest_email}`} className="text-xs text-muted-foreground hover:text-primary break-all">
+                                    {booking.guest_email}
+                                  </a>
+                                )}
+                                {booking.guest_phone && (
+                                  <span className="text-xs text-muted-foreground">{booking.guest_phone}</span>
+                                )}
+                              </div>
+                            ) : (
+                              "-"
+                            )}
                           </TableCell>
                           {/* Club Name */}
                           <TableCell>

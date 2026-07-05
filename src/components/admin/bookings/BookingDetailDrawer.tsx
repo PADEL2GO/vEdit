@@ -22,6 +22,9 @@ export interface Booking {
   club_id?: string | null;
   club_booked_by_user_id?: string | null;
   booked_for_member_name?: string | null;
+  guest_name?: string | null;
+  guest_email?: string | null;
+  guest_phone?: string | null;
   allocation_minutes?: number | null;
   is_free_allocation?: boolean;
   courts: { id: string; name: string } | null;
@@ -199,6 +202,24 @@ export function BookingDetailDrawer({
                       <div className="font-medium text-foreground">
                         {booking.booked_for_member_name}
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {(booking.guest_email || booking.guest_name) && (
+                  <div className="flex items-start gap-3">
+                    <User className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <div className="text-sm text-muted-foreground">Gast-Buchung (ohne Konto)</div>
+                      <div className="font-medium text-foreground">{booking.guest_name || "Gast"}</div>
+                      {booking.guest_email && (
+                        <a href={`mailto:${booking.guest_email}`} className="text-sm text-primary hover:underline break-all">
+                          {booking.guest_email}
+                        </a>
+                      )}
+                      {booking.guest_phone && (
+                        <div className="text-sm text-muted-foreground">{booking.guest_phone}</div>
+                      )}
                     </div>
                   </div>
                 )}

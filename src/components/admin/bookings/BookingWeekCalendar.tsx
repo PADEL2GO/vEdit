@@ -22,6 +22,9 @@ export interface Booking {
   club_id?: string | null;
   club_booked_by_user_id?: string | null;
   booked_for_member_name?: string | null;
+  guest_name?: string | null;
+  guest_email?: string | null;
+  guest_phone?: string | null;
   allocation_minutes?: number | null;
   is_free_allocation?: boolean;
   courts: { id: string; name: string } | null;
