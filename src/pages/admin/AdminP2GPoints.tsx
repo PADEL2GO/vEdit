@@ -9,13 +9,15 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Coins, Trophy, Loader2, Save } from "lucide-react";
+import { Coins, Users, Trophy, Loader2, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { P2GWalletsTab } from "@/components/admin/p2g/P2GWalletsTab";
 import { P2GExpertLevelsTab } from "@/components/admin/p2g/P2GExpertLevelsTab";
 
 const TABS = [
   { id: "dashboard", label: "Einstellungen", icon: Coins },
+  { id: "wallets", label: "Benutzer-Wallets", icon: Users },
   { id: "expert-levels", label: "Expert Levels", icon: Trophy },
 ] as const;
 
@@ -320,6 +322,10 @@ export default function AdminP2GPoints() {
               <P2GExchangeRateCard />
               <P2GPaybackRatesCard />
             </div>
+          </TabsContent>
+
+          <TabsContent value="wallets" className="mt-0">
+            <P2GWalletsTab />
           </TabsContent>
 
           <TabsContent value="expert-levels" className="mt-0">

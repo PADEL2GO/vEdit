@@ -81,7 +81,7 @@ export default function AdminEvents() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("locations")
-        .select("id, name")
+        .select("id, name, address, postal_code, city")
         .order("name");
       if (error) throw error;
       return (data || []) as Location[];

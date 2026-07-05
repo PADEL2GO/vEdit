@@ -376,11 +376,12 @@ function EventRow({
   event, index, isReg, onBook, onTicket,
 }: { event: DashboardEvent; index: number; isReg: boolean; onBook: () => void; onTicket: () => void }) {
   const d = startDate(event);
-  const free = isFreeEvent(event);
+  // With an external ticket link → book externally; without → in-app registration.
+  const external = !!event.ticket_url;
   const cap = event.capacity;
   const used = event.registrations_count ?? 0;
-  const left = cap != null ? Math.max(0, cap - used - (isReg ? 0 : 0)) : null;
-  const full = free && cap != null && left !== null && left <= 0 && !isReg;
+  const left = cap != null ? Math.max(0, cap - used) : null;
+  const full = !external && cap != null && left !== null && left <= 0 && !isReg;
   const pct = cap && cap > 0 ? Math.max(0, Math.min(100, ((left ?? 0) / cap) * 100)) : 100;
   const scarce = left !== null && cap ? left / cap <= 0.25 : false;
   const barCol = full ? "hsl(0 0% 40%)" : scarce ? "hsl(45 90% 55%)" : "#C7F011";
@@ -424,7 +425,7 @@ function EventRow({
             <span className="inline-flex items-center gap-1.5 font-stat text-[11.5px] text-muted-foreground"><Clock className="w-3 h-3" />{fmtTime(event)}</span>
             <span className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground"><MapPin className="w-3 h-3" />{event.venue_name || event.city}</span>
           </div>
-          {free && cap != null && (
+          {!external && cap != null && (
             <div className="flex items-center gap-2.5 max-w-[280px]">
               <div className="h-[5px] rounded-full bg-white/10 overflow-hidden flex-1">
                 <div className="h-full rounded-full transition-all" style={{ width: pct + "%", background: barCol }} />
@@ -440,16 +441,16 @@ function EventRow({
           <span className="font-stat font-bold text-[18px] text-primary whitespace-nowrap">{priceStr(event)}</span>
           {isReg ? (
             <Button variant="outline" size="sm" onClick={onTicket}><QrCode className="w-3.5 h-3.5 mr-1" />Ticket</Button>
-          ) : full ? (
-            <span className="text-[12.5px] font-bold text-muted-foreground border border-border rounded-full px-[15px] py-2 whitespace-nowrap">Ausverkauft</span>
-          ) : free ? (
-            <Button variant="lime" size="sm" onClick={onBook}><Zap className="w-3.5 h-3.5 mr-1" />Spot sichern</Button>
-          ) : (
+          ) : external ? (
             <Button variant="lime" size="sm" asChild>
-              <a href={event.ticket_url} target="_blank" rel="noopener noreferrer">
+              <a href={event.ticket_url!} target="_blank" rel="noopener noreferrer">
                 <Ticket className="w-3.5 h-3.5 mr-1" />Tickets<ExternalLink className="w-3 h-3 ml-1" />
               </a>
             </Button>
+          ) : full ? (
+            <span className="text-[12.5px] font-bold text-muted-foreground border border-border rounded-full px-[15px] py-2 whitespace-nowrap">Ausverkauft</span>
+          ) : (
+            <Button variant="lime" size="sm" onClick={onBook}><Zap className="w-3.5 h-3.5 mr-1" />Spot sichern</Button>
           )}
         </div>
       </div>

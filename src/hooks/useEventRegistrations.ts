@@ -13,7 +13,7 @@ export interface DashboardEvent {
   venue_name: string | null;
   city: string | null;
   image_url: string | null;
-  ticket_url: string;
+  ticket_url: string | null;
   price_cents: number | null;
   price_label: string | null;
   capacity: number | null;

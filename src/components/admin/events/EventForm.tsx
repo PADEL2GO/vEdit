@@ -49,6 +49,9 @@ export interface Event {
 export interface Location {
   id: string;
   name: string;
+  address?: string | null;
+  postal_code?: string | null;
+  city?: string | null;
 }
 
 export const EVENT_TYPES = [
@@ -130,7 +133,7 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
         address_line1: formData.address_line1 || null,
         postal_code: formData.postal_code || null,
         city: formData.city || null,
-        ticket_url: formData.ticket_url,
+        ticket_url: formData.ticket_url || null,
         is_published: formData.is_published,
         featured: formData.featured,
         event_type: formData.event_type,
@@ -251,7 +254,7 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
     setImageUrl("");
   };
 
-  const isValid = formData.title.trim() && formData.ticket_url.trim() && formData.location_id;
+  const isValid = formData.title.trim() && formData.location_id;
 
   return (
     <div className="space-y-6">
@@ -299,7 +302,19 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
           <Label htmlFor="location">Standort *</Label>
           <Select
             value={formData.location_id}
-            onValueChange={(v) => setFormData((p) => ({ ...p, location_id: v }))}
+            onValueChange={(v) => {
+              const loc = locations.find((l) => l.id === v);
+              setFormData((p) => ({
+                ...p,
+                location_id: v,
+                // Auto-fill the event address from the selected location (Verein),
+                // if the location has one stored. Fields stay editable.
+                venue_name: p.venue_name || loc?.name || "",
+                address_line1: loc?.address ?? p.address_line1,
+                postal_code: loc?.postal_code ?? p.postal_code,
+                city: loc?.city ?? p.city,
+              }));
+            }}
           >
             <SelectTrigger className="bg-background border-border">
               <SelectValue placeholder="Standort wählen" />
@@ -443,15 +458,18 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
       {/* Tickets & Capacity */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="ticket_url">Ticket-Link *</Label>
+          <Label htmlFor="ticket_url">Externer Ticket-Link (optional)</Label>
           <Input
             id="ticket_url"
             type="url"
             value={formData.ticket_url}
             onChange={(e) => setFormData((p) => ({ ...p, ticket_url: e.target.value }))}
-            placeholder="https://..."
+            placeholder="Leer lassen = Buchung über die Plattform"
             className="bg-background border-border"
           />
+          <p className="text-xs text-muted-foreground">
+            Ohne Link wird das Event direkt über PADEL2GO gebucht (kein externer Anbieter).
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="capacity">Kapazität</Label>
