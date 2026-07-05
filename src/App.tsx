@@ -47,7 +47,6 @@ const Lobbies = lazy(() => import("./pages/Lobbies"));
 
 // Dashboard Pages (Logged-In)
 const DashboardHome = lazy(() => import("./pages/dashboard/DashboardHome"));
-const DashboardMarketplace = lazy(() => import("./pages/dashboard/DashboardMarketplace"));
 const DashboardLeague = lazy(() => import("./pages/dashboard/DashboardLeague"));
 const DashboardEvents = lazy(() => import("./pages/dashboard/DashboardEvents"));
 const DashboardP2GPoints = lazy(() => import("./pages/dashboard/DashboardP2GPoints"));
@@ -174,9 +173,8 @@ const App = () => (
                 <Route element={<RequireFeature feature="events" />}>
                   <Route path="/dashboard/events" element={<DashboardEvents />} />
                 </Route>
-                <Route element={<RequireFeature feature="marketplace" />}>
-                  <Route path="/dashboard/marketplace" element={<DashboardMarketplace />} />
-                </Route>
+                {/* Logged-in users use the same public shop; old route redirects. */}
+                <Route path="/dashboard/marketplace" element={<Navigate to="/marketplace" replace />} />
 
                 {/* Club portal — gated by ClubLayout itself (isClubUser check). */}
                 <Route path="/club" element={<ClubLayout />}>

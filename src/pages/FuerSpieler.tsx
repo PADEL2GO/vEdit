@@ -884,7 +884,7 @@ const FuerSpieler = () => {
 
               <div className="text-center">
                 <NavLink
-                  to="/dashboard/marketplace"
+                  to="/marketplace"
                   className="inline-flex items-center justify-center gap-3 px-9 py-4 rounded-full bg-amber-400 text-black font-black hover:bg-amber-300 transition-all shadow-[0_0_30px_rgba(251,191,36,0.35)] hover:shadow-[0_0_50px_rgba(251,191,36,0.5)]"
                 >
                   {t("marketplace.cta")} <ArrowRight className="w-5 h-5" />

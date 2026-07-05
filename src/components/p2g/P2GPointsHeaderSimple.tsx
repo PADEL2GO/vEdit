@@ -61,7 +61,7 @@ export function P2GPointsHeaderSimple({ summary, isLoading }: P2GPointsHeaderSim
         <div className="flex items-center gap-2">
           <ExpertLevelInfoPopover currentPlayCredits={levelPoints} />
           <Button variant="lime" size="sm" asChild className="gap-2">
-            <NavLink to="/dashboard/marketplace?affordable=true">
+            <NavLink to="/marketplace">
               <ShoppingBag className="h-4 w-4" />
               <span className="hidden sm:inline">{t("p2gPointsHeaderSimple.redeem")}</span>
             </NavLink>

@@ -59,7 +59,7 @@ const DashboardHome = () => {
   const quickActions: QuickAction[] = [
     { key: "book", label: t("meinP2g.quickActions.book"), icon: Calendar, to: "/dashboard/booking" },
     ...(showMarketplace
-      ? [{ key: "marketplace", label: t("meinP2g.quickActions.marketplace"), icon: ShoppingBag, to: "/dashboard/marketplace" }]
+      ? [{ key: "marketplace", label: t("meinP2g.quickActions.marketplace"), icon: ShoppingBag, to: "/marketplace" }]
       : []),
     ...(showEvents
       ? [{ key: "events", label: t("meinP2g.quickActions.events"), icon: CalendarDays, to: "/dashboard/events" }]

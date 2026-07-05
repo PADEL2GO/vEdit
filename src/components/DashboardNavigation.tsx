@@ -55,7 +55,7 @@ const DashboardNavigation = () => {
   const dashboardItems = [
     { name: t("nav.meinP2G"), url: "/dashboard/home", show: true },
     { name: t("nav.booking"), url: "/booking", show: true },
-    { name: t("nav.marketplace"), url: "/dashboard/marketplace", show: canSee("marketplace") },
+    { name: t("nav.marketplace"), url: "/marketplace", show: canSee("marketplace") },
     { name: t("nav.events"), url: "/dashboard/events", show: canSee("events") },
   ]
     .filter((item) => item.show)

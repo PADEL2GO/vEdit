@@ -62,7 +62,7 @@ const FEATURES: FeatureConfig[] = [
     name: "marketplace",
     title: "Marktplatz",
     description: "Exklusiver Shop für Mitglieder. Equipment, Merchandise und Member-Only Deals.",
-    route: "/dashboard/marketplace",
+    route: "/marketplace",
     icon: ShoppingCart,
   },
   {

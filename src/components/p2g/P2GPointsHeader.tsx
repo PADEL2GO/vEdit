@@ -62,7 +62,7 @@ export function P2GPointsHeader({ summary, isLoading }: P2GPointsHeaderProps) {
             <span className="sm:hidden">{t("p2gPointsHeader.info")}</span>
           </Button>
           <Button variant="lime" size="sm" asChild className="gap-2">
-            <NavLink to="/dashboard/marketplace?affordable=true">
+            <NavLink to="/marketplace">
               <ShoppingBag className="h-4 w-4" />
               <span className="hidden sm:inline">{t("p2gPointsHeader.redeem")}</span>
             </NavLink>

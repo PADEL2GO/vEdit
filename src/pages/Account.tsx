@@ -352,7 +352,7 @@ const Account = () => {
 
                   <div className="mt-4 pt-3 border-t border-emerald-500/20">
                     <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
-                      <Link to="/dashboard/marketplace" className="flex items-center justify-center gap-2">
+                      <Link to="/marketplace" className="flex items-center justify-center gap-2">
                         <ShoppingBag className="w-4 h-4" />
                         <span>{t("points.redeemCta")}</span>
                         <ArrowRight className="w-4 h-4" />
