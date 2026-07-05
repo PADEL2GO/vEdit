@@ -15,6 +15,11 @@
 
 ---
 
+## ⚙️ Launch-Datum (global, admin-pflegbar) — ✅ 2026-07-05
+Neues Feld **Admin → Features → „Launch-Datum"** (`site_settings.launch_date`, Hook `useLaunchDate`). Treibt den **Homepage-Countdown + Badge** und den **Events-Launch-Placeholder**. **⚠️ Migration ausführen:** `supabase/migrations/20260705130000_add_launch_date.sql`.
+
+---
+
 ## 🌐 Global / geteilte Komponenten
 _Erscheinen auf vielen Seiten — einmal neu designen wirkt überall._
 
@@ -115,9 +120,11 @@ Masken:
 - [ ] Live-Ranking-Tabelle mit Spielern
 - [ ] League-Vorteile Karten-Grid
 
-> 🟨 **Handover-Brief für beide Event-Seiten:** [`docs/handovers/events.md`](handovers/events.md) (2026-07-04). Warte auf Claude-Design-Ergebnis.
+> ✅ **UMGESETZT (Events.dc.html → Code, Build ✓, 2026-07-05).** Übersicht (Hero · Featured · Filter/Grid · Benefits-Bento · Newsletter · „Event planen") + Detail + „nicht gefunden". Backend erhalten (events/event_artists/event_brands, Filter, externer Ticket-Link, Newsletter, slug-Routing).
+> **Launch-Placeholder:** wenn noch KEINE Events angelegt sind → Coming-Soon-Karte mit **Launch-Datum** (aus Admin → Features); Filter-leer → „Keine Events gefunden".
+> **Fake-Zahlen entfernt (deine Regel):** die erfundenen Benefits-Zahlen aus dem Design (+2.500 / 5.500+ / „8 von 10" / „3 Partnervereine" / „4 Standorte") wurden durch ehrliche, qualitative Aussagen ersetzt. Falls echte Zahlen vorliegen, sag Bescheid → verdrahten.
 
-### 🟨 Events — `/events`
+### ✅ Events — `/events` _(umgesetzt 2026-07-05, Build ✓)_
 `src/pages/Events.tsx` · Event-Übersicht mit Filter, Liste und Newsletter
 
 Masken:
@@ -130,7 +137,7 @@ Masken:
 - [ ] Benefits-Grid
 - [ ] Newsletter- und Event-planen-Panel
 
-### 🟨 EventDetail — `/events/:slug`
+### ✅ EventDetail — `/events/:slug` _(umgesetzt 2026-07-05, Build ✓)_
 `src/pages/EventDetail.tsx` · Detailansicht eines Events mit Tickets und Line-up
 
 Masken:

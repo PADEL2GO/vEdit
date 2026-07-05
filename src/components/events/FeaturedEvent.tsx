@@ -1,10 +1,9 @@
 import { motion } from "framer-motion";
 import { NavLink } from "@/components/NavLink";
-import { Calendar, MapPin, Clock, ArrowRight, Music, Sparkles } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowRight, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 interface FeaturedEventProps {
   slug: string;
@@ -38,9 +37,7 @@ export const FeaturedEvent = ({
   image_url,
   event_type,
   price_label,
-  highlights,
   venue_name,
-  event_artists,
 }: FeaturedEventProps) => {
   const startDate = start_at ? new Date(start_at) : null;
 
@@ -49,134 +46,98 @@ export const FeaturedEvent = ({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative rounded-3xl overflow-hidden bg-card border border-border group"
+      className="relative rounded-2xl overflow-hidden border border-border/60 bg-gradient-card glow-lime group grid lg:grid-cols-2"
     >
-      <div className="grid lg:grid-cols-2 gap-0">
-        {/* Image */}
-        <div className="relative aspect-[16/10] lg:aspect-auto lg:min-h-[400px] overflow-hidden">
-          {image_url ? (
-            <img
-              src={image_url}
-              alt={title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/30 to-primary/5 flex items-center justify-center">
-              <Sparkles className="w-20 h-20 text-primary/40" />
-            </div>
-          )}
-          
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-card/80 via-card/40 to-transparent lg:bg-gradient-to-l" />
-          
-          {/* Featured Badge */}
-          <div className="absolute top-6 left-6">
-            <Badge className="bg-primary text-primary-foreground px-3 py-1 text-sm font-semibold">
-              <Sparkles className="w-3.5 h-3.5 mr-1" />
-              Featured Event
-            </Badge>
+      {/* Image */}
+      <div className="relative min-h-[320px]">
+        {image_url ? (
+          <img
+            src={image_url}
+            alt={title}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-primary/5 flex items-center justify-center">
+            <Sparkles className="w-20 h-20 text-primary/40" />
           </div>
+        )}
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent_40%,hsl(0_0%_4%)_96%)] lg:block hidden" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(0_0%_4%)] via-transparent to-transparent lg:hidden" />
+
+        {/* Date Badge */}
+        {startDate && (
+          <span className="absolute top-4 left-4 inline-flex flex-col items-center rounded-[14px] px-3.5 py-2.5 bg-black/75 backdrop-blur-md border border-primary/40">
+            <span className="font-stat font-bold text-[22px] leading-none text-primary">
+              {format(startDate, "dd")}
+            </span>
+            <span className="font-stat text-[10.5px] tracking-[0.18em] text-[hsl(0_0%_70%)] uppercase">
+              {format(startDate, "MMM", { locale: de })}
+            </span>
+          </span>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-col gap-3.5 justify-center p-6 md:p-9">
+        {/* Badges */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-primary/10 border border-primary/25 text-primary">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            Featured
+          </span>
+          {event_type && (
+            <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-white/5 border border-border text-foreground/75">
+              {EVENT_TYPE_LABELS[event_type] || event_type}
+            </span>
+          )}
         </div>
 
-        {/* Content */}
-        <div className="p-8 lg:p-10 flex flex-col justify-center">
-          {/* Event Type & Date */}
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            {event_type && (
-              <Badge variant="outline" className="border-primary/30 text-primary">
-                {EVENT_TYPE_LABELS[event_type] || event_type}
-              </Badge>
-            )}
-            {startDate && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Calendar className="w-4 h-4" />
-                {format(startDate, "EEEE, d. MMMM yyyy", { locale: de })}
-              </div>
-            )}
-          </div>
+        {/* Title */}
+        <h2 className="font-display font-extrabold text-2xl md:text-4xl leading-[1.1] tracking-[-0.02em] text-foreground">
+          {title}
+        </h2>
 
-          {/* Title */}
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4 group-hover:text-primary transition-colors">
-            {title}
-          </h2>
+        {/* Description */}
+        {description && (
+          <p className="text-[15.5px] leading-relaxed text-[hsl(0_0%_65%)] line-clamp-3">
+            {description}
+          </p>
+        )}
 
-          {/* Description */}
-          {description && (
-            <p className="text-muted-foreground mb-6 line-clamp-3">
-              {description}
-            </p>
+        {/* Meta */}
+        <div className="flex flex-col gap-2.5 mt-1">
+          {startDate && (
+            <span className="inline-flex items-center gap-2.5 font-stat text-[13px] text-[hsl(0_0%_75%)]">
+              <Calendar className="w-3.5 h-3.5 text-primary" />
+              {format(startDate, "EEEE, d. MMMM yyyy", { locale: de })}
+            </span>
           )}
-
-          {/* Meta Info */}
-          <div className="flex flex-wrap items-center gap-4 mb-6 text-sm">
-            {(venue_name || city) && (
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <MapPin className="w-4 h-4 text-primary" />
-                {venue_name}{venue_name && city ? `, ${city}` : city}
-              </span>
-            )}
-            {startDate && (
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <Clock className="w-4 h-4 text-primary" />
-                {format(startDate, "HH:mm", { locale: de })} Uhr
-              </span>
-            )}
-            {price_label && (
-              <span className="font-semibold text-primary">
-                {price_label}
-              </span>
-            )}
-          </div>
-
-          {/* Highlights */}
-          {highlights && highlights.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
-              {highlights.map((highlight) => (
-                <Badge key={highlight} variant="secondary" className="bg-muted">
-                  {highlight}
-                </Badge>
-              ))}
-            </div>
+          {startDate && (
+            <span className="inline-flex items-center gap-2.5 font-stat text-[13px] text-[hsl(0_0%_75%)]">
+              <Clock className="w-3.5 h-3.5 text-primary" />
+              {format(startDate, "HH:mm", { locale: de })} Uhr
+            </span>
           )}
-
-          {/* Artists */}
-          {event_artists.length > 0 && (
-            <div className="flex items-center gap-3 mb-8">
-              <div className="flex -space-x-3">
-                {event_artists.slice(0, 4).map((artist) => (
-                  <div
-                    key={artist.id}
-                    className="w-10 h-10 rounded-full border-2 border-card overflow-hidden bg-muted"
-                  >
-                    {artist.image_url ? (
-                      <img
-                        src={artist.image_url}
-                        alt={artist.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Music className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {event_artists.map((a) => a.name).join(", ")}
-              </span>
-            </div>
+          {(venue_name || city) && (
+            <span className="inline-flex items-center gap-2.5 text-[13.5px] text-[hsl(0_0%_75%)]">
+              <MapPin className="w-3.5 h-3.5 text-primary" />
+              {venue_name}
+              {venue_name && city ? `, ${city}` : city}
+            </span>
           )}
+        </div>
 
-          {/* CTA */}
-          <div className="flex gap-4">
-            <Button variant="hero" size="lg" className="group/btn" asChild>
-              <NavLink to={`/events/${slug}`}>
-                Details & Tickets
-                <ArrowRight className="w-5 h-5 ml-1 group-hover/btn:translate-x-1 transition-transform" />
-              </NavLink>
-            </Button>
-          </div>
+        {/* CTA + Price */}
+        <div className="flex items-center gap-4 flex-wrap mt-1.5">
+          <Button variant="hero" size="lg" className="group/btn" asChild>
+            <NavLink to={`/events/${slug}`}>
+              Details & Tickets
+              <ArrowRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
+            </NavLink>
+          </Button>
+          {price_label && (
+            <span className="font-stat text-[19px] font-bold text-primary">{price_label}</span>
+          )}
         </div>
       </div>
     </motion.div>

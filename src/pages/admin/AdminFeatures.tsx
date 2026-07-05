@@ -93,9 +93,18 @@ const STATE_BADGE: Record<FeatureState, { label: string; className: string }> = 
   hidden: { label: "Aus", className: "text-muted-foreground" },
 };
 
+// ISO-Timestamp → Wert für <input type="datetime-local"> (lokale Zeit, "YYYY-MM-DDTHH:mm")
+function toLocalInput(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export default function AdminFeatures() {
   const queryClient = useQueryClient();
   const [courtsPublicEnabled, setCourtsPublicEnabled] = useState(false);
+  const [launchDate, setLaunchDate] = useState<string>("");
+  const [isSavingLaunch, setIsSavingLaunch] = useState(false);
   const [featureVisibility, setFeatureVisibility] = useState<Record<string, FeatureState>>({
     lobbies: "hidden",
     league: "hidden",
@@ -124,7 +133,7 @@ export default function AdminFeatures() {
       const { data, error } = await supabase
         .from("site_settings")
         .select(
-          "feature_courts_public_enabled, feature_lobbies_state, feature_league_state, feature_events_state, feature_rewards_state, feature_matching_state, feature_p2g_state, feature_marketplace_state, feature_friends_state, feature_credits_payment_enabled, credits_payment_max_percent, credits_per_euro"
+          "feature_courts_public_enabled, feature_lobbies_state, feature_league_state, feature_events_state, feature_rewards_state, feature_matching_state, feature_p2g_state, feature_marketplace_state, feature_friends_state, feature_credits_payment_enabled, credits_payment_max_percent, credits_per_euro, launch_date"
         )
         .eq("id", "global")
         .single();
@@ -146,11 +155,40 @@ export default function AdminFeatures() {
       setCreditsPaymentEnabled(d?.feature_credits_payment_enabled ?? false);
       setCreditsMaxPercent(d?.credits_payment_max_percent ?? 50);
       setCreditsPerEuro(d?.credits_per_euro ?? 100);
+      setLaunchDate(d?.launch_date ? toLocalInput(d.launch_date) : "");
     } catch (error) {
       console.error("Error fetching feature states:", error);
       toast.error("Fehler beim Laden der Feature-Einstellungen");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const saveLaunchDate = async () => {
+    if (!launchDate) {
+      toast.error("Bitte ein Launch-Datum wählen");
+      return;
+    }
+    setIsSavingLaunch(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const iso = new Date(launchDate).toISOString();
+      const { error } = await supabase
+        .from("site_settings")
+        .update({
+          launch_date: iso,
+          updated_at: new Date().toISOString(),
+          updated_by: userData.user?.id,
+        } as any)
+        .eq("id", "global");
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["site-settings", "launch_date"] });
+      toast.success("Launch-Datum gespeichert – gilt für Countdown & alle Placeholder");
+    } catch (error) {
+      console.error("Error saving launch date:", error);
+      toast.error("Fehler beim Speichern des Launch-Datums");
+    } finally {
+      setIsSavingLaunch(false);
     }
   };
 
@@ -289,6 +327,35 @@ export default function AdminFeatures() {
             Steuere pro Feature, ob es für alle sichtbar, nur im Admin-Demo-Modus oder komplett ausgeblendet ist
           </p>
         </div>
+
+        {/* ── Launch-Datum ─────────────────────────────────── */}
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg text-foreground flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              Launch-Datum
+            </CardTitle>
+            <CardDescription className="mt-1">
+              Treibt den Countdown auf der Startseite und alle „Coming Soon"-Placeholder (z. B. Events, wenn noch keine angelegt sind).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col sm:flex-row sm:items-end gap-3">
+            <div className="space-y-1.5 flex-1">
+              <Label htmlFor="launch-date">Datum & Uhrzeit</Label>
+              <Input
+                id="launch-date"
+                type="datetime-local"
+                value={launchDate}
+                onChange={(e) => setLaunchDate(e.target.value)}
+                className="bg-background border-border"
+              />
+            </div>
+            <Button onClick={saveLaunchDate} disabled={isSavingLaunch} className="sm:w-auto">
+              {isSavingLaunch ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+              Speichern
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* ── Courts visibility toggle ─────────────────────── */}
         <Card className={`border-2 ${courtsPublicEnabled ? "border-green-500/60 bg-green-500/5" : "border-blue-500/60 bg-blue-500/5"}`}>

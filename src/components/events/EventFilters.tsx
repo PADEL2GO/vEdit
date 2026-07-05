@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Search, X, Calendar, Filter } from "lucide-react";
+import { Search, X, History, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 interface EventFiltersProps {
   onSearchChange: (search: string) => void;
@@ -29,6 +27,13 @@ const TIME_FILTERS = [
   { value: "month", label: "Diesen Monat" },
 ];
 
+const pillClass = (active: boolean) =>
+  `inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-semibold whitespace-nowrap transition-all min-h-[36px] ${
+    active
+      ? "bg-primary text-black shadow-[0_0_18px_hsl(71_91%_51%/0.35)]"
+      : "bg-white/[0.03] border border-[hsl(0_0%_16%)] text-foreground/75 hover:border-primary/55"
+  }`;
+
 export const EventFilters = ({
   onSearchChange,
   onTypeChange,
@@ -50,96 +55,80 @@ export const EventFilters = ({
     onSearchChange("");
     onTypeChange(null);
     onTimeChange(null);
+    onShowPastChange(false);
   };
 
-  const hasActiveFilters = searchValue || selectedType || selectedTime;
+  const hasActiveFilters = searchValue || selectedType || selectedTime || showPast;
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-3.5">
       {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+      <div className="relative max-w-[440px]">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(0_0%_45%)] pointer-events-none" />
         <Input
           type="text"
-          placeholder="Events durchsuchen..."
+          placeholder="Event, Ort oder Kategorie suchen …"
           value={searchValue}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="pl-12 h-12 bg-card border-border"
+          className="h-[46px] pl-10 pr-11 rounded-[13px] bg-[hsl(0_0%_6%)] border-[hsl(0_0%_16%)] text-base focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:ring-offset-0"
         />
         {searchValue && (
           <button
             onClick={() => handleSearchChange("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label="Suche zurücksetzen"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-[30px] h-[30px] rounded-[9px] bg-[hsl(0_0%_12%)] text-[hsl(0_0%_70%)] hover:text-foreground flex items-center justify-center transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
 
-      {/* Filter Pills */}
-      <div className="flex flex-wrap items-center gap-2">
-        {/* Event Type Filters */}
-        <div className="flex items-center gap-1 mr-2">
-          <Filter className="w-4 h-4 text-muted-foreground" />
-        </div>
+      {/* Category Pills */}
+      <div className="flex flex-wrap gap-2">
+        <button onClick={() => onTypeChange(null)} className={pillClass(!selectedType)}>
+          Alle
+        </button>
         {EVENT_TYPES.map((type) => (
           <button
             key={type.value}
             onClick={() => onTypeChange(selectedType === type.value ? null : type.value)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-              selectedType === type.value
-                ? "bg-primary text-primary-foreground"
-                : "bg-card border border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"
-            }`}
+            className={pillClass(selectedType === type.value)}
           >
             {type.label}
           </button>
         ))}
+      </div>
 
-        {/* Divider */}
-        <div className="w-px h-6 bg-border mx-2" />
-
-        {/* Time Filters */}
-        <div className="flex items-center gap-1 mr-2">
-          <Calendar className="w-4 h-4 text-muted-foreground" />
-        </div>
+      {/* Time Pills + Past + Reset */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-stat text-[11px] tracking-[0.14em] uppercase text-[hsl(0_0%_45%)] mr-1">
+          Zeitraum
+        </span>
         {TIME_FILTERS.map((time) => (
           <button
             key={time.value}
             onClick={() => onTimeChange(selectedTime === time.value ? null : time.value)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-              selectedTime === time.value
-                ? "bg-primary text-primary-foreground"
-                : "bg-card border border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"
-            }`}
+            className={pillClass(selectedTime === time.value)}
           >
             {time.label}
           </button>
         ))}
 
-        {/* Show Past Toggle */}
-        <button
-          onClick={() => onShowPastChange(!showPast)}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-            showPast
-              ? "bg-muted text-foreground"
-              : "bg-card border border-border hover:border-primary/50 text-muted-foreground"
-          }`}
-        >
-          {showPast ? "Vergangene ausblenden" : "Vergangene anzeigen"}
+        <span className="w-px h-5 bg-[hsl(0_0%_16%)] mx-1" />
+
+        <button onClick={() => onShowPastChange(!showPast)} className={pillClass(showPast)}>
+          <History className="w-[13px] h-[13px]" />
+          Vergangene
         </button>
 
-        {/* Clear Filters */}
         {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={clearFilters}
-            className="text-muted-foreground hover:text-foreground"
+            className="inline-flex items-center gap-1.5 px-2.5 py-2 min-h-[36px] text-[13px] font-semibold text-[hsl(0_0%_55%)] hover:text-foreground transition-colors"
           >
-            <X className="w-4 h-4 mr-1" />
-            Filter zurücksetzen
-          </Button>
+            <RotateCcw className="w-[13px] h-[13px]" />
+            Zurücksetzen
+          </button>
         )}
       </div>
     </div>

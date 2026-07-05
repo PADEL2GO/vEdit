@@ -22,7 +22,8 @@ import {
   Globe,
   Users,
   Ticket,
-  Sparkles
+  Sparkles,
+  CalendarX
 } from "lucide-react";
 import { EventCard } from "@/components/events";
 
@@ -168,15 +169,17 @@ const EventDetail = () => {
     return (
       <>
         <Navigation />
-        <main className="min-h-screen bg-background pt-20">
-          <div className="container mx-auto px-4 py-20">
-            <div className="animate-pulse space-y-8">
-              <div className="h-8 w-32 bg-muted rounded" />
-              <div className="h-96 bg-muted rounded-3xl" />
-              <div className="h-12 w-2/3 bg-muted rounded" />
-              <div className="h-24 bg-muted rounded" />
+        <main className="min-h-screen bg-background pt-16 md:pt-20">
+          <section className="pt-6 pb-24">
+            <div className="mx-auto max-w-[1200px] px-5 flex flex-col gap-5">
+              <div className="h-8 w-32 rounded-lg bg-muted animate-pulse" />
+              <div className="h-[340px] rounded-[22px] border border-border/60 bg-gradient-card animate-pulse" />
+              <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+                <div className="h-[320px] rounded-[20px] border border-border/60 bg-gradient-card animate-pulse" />
+                <div className="h-[320px] rounded-[20px] border border-border/60 bg-gradient-card animate-pulse" />
+              </div>
             </div>
-          </div>
+          </section>
         </main>
       </>
     );
@@ -186,17 +189,26 @@ const EventDetail = () => {
     return (
       <>
         <Navigation />
-        <main className="min-h-screen bg-background pt-20">
-          <div className="container mx-auto px-4 py-20 text-center">
-            <h1 className="text-3xl font-bold mb-4">{t("detail.notFoundTitle")}</h1>
-            <p className="text-muted-foreground mb-8">
-              {t("detail.notFoundText")}
-            </p>
-            <Button variant="hero" onClick={() => navigate("/events")}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              {t("detail.back")}
-            </Button>
-          </div>
+        <main className="min-h-screen bg-background pt-16 md:pt-20">
+          <section className="pt-[110px] pb-24 px-5">
+            <div className="mx-auto max-w-[440px] flex flex-col items-center gap-5 text-center">
+              <span className="w-[88px] h-[88px] rounded-full bg-white/[0.04] border border-border flex items-center justify-center text-muted-foreground">
+                <CalendarX className="w-[38px] h-[38px]" />
+              </span>
+              <div className="flex flex-col gap-2.5">
+                <h1 className="text-[clamp(26px,4.4vw,36px)] font-black tracking-tight text-foreground">
+                  {t("detail.notFoundTitle")}
+                </h1>
+                <p className="text-[15.5px] leading-relaxed text-muted-foreground">
+                  {t("detail.notFoundText")}
+                </p>
+              </div>
+              <Button variant="hero" size="lg" onClick={() => navigate("/events")}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t("detail.back")}
+              </Button>
+            </div>
+          </section>
         </main>
         <Footer />
       </>
@@ -205,6 +217,11 @@ const EventDetail = () => {
 
   const startDate = event.start_at ? new Date(event.start_at) : null;
   const endDate = event.end_at ? new Date(event.end_at) : null;
+  const isPast = startDate ? startDate.getTime() < Date.now() : false;
+  const daysUntil = startDate
+    ? Math.ceil((startDate.getTime() - Date.now()) / 86_400_000)
+    : null;
+  const isSoon = !isPast && daysUntil !== null && daysUntil <= 7;
   const fullAddress = [
     event.venue_name || event.locations?.name,
     event.address_line1 || event.locations?.address,
@@ -251,175 +268,172 @@ const EventDetail = () => {
 
       <Navigation />
       
-      <main className="min-h-screen bg-background pt-20">
-        {/* Hero Section */}
-        <section className="relative">
-          {/* Back Button */}
-          <div className="container mx-auto px-4 py-6">
-            <Button 
-              variant="ghost" 
+      <main className="min-h-screen bg-background pt-16 md:pt-20">
+        <section className="pt-6 pb-24">
+          <div className="mx-auto max-w-[1200px] px-5 flex flex-col gap-5">
+            {/* Back Button */}
+            <button
               onClick={() => navigate("/events")}
-              className="text-muted-foreground hover:text-foreground"
+              className="inline-flex items-center gap-1.5 self-start py-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="w-4 h-4" />
               {t("detail.back")}
-            </Button>
-          </div>
+            </button>
 
-          {/* Hero Image */}
-          <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
-            {event.image_url ? (
-              <img
-                src={event.image_url}
-                alt={event.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-primary/30 to-primary/5 flex items-center justify-center">
-                <Sparkles className="w-24 h-24 text-primary/40" />
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-          </div>
-
-          {/* Event Info Overlay */}
-          <div className="container mx-auto px-4 relative -mt-32 z-10">
+            {/* Hero */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              className="max-w-4xl"
+              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="relative overflow-hidden rounded-[22px] border border-border/80"
             >
-              {/* Badges */}
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                {event.event_type && (
-                  <Badge className="bg-primary text-primary-foreground">
-                    {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
-                  </Badge>
-                )}
-                {event.featured && (
-                  <Badge variant="outline" className="border-primary/50 text-primary">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    {t("detail.featured")}
-                  </Badge>
-                )}
-              </div>
+              {event.image_url ? (
+                <img
+                  src={event.image_url}
+                  alt={event.title}
+                  className="block w-full h-[clamp(280px,38vw,400px)] object-cover"
+                />
+              ) : (
+                <div className="w-full h-[clamp(280px,38vw,400px)] bg-gradient-to-br from-primary/30 to-primary/5 flex items-center justify-center">
+                  <Sparkles className="w-24 h-24 text-primary/40" />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/15 to-black/90" />
+              <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-[clamp(20px,3vw,30px)]">
+                {/* Badges */}
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {event.event_type && (
+                    <span className="inline-flex items-center rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                      {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
+                    </span>
+                  )}
+                  {event.featured && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/35 bg-black/60 px-3 py-1 text-xs font-semibold text-primary backdrop-blur">
+                      <Sparkles className="w-3 h-3" />
+                      {t("detail.featured")}
+                    </span>
+                  )}
+                  {isPast && (
+                    <span className="inline-flex items-center rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur">
+                      Bereits vorbei
+                    </span>
+                  )}
+                  {isSoon && (
+                    <span className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-black/60 px-3 py-1 text-xs font-semibold text-primary backdrop-blur">
+                      <span className="w-[7px] h-[7px] rounded-full bg-primary animate-pulse" />
+                      {daysUntil === 0 ? "Heute!" : `In ${daysUntil} Tagen`}
+                    </span>
+                  )}
+                </div>
 
-              {/* Title */}
-              <h1 className="text-3xl md:text-5xl font-bold mb-6">
-                {event.title}
-              </h1>
+                {/* Title */}
+                <h1 className="max-w-[820px] text-[clamp(28px,4.6vw,48px)] font-black leading-[1.08] tracking-tight text-foreground">
+                  {event.title}
+                </h1>
 
-              {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-6 text-lg">
-                {startDate && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="w-5 h-5 text-primary" />
-                    {format(startDate, dateFmtLong, { locale: dateLocale })}
-                  </div>
-                )}
-                {startDate && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Clock className="w-5 h-5 text-primary" />
-                    {t("time.withSuffix", { time: format(startDate, "HH:mm", { locale: dateLocale }) })}
-                    {endDate && ` – ${t("time.withSuffix", { time: format(endDate, "HH:mm", { locale: dateLocale }) })}`}
-                  </div>
-                )}
-                {event.capacity && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Users className="w-5 h-5 text-primary" />
-                    {t("detail.capacity", { n: event.capacity })}
-                  </div>
-                )}
+                {/* Meta Info */}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  {startDate && (
+                    <span className="inline-flex items-center gap-2 font-stat text-[13px] text-foreground/80">
+                      <Calendar className="w-3.5 h-3.5 text-primary" />
+                      {format(startDate, dateFmtLong, { locale: dateLocale })}
+                    </span>
+                  )}
+                  {startDate && (
+                    <span className="inline-flex items-center gap-2 font-stat text-[13px] text-foreground/80">
+                      <Clock className="w-3.5 h-3.5 text-primary" />
+                      {t("time.withSuffix", { time: format(startDate, "HH:mm", { locale: dateLocale }) })}
+                      {endDate && ` – ${t("time.withSuffix", { time: format(endDate, "HH:mm", { locale: dateLocale }) })}`}
+                    </span>
+                  )}
+                  {event.capacity && (
+                    <span className="inline-flex items-center gap-2 font-stat text-[13px] text-foreground/80">
+                      <Users className="w-3.5 h-3.5 text-primary" />
+                      {t("detail.capacity", { n: event.capacity })}
+                    </span>
+                  )}
+                </div>
               </div>
             </motion.div>
-          </div>
-        </section>
 
-        {/* Content Grid */}
-        <section className="py-12">
-          <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-3 gap-12">
+            {/* Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start">
               {/* Main Content */}
-              <div className="lg:col-span-2 space-y-12">
-                {/* Description */}
+              <div className="flex flex-col gap-4 min-w-0">
+                {/* About */}
                 {event.description && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    <h2 className="text-xl font-bold mb-4">{t("detail.aboutHeading")}</h2>
-                    <div className="prose prose-invert max-w-none">
-                      <p className="text-muted-foreground whitespace-pre-line">
+                  <div className="rounded-2xl border border-border/60 bg-gradient-card p-[26px]">
+                    <div className="flex flex-col gap-3.5">
+                      <h2 className="text-[21px] font-bold tracking-tight text-foreground">
+                        {t("detail.aboutHeading")}
+                      </h2>
+                      <p className="text-[15.5px] leading-[1.7] text-muted-foreground whitespace-pre-line">
                         {event.description}
                       </p>
+                      {event.highlights && event.highlights.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-0.5">
+                          {event.highlights.map((highlight) => (
+                            <span
+                              key={highlight}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.08] px-3.5 py-1.5 text-[12.5px] font-semibold text-primary"
+                            >
+                              <Sparkles className="w-3 h-3" />
+                              {highlight}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </motion.div>
-                )}
-
-                {/* Highlights */}
-                {event.highlights && event.highlights.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15 }}
-                  >
-                    <h2 className="text-xl font-bold mb-4">{t("detail.highlightsHeading")}</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {event.highlights.map((highlight) => (
-                        <Badge 
-                          key={highlight} 
-                          variant="secondary" 
-                          className="bg-primary/10 text-primary border-primary/20 px-4 py-2 text-sm"
-                        >
-                          {highlight}
-                        </Badge>
-                      ))}
-                    </div>
-                  </motion.div>
+                  </div>
                 )}
 
                 {/* Line-up */}
                 {event.event_artists.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <h2 className="text-xl font-bold mb-6">{t("detail.lineupHeading")}</h2>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      {event.event_artists.map((artist) => (
-                        <div
-                          key={artist.id}
-                          className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border"
-                        >
-                          <div className="w-16 h-16 rounded-full overflow-hidden bg-muted shrink-0">
-                            {artist.image_url ? (
-                              <img
-                                src={artist.image_url}
-                                alt={artist.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Music className="w-6 h-6 text-muted-foreground" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold truncate">{artist.name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {ARTIST_ROLE_LABELS[artist.role] || artist.role}
-                            </p>
-                            <div className="flex items-center gap-2 mt-2">
+                  <div className="rounded-2xl border border-border/60 bg-gradient-card p-[26px]">
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center gap-2.5">
+                        <h2 className="text-[21px] font-bold tracking-tight text-foreground">
+                          {t("detail.lineupHeading")}
+                        </h2>
+                        <span className="font-stat text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                          {event.event_artists.length} Acts
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(240px,100%),1fr))] gap-2.5">
+                        {event.event_artists.map((artist) => (
+                          <div
+                            key={artist.id}
+                            className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 transition-colors hover:border-primary/40"
+                          >
+                            <span className="w-11 h-11 shrink-0 overflow-hidden rounded-full border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))] flex items-center justify-center text-primary">
+                              {artist.image_url ? (
+                                <img
+                                  src={artist.image_url}
+                                  alt={artist.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <Music className="w-[18px] h-[18px]" />
+                              )}
+                            </span>
+                            <span className="flex flex-col gap-px flex-1 min-w-0">
+                              <span className="truncate text-[15px] font-bold text-foreground">
+                                {artist.name}
+                              </span>
+                              <span className="text-[12.5px] text-muted-foreground">
+                                {ARTIST_ROLE_LABELS[artist.role] || artist.role}
+                              </span>
+                            </span>
+                            <span className="flex gap-1.5">
                               {artist.instagram_url && (
                                 <a
                                   href={artist.instagram_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-muted-foreground hover:text-primary transition-colors"
+                                  aria-label="Instagram"
+                                  className="w-[30px] h-[30px] rounded-[9px] border border-white/15 flex items-center justify-center text-muted-foreground transition-colors hover:text-primary hover:border-primary/40"
                                 >
-                                  <Instagram className="w-4 h-4" />
+                                  <Instagram className="w-3.5 h-3.5" />
                                 </a>
                               )}
                               {artist.website_url && (
@@ -427,131 +441,142 @@ const EventDetail = () => {
                                   href={artist.website_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-muted-foreground hover:text-primary transition-colors"
+                                  aria-label="Website"
+                                  className="w-[30px] h-[30px] rounded-[9px] border border-white/15 flex items-center justify-center text-muted-foreground transition-colors hover:text-primary hover:border-primary/40"
                                 >
-                                  <Globe className="w-4 h-4" />
+                                  <Globe className="w-3.5 h-3.5" />
                                 </a>
                               )}
-                            </div>
+                            </span>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
 
                 {/* Partners */}
                 {event.event_brands.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 }}
-                  >
-                    <h2 className="text-xl font-bold mb-6">{t("detail.partnersHeading")}</h2>
-                    <div className="flex flex-wrap gap-6">
-                      {event.event_brands.map((brand) => (
-                        <a
-                          key={brand.id}
-                          href={brand.website_url || brand.instagram_url || "#"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-colors"
-                        >
-                          {brand.logo_url ? (
-                            <img
-                              src={brand.logo_url}
-                              alt={brand.name}
-                              className="h-10 w-auto object-contain"
-                            />
-                          ) : (
-                            <span className="font-bold">{brand.name}</span>
-                          )}
-                        </a>
-                      ))}
+                  <div className="rounded-2xl border border-border/60 bg-gradient-card p-[26px]">
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center gap-2.5">
+                        <h2 className="text-[21px] font-bold tracking-tight text-foreground">
+                          {t("detail.partnersHeading")}
+                        </h2>
+                        <span className="font-stat text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                          on board
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(130px,100%),1fr))] gap-3">
+                        {event.event_brands.map((brand) => (
+                          <a
+                            key={brand.id}
+                            href={brand.website_url || brand.instagram_url || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex h-[76px] items-center justify-center overflow-hidden rounded-2xl bg-[#F5F5F3] p-2.5"
+                          >
+                            {brand.logo_url ? (
+                              <img
+                                src={brand.logo_url}
+                                alt={brand.name}
+                                className="max-h-[56px] w-full object-contain"
+                              />
+                            ) : (
+                              <span className="font-bold text-black">{brand.name}</span>
+                            )}
+                          </a>
+                        ))}
+                      </div>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
 
                 {/* Location */}
                 {fullAddress && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <h2 className="text-xl font-bold mb-4">{t("detail.locationHeading")}</h2>
-                    <div className="p-6 rounded-xl bg-card border border-border">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                          <MapPin className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold mb-1">
-                            {event.venue_name || event.locations?.name}
-                          </h3>
-                          <p className="text-muted-foreground mb-4">
-                            {event.address_line1 || event.locations?.address}
-                            {event.postal_code && event.city && (
-                              <><br />{event.postal_code} {event.city}</>
-                            )}
-                          </p>
-                          {event.location_url && (
-                            <Button variant="outline" size="sm" asChild>
-                              <a
-                                href={event.location_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {t("detail.routeCta")}
-                                <ExternalLink className="w-4 h-4 ml-2" />
-                              </a>
-                            </Button>
+                  <div className="rounded-2xl border border-border/60 bg-gradient-card p-[26px]">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <span className="w-12 h-12 shrink-0 rounded-[13px] border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))] flex items-center justify-center text-primary">
+                        <MapPin className="w-[21px] h-[21px]" />
+                      </span>
+                      <div className="flex flex-col gap-0.5 flex-1 min-w-[180px]">
+                        <span className="text-[17px] font-bold text-foreground">
+                          {event.venue_name || event.locations?.name}
+                        </span>
+                        <span className="text-[13.5px] text-muted-foreground">
+                          {event.address_line1 || event.locations?.address}
+                          {event.postal_code && event.city && (
+                            <>{" "}· {event.postal_code} {event.city}</>
                           )}
-                        </div>
+                        </span>
                       </div>
+                      {event.location_url && (
+                        <Button variant="outline" size="default" asChild>
+                          <a
+                            href={event.location_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {t("detail.routeCta")}
+                            <ExternalLink className="w-3.5 h-3.5 ml-2" />
+                          </a>
+                        </Button>
+                      )}
                     </div>
-                  </motion.div>
+                  </div>
                 )}
               </div>
 
-              {/* Sidebar - Ticket CTA */}
-              <div className="lg:col-span-1">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="sticky top-28"
-                >
-                  <div className="p-6 rounded-2xl bg-card border border-border">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Ticket className="w-5 h-5 text-primary" />
-                      <span className="font-bold">{t("detail.ticketsLabel")}</span>
+              {/* Ticket Sidebar */}
+              <div className="lg:sticky lg:top-24">
+                <div className="rounded-2xl border border-border/60 bg-gradient-card p-6 shadow-lg shadow-primary/5">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="w-[42px] h-[42px] rounded-xl border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))] flex items-center justify-center text-primary">
+                        <Ticket className="w-[19px] h-[19px]" />
+                      </span>
+                      <h3 className="text-[18px] font-bold text-foreground">
+                        {t("detail.ticketsLabel")}
+                      </h3>
                     </div>
 
                     {event.price_label && (
-                      <div className="text-3xl font-bold text-primary mb-2">
+                      <div className="font-stat text-[34px] font-bold leading-none text-primary">
                         {event.price_label}
                       </div>
                     )}
 
-                    {startDate && (
-                      <p className="text-sm text-muted-foreground mb-6">
-                        {t("time.dateTimeAt", {
-                          date: format(startDate, dateFmtMedium, { locale: dateLocale }),
-                          time: format(startDate, "HH:mm", { locale: dateLocale }),
-                        })}
-                      </p>
-                    )}
-
                     {event.capacity && (
-                      <p className="text-sm text-muted-foreground mb-6">
+                      <p className="text-[12.5px] text-muted-foreground">
                         {t("detail.capacityAvailable", { n: event.capacity })}
                       </p>
                     )}
 
-                    <Button 
-                      variant="hero" 
-                      size="lg" 
+                    <div className="flex flex-col gap-2.5 rounded-[13px] border border-white/10 bg-white/[0.03] px-3.5 py-3">
+                      {startDate && (
+                        <span className="inline-flex items-center gap-2.5 font-stat text-[12.5px] text-foreground/75">
+                          <Calendar className="w-3.5 h-3.5 text-primary" />
+                          {format(startDate, dateFmtLong, { locale: dateLocale })}
+                        </span>
+                      )}
+                      {startDate && (
+                        <span className="inline-flex items-center gap-2.5 font-stat text-[12.5px] text-foreground/75">
+                          <Clock className="w-3.5 h-3.5 text-primary" />
+                          {t("time.withSuffix", { time: format(startDate, "HH:mm", { locale: dateLocale }) })}
+                          {endDate && ` – ${t("time.withSuffix", { time: format(endDate, "HH:mm", { locale: dateLocale }) })}`}
+                        </span>
+                      )}
+                      {(event.venue_name || event.locations?.name) && (
+                        <span className="inline-flex items-center gap-2.5 text-[13px] text-foreground/75">
+                          <MapPin className="w-3.5 h-3.5 text-primary" />
+                          {event.venue_name || event.locations?.name}
+                        </span>
+                      )}
+                    </div>
+
+                    <Button
+                      variant="hero"
+                      size="xl"
                       className="w-full group"
                       asChild
                     >
@@ -560,51 +585,53 @@ const EventDetail = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
+                        <Ticket className="w-[17px] h-[17px] mr-2" />
                         {t("detail.ticketsCta")}
                         <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                       </a>
                     </Button>
 
-                    <p className="text-xs text-muted-foreground text-center mt-4">
+                    <span className="inline-flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                      <ExternalLink className="w-3 h-3" />
                       {t("detail.ticketsNote")}
-                    </p>
+                    </span>
                   </div>
-                </motion.div>
+                </div>
               </div>
             </div>
+
+            {/* Similar Events */}
+            {similarEvents && similarEvents.length > 0 && (
+              <div className="flex flex-col gap-[18px] mt-6">
+                <h2 className="text-[23px] font-bold tracking-tight text-foreground">
+                  {t("detail.similarHeading")}
+                </h2>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))] gap-4">
+                  {similarEvents.map((similar: any, index: number) => (
+                    <EventCard
+                      key={similar.id}
+                      id={similar.id}
+                      slug={similar.slug || similar.id}
+                      title={similar.title}
+                      description={similar.description}
+                      city={similar.city}
+                      start_at={similar.start_at}
+                      end_at={similar.end_at}
+                      image_url={similar.image_url}
+                      event_type={similar.event_type}
+                      price_label={similar.price_label}
+                      highlights={similar.highlights}
+                      venue_name={similar.venue_name || similar.locations?.name || null}
+                      event_artists={similar.event_artists || []}
+                      event_brands={similar.event_brands || []}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </section>
-
-        {/* Similar Events */}
-        {similarEvents && similarEvents.length > 0 && (
-          <section className="py-16 bg-card/30">
-            <div className="container mx-auto px-4">
-              <h2 className="text-2xl font-bold mb-8">{t("detail.similarHeading")}</h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {similarEvents.map((similar: any, index: number) => (
-                  <EventCard
-                    key={similar.id}
-                    id={similar.id}
-                    slug={similar.slug || similar.id}
-                    title={similar.title}
-                    description={similar.description}
-                    city={similar.city}
-                    start_at={similar.start_at}
-                    end_at={similar.end_at}
-                    image_url={similar.image_url}
-                    event_type={similar.event_type}
-                    price_label={similar.price_label}
-                    highlights={similar.highlights}
-                    venue_name={similar.venue_name || similar.locations?.name || null}
-                    event_artists={similar.event_artists || []}
-                    event_brands={similar.event_brands || []}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
       </main>
 
       <Footer />

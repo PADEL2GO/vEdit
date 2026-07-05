@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, ArrowRight, Check, Loader2 } from "lucide-react";
+import { Mail, CheckCircle2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +17,7 @@ export const NewsletterCTA = () => {
     if (!email) return;
 
     setIsLoading(true);
-    
+
     try {
       const { error } = await supabase
         .from("newsletter_subscribers")
@@ -43,67 +43,57 @@ export const NewsletterCTA = () => {
   };
 
   return (
-    <div className="relative text-center h-full" id="newsletter">
-      {/* Glow Background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-3xl blur-3xl" />
-      
-      <div className="relative p-8 md:p-12 rounded-3xl border border-primary/20 bg-card/50 backdrop-blur-sm h-full flex flex-col justify-center">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-              <Mail className="w-8 h-8 text-primary" />
-            </div>
-            
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              Nichts verpassen
-            </h2>
-            
-            <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-              Erhalte exklusive Event-Updates, Early-Bird-Tickets und Community-News 
-              direkt in dein Postfach. Kein Spam, nur das Beste von <BrandName inline />.
-            </p>
-
-            {isSuccess ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center justify-center gap-2 text-primary font-medium"
-              >
-                <Check className="w-5 h-5" />
-                Du bist dabei! Check dein Postfach.
-              </motion.div>
-            ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <Input
-                  type="email"
-                  placeholder="Deine E-Mail-Adresse"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="h-12 bg-background border-border flex-1"
-                />
-                <Button 
-                  type="submit" 
-                  variant="hero" 
-                  size="lg"
-                  disabled={isLoading}
-                  className="group"
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      Anmelden
-                      <ArrowRight className="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" />
-                    </>
-                  )}
-                </Button>
-              </form>
-            )}
-
-            <p className="text-xs text-muted-foreground mt-4">
-              Mit der Anmeldung stimmst du zu, Event-Updates von <BrandName inline /> zu erhalten. 
-              Du kannst dich jederzeit abmelden.
-            </p>
+    <div
+      id="newsletter"
+      className="h-full rounded-2xl border border-border/60 bg-gradient-card p-7 flex flex-col gap-4 scroll-mt-24"
+    >
+      <div className="flex items-center gap-3.5">
+        <span className="w-12 h-12 rounded-[13px] flex-none flex items-center justify-center text-primary border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))]">
+          <Mail className="w-[21px] h-[21px]" />
+        </span>
+        <div className="flex flex-col gap-0.5">
+          <h2 className="font-display font-bold text-xl tracking-[-0.01em] text-foreground">
+            Kein Event verpassen
+          </h2>
+          <span className="text-[13.5px] text-[hsl(0_0%_60%)]">
+            Neue Events zuerst in deinem Postfach — kein Spam, versprochen.
+          </span>
+        </div>
       </div>
+
+      {isSuccess ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex items-center gap-2.5 rounded-[14px] px-4 py-3.5 bg-primary/[0.08] border border-primary/35"
+        >
+          <CheckCircle2 className="w-[19px] h-[19px] text-primary flex-none" />
+          <span className="text-sm font-semibold text-foreground">
+            Du bist dabei! 🎾 Wir melden uns vor jedem Event.
+          </span>
+        </motion.div>
+      ) : (
+        <>
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2.5">
+            <Input
+              type="email"
+              placeholder="deine@email.de"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="h-[46px] flex-1 rounded-[13px] bg-[hsl(0_0%_6%)] border-[hsl(0_0%_16%)] text-base focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:ring-offset-0"
+            />
+            <Button type="submit" variant="lime" disabled={isLoading} className="h-[46px]">
+              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Anmelden"}
+            </Button>
+          </form>
+
+          <p className="text-xs text-[hsl(0_0%_50%)]">
+            Mit der Anmeldung stimmst du zu, Event-Updates von <BrandName inline /> zu erhalten.
+            Du kannst dich jederzeit abmelden.
+          </p>
+        </>
+      )}
     </div>
   );
 };

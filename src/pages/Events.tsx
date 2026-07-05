@@ -10,23 +10,27 @@ import { NavLink } from "@/components/NavLink";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import eventsHero from "@/assets/events-hero.jpg";
-import { 
-  ArrowRight, 
-  PartyPopper, 
+import leagueHero from "@/assets/league-hero.jpg";
+import {
+  ArrowRight,
+  PartyPopper,
   Music,
-  Wine,
   Users,
   Sparkles,
   Gift,
   Ticket,
   CalendarX,
+  Calendar,
+  Building2,
   UtensilsCrossed,
   Handshake,
   Mic2,
   Gamepad2,
 } from "lucide-react";
 import { EventCard, FeaturedEvent, EventFilters, NewsletterCTA } from "@/components/events";
-import { isToday, isThisWeek, isThisMonth, isPast } from "date-fns";
+import { useLaunchDate } from "@/hooks/useLaunchDate";
+import { isToday, isThisWeek, isThisMonth, isPast, format } from "date-fns";
+import { de } from "date-fns/locale";
 
 interface DbArtist {
   id: string;
@@ -93,10 +97,18 @@ const benefits = [
 
 const Events = () => {
   const { t } = useTranslation(["events", "common"]);
+  const { launchDate } = useLaunchDate();
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [showPast, setShowPast] = useState(false);
+
+  const resetAllFilters = () => {
+    setSearch("");
+    setSelectedType(null);
+    setSelectedTime(null);
+    setShowPast(false);
+  };
 
   const { data: dbEvents, isLoading } = useQuery({
     queryKey: ["public-events"],
@@ -194,6 +206,8 @@ const Events = () => {
     };
   }, [dbEvents, search, selectedType, selectedTime, showPast]);
 
+  // Unfiltered DB list is empty → no events created yet (Launch-Placeholder).
+  const noEventsAtAll = !isLoading && (!dbEvents || dbEvents.length === 0);
 
   return (
     <>
@@ -209,60 +223,68 @@ const Events = () => {
       
       <main className="min-h-screen bg-background pt-20">
         {/* Hero Section */}
-        <section className="relative min-h-[80vh] md:min-h-screen flex items-start justify-center overflow-hidden">
+        <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-black">
           {/* Hintergrundbild */}
           <img src={eventsHero} alt="" className="absolute inset-0 w-full h-full object-cover object-center z-0" />
-          {/* Abdunklungs-Overlay */}
-          <div className="absolute inset-0 bg-black/60 z-[1]" />
-          {/* Farbverlauf unten */}
-          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent z-[2]" />
-          
-          <div className="container mx-auto px-4 relative z-10 pt-[20vh] md:pt-[30vh]">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 z-[1]"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 55% at 50% 20%, hsl(71 91% 51% / 0.1), transparent), linear-gradient(180deg, hsl(0 0% 0% / 0.55), hsl(0 0% 0% / 0.72) 60%, #000)",
+            }}
+          />
+
+          <div className="relative z-10 mx-auto max-w-[860px] px-5 py-24">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="max-w-3xl mx-auto text-center"
+              className="flex flex-col items-center gap-6 text-center"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white mb-6">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-sm font-medium">{t("hero.badge")}</span>
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5" />
+                {t("hero.badge")}
               </span>
 
-              <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold leading-tight mb-6 text-white">
+              <h1 className="font-display font-extrabold leading-[1.04] tracking-[-0.02em] text-white text-[clamp(40px,7.5vw,74px)]">
                 {t("hero.titlePrefix")}{" "}
-                <span className="text-gradient-lime">{t("hero.titleHighlight")}</span>
+                <span className="italic text-primary">{t("hero.titleHighlight")}</span>
               </h1>
 
-              <p className="text-lg md:text-2xl text-white/80 mb-8">
+              <p className="text-[clamp(15px,2.3vw,18.5px)] leading-relaxed text-white/75 max-w-[560px]">
                 {t("hero.description")}
               </p>
 
               {/* Trust Strip */}
-              <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 mb-10 text-sm text-white/70">
-                <span className="flex items-center gap-2">
-                  <Music className="w-4 h-4 text-primary" />
-                  <span className="font-semibold text-white">{t("hero.trust.djs")}</span>
+              <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-3 text-[13.5px] font-semibold text-white/85">
+                <span className="inline-flex items-center gap-2">
+                  <Music className="w-[15px] h-[15px] text-primary" />
+                  {t("hero.trust.djs")}
                 </span>
-                <span className="flex items-center gap-2">
-                  <Gift className="w-4 h-4 text-primary" />
-                  <span className="font-semibold text-white">{t("hero.trust.brands")}</span>
+                <span className="w-1 h-1 rounded-full bg-[hsl(0_0%_40%)]" />
+                <span className="inline-flex items-center gap-2">
+                  <Gift className="w-[15px] h-[15px] text-primary" />
+                  {t("hero.trust.brands")}
                 </span>
-                <span className="flex items-center gap-2">
-                  <Ticket className="w-4 h-4 text-primary" />
-                  <span className="font-semibold text-white">{t("hero.trust.spots")}</span>
+                <span className="w-1 h-1 rounded-full bg-[hsl(0_0%_40%)]" />
+                <span className="inline-flex items-center gap-2">
+                  <Ticket className="w-[15px] h-[15px] text-primary" />
+                  {t("hero.trust.spots")}
                 </span>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3.5 justify-center mt-1">
                 <Button variant="hero" size="xl" className="group" asChild>
-                  <a href="#events">
+                  <a href="#filters">
+                    <Sparkles className="w-[17px] h-[17px]" />
                     {t("hero.primaryCta")}
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </a>
                 </Button>
                 <Button variant="heroOutline" size="xl" asChild>
-                  <a href="#filters">
+                  <a href="#ev-plan">
+                    <PartyPopper className="w-[17px] h-[17px]" />
                     {t("hero.secondaryCta")}
                   </a>
                 </Button>
@@ -272,10 +294,10 @@ const Events = () => {
         </section>
 
         {/* Featured Event Section */}
-        {featuredEvent && featuredEvent.slug && (
+        {!noEventsAtAll && featuredEvent && featuredEvent.slug && (
           <>
-            <section id="events" className="py-12 scroll-mt-24">
-              <div className="container mx-auto px-4">
+            <section className="pt-14 md:pt-20">
+              <div className="mx-auto max-w-[1200px] px-5">
                 <FeaturedEvent
                   slug={featuredEvent.slug}
                   title={featuredEvent.title}
@@ -291,61 +313,94 @@ const Events = () => {
                 />
               </div>
             </section>
-            <SectionDivider variant="glow" />
           </>
         )}
 
         {/* Filters & Events Grid */}
-        <section id="filters" className="py-16 scroll-mt-24">
-          <div className="container mx-auto px-4">
-            {/* Section Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="mb-8"
-            >
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">
-                {showPast ? t("list.headingPast") : t("list.headingUpcoming")}
-              </h2>
-              <p className="text-muted-foreground">
-                {showPast
-                  ? t("list.subtitlePast")
-                  : t("list.subtitleUpcoming")
-                }
-              </p>
-            </motion.div>
+        <section id="filters" className="py-14 md:py-20 scroll-mt-20">
+          <div className="mx-auto max-w-[1200px] px-5 flex flex-col gap-7">
+            {!noEventsAtAll && (
+              <>
+                {/* Section Header */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="flex items-end justify-between gap-4 flex-wrap"
+                >
+                  <div className="flex flex-col gap-3">
+                    <span className="font-stat text-xs tracking-[0.2em] uppercase text-primary">
+                      {t("list.subtitleUpcoming")}
+                    </span>
+                    <h2 className="font-display font-extrabold text-3xl md:text-[44px] leading-[1.1] tracking-[-0.02em]">
+                      {showPast ? t("list.headingPast") : t("list.headingUpcoming")}
+                    </h2>
+                  </div>
+                  {!isLoading && (
+                    <span className="font-stat text-[13px] text-[hsl(0_0%_55%)]">
+                      {upcomingEvents.length}{" "}
+                      {upcomingEvents.length === 1 ? "Event" : "Events"}
+                    </span>
+                  )}
+                </motion.div>
 
-            {/* Filters */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="mb-10"
-            >
-              <EventFilters
-                onSearchChange={setSearch}
-                onTypeChange={setSelectedType}
-                onTimeChange={setSelectedTime}
-                selectedType={selectedType}
-                selectedTime={selectedTime}
-                showPast={showPast}
-                onShowPastChange={setShowPast}
-              />
-            </motion.div>
+                {/* Filters */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                >
+                  <EventFilters
+                    onSearchChange={setSearch}
+                    onTypeChange={setSelectedType}
+                    onTimeChange={setSelectedTime}
+                    selectedType={selectedType}
+                    selectedTime={selectedTime}
+                    showPast={showPast}
+                    onShowPastChange={setShowPast}
+                  />
+                </motion.div>
+              </>
+            )}
 
-            {/* Events Grid */}
+            {/* Events Grid / States */}
             {isLoading ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {[1, 2, 3].map((i) => (
-                  <div 
-                    key={i} 
-                    className="h-96 rounded-2xl bg-card border border-border animate-pulse"
+                  <div
+                    key={i}
+                    className="h-[380px] rounded-2xl border border-[hsl(0_0%_12%)] bg-gradient-card animate-pulse"
                   />
                 ))}
               </div>
+            ) : noEventsAtAll ? (
+              /* No events created yet → Launch-Placeholder */
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mx-auto max-w-md w-full flex flex-col items-center gap-5 text-center rounded-2xl border border-dashed border-border/60 bg-white/[0.02] py-16 px-6"
+              >
+                <span className="w-14 h-14 rounded-[16px] flex items-center justify-center text-primary border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))]">
+                  <Calendar className="w-7 h-7" />
+                </span>
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-display font-bold text-xl text-foreground">
+                    Events kommen bald
+                  </h3>
+                  <p className="text-[14.5px] leading-relaxed text-[hsl(0_0%_60%)]">
+                    Die ersten P2G Events gehen zum Launch am{" "}
+                    <span className="font-stat text-foreground">
+                      {format(launchDate, "d. MMMM yyyy", { locale: de })}
+                    </span>{" "}
+                    live. Trag dich in den Newsletter ein, um nichts zu verpassen.
+                  </p>
+                </div>
+                <Button variant="hero" asChild>
+                  <a href="#newsletter">{t("list.newsletterCta")}</a>
+                </Button>
+              </motion.div>
             ) : upcomingEvents.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {upcomingEvents.map((event, index) => (
                   <EventCard
                     key={event.id}
@@ -368,32 +423,30 @@ const Events = () => {
                 ))}
               </div>
             ) : (
+              /* Events exist but filter matched nothing */
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-20"
+                className="flex flex-col items-center gap-3.5 text-center py-16 px-5 rounded-[22px] border border-dashed border-[hsl(0_0%_18%)] bg-white/[0.02]"
               >
-                <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
-                  {showPast ? (
-                    <CalendarX className="w-10 h-10 text-muted-foreground" />
-                  ) : (
-                    <Sparkles className="w-10 h-10 text-primary/60" />
-                  )}
+                <span className="w-[58px] h-[58px] rounded-full bg-white/5 border border-[hsl(0_0%_18%)] flex items-center justify-center text-[hsl(0_0%_55%)]">
+                  <CalendarX className="w-[26px] h-[26px]" />
+                </span>
+                <div className="flex flex-col gap-1.5">
+                  <h3 className="font-display font-bold text-xl text-foreground">
+                    {showPast ? t("list.emptyTitlePast") : "Keine Events gefunden"}
+                  </h3>
+                  <p className="text-[14.5px] text-[hsl(0_0%_55%)] max-w-md">
+                    {showPast
+                      ? t("list.emptyTextPast")
+                      : "Versuch andere Filter — oder schau bald wieder rein."}{" "}
+                    <span className="text-primary">✨</span>
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold mb-2">
-                  {showPast ? t("list.emptyTitlePast") : t("comingSoon", { ns: "common" })}
-                </h3>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  {showPast
-                    ? t("list.emptyTextPast")
-                    : t("list.emptyTextUpcoming")
-                  }
-                </p>
-                {!showPast && (
-                  <Button variant="outline" asChild>
-                    <a href="#newsletter">{t("list.newsletterCta")}</a>
-                  </Button>
-                )}
+                <Button variant="outline" onClick={resetAllFilters}>
+                  <CalendarX className="w-4 h-4" />
+                  Filter zurücksetzen
+                </Button>
               </motion.div>
             )}
           </div>
@@ -402,70 +455,195 @@ const Events = () => {
         <SectionDivider variant="glow" />
 
         {/* Benefits Section */}
-        <section className="py-14 md:py-20 bg-card/30">
-          <div className="container mx-auto px-4">
+        <section className="py-14 md:py-24 bg-gradient-hero">
+          <div className="mx-auto max-w-[1200px] px-5 flex flex-col gap-11">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center max-w-2xl mx-auto mb-12"
+              className="flex flex-col items-center gap-3.5 text-center max-w-[560px] mx-auto"
             >
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-sm font-medium">{t("benefits.badge")}</span>
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5" />
+                {t("benefits.badge")}
               </span>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
-                {t("benefits.titlePrefix")} <span className="text-gradient-lime">{t("benefits.titleHighlight")}</span>
+              <h2 className="font-display font-extrabold text-3xl md:text-[44px] leading-[1.1] tracking-[-0.02em]">
+                {t("benefits.titlePrefix")}{" "}
+                <span className="text-gradient-lime">{t("benefits.titleHighlight")}</span>
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-[17px] leading-relaxed text-[hsl(0_0%_65%)]">
                 {t("benefits.subtitle")}
               </p>
             </motion.div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {benefits.map((benefit, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`p-4 md:p-6 rounded-2xl bg-gradient-to-br ${benefit.gradient} border border-border text-center ${benefit.borderColor} transition-all duration-300 hover:scale-[1.02]`}
-                >
-                  <div className={`w-14 h-14 rounded-xl bg-background/50 backdrop-blur-sm flex items-center justify-center mx-auto mb-4`}>
-                    <benefit.icon className={`w-7 h-7 ${benefit.iconColor}`} />
+            {/* Bento — Part A: Networking image + Stats */}
+            <div className="grid lg:grid-cols-5 gap-5">
+              {/* Networking (Bild) */}
+              <div className="lg:col-span-3 relative rounded-2xl overflow-hidden border border-border/60 min-h-[380px] lg:min-h-[440px] flex flex-col justify-end">
+                <img
+                  src={leagueHero}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(200deg,hsl(0_0%_0%/0.1),hsl(0_0%_0%/0.92)_80%)]" />
+                <span className="absolute top-[18px] left-[18px] font-stat text-[11px] tracking-[0.14em] uppercase text-primary bg-black/60 backdrop-blur-md border border-primary/35 rounded-full px-3.5 py-[7px]">
+                  Community first
+                </span>
+                <div className="relative flex flex-col gap-3 p-7">
+                  <h3 className="font-display font-extrabold tracking-[-0.02em] text-white text-[clamp(24px,3.4vw,36px)] leading-[1.08]">
+                    Komm allein.
+                    <br />
+                    Geh mit <span className="italic text-primary">Crew.</span>
+                  </h3>
+                  <p className="text-[15.5px] leading-relaxed text-white/80 max-w-[420px]">
+                    Matchmaking vor Ort: Wir mixen die Teams, die Courts rotieren — nach zwei
+                    Stunden kennst du den halben Court.
+                  </p>
+                  <div className="flex items-center gap-3 flex-wrap mt-1">
+                    <div className="flex">
+                      {[
+                        "from-primary to-lime-600",
+                        "from-neutral-500 to-neutral-700",
+                        "from-lime-500 to-lime-800",
+                        "from-neutral-400 to-neutral-600",
+                        "from-primary to-lime-400",
+                      ].map((g, i) => (
+                        <span
+                          key={i}
+                          className={`w-9 h-9 rounded-full border-2 border-black bg-gradient-to-br ${g} ${
+                            i > 0 ? "-ml-2.5" : ""
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="inline-flex items-center gap-2 font-stat text-[12.5px] font-bold text-primary">
+                      <Users className="w-3.5 h-3.5" />
+                      Teil vom P2G Network
+                    </span>
                   </div>
-                  <h3 className="font-bold mb-2">{t(`benefits.items.${index}.title`)}</h3>
-                  <p className="text-sm text-muted-foreground">{t(`benefits.items.${index}.description`)}</p>
-                </motion.div>
-              ))}
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="lg:col-span-2 flex flex-col gap-5">
+                <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-card p-6 flex flex-col gap-3">
+                  <div className="absolute -right-20 -top-20 w-56 h-56 rounded-full bg-[radial-gradient(circle,hsl(71_91%_51%/0.14),transparent_70%)] pointer-events-none" />
+                  <span className="w-12 h-12 rounded-[13px] flex items-center justify-center text-primary border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))]">
+                    <Handshake className="w-[21px] h-[21px]" />
+                  </span>
+                  <span className="font-display font-extrabold text-[clamp(30px,3.6vw,44px)] leading-[1.05] tracking-[-0.02em] text-primary [text-shadow:0_0_40px_hsl(71_91%_51%/0.35)]">
+                    Solo? Kein Problem.
+                  </span>
+                  <h3 className="font-display font-extrabold text-xl tracking-[-0.01em] leading-tight text-foreground">
+                    Wir matchen dich vor Ort.
+                  </h3>
+                  <p className="text-[14.5px] leading-relaxed text-[hsl(0_0%_65%)]">
+                    Komm ohne festen Partner — geh mit neuen Kontakten nach Hause. Das Matchen übernehmen wir.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-border/60 bg-gradient-card p-5">
+                  <div className="flex items-stretch gap-3.5">
+                    <div className="flex flex-col gap-2 flex-1 min-w-0">
+                      <Building2 className="w-[19px] h-[19px] text-primary" />
+                      <span className="font-display font-bold text-[17px] leading-tight text-foreground">Partnervereine</span>
+                      <span className="text-[12.5px] text-[hsl(0_0%_55%)]">Wir bauen das Netzwerk stetig aus.</span>
+                    </div>
+                    <span className="w-px bg-[hsl(0_0%_14%)] flex-none" />
+                    <div className="flex flex-col gap-2 flex-1 min-w-0">
+                      <Users className="w-[19px] h-[19px] text-primary" />
+                      <span className="font-display font-bold text-[17px] leading-tight text-foreground">Für alle Level</span>
+                      <span className="text-[12.5px] text-[hsl(0_0%_55%)]">Anfänger bis Profi willkommen.</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bento — Part B: Afterplay image + "Immer dabei" */}
+            <div className="grid lg:grid-cols-5 gap-5">
+              {/* Afterplay (Bild) */}
+              <div className="lg:col-span-2 relative rounded-2xl overflow-hidden border border-border/60 min-h-[300px] lg:min-h-[340px] flex flex-col justify-end">
+                <img src={eventsHero} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-[linear-gradient(200deg,hsl(0_0%_0%/0.15),hsl(0_0%_0%/0.92)_80%)]" />
+                <span className="absolute top-[18px] left-[18px] font-stat text-[11px] tracking-[0.14em] uppercase text-primary bg-black/60 backdrop-blur-md border border-primary/35 rounded-full px-3.5 py-[7px]">
+                  Afterplay
+                </span>
+                <div className="relative flex flex-col gap-2.5 p-6">
+                  <h3 className="font-display font-extrabold tracking-[-0.02em] text-white text-[clamp(21px,2.6vw,28px)] leading-[1.12]">
+                    Bar, Beats, Bleiben.
+                  </h3>
+                  <p className="text-[14.5px] leading-relaxed text-white/80">
+                    Nach dem letzten Ballwechsel legt der DJ auf — die besten Rallyes werden an
+                    der Bar nachbesprochen.
+                  </p>
+                </div>
+              </div>
+
+              {/* Immer dabei */}
+              <div className="lg:col-span-3 rounded-2xl border border-border/60 bg-gradient-card p-6 md:p-7 flex flex-col gap-4">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h3 className="font-display font-bold text-xl tracking-[-0.01em] text-foreground">
+                    Was immer dabei ist
+                  </h3>
+                  <span className="font-stat text-[11px] tracking-[0.14em] uppercase text-[hsl(0_0%_50%)]">
+                    bei jedem Event
+                  </span>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3.5 flex-1">
+                  {benefits.map((benefit, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.08 }}
+                      className={`flex items-center gap-4 rounded-2xl p-[18px] border bg-gradient-to-br ${benefit.gradient} ${benefit.borderColor} transition-colors`}
+                    >
+                      <span className="w-[52px] h-[52px] flex-none rounded-[14px] flex items-center justify-center bg-background/40 backdrop-blur-sm border border-white/10">
+                        <benefit.icon className={`w-[22px] h-[22px] ${benefit.iconColor}`} />
+                      </span>
+                      <span className="flex flex-col gap-0.5">
+                        <span className="font-display font-bold text-[17px] text-foreground">
+                          {t(`benefits.items.${index}.title`)}
+                        </span>
+                        <span className="text-sm leading-snug text-[hsl(0_0%_62%)]">
+                          {t(`benefits.items.${index}.description`)}
+                        </span>
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Newsletter + Event planen Side-by-Side */}
-            <div className="grid md:grid-cols-2 gap-8 mt-16">
+            <div id="ev-nlgrid" className="grid md:grid-cols-2 gap-5 scroll-mt-24">
               <NewsletterCTA />
 
-              <div className="relative rounded-3xl border border-border bg-card/50 backdrop-blur-sm p-6 md:p-8 lg:p-12 text-center flex flex-col justify-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <PartyPopper className="w-8 h-8 text-primary" />
+              <div
+                id="ev-plan"
+                className="h-full rounded-2xl border border-border/60 bg-gradient-card p-7 flex flex-col gap-4 scroll-mt-24"
+              >
+                <div className="flex items-center gap-3.5">
+                  <span className="w-12 h-12 rounded-[13px] flex-none flex items-center justify-center text-primary border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))]">
+                    <PartyPopper className="w-[21px] h-[21px]" />
+                  </span>
+                  <h3 className="font-display font-bold text-xl tracking-[-0.01em] text-foreground">
+                    {t("planEvent.title")}
+                  </h3>
                 </div>
-                <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                  {t("planEvent.title")}
-                </h3>
-                <p className="text-muted-foreground mb-8">
+                <p className="text-[14.5px] leading-relaxed text-[hsl(0_0%_65%)]">
                   {t("planEvent.description")}
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button variant="hero" size="lg" asChild>
+                <div className="flex flex-col sm:flex-row gap-3 mt-auto">
+                  <Button variant="heroOutline" size="lg" asChild>
                     <NavLink to="/faq-kontakt?reason=verein">
                       {t("planEvent.primaryCta")}
-                      <ArrowRight className="w-5 h-5 ml-1" />
+                      <ArrowRight className="w-4 h-4 ml-1" />
                     </NavLink>
                   </Button>
                   <Button variant="outline" size="lg" asChild>
-                    <NavLink to="/fuer-partner">
-                      {t("planEvent.secondaryCta")}
-                    </NavLink>
+                    <NavLink to="/fuer-partner">{t("planEvent.secondaryCta")}</NavLink>
                   </Button>
                 </div>
               </div>

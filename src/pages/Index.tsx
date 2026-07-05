@@ -32,6 +32,9 @@ import {
 import { usePartnerTiles } from "@/hooks/usePartnerTiles";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { useLaunchDate } from "@/hooks/useLaunchDate";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
 import { Navigate } from "react-router-dom";
 import skypadelOutdoor from "@/assets/courts/skypadel-outdoor.jpg";
 import eventsHero from "@/assets/events-hero.jpg";
@@ -186,6 +189,7 @@ const PartnerSections = () => {
 const Index = () => {
   const { user, isLoading } = useAuth();
   const { t } = useTranslation("index");
+  const { launchDate } = useLaunchDate();
 
   if (!isLoading && user) {
     return <Navigate to="/dashboard" replace />;
@@ -232,9 +236,9 @@ const Index = () => {
             </>
           }
           badgeLabel={t("hero.badgeLabel")}
-          badgeText={t("hero.badgeText")}
+          badgeText={format(launchDate, "d. MMMM yyyy", { locale: de })}
           showCountdown={true}
-          countdownTargetDate={new Date("2026-07-01T00:00:00")}
+          countdownTargetDate={launchDate}
           showLogo={true}
         >
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 mt-8">
