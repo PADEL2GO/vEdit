@@ -57,18 +57,32 @@ CREATE POLICY "admins manage item images" ON public.marketplace_item_images
 CREATE INDEX IF NOT EXISTS idx_mp_item_images_item ON public.marketplace_item_images(item_id, sort_order);
 
 -- 4) Produkt-Erweiterungen ----------------------------------------------------
-ALTER TABLE public.marketplace_items
-  ADD COLUMN IF NOT EXISTS slug text,
-  ADD COLUMN IF NOT EXISTS category_id uuid REFERENCES public.marketplace_categories(id) ON DELETE SET NULL,
-  ADD COLUMN IF NOT EXISTS brand_id uuid REFERENCES public.marketplace_brands(id) ON DELETE SET NULL,
-  ADD COLUMN IF NOT EXISTS subtitle text,
-  ADD COLUMN IF NOT EXISTS long_description text,
-  ADD COLUMN IF NOT EXISTS specs jsonb DEFAULT '[]'::jsonb,
-  ADD COLUMN IF NOT EXISTS compare_at_price_cents integer,
-  ADD COLUMN IF NOT EXISTS is_featured boolean NOT NULL DEFAULT false,
-  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'published',
-  ADD COLUMN IF NOT EXISTS meta_title text,
-  ADD COLUMN IF NOT EXISTS meta_description text;
+-- Spalten einzeln hinzufügen (Foreign Keys folgen separat — inline REFERENCES in
+-- einem Mehrfach-ADD-ALTER macht in der Supabase-Konsole Syntaxprobleme).
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS slug text;
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS category_id uuid;
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS brand_id uuid;
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS subtitle text;
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS long_description text;
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS specs jsonb DEFAULT '[]'::jsonb;
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS compare_at_price_cents integer;
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS is_featured boolean NOT NULL DEFAULT false;
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'published';
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS meta_title text;
+ALTER TABLE public.marketplace_items ADD COLUMN IF NOT EXISTS meta_description text;
+
+-- Foreign Keys separat + idempotent.
+DO $fk_cat$ BEGIN
+  ALTER TABLE public.marketplace_items
+    ADD CONSTRAINT marketplace_items_category_fk
+    FOREIGN KEY (category_id) REFERENCES public.marketplace_categories(id) ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object THEN NULL; END $fk_cat$;
+
+DO $fk_brand$ BEGIN
+  ALTER TABLE public.marketplace_items
+    ADD CONSTRAINT marketplace_items_brand_fk
+    FOREIGN KEY (brand_id) REFERENCES public.marketplace_brands(id) ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object THEN NULL; END $fk_brand$;
 
 -- Eindeutige Slugs (partiell, ignoriert NULL bestehender Produkte).
 CREATE UNIQUE INDEX IF NOT EXISTS uidx_marketplace_items_slug
