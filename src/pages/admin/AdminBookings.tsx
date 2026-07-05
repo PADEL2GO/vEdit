@@ -77,7 +77,7 @@ export default function AdminBookings() {
   // Get week boundaries (Monday to Friday for work week)
   const weekStart = startOfWeek(selectedWeek, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(selectedWeek, { weekStartsOn: 1 });
-  const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd }).slice(0, 5); // Mon-Fri
+  const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd }).slice(0, 7); // Mon-So (7 Tage)
 
   // Fetch locations for filter
   const { data: locations } = useQuery({

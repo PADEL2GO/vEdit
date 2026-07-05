@@ -26,10 +26,11 @@ import {
   ShoppingBag,
   Banknote,
   Zap,
-  User,
+  Handshake,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLaunchDate } from "@/hooks/useLaunchDate";
+import { usePartnerTiles } from "@/hooks/usePartnerTiles";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { Navigate } from "react-router-dom";
@@ -56,6 +57,59 @@ const revealProps = (delay = 0) => ({
   transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] as const },
 });
 
+// ── Partner-Showcase (admin-verwaltet via partner_tiles / AdminPartnerTiles) ──
+const PartnerShowcase = () => {
+  const { data: partners } = usePartnerTiles();
+  const active = (partners ?? []).filter((p) => p.is_active !== false);
+  if (active.length === 0) return null;
+  return (
+    <section id="partner" className="py-16 md:py-24 relative overflow-hidden bg-background">
+      <div className="mx-auto max-w-[1200px] px-5">
+        <motion.div {...revealProps()} className="flex flex-col items-center gap-4 text-center max-w-2xl mx-auto mb-12">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">
+            <Handshake className="w-3.5 h-3.5" />
+            Partner
+          </span>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground" style={{ lineHeight: 1.1 }}>
+            Gemeinsam mit unseren <span className="text-gradient-lime">Partnern</span>
+          </h2>
+          <p className="text-base md:text-lg text-muted-foreground">
+            Starke Marken und lokale Vereine machen <BrandName /> möglich.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+          {active.map((p, i) => {
+            const inner = (
+              <div className="group flex flex-col items-center gap-3 p-6 rounded-2xl bg-gradient-card border border-border/60 hover:border-primary/30 transition-colors duration-300 h-full text-center">
+                {p.logo_url ? (
+                  <img src={p.logo_url} alt={p.name} className="h-12 max-w-[150px] object-contain" />
+                ) : (
+                  <span className="font-display font-bold text-lg text-foreground">{p.name}</span>
+                )}
+                {p.logo_url && <span className="font-display font-semibold text-sm text-foreground">{p.name}</span>}
+                {p.description && <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{p.description}</p>}
+                {p.website_url && (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary mt-auto pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Website <ArrowRight className="w-3 h-3" />
+                  </span>
+                )}
+              </div>
+            );
+            return p.website_url ? (
+              <motion.a key={p.id} {...revealProps(Math.min(i * 0.05, 0.3))} href={p.website_url} target="_blank" rel="noopener noreferrer">
+                {inner}
+              </motion.a>
+            ) : (
+              <motion.div key={p.id} {...revealProps(Math.min(i * 0.05, 0.3))}>{inner}</motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const Index = () => {
   const { user, isLoading } = useAuth();
   const { t } = useTranslation("index");
@@ -66,7 +120,6 @@ const Index = () => {
   }
 
   const vereinStepsCopy = t("vereinSteps.steps", { returnObjects: true }) as { title: string; desc: string }[];
-  const audienceCopy = t("audience.cards", { returnObjects: true }) as { title: string; desc: string; highlight: string; cta: string }[];
 
   // Verein steps — icon + tile animation per design (float / pulse-glow / spin)
   const vereinSteps = [
@@ -76,11 +129,6 @@ const Index = () => {
     { icon: Smartphone, anim: "float" as const },
     { icon: PartyPopper, anim: "pulse-glow" as const },
     { icon: Settings, anim: "spin" as const },
-  ];
-
-  const audienceConfig = [
-    { icon: User, href: "/fuer-spieler" },
-    { icon: Building2, href: "/fuer-vereine" },
   ];
 
   return (
@@ -301,72 +349,7 @@ const Index = () => {
 
         <SectionDivider variant="glow" />
 
-        {/* ── FÜR WEN IST PADEL2GO ──────────────────────────────── */}
-        <section id="zielgruppen" className="py-16 md:py-24 relative overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <SiteVisual
-              visualKey="home.fuer-wen.background"
-              alt="Hintergrund"
-              className="w-full h-full object-cover opacity-10"
-              fallbackSrc={fuerVereineHero}
-            />
-          </div>
-          <div className="absolute inset-0 z-[1] bg-gradient-to-b from-background via-background/60 to-background" />
-
-          <div className="mx-auto max-w-[1200px] px-5 relative z-10">
-            <motion.div {...revealProps()} className="flex flex-col items-center gap-4 text-center max-w-2xl mx-auto mb-12">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">
-                <User className="w-3.5 h-3.5" />
-                {t("audience.badge")}
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground" style={{ lineHeight: 1.1 }}>
-                {t("audience.titlePart1")} <BrandName />?
-              </h2>
-              <p className="text-base md:text-lg text-muted-foreground">{t("audience.subtitle")}</p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {audienceConfig.map((cfg, i) => {
-                const copy = audienceCopy[i];
-                const Icon = cfg.icon;
-                const highlight = copy.highlight || null;
-                return (
-                  <motion.div
-                    key={copy.title}
-                    {...revealProps(0.1 * (i + 1))}
-                    className="group flex flex-col gap-4 p-6 md:p-8 rounded-2xl bg-gradient-card border border-border/60 hover:border-primary/30 transition-colors duration-300"
-                  >
-                    <div
-                      className="w-[54px] h-[54px] rounded-[14px] border border-primary/35 flex items-center justify-center bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))] animate-float"
-                      style={{ animationDelay: `${i * 0.4}s` }}
-                    >
-                      <Icon className="w-6 h-6 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-bold text-foreground font-display">{copy.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-                      {copy.desc.split(highlight ?? "___NOMATCH___").map((part, j, arr) =>
-                        j < arr.length - 1 ? (
-                          <span key={j}>
-                            {part}
-                            <span className="text-primary font-semibold">{highlight}</span>
-                          </span>
-                        ) : (
-                          <span key={j}>{part}</span>
-                        )
-                      )}
-                    </p>
-                    <Button variant="outline" className="w-full mt-auto" asChild>
-                      <NavLink to={cfg.href}>
-                        {copy.cta}
-                        <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-                      </NavLink>
-                    </Button>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+        <PartnerShowcase />
 
       </main>
 

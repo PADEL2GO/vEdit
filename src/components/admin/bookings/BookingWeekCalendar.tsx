@@ -106,7 +106,7 @@ export function BookingWeekCalendar({
       <div className="overflow-x-auto">
         <div className="min-w-[800px]">
           {/* Header Row - Days */}
-          <div className="grid grid-cols-[60px_repeat(5,1fr)] border-b border-border">
+          <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border">
             <div className="p-2 text-center text-xs text-muted-foreground">Zeit</div>
             {weekDays.map((day, idx) => (
               <div
@@ -128,7 +128,7 @@ export function BookingWeekCalendar({
             {hours.map((hour) => (
               <div
                 key={hour}
-                className="grid grid-cols-[60px_repeat(5,1fr)] border-b border-border/50 min-h-[48px]"
+                className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/50 min-h-[48px]"
               >
                 <div className="p-2 text-xs text-muted-foreground text-right pr-3">
                   {hour.toString().padStart(2, "0")}:00
