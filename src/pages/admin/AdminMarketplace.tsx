@@ -47,11 +47,16 @@ import {
   Trash2,
   Loader2,
   ShoppingCart,
-  Upload,
   Image as ImageIcon,
   Euro,
   Coins,
   Users,
+  Tag,
+  Award,
+  ArrowUp,
+  ArrowDown,
+  X,
+  Star,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -62,14 +67,16 @@ import {
   useToggleMarketplaceItemStatus,
   MarketplaceItemInput,
 } from "@/hooks/useAdminMarketplace";
+import {
+  useAdminCatalogCategories,
+  useAdminCatalogBrands,
+  useSyncItemImages,
+  slugify,
+} from "@/hooks/useMarketplaceCatalog";
+import { CatalogManagerDialog } from "@/components/admin/marketplace/CatalogManagerDialog";
 import type { MarketplaceItem, MarketplaceCategory, ProductType } from "@/hooks/useMarketplaceItems";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
-  rental: "Verleih (Code)",
-  purchase: "Kauf (Versand)",
-};
 
 const CATEGORY_LABELS: Record<MarketplaceCategory, string> = {
   courtbooking: "Courtbuchung",
@@ -77,6 +84,15 @@ const CATEGORY_LABELS: Record<MarketplaceCategory, string> = {
   other: "Sonstiges",
   events: "Events",
 };
+
+interface GalleryImage {
+  url: string;
+  alt: string;
+}
+interface SpecRow {
+  label: string;
+  value: string;
+}
 
 interface MarketplaceReferrer {
   user_id: string;
@@ -101,12 +117,38 @@ const formatEuro = (cents: number) =>
     (cents || 0) / 100,
   );
 
+const emptyForm = (): Partial<MarketplaceItemInput> => ({
+  name: "",
+  category: "equipment",
+  credit_cost: 0,
+  price_cents: 0,
+  compare_at_price_cents: null,
+  description: "",
+  subtitle: "",
+  long_description: "",
+  image_url: "",
+  slug: "",
+  category_id: null,
+  brand_id: null,
+  partner_name: "",
+  stock_quantity: null,
+  sort_order: 0,
+  is_featured: false,
+  status: "published",
+  meta_title: "",
+  meta_description: "",
+});
+
 const AdminMarketplace = () => {
   const { data: items, isLoading } = useAdminMarketplaceItems();
   const createMutation = useCreateMarketplaceItem();
   const updateMutation = useUpdateMarketplaceItem();
   const deleteMutation = useDeleteMarketplaceItem();
   const toggleStatusMutation = useToggleMarketplaceItemStatus();
+  const syncImages = useSyncItemImages();
+
+  const { data: categories } = useAdminCatalogCategories();
+  const { data: brands } = useAdminCatalogBrands();
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
     queryKey: ["admin-marketplace-analytics"],
@@ -126,32 +168,20 @@ const AdminMarketplace = () => {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterActive, setFilterActive] = useState<string>("all");
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [catManagerOpen, setCatManagerOpen] = useState(false);
+  const [brandManagerOpen, setBrandManagerOpen] = useState(false);
 
-  // Form state
-  const [formData, setFormData] = useState<Partial<MarketplaceItemInput>>({
-    name: "",
-    category: "equipment",
-    credit_cost: 0,
-    price_cents: 0,
-    description: "",
-    image_url: "",
-    partner_name: "",
-    stock_quantity: null,
-    sort_order: 0,
-  });
+  const [formData, setFormData] = useState<Partial<MarketplaceItemInput>>(emptyForm());
+  const [specs, setSpecs] = useState<SpecRow[]>([]);
+  const [gallery, setGallery] = useState<GalleryImage[]>([]);
 
   const resetForm = () => {
-    setFormData({
-      name: "",
-      category: "equipment",
-      credit_cost: 0,
-      price_cents: 0,
-      description: "",
-      image_url: "",
-      partner_name: "",
-      stock_quantity: null,
-      sort_order: 0,
-    });
+    setFormData(emptyForm());
+    setSpecs([]);
+    setGallery([]);
+    setSlugTouched(false);
     setEditingItem(null);
   };
 
@@ -160,28 +190,101 @@ const AdminMarketplace = () => {
     setDialogOpen(true);
   };
 
-  const openEditDialog = (item: MarketplaceItem) => {
+  const openEditDialog = async (item: MarketplaceItem) => {
     setEditingItem(item);
+    setSlugTouched(true);
     setFormData({
       name: item.name,
       category: item.category,
       credit_cost: item.credit_cost,
       price_cents: item.price_cents ?? 0,
+      compare_at_price_cents: item.compare_at_price_cents ?? null,
       description: item.description || "",
+      subtitle: item.subtitle || "",
+      long_description: item.long_description || "",
       image_url: item.image_url || "",
+      slug: item.slug || "",
+      category_id: item.category_id ?? null,
+      brand_id: item.brand_id ?? null,
       partner_name: item.partner_name || "",
       stock_quantity: item.stock_quantity,
       sort_order: item.sort_order,
+      is_featured: !!item.is_featured,
+      status: (item.status as "draft" | "published") || "published",
+      meta_title: item.meta_title || "",
+      meta_description: item.meta_description || "",
     });
+    setSpecs(Array.isArray(item.specs) ? (item.specs as SpecRow[]) : []);
+    setGallery([]);
     setDialogOpen(true);
+    // Load existing gallery images for this product.
+    const { data } = await (supabase as any)
+      .from("marketplace_item_images")
+      .select("url, alt")
+      .eq("item_id", item.id)
+      .order("sort_order", { ascending: true });
+    setGallery(((data as { url: string; alt: string | null }[]) ?? []).map((d) => ({ url: d.url, alt: d.alt ?? "" })));
   };
 
-  const handleSubmit = () => {
+  const setName = (name: string) =>
+    setFormData((f) => ({
+      ...f,
+      name,
+      slug: slugTouched ? f.slug : slugify(name),
+    }));
+
+  const uploadFile = async (file: File): Promise<string | null> => {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `marketplace/${Date.now()}-${Math.floor(performance.now())}.${fileExt}`;
+    const { error } = await supabase.storage.from("media").upload(fileName, file);
+    if (error) {
+      toast.error("Fehler beim Hochladen: " + error.message);
+      return null;
+    }
+    const { data } = supabase.storage.from("media").getPublicUrl(fileName);
+    return data.publicUrl;
+  };
+
+  const handleTitleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const url = await uploadFile(file);
+    if (url) {
+      setFormData((f) => ({ ...f, image_url: url }));
+      toast.success("Titelbild hochgeladen");
+    }
+    setUploading(false);
+    e.target.value = "";
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setUploading(true);
+    for (const file of files) {
+      const url = await uploadFile(file);
+      if (url) setGallery((g) => [...g, { url, alt: "" }]);
+    }
+    setUploading(false);
+    e.target.value = "";
+  };
+
+  const moveGallery = (index: number, dir: -1 | 1) => {
+    setGallery((g) => {
+      const next = [...g];
+      const target = index + dir;
+      if (target < 0 || target >= next.length) return g;
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const handleSubmit = async () => {
     if (!formData.name || !formData.description || !formData.credit_cost || !formData.image_url) {
-      toast.error("Bitte fülle alle Pflichtfelder aus (Name, Beschreibung, Credits, Bild)");
+      toast.error("Bitte fülle alle Pflichtfelder aus (Name, Beschreibung, Credits, Titelbild)");
       return;
     }
-
     if (!formData.price_cents || formData.price_cents <= 0) {
       toast.error("Bitte gib einen gültigen Preis in Euro an");
       return;
@@ -189,31 +292,48 @@ const AdminMarketplace = () => {
 
     const data: MarketplaceItemInput = {
       name: formData.name,
-      category: formData.category as MarketplaceCategory,
+      category: (formData.category as MarketplaceCategory) || "equipment",
       credit_cost: formData.credit_cost,
       price_cents: formData.price_cents,
+      compare_at_price_cents: formData.compare_at_price_cents || null,
       description: formData.description,
+      subtitle: formData.subtitle || null,
+      long_description: formData.long_description || null,
       image_url: formData.image_url,
+      slug: (formData.slug || slugify(formData.name || "")) || null,
+      category_id: formData.category_id || null,
+      brand_id: formData.brand_id || null,
       partner_name: formData.partner_name || undefined,
       stock_quantity: formData.stock_quantity,
       sort_order: formData.sort_order || 0,
       product_type: "purchase",
+      is_featured: !!formData.is_featured,
+      status: (formData.status as "draft" | "published") || "published",
+      specs: specs.filter((s) => s.label.trim() || s.value.trim()),
+      meta_title: formData.meta_title || null,
+      meta_description: formData.meta_description || null,
     };
 
-    if (editingItem) {
-      updateMutation.mutate({ id: editingItem.id, ...data }, {
-        onSuccess: () => {
-          setDialogOpen(false);
-          resetForm();
-        },
+    setSaving(true);
+    try {
+      let itemId: string;
+      if (editingItem) {
+        await updateMutation.mutateAsync({ id: editingItem.id, ...data });
+        itemId = editingItem.id;
+      } else {
+        const created = await createMutation.mutateAsync(data);
+        itemId = (created as { id: string }).id;
+      }
+      await syncImages.mutateAsync({
+        itemId,
+        images: gallery.filter((g) => g.url).map((g) => ({ url: g.url, alt: g.alt || null })),
       });
-    } else {
-      createMutation.mutate(data, {
-        onSuccess: () => {
-          setDialogOpen(false);
-          resetForm();
-        },
-      });
+      setDialogOpen(false);
+      resetForm();
+    } catch (err: any) {
+      toast.error("Fehler beim Speichern: " + (err?.message ?? ""));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -227,41 +347,16 @@ const AdminMarketplace = () => {
     });
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const categoryName = (id?: string | null) => categories?.find((c) => c.id === id)?.name;
+  const brandName = (id?: string | null) => brands?.find((b) => b.id === id)?.name;
 
-    setUploading(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `marketplace/${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("media")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("media")
-        .getPublicUrl(fileName);
-
-      setFormData({ ...formData, image_url: publicUrl });
-      toast.success("Bild erfolgreich hochgeladen");
-    } catch (error: any) {
-      toast.error("Fehler beim Hochladen: " + error.message);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // Filter items
-  const filteredItems = items?.filter(item => {
-    if (filterCategory !== "all" && item.category !== filterCategory) return false;
-    if (filterActive === "active" && !item.is_active) return false;
-    if (filterActive === "inactive" && item.is_active) return false;
-    return true;
-  }) || [];
+  const filteredItems =
+    items?.filter((item) => {
+      if (filterCategory !== "all" && item.category_id !== filterCategory) return false;
+      if (filterActive === "active" && !item.is_active) return false;
+      if (filterActive === "inactive" && item.is_active) return false;
+      return true;
+    }) || [];
 
   return (
     <AdminLayout>
@@ -277,14 +372,22 @@ const AdminMarketplace = () => {
               <ShoppingCart className="w-6 h-6" />
               Marketplace Verwaltung
             </h1>
-            <p className="text-muted-foreground">
-              Produkte für den Marketplace verwalten
-            </p>
+            <p className="text-muted-foreground">Produkte, Kategorien und Marken verwalten</p>
           </div>
-          <Button onClick={openCreateDialog} className="shrink-0">
-            <Plus className="w-4 h-4 mr-2" />
-            Neues Produkt
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setCatManagerOpen(true)}>
+              <Tag className="w-4 h-4 mr-2" />
+              Kategorien
+            </Button>
+            <Button variant="outline" onClick={() => setBrandManagerOpen(true)}>
+              <Award className="w-4 h-4 mr-2" />
+              Marken
+            </Button>
+            <Button onClick={openCreateDialog} className="shrink-0">
+              <Plus className="w-4 h-4 mr-2" />
+              Neues Produkt
+            </Button>
+          </div>
         </div>
 
         {/* Analytics */}
@@ -302,9 +405,7 @@ const AdminMarketplace = () => {
                 {analyticsLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                 ) : (
-                  <div className="text-2xl font-bold">
-                    {formatEuro(analytics?.revenue_cents ?? 0)}
-                  </div>
+                  <div className="text-2xl font-bold">{formatEuro(analytics?.revenue_cents ?? 0)}</div>
                 )}
               </CardContent>
             </Card>
@@ -319,9 +420,7 @@ const AdminMarketplace = () => {
                 {analyticsLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                 ) : (
-                  <div className="text-2xl font-bold">
-                    {analytics?.order_count ?? 0}
-                  </div>
+                  <div className="text-2xl font-bold">{analytics?.order_count ?? 0}</div>
                 )}
               </CardContent>
             </Card>
@@ -357,9 +456,7 @@ const AdminMarketplace = () => {
                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
               ) : !analytics?.referrers.length ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  Noch keine Empfehlungen.
-                </div>
+                <div className="text-center py-8 text-muted-foreground">Noch keine Empfehlungen.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <Table>
@@ -381,9 +478,7 @@ const AdminMarketplace = () => {
                           <TableCell className="text-right font-mono">
                             {r.points.toLocaleString("de-DE")}
                           </TableCell>
-                          <TableCell className="text-right font-mono">
-                            {formatEuro(r.eur_value_cents)}
-                          </TableCell>
+                          <TableCell className="text-right font-mono">{formatEuro(r.eur_value_cents)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -406,8 +501,10 @@ const AdminMarketplace = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Alle Kategorien</SelectItem>
-                    {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    {categories?.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -440,9 +537,7 @@ const AdminMarketplace = () => {
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
             ) : filteredItems.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                Keine Produkte gefunden.
-              </div>
+              <div className="text-center py-12 text-muted-foreground">Keine Produkte gefunden.</div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
@@ -451,9 +546,9 @@ const AdminMarketplace = () => {
                       <TableHead className="w-[60px]">Bild</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Kategorie</TableHead>
-                      <TableHead>Typ</TableHead>
-                      <TableHead>Partner</TableHead>
-                      <TableHead className="text-right">Credits</TableHead>
+                      <TableHead>Marke</TableHead>
+                      <TableHead className="text-right">Preis</TableHead>
+                      <TableHead className="text-center">Status</TableHead>
                       <TableHead className="text-center">Aktiv</TableHead>
                       <TableHead className="text-right">Aktionen</TableHead>
                     </TableRow>
@@ -464,11 +559,7 @@ const AdminMarketplace = () => {
                         <TableCell>
                           <div className="w-12 h-12 rounded overflow-hidden bg-muted">
                             {item.image_url ? (
-                              <img
-                                src={item.image_url}
-                                alt={item.name}
-                                className="w-full h-full object-cover"
-                              />
+                              <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 <ImageIcon className="w-6 h-6 text-muted-foreground" />
@@ -476,20 +567,23 @@ const AdminMarketplace = () => {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-1.5">
+                            {item.is_featured && <Star className="w-3.5 h-3.5 text-primary fill-primary" />}
+                            {item.name}
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <Badge variant="outline">
-                            {CATEGORY_LABELS[item.category] || item.category}
+                            {categoryName(item.category_id) || CATEGORY_LABELS[item.category] || item.category}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant={item.product_type === "purchase" ? "default" : "secondary"}>
-                            {PRODUCT_TYPE_LABELS[item.product_type] || "Verleih"}
+                        <TableCell>{brandName(item.brand_id) || item.partner_name || "-"}</TableCell>
+                        <TableCell className="text-right font-mono">{formatEuro(item.price_cents ?? 0)}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant={item.status === "draft" ? "secondary" : "default"}>
+                            {item.status === "draft" ? "Entwurf" : "Live"}
                           </Badge>
-                        </TableCell>
-                        <TableCell>{item.partner_name || "-"}</TableCell>
-                        <TableCell className="text-right font-mono">
-                          {item.credit_cost}
                         </TableCell>
                         <TableCell className="text-center">
                           <Switch
@@ -501,11 +595,7 @@ const AdminMarketplace = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openEditDialog(item)}
-                            >
+                            <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)}>
                               <Pencil className="w-4 h-4" />
                             </Button>
                             <Button
@@ -535,38 +625,23 @@ const AdminMarketplace = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {editingItem ? "Produkt bearbeiten" : "Neues Produkt erstellen"}
-            </DialogTitle>
-            <DialogDescription>
-              Alle Felder mit * sind Pflichtfelder.
-            </DialogDescription>
+            <DialogTitle>{editingItem ? "Produkt bearbeiten" : "Neues Produkt erstellen"}</DialogTitle>
+            <DialogDescription>Alle Felder mit * sind Pflichtfelder.</DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            {/* Image Upload */}
+          <div className="space-y-5 py-4">
+            {/* Title image */}
             <div className="space-y-2">
-              <Label>Bild *</Label>
+              <Label>Titelbild *</Label>
               <div className="flex gap-4 items-start">
                 {formData.image_url && (
                   <div className="w-24 h-24 rounded overflow-hidden bg-muted shrink-0">
-                    <img
-                      src={formData.image_url}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
                   </div>
                 )}
                 <div className="flex-1 space-y-2">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={uploading}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Oder URL direkt eingeben:
-                  </p>
+                  <Input type="file" accept="image/*" onChange={handleTitleImageUpload} disabled={uploading} />
+                  <p className="text-xs text-muted-foreground">Oder URL direkt eingeben:</p>
                   <Input
                     placeholder="https://..."
                     value={formData.image_url}
@@ -576,47 +651,127 @@ const AdminMarketplace = () => {
               </div>
             </div>
 
-            {/* Name */}
+            {/* Gallery */}
+            <div className="space-y-2">
+              <Label>Weitere Bilder (Galerie)</Label>
+              {gallery.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {gallery.map((img, i) => (
+                    <div key={i} className="relative w-20 h-20 rounded overflow-hidden bg-muted group border border-border/60">
+                      <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setGallery((g) => g.filter((_, idx) => idx !== i))}
+                        className="absolute top-0.5 right-0.5 bg-black/70 rounded p-0.5 opacity-0 group-hover:opacity-100 transition"
+                        title="Entfernen"
+                      >
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                      <div className="absolute bottom-0.5 left-0.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition">
+                        <button
+                          type="button"
+                          onClick={() => moveGallery(i, -1)}
+                          className="bg-black/70 rounded p-0.5"
+                          title="Nach vorne"
+                        >
+                          <ArrowUp className="w-3 h-3 text-white" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveGallery(i, 1)}
+                          className="bg-black/70 rounded p-0.5"
+                          title="Nach hinten"
+                        >
+                          <ArrowDown className="w-3 h-3 text-white" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Input type="file" accept="image/*" multiple onChange={handleGalleryUpload} disabled={uploading} />
+              <p className="text-xs text-muted-foreground">
+                Mehrere Bilder möglich. Reihenfolge steuert die Galerie auf der Produktseite (Titelbild zuerst).
+              </p>
+            </div>
+
+            {/* Name + slug */}
             <div className="space-y-2">
               <Label>Name *</Label>
+              <Input value={formData.name} onChange={(e) => setName(e.target.value)} placeholder="Produktname" />
+            </div>
+            <div className="space-y-2">
+              <Label>Slug (URL)</Label>
               <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Produktname"
+                value={formData.slug ?? ""}
+                onChange={(e) => {
+                  setSlugTouched(true);
+                  setFormData({ ...formData, slug: slugify(e.target.value) });
+                }}
+                placeholder="produktname"
+              />
+              <p className="text-xs text-muted-foreground font-mono">/marketplace/{formData.slug || "…"}</p>
+            </div>
+
+            {/* Subtitle */}
+            <div className="space-y-2">
+              <Label>Untertitel</Label>
+              <Input
+                value={formData.subtitle ?? ""}
+                onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                placeholder="Kurzer Zusatz, z.B. „Kontrolle & Power für Fortgeschrittene“"
               />
             </div>
 
-            {/* Category */}
-            <div className="space-y-2">
-              <Label>Kategorie *</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(v) => setFormData({ ...formData, category: v as MarketplaceCategory })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Category + brand */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Produktkategorie</Label>
+                <Select
+                  value={formData.category_id ?? "none"}
+                  onValueChange={(v) => setFormData({ ...formData, category_id: v === "none" ? null : v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Kategorie wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— keine —</SelectItem>
+                    {categories?.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                        {!c.is_active ? " (inaktiv)" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Marke</Label>
+                <Select
+                  value={formData.brand_id ?? "none"}
+                  onValueChange={(v) => {
+                    const id = v === "none" ? null : v;
+                    setFormData({ ...formData, brand_id: id, partner_name: brandName(id) ?? formData.partner_name });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Marke wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— keine —</SelectItem>
+                    {brands?.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.name}
+                        {!b.is_active ? " (inaktiv)" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Credit Cost */}
-              <div className="space-y-2">
-                <Label>Credit-Kosten *</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={formData.credit_cost}
-                  onChange={(e) => setFormData({ ...formData, credit_cost: parseInt(e.target.value) || 0 })}
-                />
-              </div>
-
-              {/* Price (EUR) */}
+            {/* Price + compare + credits */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Preis (€) *</Label>
                 <Input
@@ -633,52 +788,172 @@ const AdminMarketplace = () => {
                   placeholder="0.00"
                 />
               </div>
+              <div className="space-y-2">
+                <Label>UVP (€)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={formData.compare_at_price_cents ? (formData.compare_at_price_cents / 100).toFixed(2) : ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      compare_at_price_cents: e.target.value ? Math.round(parseFloat(e.target.value) * 100) : null,
+                    })
+                  }
+                  placeholder="Streichpreis"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Punkte-Rabatt (max.) *</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={formData.credit_cost}
+                  onChange={(e) => setFormData({ ...formData, credit_cost: parseInt(e.target.value) || 0 })}
+                />
+              </div>
             </div>
 
-            {/* Description */}
+            {/* Short description */}
             <div className="space-y-2">
-              <Label>Beschreibung *</Label>
+              <Label>Kurzbeschreibung *</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Produktbeschreibung..."
-                rows={3}
+                placeholder="Kurze Beschreibung für Produktkarten..."
+                rows={2}
               />
             </div>
 
-            {/* Partner Name */}
+            {/* Long description */}
             <div className="space-y-2">
-              <Label>Partner-Name</Label>
+              <Label>Langbeschreibung</Label>
+              <Textarea
+                value={formData.long_description ?? ""}
+                onChange={(e) => setFormData({ ...formData, long_description: e.target.value })}
+                placeholder="Ausführliche Produktbeschreibung für die Produktseite..."
+                rows={4}
+              />
+            </div>
+
+            {/* Specs */}
+            <div className="space-y-2">
+              <Label>Spezifikationen</Label>
+              <div className="space-y-2">
+                {specs.map((spec, i) => (
+                  <div key={i} className="flex gap-2">
+                    <Input
+                      className="flex-1"
+                      placeholder="Merkmal (z.B. Gewicht)"
+                      value={spec.label}
+                      onChange={(e) =>
+                        setSpecs((s) => s.map((row, idx) => (idx === i ? { ...row, label: e.target.value } : row)))
+                      }
+                    />
+                    <Input
+                      className="flex-1"
+                      placeholder="Wert (z.B. 365 g)"
+                      value={spec.value}
+                      onChange={(e) =>
+                        setSpecs((s) => s.map((row, idx) => (idx === i ? { ...row, value: e.target.value } : row)))
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 text-destructive hover:text-destructive"
+                      onClick={() => setSpecs((s) => s.filter((_, idx) => idx !== i))}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button type="button" variant="outline" size="sm" onClick={() => setSpecs((s) => [...s, { label: "", value: "" }])}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Merkmal hinzufügen
+                </Button>
+              </div>
+            </div>
+
+            {/* Partner name (legacy free-text, prefilled from brand) */}
+            <div className="space-y-2">
+              <Label>Marken-/Partner-Text (Anzeige)</Label>
               <Input
                 value={formData.partner_name}
                 onChange={(e) => setFormData({ ...formData, partner_name: e.target.value })}
-                placeholder="z.B. Adidas, Red Bull, P2G"
+                placeholder="z.B. Adidas, Babolat"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {/* Stock Quantity */}
+            {/* Stock + sort + featured */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Bestand (optional)</Label>
                 <Input
                   type="number"
                   min={0}
                   value={formData.stock_quantity ?? ""}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    stock_quantity: e.target.value ? parseInt(e.target.value) : null 
-                  })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, stock_quantity: e.target.value ? parseInt(e.target.value) : null })
+                  }
                   placeholder="Unbegrenzt"
                 />
               </div>
-
-              {/* Sort Order */}
               <div className="space-y-2">
                 <Label>Sortierung</Label>
                 <Input
                   type="number"
                   value={formData.sort_order}
                   onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={formData.status ?? "published"}
+                  onValueChange={(v) => setFormData({ ...formData, status: v as "draft" | "published" })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="published">Live</SelectItem>
+                    <SelectItem value="draft">Entwurf</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2">
+              <div>
+                <Label className="cursor-pointer">Featured (hervorheben)</Label>
+                <p className="text-xs text-muted-foreground">Zeigt das Produkt prominent im Shop.</p>
+              </div>
+              <Switch
+                checked={!!formData.is_featured}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_featured: checked })}
+              />
+            </div>
+
+            {/* SEO */}
+            <div className="space-y-3 rounded-lg border border-border/60 p-3">
+              <p className="text-sm font-medium">SEO (optional)</p>
+              <div className="space-y-2">
+                <Label>Meta-Titel</Label>
+                <Input
+                  value={formData.meta_title ?? ""}
+                  onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })}
+                  placeholder="Wird für Suchmaschinen/Teilen genutzt"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Meta-Beschreibung</Label>
+                <Textarea
+                  value={formData.meta_description ?? ""}
+                  onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
+                  rows={2}
                 />
               </div>
             </div>
@@ -688,13 +963,8 @@ const AdminMarketplace = () => {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Abbrechen
             </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={createMutation.isPending || updateMutation.isPending || uploading}
-            >
-              {(createMutation.isPending || updateMutation.isPending) && (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              )}
+            <Button onClick={handleSubmit} disabled={saving || uploading}>
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {editingItem ? "Speichern" : "Erstellen"}
             </Button>
           </DialogFooter>
@@ -722,6 +992,10 @@ const AdminMarketplace = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Taxonomy managers */}
+      <CatalogManagerDialog kind="category" open={catManagerOpen} onOpenChange={setCatManagerOpen} />
+      <CatalogManagerDialog kind="brand" open={brandManagerOpen} onOpenChange={setBrandManagerOpen} />
     </AdminLayout>
   );
 };

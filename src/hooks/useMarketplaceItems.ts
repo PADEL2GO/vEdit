@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type MarketplaceCategory = "courtbooking" | "equipment" | "other" | "events";
 export type ProductType = "rental" | "purchase";
+export type ProductStatus = "draft" | "published";
 
 export interface MarketplaceItem {
   id: string;
@@ -17,6 +18,18 @@ export interface MarketplaceItem {
   stock_quantity: number | null;
   sort_order: number;
   product_type: ProductType;
+  // Phase 1 catalog extensions (not yet in generated types.ts)
+  slug?: string | null;
+  category_id?: string | null;
+  brand_id?: string | null;
+  subtitle?: string | null;
+  long_description?: string | null;
+  specs?: { label: string; value: string }[] | null;
+  compare_at_price_cents?: number | null;
+  is_featured?: boolean | null;
+  status?: ProductStatus | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
 }
 
 export const useMarketplaceItems = (category?: MarketplaceCategory) => {

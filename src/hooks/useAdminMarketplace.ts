@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { MarketplaceCategory, MarketplaceItem, ProductType } from "./useMarketplaceItems";
+import type { MarketplaceCategory, MarketplaceItem, ProductStatus, ProductType } from "./useMarketplaceItems";
 
 export interface MarketplaceItemInput {
   name: string;
@@ -15,6 +15,18 @@ export interface MarketplaceItemInput {
   sort_order?: number;
   is_active?: boolean;
   product_type?: ProductType;
+  // Phase 1 catalog extensions
+  slug?: string | null;
+  category_id?: string | null;
+  brand_id?: string | null;
+  subtitle?: string | null;
+  long_description?: string | null;
+  specs?: { label: string; value: string }[];
+  compare_at_price_cents?: number | null;
+  is_featured?: boolean;
+  status?: ProductStatus;
+  meta_title?: string | null;
+  meta_description?: string | null;
 }
 
 // Fetch all items (including inactive) for admin
