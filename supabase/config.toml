@@ -12,12 +12,6 @@ verify_jwt = true
 [functions.send-contact-email]
 verify_jwt = false
 
-[functions.rewards-api]
-verify_jwt = true
-
-[functions.rewards-claim]
-verify_jwt = true
-
 [functions.rewards-trigger]
 verify_jwt = false
 

@@ -6,7 +6,6 @@ export type FeatureName =
   | "lobbies"
   | "league"
   | "events"
-  | "rewards"
   | "matching"
   | "p2g"
   | "marketplace"
@@ -18,7 +17,6 @@ const FEATURE_NAMES: FeatureName[] = [
   "lobbies",
   "league",
   "events",
-  "rewards",
   "matching",
   "p2g",
   "marketplace",
@@ -36,7 +34,7 @@ export const useFeatureToggles = () => {
       const { data, error } = await supabase
         .from("site_settings")
         .select(
-          "feature_lobbies_state, feature_league_state, feature_events_state, feature_rewards_state, feature_matching_state, feature_p2g_state, feature_marketplace_state, feature_friends_state"
+          "feature_lobbies_state, feature_league_state, feature_events_state, feature_matching_state, feature_p2g_state, feature_marketplace_state, feature_friends_state"
         )
         .eq("id", "global")
         .maybeSingle();
@@ -65,7 +63,6 @@ export const useFeatureToggles = () => {
     lobbies_enabled: canSee("lobbies"),
     league_enabled: canSee("league"),
     events_enabled: canSee("events"),
-    rewards_enabled: canSee("rewards"),
     matching_enabled: canSee("matching"),
     p2g_enabled: canSee("p2g"),
     marketplace_enabled: canSee("marketplace"),

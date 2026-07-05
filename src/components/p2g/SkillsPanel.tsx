@@ -3,7 +3,7 @@ import { Loader2, Zap, TrendingUp, Target, Trophy, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useP2GPoints, type MatchAnalysis } from "@/hooks/useP2GPoints";
-import { AnimatedCounter } from "@/components/rewards/AnimatedCounter";
+import { AnimatedCounter } from "@/components/p2g/AnimatedCounter";
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";

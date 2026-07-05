@@ -5,11 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { AnimatedCounter } from "@/components/rewards/AnimatedCounter";
+import { AnimatedCounter } from "@/components/p2g/AnimatedCounter";
 import { NavLink } from "@/components/NavLink";
 import { ExpertLevelInfoPopover } from "./ExpertLevelInfoPopover";
 import type { P2GSummary } from "@/hooks/useP2GPoints";
-import { getExpertLevel, getProgressToNextLevel, getExpertLevelEmoji } from "@/lib/expertLevels";
+import { useExpertLevels, levelForPoints, nextLevelForPoints, progressToNext } from "@/hooks/useExpertLevels";
+import { EXPERT_LEVELS, getExpertLevelEmoji } from "@/lib/expertLevels";
 
 interface P2GPointsHeaderSimpleProps {
   summary: P2GSummary | undefined;
@@ -17,18 +18,30 @@ interface P2GPointsHeaderSimpleProps {
 }
 
 /**
- * Simplified P2G Points Header - Focus on Play Credits only
- * Expert Level + Progress Bar + Simple CTAs
+ * Simplified P2G Points Header — Expert Level (from the admin-configurable DB levels),
+ * current payback multiplier, play-credits counter and progress to the next level.
+ * The level is based on lifetime credits (total ever earned).
  */
 export function P2GPointsHeaderSimple({ summary, isLoading }: P2GPointsHeaderSimpleProps) {
   const { t } = useTranslation("p2g");
-  // Play Credits are the primary metric for Expert Level
+  const { levels } = useExpertLevels();
+
   const playCredits = summary?.play_credits ?? 0;
-  
-  // Expert Level based on Play Credits
-  const expertLevel = getExpertLevel(playCredits);
-  const progress = getProgressToNextLevel(playCredits);
-  const levelEmoji = getExpertLevelEmoji(expertLevel.name);
+  // Level & multiplier follow the total earned (lifetime) points, from the DB config.
+  const levelPoints = summary?.lifetime_credits || summary?.play_credits || 0;
+  const dbLevel = levelForPoints(levels, levelPoints);
+  const nextLevel = nextLevelForPoints(levels, levelPoints);
+  const progressPct = progressToNext(levels, levelPoints);
+  const multiplier = Number(dbLevel.multiplier ?? 1);
+
+  // Cosmetic fields (borderColor/bgGradient/textColor) fall back to the lib match by name.
+  const libLevel = EXPERT_LEVELS.find((l) => l.name === dbLevel.name) ?? EXPERT_LEVELS[0];
+  const gradient = dbLevel.gradient ?? libLevel.gradient;
+  const borderColor = libLevel.borderColor;
+  const bgGradient = libLevel.bgGradient;
+  const textColor = libLevel.textColor;
+  const levelEmoji = dbLevel.emoji ?? getExpertLevelEmoji(dbLevel.name);
+  const remaining = nextLevel ? Math.max(0, nextLevel.min_points - levelPoints) : 0;
 
   return (
     <div className="space-y-4">
@@ -46,7 +59,7 @@ export function P2GPointsHeaderSimple({ summary, isLoading }: P2GPointsHeaderSim
         
         {/* CTAs */}
         <div className="flex items-center gap-2">
-          <ExpertLevelInfoPopover currentPlayCredits={playCredits} />
+          <ExpertLevelInfoPopover currentPlayCredits={levelPoints} />
           <Button variant="lime" size="sm" asChild className="gap-2">
             <NavLink to="/dashboard/marketplace?affordable=true">
               <ShoppingBag className="h-4 w-4" />
@@ -63,27 +76,30 @@ export function P2GPointsHeaderSimple({ summary, isLoading }: P2GPointsHeaderSim
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <Card className={`overflow-hidden border ${expertLevel.borderColor} relative`}>
+          <Card className={`overflow-hidden border ${borderColor} relative`}>
             {/* Tier-based gradient background */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${expertLevel.bgGradient}`} />
-            <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${expertLevel.gradient} opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2`} />
+            <div className={`absolute inset-0 bg-gradient-to-br ${bgGradient}`} />
+            <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${gradient} opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2`} />
             
             <CardContent className="p-6 relative">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {/* Expert Level Badge */}
                 <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${expertLevel.gradient} shadow-lg`}>
+                  <div className={`p-4 rounded-2xl bg-gradient-to-br ${gradient} shadow-lg`}>
                     <Trophy className="h-10 w-10 text-white" />
                   </div>
                   <div>
                     <span className="text-sm text-muted-foreground block">{t("p2gPointsHeaderSimple.expertLevel")}</span>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-3xl">{levelEmoji}</span>
-                      <span className={`text-2xl md:text-3xl font-bold bg-gradient-to-r ${expertLevel.gradient} bg-clip-text text-transparent`}>
-                        {expertLevel.name}
+                      <span className={`text-2xl md:text-3xl font-bold bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>
+                        {dbLevel.name}
                       </span>
                     </div>
+                    <span className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/10 border border-primary/25 text-primary">
+                      <Zap className="h-3 w-3" />×{multiplier} Payback pro Buchung
+                    </span>
                   </div>
                 </div>
 
@@ -106,18 +122,18 @@ export function P2GPointsHeaderSimple({ summary, isLoading }: P2GPointsHeaderSim
               {/* Progress Bar to Next Level */}
               <div className="mt-6 p-4 rounded-xl bg-background/50 backdrop-blur-sm border border-border/50">
                 <div className="space-y-3">
-                  <Progress 
-                    value={progress.percentage} 
+                  <Progress
+                    value={progressPct}
                     className="h-3 bg-muted/50"
                   />
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      {t("p2gPointsHeaderSimple.pointsProgress", { current: playCredits.toLocaleString(), target: progress.target.toLocaleString() })}
+                      {t("p2gPointsHeaderSimple.pointsProgress", { current: levelPoints.toLocaleString(), target: (nextLevel ? nextLevel.min_points : dbLevel.min_points).toLocaleString() })}
                     </span>
-                    {progress.nextLevelName ? (
-                      <span className={`font-medium flex items-center gap-1 ${expertLevel.textColor}`}>
+                    {nextLevel ? (
+                      <span className={`font-medium flex items-center gap-1 ${textColor}`}>
                         <Target className="h-3.5 w-3.5" />
-                        {t("p2gPointsHeaderSimple.remaining", { count: progress.remaining.toLocaleString(), level: progress.nextLevelName })}
+                        {t("p2gPointsHeaderSimple.remaining", { count: remaining.toLocaleString(), level: nextLevel.name })}
                       </span>
                     ) : (
                       <span className="font-medium text-yellow-400 flex items-center gap-1">

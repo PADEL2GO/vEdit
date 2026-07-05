@@ -23,7 +23,6 @@ const FuerSpieler = lazy(() => import("./pages/FuerSpieler"));
 const FuerVereine = lazy(() => import("./pages/FuerVereine"));
 const FuerPartner = lazy(() => import("./pages/FuerPartner"));
 const AppBooking = lazy(() => import("./pages/AppBooking"));
-const Rewards = lazy(() => import("./pages/Rewards"));
 const League = lazy(() => import("./pages/League"));
 const Events = lazy(() => import("./pages/Events"));
 const EventDetail = lazy(() => import("./pages/EventDetail"));
@@ -46,7 +45,6 @@ const Lobbies = lazy(() => import("./pages/Lobbies"));
 
 // Dashboard Pages (Logged-In)
 const DashboardHome = lazy(() => import("./pages/dashboard/DashboardHome"));
-const DashboardRewards = lazy(() => import("./pages/dashboard/DashboardRewards"));
 const DashboardMarketplace = lazy(() => import("./pages/dashboard/DashboardMarketplace"));
 const DashboardLeague = lazy(() => import("./pages/dashboard/DashboardLeague"));
 const DashboardEvents = lazy(() => import("./pages/dashboard/DashboardEvents"));
@@ -126,7 +124,6 @@ const App = () => (
               <Route path="/fuer-vereine" element={<FuerVereine />} />
               <Route path="/fuer-partner" element={<FuerPartner />} />
               <Route path="/app-booking" element={<AppBooking />} />
-              <Route path="/rewards" element={<Rewards />} />
               <Route path="/league" element={<League />} />
               <Route path="/events" element={<Events />} />
               <Route path="/events/:slug" element={<EventDetail />} />
@@ -163,9 +160,6 @@ const App = () => (
                 <Route element={<RequireFeature feature="lobbies" />}>
                   <Route path="/lobbies" element={<Lobbies />} />
                   <Route path="/lobbies/:id" element={<Lobbies />} />
-                </Route>
-                <Route element={<RequireFeature feature="rewards" />}>
-                  <Route path="/dashboard/rewards" element={<DashboardRewards />} />
                 </Route>
                 <Route element={<RequireFeature feature="p2g" />}>
                   <Route path="/dashboard/p2g-points" element={<DashboardP2GPoints />} />

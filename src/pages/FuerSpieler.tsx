@@ -827,14 +827,6 @@ const FuerSpieler = () => {
                     </motion.div>
                   ))}
                 </div>
-                <div className="mt-8 text-center">
-                  <NavLink
-                    to="/rewards"
-                    className="inline-flex items-center gap-2 text-[#C7F011] text-sm font-bold hover:gap-3 transition-all"
-                  >
-                    {t("points.learnMore")} <ArrowRight className="w-4 h-4" />
-                  </NavLink>
-                </div>
               </motion.div>
             </div>
           </div>

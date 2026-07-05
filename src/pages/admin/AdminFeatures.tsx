@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Rocket, Trophy, Calendar, Loader2, Coins, ShoppingCart, Save, Eye, EyeOff, DoorOpen, Gift, Shuffle, Users } from "lucide-react";
+import { Rocket, Trophy, Calendar, Loader2, Coins, ShoppingCart, Save, Eye, EyeOff, DoorOpen, Shuffle, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -43,13 +43,6 @@ const FEATURES: FeatureConfig[] = [
     description: "Padel-Events mit DJ, Food & Community. Von Day-Drinking Sessions bis zu Partner-Activations.",
     route: "/dashboard/events",
     icon: Calendar,
-  },
-  {
-    name: "rewards",
-    title: "Rewards",
-    description: "Prämien-Katalog zum Einlösen von P2G-Punkten.",
-    route: "/dashboard/rewards",
-    icon: Gift,
   },
   {
     name: "matching",
@@ -109,7 +102,6 @@ export default function AdminFeatures() {
     lobbies: "hidden",
     league: "hidden",
     events: "hidden",
-    rewards: "hidden",
     matching: "hidden",
     p2g: "hidden",
     marketplace: "hidden",
@@ -133,7 +125,7 @@ export default function AdminFeatures() {
       const { data, error } = await supabase
         .from("site_settings")
         .select(
-          "feature_courts_public_enabled, feature_lobbies_state, feature_league_state, feature_events_state, feature_rewards_state, feature_matching_state, feature_p2g_state, feature_marketplace_state, feature_friends_state, feature_credits_payment_enabled, credits_payment_max_percent, credits_per_euro, launch_date"
+          "feature_courts_public_enabled, feature_lobbies_state, feature_league_state, feature_events_state, feature_matching_state, feature_p2g_state, feature_marketplace_state, feature_friends_state, feature_credits_payment_enabled, credits_payment_max_percent, credits_per_euro, launch_date"
         )
         .eq("id", "global")
         .single();
@@ -146,7 +138,6 @@ export default function AdminFeatures() {
         lobbies: d?.feature_lobbies_state ?? "hidden",
         league: d?.feature_league_state ?? "hidden",
         events: d?.feature_events_state ?? "hidden",
-        rewards: d?.feature_rewards_state ?? "hidden",
         matching: d?.feature_matching_state ?? "hidden",
         p2g: d?.feature_p2g_state ?? "hidden",
         marketplace: d?.feature_marketplace_state ?? "hidden",

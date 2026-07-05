@@ -25,14 +25,12 @@ const Footer = () => {
         { label: t("footer.links.bookCourt"), href: "/booking" },
         { label: t("footer.links.events"), href: "/events" },
         { label: t("footer.links.league"), href: "/league" },
-        { label: t("footer.links.rewards"), href: "/rewards" },
       ]
     : [
         { label: t("footer.links.bookCourt"), href: "/booking" },
         { label: t("footer.links.signUp"), href: "/auth" },
         { label: t("footer.links.events"), href: "/events" },
         { label: t("footer.links.league"), href: "/league" },
-        { label: t("footer.links.rewards"), href: "/rewards" },
       ];
 
   const showPlatformColumn = platformLinks.length > 0;

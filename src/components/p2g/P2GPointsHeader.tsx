@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { AnimatedCounter } from "@/components/rewards/AnimatedCounter";
+import { AnimatedCounter } from "@/components/p2g/AnimatedCounter";
 import { RewardCatalogDrawer } from "./RewardCatalogDrawer";
 import { NavLink } from "@/components/NavLink";
 import type { P2GSummary } from "@/hooks/useP2GPoints";

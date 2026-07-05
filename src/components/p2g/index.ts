@@ -4,7 +4,6 @@ export { ExpertLevelInfoPopover } from "./ExpertLevelInfoPopover";
 export { SkillLast5Section } from "./SkillLast5Section";
 export { RewardCatalogDrawer } from "./RewardCatalogDrawer";
 export { RewardCard } from "./RewardCard";
-export { RewardsPanel } from "./RewardsPanel";
 export { SkillsPanel } from "./SkillsPanel";
 export { StreakProgressCard } from "./StreakProgressCard";
 export { LastGameCard } from "./LastGameCard";

@@ -16,7 +16,7 @@ import {
   getProgressToNextLevel, 
   getExpertLevelEmoji 
 } from "@/lib/expertLevels";
-import { AnimatedCounter } from "@/components/rewards/AnimatedCounter";
+import { AnimatedCounter } from "@/components/p2g/AnimatedCounter";
 import { ExpertLevelInfoPopover } from "./ExpertLevelInfoPopover";
 import { CreditBreakdown } from "@/hooks/useP2GPoints";
 

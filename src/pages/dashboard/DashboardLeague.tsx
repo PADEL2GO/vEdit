@@ -45,7 +45,7 @@ import {
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { motion } from "framer-motion";
-import { AnimatedCounter } from "@/components/rewards/AnimatedCounter";
+import { AnimatedCounter } from "@/components/p2g/AnimatedCounter";
 
 import type { RankingEntry } from "@/hooks/useP2GPoints";
 
