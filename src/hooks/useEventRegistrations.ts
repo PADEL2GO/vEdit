@@ -69,7 +69,12 @@ export const useRegisterForEvent = () => {
     mutationFn: async (eventId: string) => {
       const { data, error } = await db.rpc("register_for_event", { p_event_id: eventId });
       if (error) throw new Error(error.message);
-      return data as { registration_id: string; ticket_code: string };
+      const result = data as { registration_id: string; ticket_code: string };
+      // Fire-and-forget branded confirmation email — never block/fail the registration on it.
+      supabase.functions
+        .invoke("send-event-confirmation", { body: { registration_id: result.registration_id } })
+        .catch(() => {});
+      return result;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["dashboard-events-list"] });

@@ -30,6 +30,9 @@ verify_jwt = true
 [functions.marketplace-refund]
 verify_jwt = true
 
+[functions.send-event-confirmation]
+verify_jwt = true
+
 [functions.p2g-points-api]
 verify_jwt = false
 

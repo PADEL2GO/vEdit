@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { resolveResendKey, brandedEmailHtml, sendBrandedEmail } from "../_shared/email.ts";
 
 const allowedOrigins = [
   "https://www.padel2go-official.com",
@@ -238,8 +239,35 @@ serve(async (req) => {
         cta_url: "/booking",
       });
       logStep("Cancellation notification sent", { userId: user.id });
+
+      // Branded cancellation email (PADEL2GO design)
+      const resendKey = await resolveResendKey(supabaseAdmin);
+      if (resendKey && user.email) {
+        const refundNote = refundIssued
+          ? "Der bezahlte Betrag wird auf dein Zahlungsmittel zurückerstattet."
+          : creditsRefunded > 0
+            ? `${creditsRefunded} Punkte wurden dir gutgeschrieben.`
+            : "Wir hoffen, dich bald wieder auf dem Court zu sehen!";
+        const html = brandedEmailHtml({
+          title: "Buchung storniert",
+          emoji: "🚫",
+          heading: "Buchung storniert",
+          intro: "Deine Court-Buchung wurde storniert.",
+          rows: [
+            { label: "Standort", value: locationName },
+            { label: "Court", value: courtName },
+            { label: "Datum", value: dateFormatted },
+            { label: "Uhrzeit", value: `${timeFormatted} Uhr` },
+          ],
+          note: refundNote,
+          ctaLabel: "Neue Buchung",
+          ctaUrl: "https://www.padel2go-official.de/booking",
+        });
+        await sendBrandedEmail(resendKey, user.email, "Deine Buchung wurde storniert", html);
+        logStep("Cancellation email sent", { email: user.email });
+      }
     } catch (notifyErr) {
-      logStep("Failed to send cancellation notification", { error: (notifyErr as Error).message });
+      logStep("Failed to send cancellation notification/email", { error: (notifyErr as Error).message });
     }
 
     // ── Reward claw-back ──────────────────────────────────────────────────────
