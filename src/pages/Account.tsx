@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resizeAvatarToSquare } from "@/lib/resizeImage";
 import { MyBookings } from "@/components/booking/MyBookings";
 import { AccountProfileForm } from "@/components/account";
+import { AccountOrdersTab } from "@/components/account/AccountOrdersTab";
 import { LevelUpAnimation, ExpertLevelsGrid } from "@/components/p2g";
 import { EXPERT_LEVELS, getExpertLevelEmoji } from "@/lib/expertLevels";
 import { useExpertLevels, levelForPoints, nextLevelForPoints, progressToNext } from "@/hooks/useExpertLevels";
@@ -276,9 +277,10 @@ const Account = () => {
         {/* Tab Content */}
         <div className="container mx-auto px-4 max-w-2xl py-8">
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 gap-y-1">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-y-1">
               <TabsTrigger value="profile">{t("page.tabs.profile")}</TabsTrigger>
               <TabsTrigger value="bookings">{t("page.tabs.bookings")}</TabsTrigger>
+              <TabsTrigger value="orders">{t("page.tabs.orders")}</TabsTrigger>
               <TabsTrigger value="p2g-points" className="text-xs sm:text-sm">{t("page.tabs.p2gPoints")}</TabsTrigger>
             </TabsList>
 
@@ -317,6 +319,10 @@ const Account = () => {
 
             <TabsContent value="bookings" className="space-y-6">
               <MyBookings />
+            </TabsContent>
+
+            <TabsContent value="orders" className="space-y-6">
+              <AccountOrdersTab />
             </TabsContent>
 
             <TabsContent value="p2g-points" className="space-y-6">

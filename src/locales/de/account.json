@@ -11,6 +11,7 @@
     "tabs": {
       "profile": "Profil",
       "bookings": "Buchungen",
+      "orders": "Bestellungen",
       "p2gPoints": "P2G Points",
       "stats": "Stats"
     },
