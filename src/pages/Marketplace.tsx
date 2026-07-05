@@ -1,361 +1,387 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import SectionDivider from "@/components/SectionDivider";
-import { NavLink } from "@/components/NavLink";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { ShippingAddressForm } from "@/components/marketplace/ShippingAddressForm";
-import { useMarketplaceItems, MarketplaceItem } from "@/hooks/useMarketplaceItems";
-import { useMarketplaceCheckout, ShippingAddress } from "@/hooks/useMarketplaceCheckout";
-import { Loader2, ShoppingBag, Sparkles, Truck, UserPlus, Mail, User } from "lucide-react";
+  Search, X, RotateCcw, ArrowRight, Coins, Zap,
+  LayoutGrid, CircleDot, Shirt, Footprints, Backpack, Package, Flame,
+} from "lucide-react";
+import { useMarketplaceItems, type MarketplaceItem } from "@/hooks/useMarketplaceItems";
+import { useCatalogCategories, useCatalogBrands } from "@/hooks/useMarketplaceCatalog";
+import { useAuth } from "@/hooks/useAuth";
+import { useP2GPoints } from "@/hooks/useP2GPoints";
+import { usePointsValue } from "@/hooks/usePointsValue";
+import { eur, ptsFmt, discountPct } from "@/lib/marketplace";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CAT_ICONS: Record<string, typeof Package> = {
+  schlaeger: Zap,
+  baelle: CircleDot,
+  bekleidung: Shirt,
+  schuhe: Footprints,
+  taschen: Backpack,
+  zubehoer: Package,
+};
 
-type CheckoutErrors = { email?: string } & Partial<Record<keyof ShippingAddress, string>>;
+type SortKey = "pop" | "asc" | "desc";
+type PriceKey = "all" | "low" | "mid" | "high";
 
 const Marketplace = () => {
-  const { t } = useTranslation("marketplace");
+  const navigate = useNavigate();
   const { data: items, isLoading } = useMarketplaceItems();
-  const checkoutMutation = useMarketplaceCheckout();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { data: categories } = useCatalogCategories();
+  const { data: brands } = useCatalogBrands();
+  const { user } = useAuth();
+  const { summary } = useP2GPoints();
+  const { maxPercent, enabled: pointsEnabled } = usePointsValue();
 
-  useEffect(() => {
-    if (searchParams.get("checkout") === "cancelled") {
-      toast(t("cancelled.toast"));
-      const next = new URLSearchParams(searchParams);
-      next.delete("checkout");
-      setSearchParams(next, { replace: true });
-    }
-  }, [searchParams, setSearchParams, t]);
+  const loggedIn = !!user;
+  const balance = summary?.play_credits ?? 0;
 
-  const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [guestEmail, setGuestEmail] = useState("");
-  const [guestName, setGuestName] = useState("");
-  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
-    address_line1: "",
-    postal_code: "",
-    city: "",
-    country: "DE",
-  });
-  const [errors, setErrors] = useState<CheckoutErrors>({});
+  const [catId, setCatId] = useState<string>("all");
+  const [selBrands, setSelBrands] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<PriceKey>("all");
+  const [availOnly, setAvailOnly] = useState(false);
+  const [q, setQ] = useState("");
+  const [sort, setSort] = useState<SortKey>("pop");
 
-  const activeItems = items ?? [];
+  const brandName = (id?: string | null) => brands?.find((b) => b.id === id)?.name;
+  const catName = (id?: string | null) => categories?.find((c) => c.id === id)?.name;
 
-  const handleBuyClick = (item: MarketplaceItem) => {
-    setSelectedItem(item);
-    setGuestEmail("");
-    setGuestName("");
-    setShippingAddress({ address_line1: "", postal_code: "", city: "", country: "DE" });
-    setErrors({});
-    setConfirmOpen(true);
-  };
+  // Public shop only lists published products that have a slug (own product page).
+  const all = (items ?? []).filter((p) => !!p.slug && p.status !== "draft");
 
-  const validate = (): boolean => {
-    const next: CheckoutErrors = {};
-    if (!guestEmail.trim() || !EMAIL_REGEX.test(guestEmail.trim())) {
-      next.email = t("checkoutDialog.errors.email");
-    }
-    if (selectedItem?.product_type === "purchase") {
-      if (!shippingAddress.address_line1.trim()) next.address_line1 = t("checkoutDialog.errors.required");
-      if (!shippingAddress.postal_code.trim()) next.postal_code = t("checkoutDialog.errors.required");
-      if (!shippingAddress.city.trim()) next.city = t("checkoutDialog.errors.required");
-    }
-    setErrors(next);
-    return Object.keys(next).length === 0;
-  };
+  const countFor = (id: string) =>
+    id === "all" ? all.length : all.filter((p) => p.category_id === id).length;
 
-  const handleConfirmCheckout = () => {
-    if (!selectedItem || !validate()) return;
+  const filtersActive =
+    catId !== "all" || selBrands.length > 0 || priceRange !== "all" || availOnly || q.trim() !== "";
 
-    checkoutMutation.mutate({
-      itemId: selectedItem.id,
-      itemName: selectedItem.name,
-      guestEmail: guestEmail.trim(),
-      guestName: guestName.trim() || undefined,
-      shipping: selectedItem.product_type === "purchase" ? shippingAddress : undefined,
+  const list = useMemo(() => {
+    const query = q.trim().toLowerCase();
+    let res = all.filter((p) => {
+      if (catId !== "all" && p.category_id !== catId) return false;
+      if (selBrands.length > 0 && !selBrands.includes(p.brand_id ?? "")) return false;
+      const price = p.price_cents ?? 0;
+      if (priceRange === "low" && !(price < 5000)) return false;
+      if (priceRange === "mid" && !(price >= 5000 && price <= 15000)) return false;
+      if (priceRange === "high" && !(price > 15000)) return false;
+      const inStock = p.stock_quantity === null || (p.stock_quantity ?? 0) > 0;
+      if (availOnly && !inStock) return false;
+      if (query) {
+        const hay = `${p.name} ${brandName(p.brand_id) ?? p.partner_name ?? ""} ${catName(p.category_id) ?? ""}`.toLowerCase();
+        if (!hay.includes(query)) return false;
+      }
+      return true;
     });
+    res = res.slice().sort((a, b) => {
+      if (sort === "asc") return (a.price_cents ?? 0) - (b.price_cents ?? 0);
+      if (sort === "desc") return (b.price_cents ?? 0) - (a.price_cents ?? 0);
+      // "pop": featured first, then sort_order.
+      const fa = a.is_featured ? 1 : 0;
+      const fb = b.is_featured ? 1 : 0;
+      if (fb !== fa) return fb - fa;
+      return (a.sort_order ?? 0) - (b.sort_order ?? 0);
+    });
+    return res;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all, catId, selBrands, priceRange, availOnly, q, sort, brands, categories]);
+
+  const resetFilters = () => {
+    setCatId("all");
+    setSelBrands([]);
+    setPriceRange("all");
+    setAvailOnly(false);
+    setQ("");
+    setSort("pop");
   };
 
-  const selectedPriceCents = selectedItem?.price_cents ?? 0;
+  const chip = (active: boolean) =>
+    `inline-flex items-center gap-2 shrink-0 rounded-full px-4 py-2 text-[13.5px] font-semibold transition-all cursor-pointer border ${
+      active
+        ? "bg-primary text-black border-transparent shadow-[0_0_20px_rgba(199,240,17,0.3)]"
+        : "bg-white/[0.04] text-foreground/75 border-border/70 hover:border-primary/50"
+    }`;
+
+  const smallChip = (active: boolean) =>
+    `rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-all cursor-pointer border ${
+      active
+        ? "bg-primary/[0.12] text-primary border-primary/50"
+        : "bg-white/[0.04] text-foreground/65 border-border/70 hover:border-primary/50"
+    }`;
 
   return (
     <>
       <Helmet>
-        <title>{t("meta.title")}</title>
-        <meta name="description" content={t("meta.description")} />
+        <title>Marketplace | PADEL2GO</title>
+        <meta name="description" content="Padel-Equipment — Schläger, Bälle, Schuhe & mehr, vom P2G Team getestet. Direkt zu dir nach Hause." />
       </Helmet>
 
       <Navigation />
 
-      <main className="min-h-screen bg-background pt-20">
-        {/* Header */}
-        <section className="relative py-14 md:py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-hero" />
-          <div className="container mx-auto px-4 relative z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="max-w-3xl mx-auto text-center"
-            >
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-6">
-                <ShoppingBag className="w-4 h-4" />
-                <span className="text-sm font-medium">{t("hero.badge")}</span>
-              </span>
-
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-                {t("hero.title")}{" "}
-                <span className="text-gradient-lime">{t("hero.titleHighlight")}</span>
-              </h1>
-
-              <p className="text-lg md:text-xl text-muted-foreground">{t("hero.description")}</p>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Upsell banner */}
-        <section className="px-4">
+      <main
+        className="min-h-screen pt-[92px] pb-24"
+        style={{ background: "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(199,240,17,0.06), transparent), #000" }}
+      >
+        <div className="mx-auto max-w-[1200px] px-5 flex flex-col gap-8">
+          {/* Hero */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-4xl mx-auto rounded-2xl border border-primary/30 bg-primary/5 p-5 md:p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left"
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className="flex flex-col items-center gap-4 text-center pt-4"
           >
-            <div className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
-              <UserPlus className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold text-foreground">{t("upsell.title")}</p>
-              <p className="text-sm text-muted-foreground">{t("upsell.body")}</p>
-            </div>
-            <Button variant="lime" asChild className="shrink-0 w-full sm:w-auto">
-              <NavLink to="/auth">{t("upsell.cta")}</NavLink>
-            </Button>
-          </motion.div>
-        </section>
-
-        <SectionDivider variant="glow" />
-
-        {/* Items grid */}
-        <section className="py-12 md:py-16">
-          <div className="container mx-auto px-4">
-            {isLoading ? (
-              <div className="flex justify-center py-16">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-            ) : activeItems.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 text-center py-20">
-                <Sparkles className="w-12 h-12 text-primary/60" />
-                <h2 className="text-xl font-bold">{t("empty.title")}</h2>
-                <p className="text-muted-foreground max-w-md">{t("empty.description")}</p>
-              </div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-3 py-1 text-xs font-semibold text-primary">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              Marketplace
+            </span>
+            <h1 className="font-display font-extrabold tracking-tight text-[clamp(32px,5vw,54px)] leading-[1.08]">
+              Dein Spiel. Dein <span className="text-gradient-lime">Equipment.</span>
+            </h1>
+            <p className="max-w-[560px] text-[17.5px] leading-relaxed text-muted-foreground">
+              Schläger, Bälle, Schuhe &amp; mehr — vom P2G Team getestet. Direkt zu dir nach Hause.
+            </p>
+            {loggedIn && pointsEnabled ? (
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-4 py-1.5 text-[13.5px] font-semibold text-primary">
+                <Coins className="w-3.5 h-3.5" />
+                {ptsFmt(balance)} Points verfügbar — bis zu {maxPercent}% Rabatt im Checkout
+              </span>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {activeItems.map((item, index) => {
-                  const priceCents = item.price_cents ?? 0;
-                  const hasPrice = priceCents > 0;
-                  const isOutOfStock = item.stock_quantity !== null && item.stock_quantity <= 0;
-                  const isPurchase = item.product_type === "purchase";
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-4 py-1.5 text-[13.5px] font-semibold text-primary">
+                <Zap className="w-3.5 h-3.5" />
+                Ohne Konto shoppen — mit Konto Points einlösen
+              </span>
+            )}
+          </motion.div>
 
-                  return (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: (index % 4) * 0.08 }}
-                      className="relative rounded-2xl overflow-hidden bg-card/30 backdrop-blur-sm border border-border/50 flex flex-col"
+          {/* Filters */}
+          <div className="flex flex-col gap-3.5">
+            {/* Category chips */}
+            <div className="flex gap-2.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
+              <button className={chip(catId === "all")} onClick={() => setCatId("all")}>
+                <LayoutGrid className="w-3.5 h-3.5" />
+                Alle
+                <span className="font-stat text-[11px] opacity-60">{countFor("all")}</span>
+              </button>
+              {categories?.map((c) => {
+                const Icon = CAT_ICONS[c.slug] ?? Package;
+                return (
+                  <button key={c.id} className={chip(catId === c.id)} onClick={() => setCatId(c.id)}>
+                    <Icon className="w-3.5 h-3.5" />
+                    {c.name}
+                    <span className="font-stat text-[11px] opacity-60">{countFor(c.id)}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Toolbar */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <div className="flex-1 min-w-[220px] max-w-[380px] relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Produkt oder Marke suchen …"
+                  className="pl-9 h-11 rounded-full bg-white/[0.04] border-border/70"
+                />
+              </div>
+              <div className="flex gap-1.5 rounded-full border border-border/70 bg-black/40 p-1">
+                {([["pop", "Beliebt"], ["asc", "Preis ↑"], ["desc", "Preis ↓"]] as [SortKey, string][]).map(
+                  ([key, label]) => (
+                    <button
+                      key={key}
+                      onClick={() => setSort(key)}
+                      className={`rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-all ${
+                        sort === key ? "bg-primary text-black" : "text-foreground/65"
+                      }`}
                     >
-                      <div className="absolute top-2 left-2 z-10 flex gap-1">
-                        <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm">
-                          {item.partner_name || "P2G"}
-                        </Badge>
-                        {isPurchase && (
-                          <Badge variant="default" className="bg-primary/80 backdrop-blur-sm">
-                            <Truck className="w-3 h-3 mr-1" />
-                            {t("item.shippingBadge")}
-                          </Badge>
-                        )}
-                      </div>
+                      {label}
+                    </button>
+                  ),
+                )}
+              </div>
+              <button
+                onClick={() => setAvailOnly((v) => !v)}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold border transition-all ${
+                  availOnly
+                    ? "bg-primary/[0.12] text-primary border-primary/50"
+                    : "bg-white/[0.04] text-foreground/65 border-border/70 hover:border-primary/50"
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${availOnly ? "bg-primary shadow-[0_0_10px_rgba(199,240,17,0.6)]" : "bg-muted-foreground/40"}`} />
+                Nur verfügbare
+              </button>
+              <span className="font-stat text-xs text-muted-foreground ml-auto whitespace-nowrap">
+                {list.length === all.length ? `${all.length} Produkte` : `${list.length} von ${all.length}`}
+              </span>
+            </div>
 
-                      <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
-                        <img
-                          src={item.image_url || "/placeholder.svg"}
-                          alt={item.name}
-                          className="w-full h-full object-cover transition-transform hover:scale-105"
-                        />
-                      </div>
-
-                      <div className="p-4 flex flex-col flex-grow space-y-3">
-                        <div className="flex-grow space-y-2">
-                          <h3 className="font-semibold line-clamp-1">{item.name}</h3>
-                          {item.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
-                          )}
-                        </div>
-
-                        <div className="space-y-2">
-                          {hasPrice ? (
-                            <span className="text-xl font-bold text-primary block">
-                              {t("item.price", { amount: (priceCents / 100).toFixed(2) })}
-                            </span>
-                          ) : (
-                            <Badge variant="outline" className="text-xs">
-                              {t("item.pointsOnlyBadge")}
-                            </Badge>
-                          )}
-
-                          <Button
-                            onClick={() => handleBuyClick(item)}
-                            disabled={!hasPrice || isOutOfStock}
-                            className="w-full"
-                            variant={hasPrice && !isOutOfStock ? "lime" : "secondary"}
-                            size="sm"
-                          >
-                            {isOutOfStock ? t("item.outOfStock") : t("item.buy")}
-                          </Button>
-                        </div>
-                      </div>
-                    </motion.div>
+            {/* Brand + price chips */}
+            {(brands?.length || 0) > 0 && (
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <span className="font-stat text-[10.5px] tracking-[0.14em] text-muted-foreground/70">MARKE</span>
+                {brands?.map((b) => {
+                  const on = selBrands.includes(b.id);
+                  return (
+                    <button
+                      key={b.id}
+                      className={smallChip(on)}
+                      onClick={() =>
+                        setSelBrands((s) => (on ? s.filter((x) => x !== b.id) : [...s, b.id]))
+                      }
+                    >
+                      {b.name}
+                    </button>
                   );
                 })}
+                <span className="w-px h-[18px] bg-border mx-1" />
+                <span className="font-stat text-[10.5px] tracking-[0.14em] text-muted-foreground/70">PREIS</span>
+                {([["all", "Alle"], ["low", "bis 50 €"], ["mid", "50 – 150 €"], ["high", "ab 150 €"]] as [PriceKey, string][]).map(
+                  ([key, label]) => (
+                    <button key={key} className={smallChip(priceRange === key)} onClick={() => setPriceRange(key)}>
+                      {label}
+                    </button>
+                  ),
+                )}
+                {filtersActive && (
+                  <button
+                    onClick={resetFilters}
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-semibold text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="w-3 h-3" />
+                    Zurücksetzen
+                  </button>
+                )}
               </div>
             )}
           </div>
-        </section>
+
+          {/* Grid */}
+          {isLoading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-[18px]">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="rounded-2xl border border-border/60 bg-gradient-card h-[360px] animate-pulse" />
+              ))}
+            </div>
+          ) : list.length === 0 ? (
+            <div className="flex flex-col items-center gap-3.5 text-center py-16 rounded-[20px] border border-dashed border-border/70 bg-white/[0.02]">
+              <span className="w-[52px] h-[52px] rounded-full bg-white/[0.05] border border-border/70 flex items-center justify-center text-muted-foreground">
+                <Search className="w-6 h-6" />
+              </span>
+              <span className="text-base font-semibold text-foreground/80">Nichts gefunden für deine Filter</span>
+              {filtersActive && (
+                <button
+                  onClick={resetFilters}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-[13.5px] font-bold text-primary hover:bg-primary/[0.16]"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Filter zurücksetzen
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-[18px]">
+              {list.map((p, i) => (
+                <ProductCard
+                  key={p.id}
+                  p={p}
+                  index={i}
+                  brand={brandName(p.brand_id) ?? p.partner_name ?? "P2G"}
+                  onOpen={() => navigate(`/marketplace/${p.slug}`)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
       <Footer />
-
-      {/* Guest checkout dialog */}
-      <Dialog
-        open={confirmOpen}
-        onOpenChange={(open) => !checkoutMutation.isPending && setConfirmOpen(open)}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("checkoutDialog.title")}</DialogTitle>
-            <DialogDescription>
-              {selectedItem?.product_type === "purchase"
-                ? t("checkoutDialog.descriptionPurchase")
-                : t("checkoutDialog.descriptionDefault")}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedItem && (
-            <div className="py-4 space-y-4">
-              <div className="p-4 rounded-xl bg-muted/50 space-y-2">
-                <p className="font-semibold">{selectedItem.name}</p>
-                {selectedItem.partner_name && (
-                  <p className="text-xs text-muted-foreground">
-                    {t("checkoutDialog.from", { partner: selectedItem.partner_name })}
-                  </p>
-                )}
-                {selectedItem.product_type === "purchase" && (
-                  <Badge variant="default" className="mt-1">
-                    <Truck className="w-3 h-3 mr-1" />
-                    {t("checkoutDialog.willShip")}
-                  </Badge>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="guest-email">
-                  {t("checkoutDialog.emailLabel")} <span className="text-destructive">*</span>
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="guest-email"
-                    type="email"
-                    placeholder={t("checkoutDialog.emailPlaceholder")}
-                    value={guestEmail}
-                    onChange={(e) => setGuestEmail(e.target.value)}
-                    className={`pl-9 ${errors.email ? "border-destructive" : ""}`}
-                    disabled={checkoutMutation.isPending}
-                  />
-                </div>
-                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="guest-name">{t("checkoutDialog.nameLabel")}</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="guest-name"
-                    placeholder={t("checkoutDialog.namePlaceholder")}
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
-                    className="pl-9"
-                    disabled={checkoutMutation.isPending}
-                  />
-                </div>
-              </div>
-
-              {selectedItem.product_type === "purchase" && (
-                <div className="border-t pt-4">
-                  <h4 className="font-medium mb-3">{t("checkoutDialog.deliveryAddress")}</h4>
-                  <ShippingAddressForm
-                    address={shippingAddress}
-                    onChange={setShippingAddress}
-                    errors={errors}
-                  />
-                </div>
-              )}
-
-              <div className="flex justify-between text-sm border-t pt-4">
-                <span className="text-muted-foreground">{t("checkoutDialog.totalLabel")}</span>
-                <span className="font-semibold text-primary">
-                  {t("item.price", { amount: (selectedPriceCents / 100).toFixed(2) })}
-                </span>
-              </div>
-
-              <p className="text-center text-sm text-muted-foreground">
-                {t("checkoutDialog.loginHint")}{" "}
-                <NavLink to="/auth" className="text-primary hover:underline font-medium">
-                  {t("checkoutDialog.loginLink")}
-                </NavLink>
-              </p>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={checkoutMutation.isPending}>
-              {t("checkoutDialog.cancel")}
-            </Button>
-            <Button variant="lime" onClick={handleConfirmCheckout} disabled={checkoutMutation.isPending}>
-              {checkoutMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t("checkoutDialog.submitting")}
-                </>
-              ) : (
-                t("checkoutDialog.submit")
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
+
+function ProductCard({
+  p,
+  index,
+  brand,
+  onOpen,
+}: {
+  p: MarketplaceItem;
+  index: number;
+  brand: string;
+  onOpen: () => void;
+}) {
+  const price = p.price_cents ?? 0;
+  const uvp = p.compare_at_price_cents ?? null;
+  const off = discountPct(price, uvp);
+  const soldOut = p.stock_quantity !== null && (p.stock_quantity ?? 0) <= 0;
+  const low = !soldOut && p.stock_quantity !== null && (p.stock_quantity ?? 0) <= 5;
+  const stockCol = soldOut ? "text-red-400" : low ? "text-amber-400" : "text-primary";
+  const stockDot = soldOut ? "bg-red-400" : low ? "bg-amber-400" : "bg-primary";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: Math.min(index * 0.05, 0.4) }}
+      onClick={onOpen}
+      className="group cursor-pointer rounded-2xl border border-border/60 bg-gradient-card overflow-hidden flex flex-col transition-colors hover:border-primary/50"
+    >
+      <div className="relative overflow-hidden">
+        <div className={`h-[190px] ${soldOut ? "opacity-45 grayscale" : ""}`}>
+          <img
+            src={p.image_url || "/placeholder.svg"}
+            alt={p.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+        {p.is_featured && (
+          <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-black/70 px-2.5 py-1 text-[11.5px] font-bold text-primary backdrop-blur">
+            <Flame className="w-3 h-3" />
+            Bestseller
+          </span>
+        )}
+        {off > 0 && (
+          <span className="absolute top-3 right-3 inline-flex items-center rounded-full border border-white/15 bg-black/70 px-2.5 py-1 font-stat text-[11.5px] font-bold text-foreground backdrop-blur">
+            −{off}%
+          </span>
+        )}
+        {soldOut && (
+          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex rounded-full border border-border bg-black/80 px-4 py-1.5 text-[12.5px] font-bold backdrop-blur">
+            Ausverkauft
+          </span>
+        )}
+      </div>
+      <div className="flex flex-col gap-2 p-[16px_18px_18px] flex-1">
+        <div className="flex flex-col gap-0.5">
+          <span className="font-stat text-[10.5px] tracking-[0.14em] uppercase text-muted-foreground/80">{brand}</span>
+          <h3 className="font-display font-bold text-[16.5px] leading-tight tracking-tight line-clamp-2">{p.name}</h3>
+        </div>
+        <div className="flex items-baseline gap-2 mt-auto pt-1">
+          <span className="font-stat font-bold text-[17.5px]">{eur(price)}</span>
+          {uvp && (
+            <span className="font-stat text-[12.5px] text-muted-foreground/70 line-through">{eur(uvp)}</span>
+          )}
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="inline-flex items-center gap-1.5">
+            <span className={`w-[7px] h-[7px] rounded-full ${stockDot}`} />
+            <span className={`text-[12.5px] font-semibold ${stockCol}`}>
+              {soldOut ? "Ausverkauft" : low ? `Nur noch ${p.stock_quantity}` : "Auf Lager"}
+            </span>
+          </span>
+          <span className="inline-flex items-center gap-1 text-[12.5px] font-bold text-primary">
+            Details
+            <ArrowRight className="w-3.5 h-3.5" />
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export default Marketplace;
