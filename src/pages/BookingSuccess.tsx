@@ -6,12 +6,12 @@ import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Calendar, ArrowRight, Loader2, Coins, Gift, UserPlus, Users } from "lucide-react";
+import { Check, CalendarDays, ArrowRight, Loader2, Coins, Gift, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 import { LobbyActionButton, type BookingForLobby } from "@/components/lobby";
+import { BookingStepper } from "@/components/booking/BookingStepper";
 
 interface EarnedReward {
   points: number;
@@ -122,140 +122,193 @@ const BookingSuccess = () => {
 
       <Navigation />
 
-      <main className="min-h-screen bg-background pt-24 pb-12">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="max-w-lg mx-auto"
-          >
-            <Card>
-              <CardContent className="pt-8 pb-8">
-                <div className="text-center">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                    className="mb-6"
-                  >
-                    <div className="w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
-                      <CheckCircle className="w-10 h-10 text-green-500" />
-                    </div>
-                  </motion.div>
+      <main className="min-h-screen bg-background pt-16 md:pt-20">
+        <BookingStepper currentStep={3} />
 
-                  <h1 className="text-2xl font-bold mb-2">{t("success.title")}</h1>
-                  <p className="text-muted-foreground mb-6">
-                    {t("success.description")}
-                  </p>
+        <section
+          className="pt-10 md:pt-14 pb-24 px-5"
+          style={{ background: "radial-gradient(ellipse 60% 40% at 50% 0%, hsl(71 91% 51% / 0.09), transparent)" }}
+        >
+          <div className="mx-auto max-w-[560px] flex flex-col items-center gap-[22px] text-center">
+            {/* Check-Kreis */}
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.15, type: "spring", stiffness: 200, damping: 14 }}
+              className="w-24 h-24 rounded-full bg-primary/10 border border-primary/45 flex items-center justify-center text-primary shadow-[0_0_60px_hsl(71_91%_51%/0.3)]"
+            >
+              <Check className="w-11 h-11" strokeWidth={2.5} />
+            </motion.span>
 
-                  {/* P2G Points Earned Confirmation */}
-                  {totalEarned > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 }}
-                      className="mb-6 rounded-lg bg-gradient-to-r from-emerald-500/10 to-primary/10 border border-emerald-500/30 p-4 text-left"
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="p-1.5 rounded-full bg-emerald-500/20">
-                          <Coins className="h-4 w-4 text-emerald-400" />
-                        </div>
-                        <span className="font-semibold text-emerald-400">
-                          {t("success.rewards.creditedHeading")}
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-1.5 ml-8 text-sm">
-                        {earnedRewards.map((reward, idx) => (
-                          <div key={idx} className="flex justify-between items-center">
-                            <span className="text-muted-foreground">{reward.title}</span>
-                            <span className="text-emerald-400 font-medium">+{reward.points}</span>
-                          </div>
-                        ))}
-                        <div className="border-t border-emerald-500/20 pt-2 mt-2 flex justify-between items-center font-semibold">
-                          <span className="flex items-center gap-1.5">
-                            <Gift className="h-4 w-4 text-emerald-400" />
-                            {t("success.rewards.totalLabel")}
-                          </span>
-                          <span className="text-emerald-400 text-lg">+{totalEarned}{t("success.rewards.totalSuffix")}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
+            {/* Titel + Untertitel */}
+            <div className="flex flex-col gap-2.5">
+              <h1 className="font-bold tracking-tight text-foreground leading-tight text-[clamp(30px,5vw,42px)]">
+                {t("success.title")}
+              </h1>
+              <p className="text-base leading-relaxed text-muted-foreground">
+                {t("success.description")}
+              </p>
+            </div>
 
-                  {/* Lobby CTA — turn this booking into a lobby (hidden while lobbies feature isn't visible to this user) */}
-                  {!isGuest && recentBooking && canSee("lobbies") && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
-                      className="mb-6 rounded-lg border border-primary/30 bg-primary/5 p-4 text-left"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="p-1.5 rounded-full bg-primary/20 shrink-0">
-                          <Users className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-foreground">
-                            {t("success.lobby.title")}
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-0.5 mb-3">
-                            {t("success.lobby.body")}
-                          </p>
-                          <LobbyActionButton booking={recentBooking} variant="default" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  <div className="space-y-3">
-                    {!isGuest ? (
-                      <Button variant="lime" size="lg" className="w-full" asChild>
-                        <NavLink to="/account">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          {t("success.actions.myBookings")}
-                        </NavLink>
-                      </Button>
-                    ) : (
-                      <Button variant="lime" size="lg" className="w-full" asChild>
-                        <NavLink to="/auth">
-                          <UserPlus className="w-4 h-4 mr-2" />
-                          {t("success.actions.createAccount")}
-                        </NavLink>
-                      </Button>
-                    )}
-
-                    {!isGuest && totalEarned > 0 && (
-                      <Button variant="outline" className="w-full border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10" asChild>
-                        <NavLink to="/dashboard/p2g-points">
-                          <Coins className="w-4 h-4 mr-2" />
-                          {t("success.actions.myCredits")}
-                        </NavLink>
-                      </Button>
-                    )}
-
-                    {isGuest && (
-                      <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground text-left">
-                        <p className="font-medium text-foreground mb-1 flex items-center gap-1.5">
-                          <Coins className="w-4 h-4 text-primary" />
-                          {t("success.guestInfo.title")}
-                        </p>
-                        <p>{t("success.guestInfo.body")}</p>
-                      </div>
-                    )}
-
-                    <Button variant="outline" className="w-full" asChild>
-                      <NavLink to="/booking">
-                        {t("success.actions.anotherBooking")}
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </NavLink>
-                    </Button>
+            {/* Detail-Karte (echte Buchungsdaten) */}
+            {recentBooking && (
+              <div className="w-full rounded-2xl border border-border/60 bg-gradient-card p-6">
+                <div className="flex flex-col gap-3 text-left">
+                  <div className="flex items-center justify-between gap-2.5">
+                    <span className="text-[13.5px] text-muted-foreground">Standort</span>
+                    <span className="text-sm font-semibold text-foreground text-right">{recentBooking.location_name}</span>
+                  </div>
+                  <div className="h-px bg-border" />
+                  <div className="flex items-center justify-between gap-2.5">
+                    <span className="text-[13.5px] text-muted-foreground">Court</span>
+                    <span className="text-sm font-semibold text-foreground">{recentBooking.court_name}</span>
+                  </div>
+                  <div className="h-px bg-border" />
+                  <div className="flex items-center justify-between gap-2.5">
+                    <span className="text-[13.5px] text-muted-foreground">Termin</span>
+                    <span className="font-stat text-[13.5px] font-semibold text-foreground">
+                      {new Date(recentBooking.start_time).toLocaleDateString("de-DE", { day: "2-digit", month: "short" })}
+                      {" · "}
+                      {new Date(recentBooking.start_time).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                  <div className="h-px bg-border" />
+                  <div className="flex items-center justify-between gap-2.5">
+                    <span className="text-[13.5px] text-muted-foreground">Bezahlt</span>
+                    <span className="inline-flex items-center gap-2">
+                      <span className="font-stat text-[15px] font-bold text-primary">
+                        {(recentBooking.price_cents / 100).toFixed(2).replace(".", ",")} €
+                      </span>
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-bold text-primary">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                        Bestätigt
+                      </span>
+                    </span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+              </div>
+            )}
+
+            {/* P2G Points Earned Confirmation (eingeloggt) */}
+            {totalEarned > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="w-full rounded-[18px] border border-primary/35 p-5 text-left"
+                style={{ background: "linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.03))" }}
+              >
+                <div className="flex items-center gap-3.5 mb-3">
+                  <span className="flex-none w-[46px] h-[46px] rounded-[13px] bg-primary/[0.12] border border-primary/35 flex items-center justify-center text-primary">
+                    <Coins className="w-5 h-5" />
+                  </span>
+                  <span className="font-semibold text-primary">
+                    {t("success.rewards.creditedHeading")}
+                  </span>
+                </div>
+
+                <div className="space-y-1.5 pl-[60px] text-sm">
+                  {earnedRewards.map((reward, idx) => (
+                    <div key={idx} className="flex justify-between items-center">
+                      <span className="text-muted-foreground">{reward.title}</span>
+                      <span className="font-stat text-primary font-medium">+{reward.points}</span>
+                    </div>
+                  ))}
+                  <div className="border-t border-primary/20 pt-2 mt-2 flex justify-between items-center font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <Gift className="h-4 w-4 text-primary" />
+                      {t("success.rewards.totalLabel")}
+                    </span>
+                    <span className="font-stat text-primary text-lg">+{totalEarned}{t("success.rewards.totalSuffix")}</span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Lobby CTA — turn this booking into a lobby (hidden while lobbies feature isn't visible to this user) */}
+            {!isGuest && recentBooking && canSee("lobbies") && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="w-full rounded-[18px] border border-primary/30 bg-primary/5 p-5 text-left"
+              >
+                <div className="flex items-start gap-3.5">
+                  <span className="flex-none w-[46px] h-[46px] rounded-[13px] bg-primary/[0.12] border border-primary/35 flex items-center justify-center text-primary">
+                    <Users className="w-5 h-5" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground">
+                      {t("success.lobby.title")}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-0.5 mb-3">
+                      {t("success.lobby.body")}
+                    </p>
+                    <LobbyActionButton booking={recentBooking} variant="default" />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Gast-Box: Points warten */}
+            {isGuest && (
+              <div
+                className="w-full rounded-[18px] border border-primary/35 p-5 text-left"
+                style={{ background: "linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.03))" }}
+              >
+                <div className="flex items-center gap-3.5">
+                  <span className="flex-none w-[46px] h-[46px] rounded-[13px] bg-primary/[0.12] border border-primary/35 flex items-center justify-center text-primary">
+                    <Gift className="w-5 h-5" />
+                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-semibold text-foreground flex items-center gap-1.5">
+                      <Coins className="w-4 h-4 text-primary" />
+                      {t("success.guestInfo.title")}
+                    </span>
+                    <span className="text-[13px] leading-snug text-muted-foreground">{t("success.guestInfo.body")}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Action-Buttons */}
+            <div className="flex flex-col gap-3 w-full">
+              <div className="flex gap-3 w-full flex-wrap">
+                <Button variant="outline" size="lg" className="flex-1 min-w-[200px]" asChild>
+                  <NavLink to="/booking">
+                    {t("success.actions.anotherBooking")}
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </NavLink>
+                </Button>
+
+                {!isGuest ? (
+                  <Button variant="lime" size="lg" className="flex-1 min-w-[200px]" asChild>
+                    <NavLink to="/account">
+                      <CalendarDays className="w-4 h-4 mr-2" />
+                      {t("success.actions.myBookings")}
+                    </NavLink>
+                  </Button>
+                ) : (
+                  <Button variant="lime" size="lg" className="flex-1 min-w-[200px]" asChild>
+                    <NavLink to="/auth">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      {t("success.actions.createAccount")}
+                    </NavLink>
+                  </Button>
+                )}
+              </div>
+
+              {!isGuest && totalEarned > 0 && (
+                <Button variant="outline" size="lg" className="w-full border-primary/30 text-primary hover:bg-primary/10" asChild>
+                  <NavLink to="/dashboard/p2g-points">
+                    <Coins className="w-4 h-4 mr-2" />
+                    {t("success.actions.myCredits")}
+                  </NavLink>
+                </Button>
+              )}
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer />

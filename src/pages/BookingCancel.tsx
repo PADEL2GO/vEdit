@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { XCircle, ArrowLeft, RefreshCw } from "lucide-react";
+import { X, ArrowLeft, RotateCcw, ShieldCheck } from "lucide-react";
+import { BookingStepper } from "@/components/booking/BookingStepper";
 
 const BookingCancel = () => {
   const { t } = useTranslation("booking");
@@ -22,47 +22,65 @@ const BookingCancel = () => {
 
       <Navigation />
 
-      <main className="min-h-screen bg-background pt-24 pb-12">
-        <div className="container mx-auto px-4">
+      <main className="min-h-screen bg-background pt-16 md:pt-20">
+        <BookingStepper currentStep={2} />
+
+        <section className="pt-12 md:pt-16 pb-24 px-5">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-lg mx-auto"
+            className="mx-auto max-w-[480px] flex flex-col items-center gap-[22px] text-center"
           >
-            <Card>
-              <CardContent className="pt-8 pb-8">
-                <div className="text-center">
-                  <div className="w-20 h-20 mx-auto rounded-full bg-amber-500/20 flex items-center justify-center mb-6">
-                    <XCircle className="w-10 h-10 text-amber-500" />
-                  </div>
+            {/* X-Kreis */}
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 14 }}
+              className="w-[88px] h-[88px] rounded-full flex items-center justify-center border border-[hsl(0_72%_55%/0.4)] bg-[hsl(0_72%_55%/0.09)] text-[hsl(0_72%_58%)]"
+            >
+              <X className="w-10 h-10" strokeWidth={2.5} />
+            </motion.span>
 
-                  <h1 className="text-2xl font-bold mb-2">{t("cancel.title")}</h1>
-                  <p className="text-muted-foreground mb-8">
-                    {t("cancel.description")}
-                  </p>
+            {/* Titel + Hinweis */}
+            <div className="flex flex-col gap-2.5">
+              <h1 className="font-bold tracking-tight text-foreground leading-tight text-[clamp(28px,4.6vw,38px)]">
+                {t("cancel.title")}
+              </h1>
+              <p className="text-[15.5px] leading-relaxed text-muted-foreground">
+                {t("cancel.description")}
+              </p>
+            </div>
 
-                  <div className="space-y-3">
-                    {bookingId && (
-                      <Button variant="lime" size="lg" className="w-full" asChild>
-                        <NavLink to={`/booking/checkout?booking_id=${bookingId}`}>
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                          {t("cancel.retry")}
-                        </NavLink>
-                      </Button>
-                    )}
-
-                    <Button variant="outline" className="w-full" asChild>
-                      <NavLink to="/booking">
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        {t("cancel.back")}
-                      </NavLink>
-                    </Button>
-                  </div>
+            {/* Action-Buttons */}
+            <div className="flex gap-3 w-full flex-wrap">
+              {bookingId && (
+                <div className="flex-1 min-w-[180px]">
+                  <Button variant="hero" size="lg" className="w-full" asChild>
+                    <NavLink to={`/booking/checkout?booking_id=${bookingId}`}>
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      {t("cancel.retry")}
+                    </NavLink>
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+
+              <div className="flex-1 min-w-[180px]">
+                <Button variant="outline" size="lg" className="w-full" asChild>
+                  <NavLink to="/booking">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    {t("cancel.back")}
+                  </NavLink>
+                </Button>
+              </div>
+            </div>
+
+            {/* Fußnote */}
+            <span className="inline-flex items-center gap-1.5 text-[12.5px] text-[hsl(0_0%_50%)]">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Es wurde nichts abgebucht.
+            </span>
           </motion.div>
-        </div>
+        </section>
       </main>
 
       <Footer />

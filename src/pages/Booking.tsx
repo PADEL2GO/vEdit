@@ -4,8 +4,9 @@ import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Loader2, EyeOff } from "lucide-react";
+import { EyeOff, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { BookingStepper } from "@/components/booking/BookingStepper";
 import { LocationCard } from "@/components/booking/LocationCard";
 import { MyBookings } from "@/components/booking/MyBookings";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,6 +17,7 @@ interface LocationWithAvailability extends DbLocation {
   todayFreeSlots: number;
   occupancyPercent: number;
   minPriceCents: number | null;
+  courtCount: number;
 }
 
 const Booking = () => {
@@ -88,7 +90,7 @@ const Booking = () => {
           }
 
           if (!hours) {
-            return { ...loc, todayFreeSlots: 0, occupancyPercent: 0, minPriceCents };
+            return { ...loc, todayFreeSlots: 0, occupancyPercent: 0, minPriceCents, courtCount: courtIds.length };
           }
 
           // Calculate total available minutes today
@@ -127,6 +129,7 @@ const Booking = () => {
             todayFreeSlots: freeSlots,
             occupancyPercent: Math.min(100, occupancyPercent),
             minPriceCents,
+            courtCount: courtIds.length,
           };
         })
       );
@@ -147,31 +150,41 @@ const Booking = () => {
       </Helmet>
 
       <Navigation />
-      
-      <main className="min-h-screen bg-background pt-24 pb-12">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-4xl mx-auto"
-          >
-            <div className="text-center mb-12">
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+
+      <main className="min-h-screen bg-background pt-16 md:pt-20">
+        <BookingStepper currentStep={0} />
+
+        <section className="px-5 pt-8 md:pt-10 pb-24">
+          <div className="mx-auto max-w-[1200px]">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center gap-4 text-center"
+            >
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse-glow" />
+                Court buchen
+              </span>
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-[1.08]">
                 {t("landing.heading")}<span className="text-gradient-lime">{t("landing.headingHighlight")}</span>
               </h1>
-              <p className="text-lg text-muted-foreground">
+              <p className="max-w-[520px] text-base md:text-lg text-muted-foreground">
                 {t("landing.intro")}
               </p>
-            </div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-4 py-[7px] text-[13.5px] font-semibold text-primary">
+                <Zap className="w-3.5 h-3.5" />
+                Ohne Konto buchbar — einfach als Gast
+              </span>
+            </motion.div>
 
             {user && (
-              <div className="mb-8">
+              <div className="mt-10">
                 <MyBookings />
               </div>
             )}
 
             {isAdmin && !publicEnabled && (
-              <div className="mb-6 rounded-xl border border-blue-500/40 bg-blue-500/10 px-4 py-3 flex items-start gap-3">
+              <div className="mt-8 rounded-2xl border border-blue-500/40 bg-blue-500/10 px-4 py-3 flex items-start gap-3">
                 <EyeOff className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <p className="font-medium text-foreground">{t("common.adminPreviewLabel")}</p>
@@ -182,40 +195,48 @@ const Booking = () => {
               </div>
             )}
 
-            {visibilityLoading || loading ? (
-              <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-            ) : !canSeeCourts ? (
-              <div className="text-center py-20 max-w-md mx-auto">
-                <div className="inline-flex p-4 rounded-2xl bg-primary/10 mb-4">
-                  <EyeOff className="w-10 h-10 text-primary" />
+            <div className="mt-11">
+              {visibilityLoading || loading ? (
+                <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))" }}>
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="h-[440px] rounded-2xl border border-[hsl(0_0%_12%)] bg-gradient-card animate-pulse"
+                    />
+                  ))}
                 </div>
-                <h2 className="text-2xl font-bold mb-2">{t("common.comingSoonTitle")}</h2>
-                <p className="text-muted-foreground">
-                  {t("landing.comingSoonDescription")}
-                </p>
-              </div>
-            ) : locations.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="text-muted-foreground">{t("landing.noLocations")}</p>
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-6">
-                {locations.map((location, index) => (
-                  <LocationCard
-                    key={location.id}
-                    location={location}
-                    todayFreeSlots={location.todayFreeSlots}
-                    occupancyPercent={location.occupancyPercent}
-                    index={index}
-                    minPriceCents={location.minPriceCents}
-                  />
-                ))}
-              </div>
-            )}
-          </motion.div>
-        </div>
+              ) : !canSeeCourts ? (
+                <div className="text-center py-20 max-w-md mx-auto">
+                  <div className="inline-flex p-4 rounded-2xl bg-primary/10 mb-4">
+                    <EyeOff className="w-10 h-10 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2">{t("common.comingSoonTitle")}</h2>
+                  <p className="text-muted-foreground">
+                    {t("landing.comingSoonDescription")}
+                  </p>
+                </div>
+              ) : locations.length === 0 ? (
+                <div className="text-center py-20">
+                  <p className="text-muted-foreground">{t("landing.noLocations")}</p>
+                </div>
+              ) : (
+                <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))" }}>
+                  {locations.map((location, index) => (
+                    <LocationCard
+                      key={location.id}
+                      location={location}
+                      todayFreeSlots={location.todayFreeSlots}
+                      occupancyPercent={location.occupancyPercent}
+                      index={index}
+                      minPriceCents={location.minPriceCents}
+                      courtCount={location.courtCount}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer />

@@ -294,8 +294,9 @@ Masken:
 
 ## 📅 Booking-Flow
 
-> 🟨 **Handover-Brief für den gesamten Booking-Flow:** [`docs/handovers/booking.md`](handovers/booking.md) (2026-07-04). Ziel: sehr interaktiv/icon-reich, aber simpel; Gast-Buchung prominent. Warte auf Claude-Design-Ergebnis.
-> **Bereits erledigt (Code, live):** Booking als Tab in der öffentlichen Navi nach „Home" eingefügt (`Navigation.tsx`). Gäste sind nicht login-gesperrt — Sichtbarkeit hängt am Flag `feature_courts_public_enabled` (Admin → Features / SQL).
+> ✅ **UMGESETZT (Claude Design → Code, Build ✓, 2026-07-05).** Alle 4 Pages + Overlays auf `Booking.dc.html` umgestylt, neuer **Fortschritts-Stepper** (Standort → Termin → Bezahlen → Fertig, `components/booking/BookingStepper.tsx`) unter der Navi. Backend voll erhalten (locations/courts/booking_availability/court_prices/Stripe/Gast-Checkout). Court-Anzahl auf der Standort-Karte neu verdrahtet.
+> **Bewusste Design-Abweichungen (Daten nicht im Backend als eigenes Feld / kompaktes Design):** Court-Buttons ohne „Tag/Preis pro Court"; Dauer-Segmente ohne Preis; Standort-Header ohne Beschreibung/Amenity-Chips (kompaktes Bild-Overlay); Success ohne Buchungscode/Mail-Einblendung (keine Quelle im Code); Datum als horizontale Tages-Chips statt Kalender (= Design). **Offene i18n-Nachziehung:** neue statische Labels sind aktuell hardcodiert (de) — Locale-JSONs bewusst nicht angefasst (Parallel-Umbau).
+> **Handover-Brief:** [`docs/handovers/booking.md`](handovers/booking.md). **Navi:** Booking-Tab nach „Home" (live). **Gäste-Sichtbarkeit:** Flag `feature_courts_public_enabled` (Admin → Features).
 
 ### 🟨 Booking — `/booking`
 `src/pages/Booking.tsx` · Standort-Übersicht mit Verfügbarkeit und eigenen Buchungen
@@ -763,7 +764,7 @@ Masken:
 ## 📌 Aktueller Fokus
 - ✅ **Homepage (`/`)** — umgesetzt, Build ✓ & **live auf Vercel deployed** (Commits f991779 + 5b35407, 2026-07-04). Inkl. Fix „einheitliche Seitenabstände" (alle Sektionen `max-w-[1200px] px-5`). Florian sichtet in der Live-Version. Offen: Migration ausführen (siehe Homepage-Eintrag).
 - **Workflow ab jetzt:** Seite umsetzen → `vite build` → Push auf `main` → Vercel auto-deployt → Florian sichtet live (keine Screenshots).
-- 🟨 **Booking** — Handover-Brief erstellt ([`docs/handovers/booking.md`](handovers/booking.md)); Nav-Tab nach „Home" eingebaut & live. Warte auf Claude-Design. Offen für Gäste-Sichtbarkeit: Flag `feature_courts_public_enabled` = true (Admin → Features).
+- ✅ **Booking** — 4 Pages + Stepper umgesetzt (Booking.dc.html), Build ✓, live. Offen: Flag `feature_courts_public_enabled` = true (Admin → Features) für Gäste-Sichtbarkeit; optional: i18n-Nachzug neuer Labels + weitere Court-Details (Preis/Tag pro Court) verdrahten, falls gewünscht.
 - 🟨 **Events** — Handover-Brief erstellt ([`docs/handovers/events.md`](handovers/events.md)). Warte auf Claude-Design.
 - 🟨 **Spieler** (`/fuer-spieler`) — Handover-Brief erstellt ([`docs/handovers/spieler.md`](handovers/spieler.md)). Warte auf Claude-Design.
 - ➡️ **Nächste Seite:** Florian liefert Claude-Design für Booking / Events / Spieler; dann Umsetzung.

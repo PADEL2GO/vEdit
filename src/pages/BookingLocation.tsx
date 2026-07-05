@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, EyeOff } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
+import { BookingStepper } from "@/components/booking/BookingStepper";
 import { BookingLocationHeader } from "@/components/booking/BookingLocationHeader";
 import { BookingSlotPicker } from "@/components/booking/BookingSlotPicker";
 import { BookingSummary } from "@/components/booking/BookingSummary";
@@ -95,21 +96,27 @@ const BookingLocation = () => {
       </Helmet>
 
       <Navigation />
-      
-      <main className="min-h-screen bg-background pt-24 pb-12">
-        <div className="container mx-auto px-4">
+
+      <main className="min-h-screen bg-background pt-16 md:pt-20">
+        <BookingStepper currentStep={1} detailPath={`/booking/locations/${slug}`} />
+
+        <section className="pt-8 md:pt-10 pb-24 px-5">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-5xl mx-auto"
+            className="mx-auto max-w-[1200px] flex flex-col gap-5"
           >
-            <Button variant="ghost" onClick={() => navigate("/booking")} className="mb-6">
-              <ArrowLeft className="w-4 h-4 mr-2" />
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/booking")}
+              className="self-start px-0 h-auto py-1.5 text-[hsl(0_0%_60%)] hover:bg-transparent hover:text-primary"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1.5" />
               {t("location.back")}
             </Button>
 
             {isAdmin && !publicEnabled && (
-              <div className="mb-6 rounded-xl border border-blue-500/40 bg-blue-500/10 px-4 py-3 flex items-start gap-3">
+              <div className="rounded-xl border border-blue-500/40 bg-blue-500/10 px-4 py-3 flex items-start gap-3">
                 <EyeOff className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <p className="font-medium text-foreground">{t("common.adminPreviewLabel")}</p>
@@ -122,7 +129,10 @@ const BookingLocation = () => {
 
             <BookingLocationHeader location={location} />
 
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div
+              id="bk-detail"
+              className="grid gap-5 items-start min-[980px]:grid-cols-[minmax(0,1fr)_384px]"
+            >
               <BookingSlotPicker
                 courts={courts}
                 selectedCourt={selectedCourt}
@@ -157,7 +167,7 @@ const BookingLocation = () => {
               />
             </div>
           </motion.div>
-        </div>
+        </section>
       </main>
 
       <Footer />

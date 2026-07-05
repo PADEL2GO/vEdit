@@ -8,10 +8,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { NavLink } from "react-router-dom";
-import { Loader2, User, Mail, Phone } from "lucide-react";
+import { Loader2, User, Mail, Phone, Check, ArrowRight, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
@@ -54,82 +52,101 @@ export function GuestCheckoutModal({
 
   return (
     <Dialog open={open} onOpenChange={isSubmitting ? undefined : onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("guestModal.title")}</DialogTitle>
-          <DialogDescription>
-            {t("guestModal.description")}
-          </DialogDescription>
+      <DialogContent className="max-w-[440px] gap-[18px] rounded-[22px] border border-border/60 bg-gradient-card p-[26px]">
+        <DialogHeader className="text-left">
+          <div className="flex items-center gap-3">
+            <span className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[13px] border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))] text-primary">
+              <User className="h-5 w-5" />
+            </span>
+            <div className="flex flex-col gap-0.5">
+              <DialogTitle className="text-[19px] font-bold tracking-tight">
+                {t("guestModal.title")}
+              </DialogTitle>
+              <DialogDescription className="text-[13px] text-muted-foreground">
+                {t("guestModal.description")}
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="space-y-4 pt-2">
+        <div className="flex flex-col gap-[13px]">
           {/* Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="guest-name">
-              {t("guestModal.nameLabel")} <span className="text-destructive">*</span>
-            </Label>
-            <div className="relative">
-              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="guest-name"
-                placeholder={t("guestModal.namePlaceholder")}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="pl-9"
-                disabled={isSubmitting}
-              />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="guest-name"
+              className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-foreground/75"
+            >
+              <User className="h-[13px] w-[13px] text-primary" />
+              {t("guestModal.nameLabel")}
+            </label>
+            <Input
+              id="guest-name"
+              placeholder={t("guestModal.namePlaceholder")}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={isSubmitting}
+              className="h-11"
+            />
           </div>
 
           {/* Email */}
-          <div className="space-y-1.5">
-            <Label htmlFor="guest-email">
-              {t("guestModal.emailLabel")} <span className="text-destructive">*</span>
-            </Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="guest-email"
-                type="email"
-                placeholder={t("guestModal.emailPlaceholder")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-9"
-                disabled={isSubmitting}
-                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="guest-email"
+              className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-foreground/75"
+            >
+              <Mail className="h-[13px] w-[13px] text-primary" />
+              {t("guestModal.emailLabel")}
+            </label>
+            <Input
+              id="guest-email"
+              type="email"
+              placeholder={t("guestModal.emailPlaceholder")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isSubmitting}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              className="h-11"
+            />
           </div>
 
           {/* Phone */}
-          <div className="space-y-1.5">
-            <Label htmlFor="guest-phone">{t("guestModal.phoneLabel")}</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="guest-phone"
-                type="tel"
-                placeholder={t("guestModal.phonePlaceholder")}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="pl-9"
-                disabled={isSubmitting}
-              />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="guest-phone"
+              className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-foreground/75"
+            >
+              <Phone className="h-[13px] w-[13px] text-primary" />
+              {t("guestModal.phoneLabel")}
+            </label>
+            <Input
+              id="guest-phone"
+              type="tel"
+              placeholder={t("guestModal.phonePlaceholder")}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              disabled={isSubmitting}
+              className="h-11"
+            />
           </div>
 
           {/* AGB */}
-          <div className="flex items-start gap-3 pt-1">
-            <Checkbox
-              id="guest-agb"
-              checked={agbAccepted}
-              onCheckedChange={(checked) => setAgbAccepted(!!checked)}
-              disabled={isSubmitting}
-            />
-            <Label
-              htmlFor="guest-agb"
-              className="text-sm leading-relaxed cursor-pointer text-muted-foreground"
+          <button
+            type="button"
+            onClick={() => setAgbAccepted(!agbAccepted)}
+            disabled={isSubmitting}
+            className="flex items-start gap-3 pt-1 text-left disabled:cursor-not-allowed"
+          >
+            <span
+              className={`mt-0.5 flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-md border transition-colors ${
+                agbAccepted
+                  ? "border-primary bg-primary text-black"
+                  : "border-border bg-white/[0.03] text-transparent"
+              }`}
             >
+              <Check className="h-3 w-3" strokeWidth={3.5} />
+            </span>
+            <span className="text-[12.5px] leading-relaxed text-muted-foreground">
               {t("guestModal.agbIntro")}
               <NavLink
                 to="/agb"
@@ -147,33 +164,46 @@ export function GuestCheckoutModal({
                 {t("guestModal.privacyLink")}
               </NavLink>
               {t("guestModal.agbOutro")}
-            </Label>
-          </div>
+            </span>
+          </button>
+        </div>
 
+        <div className="flex flex-col gap-3">
           {/* Submit */}
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            variant="lime"
+            variant="hero"
             className="w-full"
             size="lg"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 {t("guestModal.submitting")}
               </>
             ) : (
-              t("guestModal.submit")
+              <>
+                {t("guestModal.submit")}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </>
             )}
           </Button>
 
+          {/* Privacy hint */}
+          <span className="inline-flex items-center justify-center gap-1.5 text-[11.5px] text-muted-foreground">
+            <Lock className="h-3 w-3" />
+            Deine Daten werden nur für diese Buchung verwendet.
+          </span>
+
+          <div className="h-px bg-border" />
+
           {/* Login link */}
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-[13px] text-muted-foreground">
             {t("guestModal.hasAccount")}{" "}
             <NavLink
               to={`/auth?redirect=/booking/locations/${locationSlug}`}
-              className="text-primary hover:underline font-medium"
+              className="font-bold text-primary hover:underline"
             >
               {t("guestModal.login")}
             </NavLink>

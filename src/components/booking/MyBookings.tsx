@@ -243,28 +243,28 @@ export const MyBookings = () => {
                           key={booking.id}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="bg-secondary/50 rounded-xl p-4 border border-border"
+                          className="rounded-2xl p-4 border border-border/60 bg-gradient-card"
                         >
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs">
+                              <div className="flex items-center justify-between gap-2 mb-2">
+                                <p className="font-bold tracking-tight">{booking.location?.name}</p>
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                                   <CheckCircle className="w-3 h-3" />
                                   {t("myBookings.statusConfirmed")}
                                 </span>
                               </div>
-                              <p className="font-medium">{booking.location?.name}</p>
                               <p className="text-sm text-muted-foreground">
                                 {booking.court?.name}
                               </p>
                               <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                  <Calendar className="w-4 h-4" />
-                                  {format(new Date(booking.start_time), "dd.MM.yyyy", { locale: dateLocale })}
+                                <span className="flex items-center gap-1.5">
+                                  <Calendar className="w-4 h-4 text-primary" />
+                                  <span className="font-stat text-[12.5px]">{format(new Date(booking.start_time), "dd.MM.yyyy", { locale: dateLocale })}</span>
                                 </span>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-4 h-4" />
-                                  {format(new Date(booking.start_time), "HH:mm")} - {format(new Date(booking.end_time), "HH:mm")}{t("myBookings.timeSuffix")}
+                                <span className="flex items-center gap-1.5">
+                                  <Clock className="w-4 h-4 text-primary" />
+                                  <span className="font-stat text-[12.5px]">{format(new Date(booking.start_time), "HH:mm")} - {format(new Date(booking.end_time), "HH:mm")}{t("myBookings.timeSuffix")}</span>
                                 </span>
                               </div>
                             </div>
@@ -334,36 +334,36 @@ export const MyBookings = () => {
                       {pastBookings.slice(0, 5).map((booking) => (
                         <div
                           key={booking.id}
-                          className="bg-secondary/30 rounded-xl p-4 border border-border/50 opacity-60"
+                          className="rounded-2xl p-4 border border-border/60 bg-gradient-card opacity-60"
                         >
                           <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <div className="flex items-center gap-2 mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between gap-2 mb-2">
+                                <p className="font-bold tracking-tight">{booking.location?.name}</p>
                                 {booking.status === "cancelled" ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs">
+                                  <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/25 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-400">
                                     <AlertCircle className="w-3 h-3" />
                                     {t("myBookings.statusCancelled")}
                                   </span>
                                 ) : booking.status === "expired" ? (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-500/20 text-gray-400 text-xs">
+                                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/5 px-3 py-1 text-xs font-semibold text-muted-foreground">
                                     <Timer className="w-3 h-3" />
                                     {t("myBookings.statusExpired")}
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-500/20 text-gray-400 text-xs">
+                                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/5 px-3 py-1 text-xs font-semibold text-muted-foreground">
                                     {t("myBookings.statusCompleted")}
                                   </span>
                                 )}
                               </div>
-                              <p className="font-medium">{booking.location?.name}</p>
                               <div className="flex flex-wrap gap-4 mt-1 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                  <Calendar className="w-4 h-4" />
-                                  {format(new Date(booking.start_time), "dd.MM.yyyy", { locale: dateLocale })}
+                                <span className="flex items-center gap-1.5">
+                                  <Calendar className="w-4 h-4 text-primary" />
+                                  <span className="font-stat text-[12.5px]">{format(new Date(booking.start_time), "dd.MM.yyyy", { locale: dateLocale })}</span>
                                 </span>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-4 h-4" />
-                                  {format(new Date(booking.start_time), "HH:mm")}{t("myBookings.timeSuffix")}
+                                <span className="flex items-center gap-1.5">
+                                  <Clock className="w-4 h-4 text-primary" />
+                                  <span className="font-stat text-[12.5px]">{format(new Date(booking.start_time), "HH:mm")}{t("myBookings.timeSuffix")}</span>
                                 </span>
                               </div>
                             </div>
@@ -403,39 +403,41 @@ const PendingPaymentCard = ({ booking }: { booking: Booking }) => {
     <motion.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30"
+      className="rounded-2xl p-4 border border-amber-500/30 bg-amber-500/10"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-xs">
+          <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+            <p className="font-bold tracking-tight">{booking.location?.name}</p>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-400">
               <Timer className="w-3 h-3" />
               {t("myBookings.pendingHeading")}
             </span>
+          </div>
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-sm text-muted-foreground">
+              {booking.court?.name}
+            </p>
             {booking.price_cents && (
-              <span className="text-xs font-medium text-primary">
+              <span className="font-stat text-xs font-semibold text-primary">
                 {formatPrice(booking.price_cents, booking.currency || 'EUR')}
               </span>
             )}
           </div>
-          <p className="font-medium">{booking.location?.name}</p>
-          <p className="text-sm text-muted-foreground">
-            {booking.court?.name}
-          </p>
           <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
-              {format(new Date(booking.start_time), "dd.MM.yyyy", { locale: dateLocale })}
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-primary" />
+              <span className="font-stat text-[12.5px]">{format(new Date(booking.start_time), "dd.MM.yyyy", { locale: dateLocale })}</span>
             </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              {format(new Date(booking.start_time), "HH:mm")} - {format(new Date(booking.end_time), "HH:mm")}{t("myBookings.timeSuffix")}
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-primary" />
+              <span className="font-stat text-[12.5px]">{format(new Date(booking.start_time), "HH:mm")} - {format(new Date(booking.end_time), "HH:mm")}{t("myBookings.timeSuffix")}</span>
             </span>
           </div>
           {timeLeft && (
-            <p className="mt-2 text-xs font-medium text-amber-400 flex items-center gap-1">
+            <p className="mt-2 text-xs font-medium text-amber-400 flex items-center gap-1.5">
               <Timer className="w-3 h-3" />
-              {t("myBookings.reservedRemaining", { time: timeLeft })}
+              <span className="font-stat">{t("myBookings.reservedRemaining", { time: timeLeft })}</span>
             </p>
           )}
         </div>
