@@ -55,7 +55,8 @@ const BookingCheckout = () => {
     formatTimeLeft,
   } = useBookingCheckout();
 
-  const [voucherOpen, setVoucherOpen] = useState(false);
+  // Gutschein-Feld standardmäßig offen, damit es in der Bezahlmaske sofort sichtbar ist.
+  const [voucherOpen, setVoucherOpen] = useState(true);
 
   if (state === "loading") {
     return (
