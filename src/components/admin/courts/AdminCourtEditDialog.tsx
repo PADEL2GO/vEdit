@@ -22,6 +22,7 @@ interface Court {
   name: string;
   is_active: boolean;
   location_id: string;
+  label?: string | null;
 }
 
 interface AdminCourtEditDialogProps {
@@ -40,6 +41,7 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
   const { toggleCourtMutation } = useLocationMutations();
   
   const [courtName, setCourtName] = useState(court.name);
+  const [courtLabel, setCourtLabel] = useState(court.label ?? "");
   const [isActive, setIsActive] = useState(court.is_active);
   const [editedPrices, setEditedPrices] = useState<Record<number, number>>({
     60: 24,
@@ -50,6 +52,7 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
   // Sync state when dialog opens or court changes
   useEffect(() => {
     setCourtName(court.name);
+    setCourtLabel(court.label ?? "");
     setIsActive(court.is_active);
   }, [court, open]);
 
@@ -65,10 +68,10 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
   }, [prices]);
 
   const updateCourtMutation = useMutation({
-    mutationFn: async ({ name }: { name: string }) => {
+    mutationFn: async ({ name, label }: { name: string; label: string | null }) => {
       const { error } = await supabase
         .from("courts")
-        .update({ name })
+        .update({ name, label } as any)
         .eq("id", court.id);
       if (error) throw error;
     },
@@ -81,9 +84,10 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
   });
 
   const handleSave = async () => {
-    // Update court name if changed
-    if (courtName !== court.name) {
-      await updateCourtMutation.mutateAsync({ name: courtName });
+    // Update court name/label if changed
+    const newLabel = courtLabel.trim() || null;
+    if (courtName !== court.name || newLabel !== (court.label ?? null)) {
+      await updateCourtMutation.mutateAsync({ name: courtName, label: newLabel });
     }
 
     // Update active status if changed
@@ -134,6 +138,19 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
                 onChange={(e) => setCourtName(e.target.value)}
                 className="bg-background border-border"
               />
+            </div>
+
+            {/* Court Label */}
+            <div className="space-y-2">
+              <Label htmlFor="court-label">Kurz-Label (optional)</Label>
+              <Input
+                id="court-label"
+                value={courtLabel}
+                onChange={(e) => setCourtLabel(e.target.value)}
+                placeholder="z.B. Outdoor · Flutlicht"
+                className="bg-background border-border"
+              />
+              <p className="text-xs text-muted-foreground">Wird bei der Court-Auswahl im Booking angezeigt.</p>
             </div>
 
             {/* Active Status */}

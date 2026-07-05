@@ -49,7 +49,7 @@ export default function AdminCourts() {
           ai_analysis_enabled,
           vending_enabled,
           features_json,
-          courts (id, name, is_active, location_id)
+          courts (id, name, is_active, location_id, label)
         `)
         .order("name");
       if (error) throw error;

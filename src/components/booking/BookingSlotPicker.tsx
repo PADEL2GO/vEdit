@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 import type { Court, TimeSlot } from "./types";
 import { SLOT_DURATIONS } from "@/types/constants";
+import { getPriceFromList, type CourtPrice } from "@/hooks/useCourtPrices";
+import { formatPrice } from "@/lib/pricing";
 
 interface BookingSlotPickerProps {
   courts: Court[];
@@ -18,6 +20,8 @@ interface BookingSlotPickerProps {
   setSelectedSlot: (slot: TimeSlot | null) => void;
   availableSlots: TimeSlot[];
   loadingSlots: boolean;
+  /** Echte Preise (pro Dauer) für den gewählten Court; zeigt Preis auf den Dauer-Buttons. */
+  courtPrices?: CourtPrice[];
 }
 
 const CARD = "rounded-2xl border border-border/60 bg-gradient-card p-[22px]";
@@ -79,6 +83,7 @@ export function BookingSlotPicker({
   setSelectedSlot,
   availableSlots,
   loadingSlots,
+  courtPrices,
 }: BookingSlotPickerProps) {
   const { t, i18n } = useTranslation("booking");
   const dateLocale = i18n.language === "en" ? enUS : de;
@@ -125,6 +130,9 @@ export function BookingSlotPicker({
                     <span className="font-bold text-[15.5px] tracking-tight text-foreground">
                       {court.name}
                     </span>
+                    {court.label && (
+                      <span className="text-[12px] text-muted-foreground">{court.label}</span>
+                    )}
                   </button>
                 );
               })}
@@ -183,6 +191,7 @@ export function BookingSlotPicker({
           <div className="grid grid-cols-3 gap-2.5">
             {SLOT_DURATIONS.map((duration) => {
               const on = selectedDuration === duration;
+              const durationPrice = getPriceFromList(courtPrices, duration);
               return (
                 <button
                   key={duration}
@@ -200,6 +209,11 @@ export function BookingSlotPicker({
                   <span className="font-stat font-bold text-[15px]">
                     {t("slotPicker.durationMinutes", { count: duration })}
                   </span>
+                  {durationPrice !== null && (
+                    <span className={`font-stat text-[11px] ${on ? "text-black/70" : "text-primary"}`}>
+                      {formatPrice(durationPrice)}
+                    </span>
+                  )}
                 </button>
               );
             })}

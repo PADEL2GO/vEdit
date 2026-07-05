@@ -1,6 +1,7 @@
 import { MapPin, Clock, Trophy, Brain, ShoppingCart, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { DbLocation } from "@/types/database";
+import { COURT_FEATURES, extractFeatures } from "@/lib/courtFeatures";
 
 interface BookingLocationHeaderProps {
   location: DbLocation;
@@ -11,6 +12,11 @@ export function BookingLocationHeader({ location }: BookingLocationHeaderProps) 
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const todayName = dayNames[new Date().getDay()];
   const hours = location.opening_hours_json?.[todayName];
+
+  // Echte, admin-gepflegte Ausstattung aus features_json (WC, Dusche, Flutlicht, Indoor/Outdoor …)
+  const features = extractFeatures(location.features_json as Record<string, unknown> | null | undefined);
+  const activeFeatures = COURT_FEATURES.filter((f) => features[f.key]);
+  const description = location.description?.trim();
 
   // Build full address for maps link
   const fullAddress = [location.address, location.postal_code, location.city, location.country]
@@ -31,7 +37,8 @@ export function BookingLocationHeader({ location }: BookingLocationHeaderProps) 
     "inline-flex items-center gap-1.5 rounded-full px-[11px] py-[5px] text-xs font-semibold text-primary bg-primary/[0.12] backdrop-blur-md border border-primary/30";
 
   return (
-    <div className="relative rounded-2xl overflow-hidden border border-border/60">
+    <div className="rounded-2xl overflow-hidden border border-border/60 bg-gradient-card">
+      <div className="relative">
       {/* Hero Image */}
       {location.main_image_url ? (
         <img
@@ -101,6 +108,29 @@ export function BookingLocationHeader({ location }: BookingLocationHeaderProps) 
           )}
         </div>
       </div>
+      </div>
+
+      {/* Beschreibung + echte Ausstattung (admin-gepflegt via features_json) */}
+      {(description || activeFeatures.length > 0) && (
+        <div className="flex flex-col gap-3 p-5">
+          {description && (
+            <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+          )}
+          {activeFeatures.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {activeFeatures.map((f) => (
+                <span
+                  key={f.key}
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-foreground/75 bg-white/5 border border-border"
+                >
+                  <f.icon className="w-3 h-3 text-primary" />
+                  {f.label}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

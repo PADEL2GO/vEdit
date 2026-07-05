@@ -254,6 +254,7 @@ export function useBookingLocation(slug: string | undefined) {
     loadingSlots,
     priceCents,
     hasPrices,
+    courtPrices,
     user,
     lobbyEnabled,
     lobbySettings,

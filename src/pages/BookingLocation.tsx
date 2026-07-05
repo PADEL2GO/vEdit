@@ -36,6 +36,7 @@ const BookingLocation = () => {
     loadingSlots,
     priceCents,
     hasPrices,
+    courtPrices,
     user,
     lobbyEnabled,
     lobbySettings,
@@ -145,6 +146,7 @@ const BookingLocation = () => {
                 setSelectedSlot={setSelectedSlot}
                 availableSlots={availableSlots}
                 loadingSlots={loadingSlots}
+                courtPrices={courtPrices}
               />
 
               <BookingSummary

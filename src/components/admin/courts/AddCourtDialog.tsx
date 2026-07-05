@@ -22,6 +22,7 @@ interface AddCourtDialogProps {
 export function AddCourtDialog({ locationId }: AddCourtDialogProps) {
   const [open, setOpen] = useState(false);
   const [courtName, setCourtName] = useState("");
+  const [courtLabel, setCourtLabel] = useState("");
   const queryClient = useQueryClient();
 
   const addCourtMutation = useMutation({
@@ -30,13 +31,15 @@ export function AddCourtDialog({ locationId }: AddCourtDialogProps) {
         location_id: locationId,
         name: courtName,
         is_active: true,
-      });
+        label: courtLabel.trim() || null,
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Court hinzugefügt");
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.adminLocations] });
       setCourtName("");
+      setCourtLabel("");
       setOpen(false);
     },
     onError: () => {
@@ -66,6 +69,17 @@ export function AddCourtDialog({ locationId }: AddCourtDialogProps) {
               placeholder="z.B. Court 5"
               className="bg-background border-border"
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="court-label">Kurz-Label (optional)</Label>
+            <Input
+              id="court-label"
+              value={courtLabel}
+              onChange={(e) => setCourtLabel(e.target.value)}
+              placeholder="z.B. Outdoor · Flutlicht"
+              className="bg-background border-border"
+            />
+            <p className="text-xs text-muted-foreground">Wird bei der Court-Auswahl im Booking angezeigt.</p>
           </div>
           <Button
             className="w-full bg-primary text-primary-foreground"

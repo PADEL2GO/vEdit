@@ -121,7 +121,7 @@ export function LocationCard({ location, todayFreeSlots, occupancyPercent, index
           <div className="flex flex-wrap gap-[7px]">
             {location.rewards_enabled && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(0_0%_15%)] bg-white/5 px-2.5 py-1 text-xs font-semibold text-[hsl(0_0%_75%)]">
-                <Trophy className="w-3 h-3" /> Turniere
+                <Trophy className="w-3 h-3" /> P2G Rewards
               </span>
             )}
             {location.ai_analysis_enabled && (

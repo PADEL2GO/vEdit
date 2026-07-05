@@ -6,6 +6,8 @@ export interface Court {
   id: string;
   name: string;
   is_active: boolean;
+  /** Optionales, admin-pflegbares Kurz-Label (z. B. "Outdoor · Flutlicht"). */
+  label?: string | null;
 }
 
 export interface TimeSlot {
