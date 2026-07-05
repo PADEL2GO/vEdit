@@ -50,8 +50,9 @@ Masken:
 **Geänderte Dateien:** `Index.tsx`, `components/LocationTeasersSection.tsx`, `components/news/ArticleFeed.tsx`, `components/ui/synthetic-hero.tsx`, `locales/de+en/index.json` (neuer `network`-Block), `locales/de+en/common.json` (News-Keys), neue Migration.
 **Bewusst NICHT angefasst:** geteilte `Navigation` + `Footer` (eigene Global-Einträge oben), keine Logik/Routen/Inhalte.
 
-### ⬜ FuerSpieler — `/fuer-spieler`
+### 🟨 FuerSpieler — `/fuer-spieler`
 `src/pages/FuerSpieler.tsx` · Marketing-Landingpage für Spieler mit App und Punkten
+🟨 **Handover-Brief:** [`docs/handovers/spieler.md`](handovers/spieler.md) (2026-07-04). Warte auf Claude-Design.
 
 Masken:
 - [ ] Hero mit Video/Bild-Hintergrund und Trust-Chips
@@ -764,4 +765,5 @@ Masken:
 - **Workflow ab jetzt:** Seite umsetzen → `vite build` → Push auf `main` → Vercel auto-deployt → Florian sichtet live (keine Screenshots).
 - 🟨 **Booking** — Handover-Brief erstellt ([`docs/handovers/booking.md`](handovers/booking.md)); Nav-Tab nach „Home" eingebaut & live. Warte auf Claude-Design. Offen für Gäste-Sichtbarkeit: Flag `feature_courts_public_enabled` = true (Admin → Features).
 - 🟨 **Events** — Handover-Brief erstellt ([`docs/handovers/events.md`](handovers/events.md)). Warte auf Claude-Design.
-- ➡️ **Nächste Seite:** Florian liefert Claude-Design für Booking und/oder Events; dann Umsetzung.
+- 🟨 **Spieler** (`/fuer-spieler`) — Handover-Brief erstellt ([`docs/handovers/spieler.md`](handovers/spieler.md)). Warte auf Claude-Design.
+- ➡️ **Nächste Seite:** Florian liefert Claude-Design für Booking / Events / Spieler; dann Umsetzung.
