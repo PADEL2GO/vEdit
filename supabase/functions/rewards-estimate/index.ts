@@ -68,19 +68,20 @@ serve(async (req) => {
         .maybeSingle();
       if (bk) { startTime = (bk as any).start_time; endTime = (bk as any).end_time; }
     }
-    let hours = 1;
+    let durationMin = 60;
     if (startTime && endTime) {
-      hours = (new Date(endTime).getTime() - new Date(startTime).getTime()) / 3600000;
+      durationMin = Math.round((new Date(endTime).getTime() - new Date(startTime).getTime()) / 60000);
     }
-    const roundedHours = Math.max(0.5, Math.round(hours * 2) / 2);
 
-    // ── Admin-configurable base points per hour ──────────────────────────
+    // ── Admin-configurable fixed payback per booking length (60 vs 120 min) ──
     const { data: settings } = await supabaseAdmin
       .from("site_settings")
-      .select("payback_points_per_hour")
+      .select("payback_points_60min, payback_points_120min")
       .eq("id", "global")
       .maybeSingle();
-    const perHour = Number((settings as any)?.payback_points_per_hour ?? 100) || 100;
+    const rate60 = Number((settings as any)?.payback_points_60min ?? 100) || 0;
+    const rate120 = Number((settings as any)?.payback_points_120min ?? 200) || 0;
+    const base = durationMin >= 120 ? rate120 : rate60;
 
     // ── Expert-level multiplier (based on user's lifetime credits) ────────
     const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
@@ -105,15 +106,14 @@ serve(async (req) => {
       .maybeSingle();
     const levelName = (lvl as any)?.name as string | undefined;
 
-    const base = Math.round(roundedHours * perHour);
-    const total_points = Math.round(roundedHours * perHour * multiplier);
+    const total_points = Math.round(base * multiplier);
 
     const breakdown: RewardBreakdown[] = [
       {
         key: "BOOKING_PAYBACK",
         title: "Buchungs-Payback",
         points: base,
-        description: `${roundedHours} Std × ${perHour} Punkte`,
+        description: `${durationMin >= 120 ? "120" : "60"} Min Buchung`,
       },
     ];
     if (multiplier !== 1 && total_points - base !== 0) {

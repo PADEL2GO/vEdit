@@ -447,23 +447,7 @@ serve(async (req) => {
           }
         }
 
-        // FIRST_BOOKING_BONUS - check if first booking - AUTO CLAIM
-        const { count: bookingCount } = await supabaseAdmin
-          .from("bookings")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", userId)
-          .eq("status", "confirmed");
-        
-        if ((bookingCount || 0) <= 1) {
-          const firstDef = await getDefinition("FIRST_BOOKING_BONUS");
-          if (firstDef) {
-            if (firstDef.awarding_mode === "AUTO_CLAIM") {
-              await autoClaimReward(userId, "FIRST_BOOKING_BONUS", firstDef.points_rule.value, "booking", bookingId);
-            } else {
-              await createRewardInstance(userId, "FIRST_BOOKING_BONUS", firstDef.points_rule.value, "booking", bookingId, "AVAILABLE");
-            }
-          }
-        }
+        // FIRST_BOOKING_BONUS removed — no bonus on the first booking for any user.
 
         // EARLY_BIRD - check if booked 7+ days in advance - AUTO CLAIM
         const { data: booking } = await supabaseAdmin

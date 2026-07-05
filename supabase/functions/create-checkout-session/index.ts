@@ -596,54 +596,40 @@ serve(async (req) => {
           .eq("id", booking.id)
           .single();
 
-        if (bk && bk.play_credits_awarded === 0 && bk.user_id) {
-          const threeMonthsAgo = new Date();
-          threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-          const { data: prevBookings } = await supabaseAdmin
-            .from("bookings")
-            .select("start_time")
-            .eq("user_id", bk.user_id)
-            .eq("status", "confirmed")
-            .neq("id", booking.id)
-            .gte("start_time", threeMonthsAgo.toISOString());
+        // Same fixed-rate model as the webhook; no payback if a voucher was applied.
+        if (bk && bk.play_credits_awarded === 0 && bk.user_id && !appliedVoucherId) {
+          const durationMin = Math.round(
+            (new Date(bk.end_time).getTime() - new Date(bk.start_time).getTime()) / 60000,
+          );
+          const { data: settings } = await supabaseAdmin
+            .from("site_settings")
+            .select("payback_points_60min, payback_points_120min")
+            .eq("id", "global")
+            .maybeSingle();
+          const rate60 = Number((settings as any)?.payback_points_60min ?? 100) || 0;
+          const rate120 = Number((settings as any)?.payback_points_120min ?? 200) || 0;
+          const base = durationMin >= 120 ? rate120 : rate60;
 
-          const isoWeekKey = (d: Date): string => {
-            const dt = new Date(d);
-            dt.setHours(12, 0, 0, 0);
-            dt.setDate(dt.getDate() + 3 - ((dt.getDay() + 6) % 7));
-            const jan4 = new Date(dt.getFullYear(), 0, 4);
-            const wn = 1 + Math.round(((dt.getTime() - jan4.getTime()) / 86400000 - 3 + ((jan4.getDay() + 6) % 7)) / 7);
-            return `${dt.getFullYear()}-W${String(wn).padStart(2, "0")}`;
-          };
-
-          const weekSet = new Set((prevBookings || []).map(b => isoWeekKey(new Date(b.start_time))));
-          weekSet.add(isoWeekKey(new Date(bk.start_time)));
-
-          let weekStreak = 0;
-          const cursor = new Date();
-          for (let i = 0; i < 13; i++) {
-            if (!weekSet.has(isoWeekKey(cursor))) break;
-            weekStreak++;
-            cursor.setDate(cursor.getDate() - 7);
-          }
-
-          const multiplier = weekStreak >= 4 ? 2.5 : weekStreak === 3 ? 2.0 : weekStreak === 2 ? 1.5 : 1.0;
-          const hours = (new Date(bk.end_time).getTime() - new Date(bk.start_time).getTime()) / 3600000;
-          const roundedHours = Math.max(0.5, Math.round(hours * 2) / 2);
-          const creditsToAward = Math.round(roundedHours * 100 * multiplier);
-
-          const { error: awardError } = await supabaseAdmin.rpc("increment_play_and_lifetime", {
+          const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
             p_user_id: bk.user_id,
-            p_play_delta: creditsToAward,
-            p_lifetime_delta: creditsToAward,
           });
-          if (awardError) {
-            logStep("Free path: failed to award play credits", { bookingId: booking.id, error: awardError.message });
-          } else {
-            await supabaseAdmin.from("bookings")
-              .update({ play_credits_awarded: creditsToAward })
-              .eq("id", booking.id);
-            logStep("Free path: play credits awarded", { bookingId: booking.id, creditsToAward, weekStreak, multiplier });
+          const levelMultiplier = Number(multData ?? 1) || 1;
+          const creditsToAward = Math.round(base * levelMultiplier);
+
+          if (creditsToAward > 0) {
+            const { error: awardError } = await supabaseAdmin.rpc("increment_play_and_lifetime", {
+              p_user_id: bk.user_id,
+              p_play_delta: creditsToAward,
+              p_lifetime_delta: creditsToAward,
+            });
+            if (awardError) {
+              logStep("Free path: failed to award play credits", { bookingId: booking.id, error: awardError.message });
+            } else {
+              await supabaseAdmin.from("bookings")
+                .update({ play_credits_awarded: creditsToAward })
+                .eq("id", booking.id);
+              logStep("Free path: play credits awarded", { bookingId: booking.id, creditsToAward, durationMin, base, levelMultiplier });
+            }
           }
         }
       } catch (creditErr) {

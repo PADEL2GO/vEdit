@@ -667,46 +667,59 @@ serve(async (req) => {
             if (!isGuestWebhook) try {
               const { data: bk } = await supabaseAdmin
                 .from("bookings")
-                .select("start_time, end_time, user_id, play_credits_awarded")
+                .select("start_time, end_time, user_id, play_credits_awarded, payment_mode, reserved_voucher_id")
                 .eq("id", bookingId)
                 .single();
 
-              if (bk && bk.play_credits_awarded === 0 && bk.user_id) {
-                // ── P2G Payback = round(hours * basePerHour * expert-level multiplier) ──
-                // basePerHour is admin-configurable (site_settings.payback_points_per_hour);
-                // the multiplier comes from the user's expert level (based on lifetime credits).
-                const hours = (new Date(bk.end_time).getTime() - new Date(bk.start_time).getTime()) / 3600000;
-                const roundedHours = Math.max(0.5, Math.round(hours * 2) / 2);
+              // No payback when a voucher was used — the voucher discount excludes payback.
+              const usedVoucher =
+                !!session.metadata?.voucher_id ||
+                !!(bk as any)?.reserved_voucher_id ||
+                (bk as any)?.payment_mode === "voucher";
+
+              if (bk && bk.play_credits_awarded === 0 && bk.user_id && !usedVoucher) {
+                // ── P2G Payback = round(fixedRate(duration) * expert-level multiplier) ──
+                // Fixed points per booking length (60 vs 120 min), admin-configurable in
+                // site_settings; the multiplier comes from the user's expert level.
+                const durationMin = Math.round(
+                  (new Date(bk.end_time).getTime() - new Date(bk.start_time).getTime()) / 60000,
+                );
 
                 const { data: settings } = await supabaseAdmin
                   .from("site_settings")
-                  .select("payback_points_per_hour")
+                  .select("payback_points_60min, payback_points_120min")
                   .eq("id", "global")
                   .maybeSingle();
-                const perHour = Number((settings as any)?.payback_points_per_hour ?? 100) || 100;
+                const rate60 = Number((settings as any)?.payback_points_60min ?? 100) || 0;
+                const rate120 = Number((settings as any)?.payback_points_120min ?? 200) || 0;
+                const base = durationMin >= 120 ? rate120 : rate60;
 
                 const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
                   p_user_id: bk.user_id,
                 });
                 const levelMultiplier = Number(multData ?? 1) || 1;
 
-                const creditsToAward = Math.round(roundedHours * perHour * levelMultiplier);
+                const creditsToAward = Math.round(base * levelMultiplier);
 
-                // Award atomically (signed delta) so a concurrent reserve/refund can't clobber it.
-                const { error: awardError } = await supabaseAdmin.rpc("increment_play_and_lifetime", {
-                  p_user_id: bk.user_id,
-                  p_play_delta: creditsToAward,
-                  p_lifetime_delta: creditsToAward,
-                });
+                if (creditsToAward > 0) {
+                  // Award atomically (signed delta) so a concurrent reserve/refund can't clobber it.
+                  const { error: awardError } = await supabaseAdmin.rpc("increment_play_and_lifetime", {
+                    p_user_id: bk.user_id,
+                    p_play_delta: creditsToAward,
+                    p_lifetime_delta: creditsToAward,
+                  });
 
-                if (awardError) {
-                  logStep("Failed to award payback credits", { bookingId, error: awardError.message });
-                } else {
-                  await supabaseAdmin.from("bookings")
-                    .update({ play_credits_awarded: creditsToAward })
-                    .eq("id", bookingId);
-                  logStep("Payback credits awarded", { bookingId, creditsToAward, perHour, levelMultiplier });
+                  if (awardError) {
+                    logStep("Failed to award payback credits", { bookingId, error: awardError.message });
+                  } else {
+                    await supabaseAdmin.from("bookings")
+                      .update({ play_credits_awarded: creditsToAward })
+                      .eq("id", bookingId);
+                    logStep("Payback credits awarded", { bookingId, creditsToAward, durationMin, base, levelMultiplier });
+                  }
                 }
+              } else if (usedVoucher) {
+                logStep("Payback skipped — voucher used", { bookingId });
               }
             } catch (creditErr) {
               logStep("Failed to award play credits", { error: (creditErr as Error).message });

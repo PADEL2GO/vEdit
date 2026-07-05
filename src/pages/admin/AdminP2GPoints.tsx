@@ -9,23 +9,14 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Coins, Users, CheckCircle, Settings, Package, Trophy, Loader2, Save } from "lucide-react";
+import { Coins, Trophy, Loader2, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { P2GDashboardTab } from "@/components/admin/p2g/P2GDashboardTab";
-import { P2GWalletsTab } from "@/components/admin/p2g/P2GWalletsTab";
-import { P2GApprovalsTab } from "@/components/admin/p2g/P2GApprovalsTab";
-import { P2GDefinitionsTab } from "@/components/admin/p2g/P2GDefinitionsTab";
-import { P2GRedemptionsTab } from "@/components/admin/p2g/P2GRedemptionsTab";
 import { P2GExpertLevelsTab } from "@/components/admin/p2g/P2GExpertLevelsTab";
 
 const TABS = [
-  { id: "dashboard", label: "Übersicht", icon: Coins },
-  { id: "wallets", label: "Benutzer-Wallets", icon: Users },
-  { id: "approvals", label: "Freigaben", icon: CheckCircle },
-  { id: "definitions", label: "Rewards", icon: Settings },
+  { id: "dashboard", label: "Einstellungen", icon: Coins },
   { id: "expert-levels", label: "Expert Levels", icon: Trophy },
-  { id: "redemptions", label: "Einlösungen", icon: Package },
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
@@ -203,6 +194,84 @@ function P2GExchangeRateCard() {
   );
 }
 
+function P2GPaybackRatesCard() {
+  const [rate60, setRate60] = useState(100);
+  const [rate120, setRate120] = useState(200);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("payback_points_60min, payback_points_120min")
+        .eq("id", "global")
+        .maybeSingle();
+      const d = data as any;
+      if (d) {
+        setRate60(Number(d.payback_points_60min ?? 100));
+        setRate120(Number(d.payback_points_120min ?? 200));
+      }
+      setIsLoading(false);
+    })();
+  }, []);
+
+  const save = async () => {
+    setIsSaving(true);
+    try {
+      const { error } = await (supabase as any)
+        .from("site_settings")
+        .update({
+          payback_points_60min: Math.max(0, Math.round(rate60)),
+          payback_points_120min: Math.max(0, Math.round(rate120)),
+        })
+        .eq("id", "global");
+      if (error) throw error;
+      toast.success("Payback-Raten gespeichert");
+    } catch (e: any) {
+      toast.error("Fehler: " + e.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) return null;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Coins className="w-5 h-5 text-primary" />
+          Payback pro Buchung
+        </CardTitle>
+        <CardDescription>
+          Feste Punkte-Rückvergütung je Buchungslänge — wird mit dem Expert-Level-Multiplikator multipliziert.
+          Kein Payback bei Zahlung mit Gutscheincode.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Payback für 60 Min (Punkte)</Label>
+            <Input type="number" min={0} value={rate60} onChange={(e) => setRate60(parseInt(e.target.value) || 0)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Payback für 120 Min (Punkte)</Label>
+            <Input type="number" min={0} value={rate120} onChange={(e) => setRate120(parseInt(e.target.value) || 0)} />
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Beispiel bei Level-Multiplikator ×1,5: 60-Min-Buchung ergibt {Math.round(rate60 * 1.5)} Punkte,
+          120-Min-Buchung {Math.round(rate120 * 1.5)} Punkte.
+        </p>
+        <Button onClick={save} disabled={isSaving} className="gap-2">
+          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          Payback-Raten speichern
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminP2GPoints() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") as TabId) || "dashboard";
@@ -227,7 +296,7 @@ export default function AdminP2GPoints() {
             P2G Points
           </h1>
           <p className="text-muted-foreground">
-            Credits, Wallets, Freigaben und Reward-Definitionen verwalten
+            Exchange-Rate, Payback und Expert Levels verwalten
           </p>
         </div>
 
@@ -249,28 +318,12 @@ export default function AdminP2GPoints() {
           <TabsContent value="dashboard" className="mt-0">
             <div className="space-y-6">
               <P2GExchangeRateCard />
-              <P2GDashboardTab />
+              <P2GPaybackRatesCard />
             </div>
-          </TabsContent>
-
-          <TabsContent value="wallets" className="mt-0">
-            <P2GWalletsTab />
-          </TabsContent>
-
-          <TabsContent value="approvals" className="mt-0">
-            <P2GApprovalsTab />
-          </TabsContent>
-
-          <TabsContent value="definitions" className="mt-0">
-            <P2GDefinitionsTab />
           </TabsContent>
 
           <TabsContent value="expert-levels" className="mt-0">
             <P2GExpertLevelsTab />
-          </TabsContent>
-
-          <TabsContent value="redemptions" className="mt-0">
-            <P2GRedemptionsTab />
           </TabsContent>
         </Tabs>
       </div>

@@ -44,7 +44,6 @@
     },
     "earnMethods": {
       "play": { "title": "Spiele Padel", "description": "10% vom Buchungspreis" },
-      "firstBooking": { "title": "Erste Buchung", "description": "+50 Bonus Punkte" },
       "inviteFriends": { "title": "Freunde einladen", "description": "25-50 Punkte" },
       "completeProfile": { "title": "Profil vervollständigen", "description": "+20 Punkte" },
       "tagInstagram": { "title": "Instagram taggen", "description": "+30 Punkte" }
