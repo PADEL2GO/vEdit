@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Loader2, CheckCircle } from "lucide-react";
+import { Pencil, Loader2, CheckCircle, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ExpertLevel {
@@ -23,6 +23,7 @@ interface ExpertLevel {
   emoji: string | null;
   description: string | null;
   perks: string[] | null;
+  multiplier: number | null;
 }
 
 const GRADIENT_OPTIONS = [
@@ -41,10 +42,13 @@ const EMOJI_OPTIONS = ["🌱", "🎾", "⚡", "🔥", "💎", "👑", "🏆", "�
 export function P2GExpertLevelsTab() {
   const queryClient = useQueryClient();
   const [editingLevel, setEditingLevel] = useState<ExpertLevel | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     minPoints: 0,
     maxPoints: 0,
+    sortOrder: 0,
+    multiplier: 1,
     gradient: "",
     emoji: "",
     description: "",
@@ -59,55 +63,105 @@ export function P2GExpertLevelsTab() {
         .select("*")
         .order("sort_order", { ascending: true });
       if (error) throw error;
-      return data as ExpertLevel[];
+      return data as unknown as ExpertLevel[];
     },
   });
 
+  const buildPayload = () => {
+    const perksArray = formData.perks
+      .split("\n")
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+    return {
+      name: formData.name,
+      min_points: formData.minPoints,
+      max_points: formData.maxPoints || null,
+      sort_order: formData.sortOrder,
+      multiplier: formData.multiplier,
+      gradient: formData.gradient,
+      emoji: formData.emoji,
+      description: formData.description || null,
+      perks: perksArray,
+    };
+  };
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin", "expert-levels"] });
+    queryClient.invalidateQueries({ queryKey: ["p2g-expert-levels"] });
+    queryClient.invalidateQueries({ queryKey: ["expert-levels-config"] });
+  };
+
+  const closeDialog = () => { setEditingLevel(null); setIsCreating(false); };
+
   const updateMutation = useMutation({
     mutationFn: async () => {
-      if (!editingLevel) return;
-      
-      // Parse perks from textarea (one perk per line)
-      const perksArray = formData.perks
-        .split("\n")
-        .map(p => p.trim())
-        .filter(p => p.length > 0);
-      
-      const { error } = await supabase
-        .from("expert_levels_config")
-        .update({
-          name: formData.name,
-          min_points: formData.minPoints,
-          max_points: formData.maxPoints || null,
-          gradient: formData.gradient,
-          emoji: formData.emoji,
-          description: formData.description || null,
-          perks: perksArray,
-        })
-        .eq("id", editingLevel.id);
-      if (error) throw error;
+      if (isCreating) {
+        const { error } = await supabase.from("expert_levels_config").insert(buildPayload() as any);
+        if (error) throw error;
+      } else {
+        if (!editingLevel) return;
+        const { error } = await supabase
+          .from("expert_levels_config")
+          .update(buildPayload() as any)
+          .eq("id", editingLevel.id);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "expert-levels"] });
-      queryClient.invalidateQueries({ queryKey: ["p2g-expert-levels"] });
-      toast.success("Expert Level aktualisiert");
-      setEditingLevel(null);
+      invalidateAll();
+      toast.success(isCreating ? "Expert Level hinzugefügt" : "Expert Level aktualisiert");
+      closeDialog();
     },
     onError: (error) => {
       toast.error("Fehler beim Speichern: " + error.message);
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase.from("expert_levels_config").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidateAll();
+      toast.success("Expert Level gelöscht");
+    },
+    onError: (error) => {
+      toast.error("Fehler beim Löschen: " + error.message);
+    },
+  });
+
   const openEditDialog = (level: ExpertLevel) => {
+    setIsCreating(false);
     setEditingLevel(level);
     setFormData({
       name: level.name,
       minPoints: level.min_points,
       maxPoints: level.max_points || 0,
+      sortOrder: level.sort_order,
+      multiplier: level.multiplier ?? 1,
       gradient: level.gradient || "",
       emoji: level.emoji || "",
       description: level.description || "",
       perks: (level.perks || []).join("\n"),
+    });
+  };
+
+  const openNewDialog = () => {
+    setIsCreating(true);
+    setEditingLevel({ id: -1 } as ExpertLevel);
+    const nextSort = (levels?.reduce((m, l) => Math.max(m, l.sort_order), 0) ?? 0) + 1;
+    const lastMax = levels?.reduce((m, l) => Math.max(m, l.max_points ?? l.min_points), 0) ?? 0;
+    setFormData({
+      name: "",
+      minPoints: lastMax > 0 ? lastMax + 1 : 0,
+      maxPoints: 0,
+      sortOrder: nextSort,
+      multiplier: 1,
+      gradient: "from-zinc-400 to-zinc-500",
+      emoji: "✨",
+      description: "",
+      perks: "",
     });
   };
 
@@ -127,11 +181,17 @@ export function P2GExpertLevelsTab() {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Expert Levels verwalten</CardTitle>
-          <CardDescription>
-            Schwellenwerte, Namen, Farben und Perks der Expert Levels konfigurieren
-          </CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle>Expert Levels verwalten</CardTitle>
+            <CardDescription>
+              Schwellenwerte, Multiplikator, Namen, Farben und Perks der Expert Levels konfigurieren
+            </CardDescription>
+          </div>
+          <Button size="sm" onClick={openNewDialog}>
+            <Plus className="w-4 h-4 mr-2" />
+            Neues Level
+          </Button>
         </CardHeader>
         <CardContent>
           <Table>
@@ -141,10 +201,11 @@ export function P2GExpertLevelsTab() {
                 <TableHead>Name</TableHead>
                 <TableHead className="text-right">Von</TableHead>
                 <TableHead className="text-right">Bis</TableHead>
+                <TableHead className="text-right">×&nbsp;Mult.</TableHead>
                 <TableHead>Gradient</TableHead>
                 <TableHead>Emoji</TableHead>
                 <TableHead className="text-center">Perks</TableHead>
-                <TableHead className="w-20">Aktion</TableHead>
+                <TableHead className="w-24">Aktion</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -158,6 +219,9 @@ export function P2GExpertLevelsTab() {
                   <TableCell className="text-right tabular-nums">
                     {formatPoints(level.max_points)}
                   </TableCell>
+                  <TableCell className="text-right tabular-nums font-semibold text-primary">
+                    ×{Number(level.multiplier ?? 1)}
+                  </TableCell>
                   <TableCell>
                     <div
                       className={`h-6 w-20 rounded bg-gradient-to-r ${level.gradient || "from-gray-400 to-gray-500"}`}
@@ -170,13 +234,21 @@ export function P2GExpertLevelsTab() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => openEditDialog(level)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(level)}>
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => {
+                          if (confirm(`Level "${level.name}" wirklich löschen?`)) deleteMutation.mutate(level.id);
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -186,12 +258,12 @@ export function P2GExpertLevelsTab() {
       </Card>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingLevel} onOpenChange={(open) => !open && setEditingLevel(null)}>
+      <Dialog open={!!editingLevel} onOpenChange={(open) => !open && closeDialog()}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Expert Level bearbeiten</DialogTitle>
+            <DialogTitle>{isCreating ? "Neues Expert Level" : "Expert Level bearbeiten"}</DialogTitle>
             <DialogDescription>
-              Passe die Einstellungen für dieses Expert Level an.
+              Schwellen, Multiplikator und Aussehen dieses Levels festlegen.
             </DialogDescription>
           </DialogHeader>
 
@@ -283,6 +355,30 @@ export function P2GExpertLevelsTab() {
               </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="multiplier">Payback-Multiplikator</Label>
+                <Input
+                  id="multiplier"
+                  type="number"
+                  step="0.05"
+                  min="1"
+                  value={formData.multiplier}
+                  onChange={(e) => setFormData({ ...formData, multiplier: parseFloat(e.target.value) || 1 })}
+                />
+                <p className="text-xs text-muted-foreground">z. B. 1,5 = +50% Punkte pro Buchung</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sortOrder">Reihenfolge</Label>
+                <Input
+                  id="sortOrder"
+                  type="number"
+                  value={formData.sortOrder}
+                  onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label>Gradient</Label>
               <Select
@@ -333,12 +429,12 @@ export function P2GExpertLevelsTab() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingLevel(null)}>
+            <Button variant="outline" onClick={closeDialog}>
               Abbrechen
             </Button>
-            <Button onClick={() => updateMutation.mutate()} disabled={updateMutation.isPending}>
+            <Button onClick={() => updateMutation.mutate()} disabled={updateMutation.isPending || !formData.name.trim()}>
               {updateMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Speichern
+              {isCreating ? "Hinzufügen" : "Speichern"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
@@ -46,7 +46,6 @@ const Lobbies = lazy(() => import("./pages/Lobbies"));
 
 // Dashboard Pages (Logged-In)
 const DashboardHome = lazy(() => import("./pages/dashboard/DashboardHome"));
-const DashboardBooking = lazy(() => import("./pages/dashboard/DashboardBooking"));
 const DashboardRewards = lazy(() => import("./pages/dashboard/DashboardRewards"));
 const DashboardMarketplace = lazy(() => import("./pages/dashboard/DashboardMarketplace"));
 const DashboardLeague = lazy(() => import("./pages/dashboard/DashboardLeague"));
@@ -152,7 +151,8 @@ const App = () => (
                 <Route path="/account" element={<Account />} />
                 <Route path="/dashboard" element={<DashboardHome />} />
                 <Route path="/dashboard/home" element={<DashboardHome />} />
-                <Route path="/dashboard/booking" element={<DashboardBooking />} />
+                {/* Logged-in users use the same redesigned public booking flow. */}
+                <Route path="/dashboard/booking" element={<Navigate to="/booking" replace />} />
 
                 {/* Friends + Chat — released to everyone */}
                 <Route path="/dashboard/friends" element={<DashboardFriends />} />

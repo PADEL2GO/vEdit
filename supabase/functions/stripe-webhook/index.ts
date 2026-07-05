@@ -672,49 +672,27 @@ serve(async (req) => {
                 .single();
 
               if (bk && bk.play_credits_awarded === 0 && bk.user_id) {
-                // Calculate weekly streak for this user
-                const threeMonthsAgo = new Date();
-                threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-                const { data: prevBookings } = await supabaseAdmin
-                  .from("bookings")
-                  .select("start_time")
-                  .eq("user_id", bk.user_id)
-                  .eq("status", "confirmed")
-                  .neq("id", bookingId)
-                  .gte("start_time", threeMonthsAgo.toISOString());
-
-                // ISO week key helper
-                const isoWeekKey = (d: Date): string => {
-                  const dt = new Date(d);
-                  dt.setHours(12, 0, 0, 0);
-                  dt.setDate(dt.getDate() + 3 - ((dt.getDay() + 6) % 7));
-                  const jan4 = new Date(dt.getFullYear(), 0, 4);
-                  const wn = 1 + Math.round(((dt.getTime() - jan4.getTime()) / 86400000 - 3 + ((jan4.getDay() + 6) % 7)) / 7);
-                  return `${dt.getFullYear()}-W${String(wn).padStart(2, "0")}`;
-                };
-
-                const weekSet = new Set((prevBookings || []).map(b => isoWeekKey(new Date(b.start_time))));
-                // Include current booking's week
-                weekSet.add(isoWeekKey(new Date(bk.start_time)));
-
-                let weekStreak = 0;
-                const cursor = new Date();
-                for (let i = 0; i < 13; i++) {
-                  if (!weekSet.has(isoWeekKey(cursor))) break;
-                  weekStreak++;
-                  cursor.setDate(cursor.getDate() - 7);
-                }
-
-                // Multiplier
-                const multiplier = weekStreak >= 4 ? 2.5 : weekStreak === 3 ? 2.0 : weekStreak === 2 ? 1.5 : 1.0;
-
-                // Hours (rounded to nearest 0.5)
+                // ── P2G Payback = round(hours * basePerHour * expert-level multiplier) ──
+                // basePerHour is admin-configurable (site_settings.payback_points_per_hour);
+                // the multiplier comes from the user's expert level (based on lifetime credits).
                 const hours = (new Date(bk.end_time).getTime() - new Date(bk.start_time).getTime()) / 3600000;
                 const roundedHours = Math.max(0.5, Math.round(hours * 2) / 2);
-                const creditsToAward = Math.round(roundedHours * 100 * multiplier);
 
-                // Award atomically (a signed delta, not a stale-read absolute value)
-                // so a concurrent reserve/refund on the same wallet can't clobber it.
+                const { data: settings } = await supabaseAdmin
+                  .from("site_settings")
+                  .select("payback_points_per_hour")
+                  .eq("id", "global")
+                  .maybeSingle();
+                const perHour = Number((settings as any)?.payback_points_per_hour ?? 100) || 100;
+
+                const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
+                  p_user_id: bk.user_id,
+                });
+                const levelMultiplier = Number(multData ?? 1) || 1;
+
+                const creditsToAward = Math.round(roundedHours * perHour * levelMultiplier);
+
+                // Award atomically (signed delta) so a concurrent reserve/refund can't clobber it.
                 const { error: awardError } = await supabaseAdmin.rpc("increment_play_and_lifetime", {
                   p_user_id: bk.user_id,
                   p_play_delta: creditsToAward,
@@ -722,17 +700,13 @@ serve(async (req) => {
                 });
 
                 if (awardError) {
-                  logStep("Failed to award play credits", { bookingId, error: awardError.message });
+                  logStep("Failed to award payback credits", { bookingId, error: awardError.message });
                 } else {
                   await supabaseAdmin.from("bookings")
                     .update({ play_credits_awarded: creditsToAward })
                     .eq("id", bookingId);
-                  logStep("Play credits awarded", { bookingId, creditsToAward, weekStreak, multiplier });
+                  logStep("Payback credits awarded", { bookingId, creditsToAward, perHour, levelMultiplier });
                 }
-
-                // First-booking onboarding bonus is handled exclusively by the
-                // claim_onboarding_bonus RPC (called from the dashboard checklist).
-                // Do NOT duplicate it here, otherwise users get 1000 credits instead of 500.
               }
             } catch (creditErr) {
               logStep("Failed to award play credits", { error: (creditErr as Error).message });
@@ -771,21 +745,9 @@ serve(async (req) => {
             const priceCents = session.amount_total;
 
             if (!isGuestWebhook && userId && priceCents) {
-              // ── Authenticated user: trigger rewards + send confirmation ──
-              try {
-                await fetch(`${supabaseUrl}/functions/v1/rewards-trigger`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${supabaseServiceKey}`,
-                  },
-                  body: JSON.stringify({ event: "bookingPaid", userId, bookingId, priceCents }),
-                });
-                logStep("Rewards trigger called", { userId, bookingId, priceCents });
-              } catch (rewardErr) {
-                logStep("Failed to trigger rewards", { error: (rewardErr as Error).message });
-              }
-
+              // ── Authenticated user: send confirmation ──
+              // (Payback points are awarded directly above via increment_play_and_lifetime;
+              //  the old rewards-trigger percentage award has been removed.)
               try {
                 await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
                   method: "POST",

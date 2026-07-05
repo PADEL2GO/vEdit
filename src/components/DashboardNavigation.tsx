@@ -54,7 +54,7 @@ const DashboardNavigation = () => {
   // everyone, demo for admins only), so hidden features drop out for both.
   const dashboardItems = [
     { name: t("nav.meinP2G"), url: "/dashboard/home", show: true },
-    { name: t("nav.booking"), url: "/dashboard/booking", show: true },
+    { name: t("nav.booking"), url: "/booking", show: true },
     { name: t("nav.marketplace"), url: "/dashboard/marketplace", show: canSee("marketplace") },
     { name: t("nav.events"), url: "/dashboard/events", show: canSee("events") },
   ]
@@ -118,7 +118,7 @@ const DashboardNavigation = () => {
                 <DropdownMenuLabel className="truncate">{accountName}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <NavLink to="/dashboard/booking" className="cursor-pointer">
+                  <NavLink to="/booking" className="cursor-pointer">
                     <CalendarDays className="w-4 h-4 mr-2" />
                     {t("menu.myBookings")}
                   </NavLink>
