@@ -74,6 +74,7 @@ import {
   slugify,
 } from "@/hooks/useMarketplaceCatalog";
 import { CatalogManagerDialog } from "@/components/admin/marketplace/CatalogManagerDialog";
+import { MarketplaceOrdersSection } from "@/components/admin/marketplace/MarketplaceOrdersSection";
 import type { MarketplaceItem, MarketplaceCategory, ProductType } from "@/hooks/useMarketplaceItems";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -619,6 +620,9 @@ const AdminMarketplace = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Orders & fulfillment */}
+        <MarketplaceOrdersSection />
       </div>
 
       {/* Create/Edit Dialog */}

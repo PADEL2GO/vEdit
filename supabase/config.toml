@@ -27,6 +27,9 @@ verify_jwt = false
 [functions.admin-credits]
 verify_jwt = true
 
+[functions.marketplace-refund]
+verify_jwt = true
+
 [functions.p2g-points-api]
 verify_jwt = false
 

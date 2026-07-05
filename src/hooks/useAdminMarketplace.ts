@@ -112,10 +112,91 @@ export const useUpdateFulfillmentStatus = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-marketplace-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-marketplace-orders"] });
       toast.success("Status aktualisiert");
     },
     onError: (error) => {
       toast.error("Fehler: " + error.message);
+    },
+  });
+};
+
+// ── Full order/fulfillment view (paid + refunded/cancelled) ──────────────────
+export interface MarketplaceOrder {
+  id: string;
+  status: string;
+  fulfillment_status: FulfillmentStatus;
+  reference_code: string | null;
+  created_at: string;
+  quantity: number | null;
+  amount_cents: number | null;
+  play_spent: number | null;
+  reward_spent: number | null;
+  guest_email: string | null;
+  guest_name: string | null;
+  user_id: string | null;
+  shipping_address_line1: string | null;
+  shipping_postal_code: string | null;
+  shipping_city: string | null;
+  shipping_country: string | null;
+  item?: { name: string; image_url: string | null } | null;
+}
+
+export const useAdminMarketplaceOrders = () => {
+  return useQuery({
+    queryKey: ["admin-marketplace-orders"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("marketplace_redemptions")
+        .select(`
+          id, status, fulfillment_status, reference_code, created_at, quantity,
+          amount_cents, play_spent, reward_spent, guest_email, guest_name, user_id,
+          shipping_address_line1, shipping_postal_code, shipping_city, shipping_country,
+          item:marketplace_items(name, image_url)
+        `)
+        .in("status", ["success", "refunded", "cancelled"])
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return (data ?? []) as unknown as MarketplaceOrder[];
+    },
+  });
+};
+
+// Admin-initiated cancellation + refund (Stripe money back + points + stock reversal)
+export const useRefundMarketplaceOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      const { data, error } = await supabase.functions.invoke("marketplace-refund", {
+        body: { order_id: orderId },
+      });
+      if (error) {
+        let serverMessage: string | null = null;
+        const ctx = (error as { context?: Response }).context;
+        if (ctx && typeof ctx.json === "function") {
+          try {
+            const body = await ctx.json();
+            serverMessage = body?.error ?? null;
+          } catch {
+            /* ignore */
+          }
+        }
+        throw new Error(serverMessage || error.message);
+      }
+      if ((data as { error?: string })?.error) throw new Error((data as { error?: string }).error!);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-marketplace-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-marketplace-redemptions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-marketplace-items"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-marketplace-analytics"] });
+      toast.success("Bestellung storniert & erstattet");
+    },
+    onError: (error: Error) => {
+      toast.error("Stornierung fehlgeschlagen: " + error.message);
     },
   });
 };
