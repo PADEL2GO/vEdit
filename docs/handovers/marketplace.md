@@ -1,0 +1,84 @@
+# 📄 Plan & Handover — PADEL2GO Marketplace (Equipment-Shop)
+
+> Umfassender Plan für den Ausbau des Marketplace zu einem echten **Online-Shop für Padel-Equipment** mit eigenen Produktseiten, Katalog, Admin-Produktpflege und Checkout mit **Geld + P2G-Punkten**. Enthält: Vision, Datenmodell, Admin-Backend, Frontend-Seiten, Design-Handover für Claude Design und einen Phasenplan.
+
+---
+
+## 1. Vision — was der Marketplace erfüllen soll
+Ein vollwertiger, markenfähiger **Padel-Equipment-Shop** unter der Sektion **„Marketplace"**:
+- **Katalog** nach Kategorien (Schläger, Bälle, Textil/Bekleidung, Schuhe, Taschen, Zubehör) und Marken.
+- **Eigene, verlinkbare Produktseiten** (`/marketplace/:slug`) mit Bildergalerie, Varianten (Größe/Farbe/Gewicht), technischen Specs, Preis in **€** und Punkte-Rabatt, Verfügbarkeit — wie bei einem echten Online-Shop.
+- **Kauf mit Geld (Stripe: Karte + PayPal)** und optional **P2G-Punkte als Rabatt** (bis zum admin-definierten Max-Prozentsatz) — die Punkte, die man über Buchungen als Payback verdient, werden hier eingelöst.
+- **Warenkorb** (mehrere Artikel pro Bestellung).
+- **Admin pflegt den kompletten Katalog** selbst: Produkte, Varianten, mehrere Bilder, Kategorien, Marken, Bestand, Specs, Sichtbarkeit — plus Bestell-/Versandabwicklung.
+- Gäste können kaufen (nur Geld); eingeloggte User zusätzlich mit Punkte-Rabatt.
+
+## 2. Ist-Zustand (Basis, auf der wir aufbauen)
+**Stark & behalten (Checkout-/Order-Kern):**
+- Edge fn `marketplace-checkout`: Geld via Stripe (Karte + PayPal), Punkte-als-Rabatt (nur eingeloggt, `credits_payment_max_percent`), Gast + Login, 50c-Stripe-Minimum-Schutz.
+- Atomare RPCs (`insert_marketplace_order`, `marketplace_decrement_stock`, `settle/release_marketplace_order`, `reserve_points`) + Cron-Backstop; Webhook-Branch `marketplace_purchase` mit Auto-Refund-Absicherung. **Punkte-Integrität ist gewährleistet.**
+- Bestellungen liegen in `marketplace_redemptions` (Status/Fulfillment, Shipping-Adresse, `stripe_session_id`-Idempotenz).
+- Feature-Flags: `feature_marketplace_state` (visible/demo/hidden), Punkte-Zahlung separat via `feature_credits_payment_enabled`.
+
+**Lücken (das bauen wir):**
+- **Keine Produkt-Detailseite**, kein `slug`. Kauf läuft heute nur über ein Modal auf `/marketplace`.
+- `marketplace_items` ist flach: **nur ein Bild**, **keine Varianten**, `partner_name` als Freitext-„Marke", Kategorie ist ein fixes 4-Werte-CHECK-Enum (keine Kategorien-Tabelle), kein Rich-Content/Specs, kein UVP/MwSt.
+- **Kein Warenkorb** (1 Bestellung = 1 Produkt), keine Filter/Suche/Kategorie-Nav im Shop-UI.
+- Admin: einfacher Ein-Bild-Editor, keine Varianten/Kategorien-/Marken-Verwaltung; Versand nur Status-Umschaltung ohne Tracking.
+- `types.ts` ist bei `marketplace_items.price_cents` veraltet → nach Schema-Änderungen `supabase gen types` neu ziehen.
+
+## 3. Ziel-Datenmodell (Backend)
+> Bestehende `marketplace_items` + `marketplace_redemptions` **bleiben**; wir erweitern und ergänzen normalisierte Tabellen. Alle neuen Tabellen mit RLS (public liest aktive, nur Admin schreibt).
+
+**Neu — `marketplace_categories`** (Kategorien-Baum): `id, name, slug (unique), parent_id (nullable, Unterkategorien), image_url, sort_order, is_active`. Beispiel: Schläger, Bälle, Bekleidung, Schuhe, Taschen, Zubehör.
+
+**Neu — `marketplace_brands`** (Marken): `id, name, slug (unique), logo_url, sort_order, is_active`. Ersetzt das Freitext-`partner_name`.
+
+**Erweiterung — `marketplace_items` (Produkt-Kopf):** neue Spalten
+`slug (unique)`, `category_id (FK)`, `brand_id (FK)`, `subtitle/short_desc`, `long_description (Rich/HTML)`, `specs (jsonb: {label,value}[] für Gewicht/Balance/Härte/Material…)`, `compare_at_price_cents (UVP/Streichpreis)`, `is_featured (bool)`, `status ('draft'|'published')`, `meta_title`, `meta_description`. (Bestehende `price_cents`, `credit_cost`, `stock_quantity` bleiben als Default/Fallback für variantenlose Produkte.)
+
+**Neu — `marketplace_item_images`** (Galerie, 1:n): `id, item_id (FK), url, alt, sort_order`. Erstes Bild = Titelbild.
+
+**Neu — `marketplace_item_variants`** (Varianten, 1:n): `id, item_id (FK), sku, option_name (z. B. „Größe"/„Farbe"/„Gewicht"), option_value (z. B. „L"/„Schwarz"/„365g"), price_cents (variantenspezifisch, Fallback Produkt-Preis), stock_quantity, is_active, sort_order`. Für Mehrfach-Optionen (Größe **und** Farbe) entweder Kombi-Varianten (eine Zeile pro Kombination) oder zwei Option-Achsen — **Empfehlung Phase-Start: eine Optionsachse pro Produkt** (deckt Schläger-Gewicht, Textil-Größe, Ball-Menge ab), Mehrachsen später.
+
+**Warenkorb / Mehr-Positionen-Bestellung (Phase Cart):** neue `marketplace_order_items` (1:n an einen Order-Kopf) ODER `redemptions` um `order_group_id` erweitern. Checkout-Edge-Fn auf mehrere Positionen erweitern (Summe der Varianten-Preise, Stock je Variante dekrementieren, ein Stripe-Betrag). **Der bestehende atomare Order-Mechanismus wird dafür pro Position/als Gruppe wiederverwendet.**
+
+**Versand (Phase Fulfillment):** `marketplace_redemptions` um `tracking_number, carrier, shipped_at` erweitern; Versandbestätigungs-Mail an Kunde beim Statuswechsel → „shipped".
+
+## 4. Frontend — Seiten (alle unter `/marketplace`, Dark/Lime-Design)
+1. **Katalog / Übersicht `/marketplace`** — Hero, **Kategorie-Navigation** (Chips/Kacheln), **Filter** (Kategorie, Marke, Preis-Range, „nur verfügbar"), **Suche**, **Sortierung**, Produkt-Grid. Produkt-Card: Titelbild, Marke, Name, Preis (€, ggf. Streichpreis), Punkte-Rabatt-Badge, „ab Lager/ausverkauft", Klick → Produktseite.
+2. **🆕 Produkt-Detailseite `/marketplace/:slug`** (Herzstück, unique page pro Produkt) — Breadcrumb (Kategorie), **Bildergalerie** (großes Bild + Thumbnails), Marke + Titel, **Preis in € + „oder X Punkte Rabatt"** (+ UVP durchgestrichen), **Varianten-Auswahl** (Größe/Farbe/Gewicht als Chips), **Verfügbarkeit** je Variante, **Mengen-Selektor**, **„In den Warenkorb" / „Sofort kaufen"**, **Specs-Tabelle**, Langbeschreibung, Versand-/Lieferinfo, **verwandte Produkte**. SEO: eigener `meta_title/description`, OG-Bild = Titelbild.
+3. **Warenkorb** (Drawer + `/marketplace/cart`) — Positionen (Bild, Name, Variante, Menge ±, Einzel-/Zeilenpreis, entfernen), Zwischensumme, „zur Kasse".
+4. **Checkout `/marketplace/checkout`** — Lieferadresse, **Zahlungsart (Karte/PayPal)**, **Punkte-Rabatt-Slider** (eingeloggt, bis Max-%), Bestellübersicht (Positionen, Rabatt, zu zahlen), „Kostenpflichtig bestellen" → Stripe.
+5. **Bestellbestätigung `/marketplace/success`** — **echte Bestellzusammenfassung** (Artikel, Menge, Preis, eingelöste Punkte, Lieferadresse, Referenzcode) statt nur der Stripe-Session-ID.
+6. **„Meine Bestellungen"** (im Konto/Dashboard) — Bestellhistorie mit Status/Tracking.
+
+## 5. Admin — volles Produkt-Backend (`/admin/marketplace`)
+- **Produkt anlegen/bearbeiten:** Name, Slug (auto aus Name), Kategorie (Dropdown aus DB), Marke (Dropdown aus DB), Kurz- & Langbeschreibung, **Bildergalerie (mehrere Uploads, sortierbar)**, **Varianten-Editor** (Zeilen: Option-Wert, SKU, Preis, Bestand), Preis €, UVP, Punkte-Preis/Rabatt-Fähigkeit, **Specs-Editor** (Label/Wert-Paare), Versandgewicht/-info, `is_featured`, **Status Entwurf/Veröffentlicht**, SEO-Felder. Aktionen: duplizieren, löschen.
+- **Kategorien-Verwaltung:** CRUD (Name, Slug, Parent, Bild, Sortierung).
+- **Marken-Verwaltung:** CRUD (Name, Slug, Logo).
+- **Bestell-/Versandverwaltung** (aktuell unter P2G → Einlösungen; ideal auch hier): Kundenname/-Mail anzeigen, Status setzen, **Tracking-Nr. + Carrier erfassen**, Versandbestätigung an Kunde, Retoure/Storno mit Rückerstattung.
+- Bild-Upload: bestehender Storage-Bucket `media`, Ordner `marketplace/` (Galerie-fähig machen).
+
+## 6. P2G-Punkte-Integration (bleibt wie etabliert)
+- Punkte (aus Buchungs-Payback) sind im Checkout **als Rabatt** einlösbar (eingeloggt), begrenzt durch `credits_payment_max_percent`, Rest per Karte/PayPal. Atomarer Abzug + Rückerstattung bei Storno/Abbruch sind bereits implementiert.
+- Punkte-Zahlung global schaltbar via `feature_credits_payment_enabled` (Admin → Features / P2G).
+
+## 7. Design-Handover für Claude Design (Dark/Lime)
+Zu gestaltende Screens (Design-System wie restliche Seiten: Schwarz `#000`, Lime `#C7F011`, Bricolage/DM Sans, Preise/Zahlen in JetBrains Mono, Karten `rounded-2xl` + Hover-Lime, `max-w-[1200px]` + 20px Padding):
+1. **Marketplace-Übersicht** — Hero + Kategorie-Nav + Filterleiste/Sidebar + Such-/Sortier-Zeile + Produkt-Grid (Cards mit Bild, Marke, Name, Preis €, Punkte-Rabatt-Badge, evtl. Streichpreis).
+2. **Produkt-Detailseite** — 2-spaltig: links Bildergalerie (groß + Thumbnails), rechts Kaufbox (Marke, Titel, Preis €/Punkte, Varianten-Chips, Verfügbarkeit, Menge, „In den Warenkorb"/„Sofort kaufen"). Darunter Specs-Tabelle + Langbeschreibung (+ Reviews später) + verwandte Produkte.
+3. **Warenkorb** (Drawer + Seite) und **Checkout** (Adresse, Zahlart Karte/PayPal, Punkte-Rabatt-Slider, Bestellübersicht).
+4. **Bestellbestätigung** mit Bestelldetails.
+
+## 8. Phasenplan (empfohlene Reihenfolge)
+- **Phase 1 — Katalog + Produktseiten (Kern des Wunsches):** Schema (categories, brands, images, `slug`, specs, status) + `supabase gen types`; Admin-CRUD für Produkte (Galerie, Kategorie/Marke-Dropdowns, Specs, Slug, Entwurf/Live) + Kategorien-/Marken-Verwaltung; Frontend Katalog mit Kategorie-Nav/Filter/Suche + **Produkt-Detailseite `/marketplace/:slug`** (Galerie, Preis €/Punkte, Specs). Kauf zunächst über den **bestehenden Einzelkauf-Checkout** (Geld + Punkte-Rabatt).
+- **Phase 2 — Varianten:** `marketplace_item_variants` + Varianten-Editor im Admin + Varianten-Auswahl/Bestand/Preis auf der Produktseite; Checkout auf Varianten-Preis/-Bestand umstellen.
+- **Phase 3 — Warenkorb:** `order_items`/Order-Gruppe + Cart-UI + Multi-Position-Checkout (ein Stripe-Betrag, Punkte-Rabatt auf Summe).
+- **Phase 4 — Bestellabwicklung:** Tracking-Nr./Carrier, Versandbestätigungs-Mail, „Meine Bestellungen", Retouren/Storno mit Rückerstattung.
+
+## 9. Wichtig / Rahmen
+- **Punkte-Integrität hat Priorität:** alle Wallet-/Stock-Mutationen laufen weiter über die bestehenden atomaren service-role-RPCs; neue Kaufpfade daran anschließen (nie Client-Preise vertrauen).
+- Bestehendes Checkout-/Webhook-/Refund-System **wiederverwenden**, nicht neu bauen.
+- Nach jeder Schema-Migration `supabase gen types` neu ziehen (aktuell veraltet bei `price_cents`).
+- Mobile-first ab 320px; Design im etablierten Dark/Lime-System.
