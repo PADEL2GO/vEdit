@@ -56,7 +56,7 @@ const DashboardNavigation = () => {
     { name: t("nav.meinP2G"), url: "/dashboard/home", show: true },
     { name: t("nav.booking"), url: "/booking", show: true },
     { name: t("nav.marketplace"), url: "/marketplace", show: canSee("marketplace") },
-    { name: t("nav.events"), url: "/dashboard/events", show: canSee("events") },
+    { name: t("nav.events"), url: "/dashboard/events", show: true },
   ]
     .filter((item) => item.show)
     .map(({ show, ...item }) => item);

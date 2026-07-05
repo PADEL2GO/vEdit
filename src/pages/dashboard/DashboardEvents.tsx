@@ -11,10 +11,7 @@ import {
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { Link } from "react-router-dom";
-import { useFeatureToggles } from "@/hooks/useFeatureToggles";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useAuth } from "@/hooks/useAuth";
-import { ComingSoonOverlay } from "@/components/ComingSoonOverlay";
 import {
   useDashboardEvents, useMyEventRegistrations, useRegisterForEvent, useCancelEventRegistration,
   type DashboardEvent, type MyEventRegistration,
@@ -47,8 +44,6 @@ const fmtTime = (e: DashboardEvent) => {
 
 const DashboardEvents = () => {
   const { t } = useTranslation("p2g");
-  const { events_enabled, isLoading: featureLoading } = useFeatureToggles();
-  const { isAdmin } = useAdminAuth();
   const { user } = useAuth();
 
   const { data: events, isLoading } = useDashboardEvents();
@@ -74,7 +69,7 @@ const DashboardEvents = () => {
   }, [myRegs]);
 
   const upcoming = useMemo(
-    () => (events ?? []).filter((e) => { const d = startDate(e); return d && d.getTime() > now - 3 * 3600000; }),
+    () => (events ?? []).filter((e) => { const d = startDate(e); return !d || d.getTime() > now - 3 * 3600000; }),
     [events, now],
   );
 
@@ -117,23 +112,8 @@ const DashboardEvents = () => {
     if (confirm("Anmeldung wirklich stornieren?")) cancel.mutate(eventId);
   };
 
-  // ── Feature gate (unchanged) ──
-  if (!events_enabled && !isAdmin && !featureLoading) {
-    return (
-      <DashboardLayout>
-        <ComingSoonOverlay
-          title={t("comingSoon.events.title")}
-          description={t("comingSoon.events.description")}
-          icon={PartyPopper}
-        >
-          <div className="container mx-auto px-4 py-6 space-y-6">
-            <div className="h-32 bg-muted/20 rounded-xl" />
-            <div className="h-64 bg-muted/20 rounded-xl" />
-          </div>
-        </ComingSoonOverlay>
-      </DashboardLayout>
-    );
-  }
+  // Kein Feature-Flag-Gate: veröffentlichte Events sind für alle eingeloggten User sichtbar
+  // (wie auf der öffentlichen /events-Seite).
 
   return (
     <DashboardLayout>

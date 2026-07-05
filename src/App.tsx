@@ -166,9 +166,8 @@ const App = () => (
                 <Route element={<RequireFeature feature="league" />}>
                   <Route path="/dashboard/league" element={<DashboardLeague />} />
                 </Route>
-                <Route element={<RequireFeature feature="events" />}>
-                  <Route path="/dashboard/events" element={<DashboardEvents />} />
-                </Route>
+                {/* Events sind sichtbar, sobald sie veröffentlicht sind (wie die öffentliche /events-Seite) — kein Feature-Flag-Gate. */}
+                <Route path="/dashboard/events" element={<DashboardEvents />} />
                 {/* Logged-in users use the same public shop; old route redirects. */}
                 <Route path="/dashboard/marketplace" element={<Navigate to="/marketplace" replace />} />
 
