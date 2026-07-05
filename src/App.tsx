@@ -21,7 +21,6 @@ import { ClubLayout } from "./components/club/ClubLayout";
 const Index = lazy(() => import("./pages/Index"));
 const FuerSpieler = lazy(() => import("./pages/FuerSpieler"));
 const FuerVereine = lazy(() => import("./pages/FuerVereine"));
-const FuerPartner = lazy(() => import("./pages/FuerPartner"));
 const AppBooking = lazy(() => import("./pages/AppBooking"));
 const League = lazy(() => import("./pages/League"));
 const Events = lazy(() => import("./pages/Events"));
@@ -30,7 +29,6 @@ const Marketplace = lazy(() => import("./pages/Marketplace"));
 const MarketplaceProduct = lazy(() => import("./pages/MarketplaceProduct"));
 const MarketplaceCheckout = lazy(() => import("./pages/MarketplaceCheckout"));
 const MarketplaceSuccess = lazy(() => import("./pages/MarketplaceSuccess"));
-const UeberUns = lazy(() => import("./pages/UeberUns"));
 const FaqKontakt = lazy(() => import("./pages/FaqKontakt"));
 const Impressum = lazy(() => import("./pages/Impressum"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -123,7 +121,6 @@ const App = () => (
               <Route path="/qr" element={<QrLanding />} />
               <Route path="/fuer-spieler" element={<FuerSpieler />} />
               <Route path="/fuer-vereine" element={<FuerVereine />} />
-              <Route path="/fuer-partner" element={<FuerPartner />} />
               <Route path="/app-booking" element={<AppBooking />} />
               <Route path="/league" element={<League />} />
               <Route path="/events" element={<Events />} />
@@ -132,7 +129,6 @@ const App = () => (
               <Route path="/marketplace/success" element={<MarketplaceSuccess />} />
               <Route path="/marketplace/:slug" element={<MarketplaceProduct />} />
               <Route path="/marketplace/:slug/checkout" element={<MarketplaceCheckout />} />
-              <Route path="/ueber-uns" element={<UeberUns />} />
               <Route path="/faq-kontakt" element={<FaqKontakt />} />
               <Route path="/impressum" element={<Impressum />} />
               <Route path="/auth" element={<Auth />} />

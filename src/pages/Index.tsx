@@ -27,10 +27,7 @@ import {
   Banknote,
   Zap,
   User,
-  Megaphone,
 } from "lucide-react";
-import { usePartnerTiles } from "@/hooks/usePartnerTiles";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLaunchDate } from "@/hooks/useLaunchDate";
 import { format } from "date-fns";
@@ -59,133 +56,6 @@ const revealProps = (delay = 0) => ({
   transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] as const },
 });
 
-// ── Partner components (admin-managed via partner_tiles table) ────────────────
-const PartnerGrid = ({ tiles }: { tiles: import("@/hooks/usePartnerTiles").PartnerTile[] }) => (
-  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full">
-    {tiles.map((tile, index) => {
-      const card = (
-        <motion.div
-          key={tile.id}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: index * 0.05 }}
-          className={`flex items-center justify-center h-24 p-3 rounded-2xl overflow-hidden transition-transform duration-200 ${
-            tile.website_url ? "hover:scale-[1.03] cursor-pointer" : ""
-          }`}
-          style={{ backgroundColor: tile.bg_color || "#F5F5F3" }}
-        >
-          {tile.logo_url ? (
-            <img src={tile.logo_url} alt={tile.name} className="max-h-16 w-auto object-contain" />
-          ) : (
-            <span className="text-sm font-medium text-gray-600">{tile.name}</span>
-          )}
-        </motion.div>
-      );
-      return tile.website_url ? (
-        <a key={tile.id} href={tile.website_url} target="_blank" rel="noopener noreferrer">{card}</a>
-      ) : (
-        <div key={tile.id}>{card}</div>
-      );
-    })}
-  </div>
-);
-
-const LocalPartnerSection = ({ tiles }: { tiles: import("@/hooks/usePartnerTiles").PartnerTile[] }) => {
-  const { t, i18n } = useTranslation("index");
-  if (!tiles.length) return null;
-  const fallback = t("partners.regionFallback");
-  return (
-    <div className="w-full flex flex-col gap-4">
-      {tiles.map((tile, index) => {
-        const region = tile.region || fallback;
-        const description = localized(tile, "description", i18n.language);
-        const inner = (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.05 }}
-            className={`flex items-center gap-4 flex-wrap rounded-2xl border border-border/60 bg-gradient-card p-5 transition-colors duration-200 ${
-              tile.website_url ? "hover:border-primary/30 cursor-pointer" : ""
-            }`}
-          >
-            <span className="flex-none font-stat text-[11px] uppercase tracking-[0.12em] text-primary bg-primary/10 border border-primary/25 rounded-full px-3 py-1.5">
-              {region}
-            </span>
-            <div className="flex-1 min-w-[200px] flex flex-col gap-0.5">
-              <span className="text-base font-semibold text-foreground">{tile.name}</span>
-              {description && (
-                <span className="text-sm text-muted-foreground line-clamp-2">{description}</span>
-              )}
-            </div>
-            <ArrowRight className="w-[18px] h-[18px] text-muted-foreground/60" />
-          </motion.div>
-        );
-        return tile.website_url ? (
-          <a key={tile.id} href={tile.website_url} target="_blank" rel="noopener noreferrer">{inner}</a>
-        ) : (
-          <div key={tile.id}>{inner}</div>
-        );
-      })}
-    </div>
-  );
-};
-
-const PartnerSections = () => {
-  const { t } = useTranslation("index");
-  const { data: tiles, isLoading } = usePartnerTiles();
-  const equipmentTiles = tiles?.filter((tile) => tile.partner_type !== "local") || [];
-  const localTiles = tiles?.filter((tile) => tile.partner_type === "local") || [];
-  const partnerTitlePart2 = t("partners.titlePart2");
-
-  return (
-    <section id="partner" className="py-16 md:py-24 bg-background">
-      <div className="mx-auto max-w-[1200px] px-5 flex flex-col items-center">
-        {/* Equipment partners */}
-        <motion.div {...revealProps()} className="flex flex-col items-center gap-3.5 text-center mb-11">
-          <span className="font-stat text-xs uppercase tracking-[0.2em] text-primary">{t("partners.kicker")}</span>
-          <h3 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground max-w-2xl" style={{ lineHeight: 1.15 }}>
-            {t("partners.titlePart1")} <BrandName />
-            {partnerTitlePart2 ? ` ${partnerTitlePart2}` : ""}
-          </h3>
-        </motion.div>
-
-        {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 w-full">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 rounded-2xl" />
-            ))}
-          </div>
-        ) : equipmentTiles.length > 0 ? (
-          <PartnerGrid tiles={equipmentTiles} />
-        ) : null}
-
-        <motion.div {...revealProps()} className="mt-9">
-          <Button variant="heroOutline" size="lg" asChild>
-            <NavLink to="/fuer-partner">
-              {t("partners.becomePartner")}
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </NavLink>
-          </Button>
-        </motion.div>
-
-        {/* Local / location partners */}
-        {localTiles.length > 0 && (
-          <motion.div {...revealProps()} className="w-full mt-20 flex flex-col gap-5">
-            <div className="flex flex-col items-center gap-2 text-center">
-              <span className="font-stat text-xs uppercase tracking-[0.2em] text-muted-foreground">{t("partners.localKicker")}</span>
-              <h4 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">{t("partners.localTitle")}</h4>
-            </div>
-            <LocalPartnerSection tiles={localTiles} />
-          </motion.div>
-        )}
-      </div>
-    </section>
-  );
-};
-
-// ── Page ──────────────────────────────────────────────────────────────────────
 const Index = () => {
   const { user, isLoading } = useAuth();
   const { t } = useTranslation("index");
@@ -211,7 +81,6 @@ const Index = () => {
   const audienceConfig = [
     { icon: User, href: "/fuer-spieler" },
     { icon: Building2, href: "/fuer-vereine" },
-    { icon: Megaphone, href: "/fuer-partner" },
   ];
 
   return (
@@ -498,11 +367,6 @@ const Index = () => {
             </div>
           </div>
         </section>
-
-        <SectionDivider variant="glow" />
-
-        {/* ── PARTNERS (backend: partner_tiles) ─────────────────── */}
-        <PartnerSections />
 
       </main>
 

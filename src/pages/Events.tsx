@@ -642,9 +642,6 @@ const Events = () => {
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </NavLink>
                   </Button>
-                  <Button variant="outline" size="lg" asChild>
-                    <NavLink to="/fuer-partner">{t("planEvent.secondaryCta")}</NavLink>
-                  </Button>
                 </div>
               </div>
             </div>

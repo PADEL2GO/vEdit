@@ -39,8 +39,6 @@ const Footer = () => {
     unternehmen: [
       { label: t("footer.links.forPlayers"), href: "/fuer-spieler" },
       { label: t("footer.links.forClubs"), href: "/fuer-vereine" },
-      { label: t("footer.links.forPartners"), href: "/fuer-partner" },
-      { label: t("footer.links.about"), href: "/ueber-uns" },
       { label: t("footer.links.faqContact"), href: "/faq-kontakt" },
     ],
     legal: [
