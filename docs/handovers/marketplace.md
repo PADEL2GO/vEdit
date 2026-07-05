@@ -66,12 +66,49 @@ Ein vollwertiger, markenfähiger **Padel-Equipment-Shop** unter der Sektion **�
 - Punkte (aus Buchungs-Payback) sind im Checkout **als Rabatt** einlösbar (eingeloggt), begrenzt durch `credits_payment_max_percent`, Rest per Karte/PayPal. Atomarer Abzug + Rückerstattung bei Storno/Abbruch sind bereits implementiert.
 - Punkte-Zahlung global schaltbar via `feature_credits_payment_enabled` (Admin → Features / P2G).
 
-## 7. Design-Handover für Claude Design (Dark/Lime)
-Zu gestaltende Screens (Design-System wie restliche Seiten: Schwarz `#000`, Lime `#C7F011`, Bricolage/DM Sans, Preise/Zahlen in JetBrains Mono, Karten `rounded-2xl` + Hover-Lime, `max-w-[1200px]` + 20px Padding):
-1. **Marketplace-Übersicht** — Hero + Kategorie-Nav + Filterleiste/Sidebar + Such-/Sortier-Zeile + Produkt-Grid (Cards mit Bild, Marke, Name, Preis €, Punkte-Rabatt-Badge, evtl. Streichpreis).
-2. **Produkt-Detailseite** — 2-spaltig: links Bildergalerie (groß + Thumbnails), rechts Kaufbox (Marke, Titel, Preis €/Punkte, Varianten-Chips, Verfügbarkeit, Menge, „In den Warenkorb"/„Sofort kaufen"). Darunter Specs-Tabelle + Langbeschreibung (+ Reviews später) + verwandte Produkte.
-3. **Warenkorb** (Drawer + Seite) und **Checkout** (Adresse, Zahlart Karte/PayPal, Punkte-Rabatt-Slider, Bestellübersicht).
-4. **Bestellbestätigung** mit Bestelldetails.
+## 7. Design-Handover für Claude Design — LANGFASSUNG (Dark/Lime)
+
+**Design-System (für alle Screens gleich):** Hintergrund reines Schwarz `#000`, Text `#FAFAFA`, Markenfarbe Lime `#C7F011` (Buttons, Preise, aktive Auswahl, Badges, Glow). Überschriften *Bricolage Grotesque* (bold), Text *DM Sans*, **alle Preise/Zahlen/SKU in *JetBrains Mono*** (`.font-stat`). Karten `rounded-2xl`, dunkler Gradient (`.bg-gradient-card`), 1px-Border, Hover → Lime-Border + Glow. Einheitlicher Content-Wrapper `max-w-[1200px]` + 20px Seitenpadding. Sanfte fade+rise-Animationen. Mobile-first ab 320px. Es gilt die geteilte `Navigation` oben und der `Footer` unten (nicht neu bauen).
+
+### Screen ① — Marketplace-Übersicht (`/marketplace`)
+Von oben nach unten:
+- **Hero (kompakt):** Badge „Marketplace" (lime, `shopping-bag`-Icon), H1 „**P2G Marketplace**" bzw. „Dein Padel-**Shop**" (zweiter Teil Lime-Gradient), kurzer Untertitel („Equipment, das dein Spiel besser macht — mit Geld oder P2G Points"). Rechts optional der Punktestand-Chip (eingeloggt).
+- **Kategorie-Navigation:** horizontale Kachel-/Chip-Reihe (Schläger, Bälle, Bekleidung, Schuhe, Taschen, Zubehör) mit Icon/Bild; aktive Kategorie lime hervorgehoben. Auf Mobile scrollbar.
+- **Filter- & Sortierzeile:** Suchfeld (`search`, mit Clear-x), Filter-Chips/Dropdowns (Marke, Preis-Range, „nur verfügbar"), Sortierung (Beliebt / Preis ↑ / Preis ↓ / Neu), rechts Ergebniszahl (mono). Auf Desktop optional als linke Filter-Sidebar.
+- **Produkt-Grid** (`grid`, 2 Spalten mobil → 3–4 Desktop). **Produkt-Card:**
+  - Bild (Titelbild, `aspect-square` oder 4/5, `object-cover`, Hover-Zoom), oben-links optional Marken-Logo/Chip, oben-rechts optional Sale-/„Neu"-Badge.
+  - Marke (klein, mono/muted), Produktname (h3, 1–2 Zeilen).
+  - Preis: **€-Preis groß (lime, mono)**, ggf. **UVP durchgestrichen** daneben; darunter Punkte-Rabatt-Hinweis-Badge („bis zu X Punkte einlösbar").
+  - Verfügbarkeit („Auf Lager" / „Ausverkauft" — ausverkauft ausgegraut).
+  - Ganze Card klickbar → Produktseite; dezenter „Ansehen →"-Hinweis.
+- **Zustände:** Loading = Shimmer-Skeleton-Cards; Empty (keine Treffer) = Icon + „Keine Produkte gefunden" + „Filter zurücksetzen"; Kategorie-leer analog.
+- Optional unten: Marken-Logo-Leiste („Unsere Marken") + Trust-Zeile (sichere Zahlung, Versand).
+
+### Screen ② — Produkt-Detailseite (`/marketplace/:slug`) — Herzstück
+- **Breadcrumb:** Marketplace › Kategorie › Produktname.
+- **2-Spalten-Layout** (Desktop `~1.1fr / 1fr`, mobil gestapelt):
+  - **Links — Bildergalerie:** großes Hauptbild (`rounded-2xl`, Zoom/Lightbox optional), darunter Thumbnail-Leiste (aktives Thumbnail lime umrandet). Bei einem Bild nur das Hauptbild.
+  - **Rechts — Kaufbox (sticky):** Marke (mit Logo), H1 Produktname, ggf. Kurz-Untertitel. **Preisblock:** großer €-Preis (lime mono) + optional UVP durchgestrichen + Ersparnis-Badge; darunter **„oder bis zu X Punkte einlösen"** (Punkte-Rabatt-Hinweis, `coins`). **Verfügbarkeit** (auf Lager / wenige übrig / ausverkauft). **Mengen-Selektor** (− / Zahl / +). **Primär-Button „In den Warenkorb"** bzw. (Phase 1) **„Jetzt kaufen"** (hero/xl). Sekundär: Merken/Teilen optional. Kurze Icon-Zeile: sichere Zahlung (`shield-check`), Versand (`truck`), Rückgabe.
+  - _(Varianten-Auswahl-Chips [Größe/Farbe/Gewicht] werden erst in einer späteren Phase ergänzt — im Design als optionaler Platzhalter denkbar, aber nicht Pflicht.)_
+- **Darunter (volle Breite):**
+  - **Beschreibung** (Rich-Text/Langtext).
+  - **Spezifikationen-Tabelle** (Label/Wert-Paare, z. B. Gewicht, Balance, Härte, Material, Form) — im Card-Stil.
+  - **Versand & Rückgabe** Info-Block.
+  - **Verwandte / ähnliche Produkte** (Produkt-Card-Grid, gleiche Kategorie).
+- **Zustände:** Loading-Skeleton; „Produkt nicht gefunden" (calendar-x-artig + „Zurück zum Shop").
+- **SEO:** eigener Titel/Description, Titelbild als OG-Bild.
+
+### Screen ③ — Checkout (bestehender Flow, nur Optik) & Bestätigung
+- **Checkout** (Einzelkauf, Phase 1): Produkt-Zusammenfassung (Bild/Name/Menge/Preis), **Lieferadresse** (bei physischen Produkten), **Zahlungsart** (Karte / PayPal), **Punkte-Rabatt-Slider** (eingeloggt, bis Max-%), Preisblock (Preis − Punkte-Rabatt = zu zahlen), „Kostenpflichtig bestellen" → Stripe. Sicher-Zahlung-Hinweis.
+- **Bestellbestätigung (`/marketplace/success`):** grüner Erfolg-Check, „Bestellung bestätigt!", **Bestellzusammenfassung** (Artikel, Menge, gezahlt €, eingelöste Punkte, Lieferadresse, Referenzcode `P2G-…`), Buttons „Weiter shoppen" + „Meine Bestellungen".
+
+### (Später) Screen ④ — Warenkorb
+Drawer (von rechts) + eigene Seite: Positionen (Bild, Name, Menge ±, Zeilenpreis, entfernen), Zwischensumme, „zur Kasse". _Nicht Teil von Phase 1._
+
+---
+
+## 7b. Kurz-Referenz für den Design-Auftrag (zum Weitergeben)
+> „Gestalte einen Padel-Equipment-Online-Shop im PADEL2GO-Dark/Lime-Design: (1) eine **Marketplace-Übersicht** mit Hero, Kategorie-Navigation, Filter/Suche/Sortierung und Produkt-Grid (Cards mit Bild, Marke, Name, €-Preis + Punkte-Rabatt-Badge, Verfügbarkeit); (2) eine **Produkt-Detailseite** mit Bildergalerie links und stickyy Kaufbox rechts (Marke, Titel, €-Preis + „oder X Punkte", Menge, „Jetzt kaufen"), darunter Spezifikations-Tabelle, Beschreibung, Versandinfo und verwandte Produkte; (3) **Checkout** + **Bestellbestätigung**. Schwarz/Lime `#C7F011`, Bricolage Grotesque + DM Sans, Preise in JetBrains Mono, `rounded-2xl`-Karten mit Hover-Lime, `max-w-[1200px]`, mobil ab 320px. Keine Varianten und kein Warenkorb in dieser Version."
 
 ## 8. Phasenplan (empfohlene Reihenfolge)
 - **Phase 1 — Katalog + Produktseiten (Kern des Wunsches):** Schema (categories, brands, images, `slug`, specs, status) + `supabase gen types`; Admin-CRUD für Produkte (Galerie, Kategorie/Marke-Dropdowns, Specs, Slug, Entwurf/Live) + Kategorien-/Marken-Verwaltung; Frontend Katalog mit Kategorie-Nav/Filter/Suche + **Produkt-Detailseite `/marketplace/:slug`** (Galerie, Preis €/Punkte, Specs). Kauf zunächst über den **bestehenden Einzelkauf-Checkout** (Geld + Punkte-Rabatt).
