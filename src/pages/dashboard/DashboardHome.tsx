@@ -14,6 +14,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccountData } from "@/hooks/useAccountData";
+import { useP2GPoints } from "@/hooks/useP2GPoints";
 import { usePointsValue } from "@/hooks/usePointsValue";
 import { useExpertLevels, levelForPoints, nextLevelForPoints, progressToNext } from "@/hooks/useExpertLevels";
 import { useMarketplaceItems } from "@/hooks/useMarketplaceItems";
@@ -28,6 +29,7 @@ const MON = ["Januar","Februar","März","April","Mai","Juni","Juli","August","Se
 const DashboardHome = () => {
   const { user } = useAuth();
   const { profile, wallet } = useAccountData();
+  const { summary } = useP2GPoints();
   const { centsPerPoint, maxPercent, enabled: pointsEnabled } = usePointsValue();
   const { levels } = useExpertLevels();
   const { data: marketItems } = useMarketplaceItems();
@@ -35,8 +37,10 @@ const DashboardHome = () => {
   const { data: myRegs } = useMyEventRegistrations();
   const { data: articles } = useArticles("logged_in");
 
-  const balance = wallet?.play_credits ?? 0;
-  const lifetime = wallet?.lifetime_credits ?? balance;
+  // Live P2G points from the canonical summary (same source as "Mein P2G"), wallet fallback.
+  const balance = summary?.play_credits ?? wallet?.play_credits ?? 0;
+  const lifetime = summary?.lifetime_credits ?? wallet?.lifetime_credits ?? balance;
+  const pointsPerEuro = Math.round(100 / centsPerPoint);
   const userName = (profile?.display_name || user?.email?.split("@")[0] || "Spieler").trim();
 
   const level = levelForPoints(levels, lifetime);
@@ -167,7 +171,7 @@ const DashboardHome = () => {
                     {ptsFmt(balance)}
                   </span>
                   <span className="text-[14.5px] text-muted-foreground">
-                    ≈ {euroValue} Rabattwert <span className="text-muted-foreground/60">· {ptsFmt(Math.round(100 / centsPerPoint))} P = €1,00</span>
+                    ≈ {euroValue} Rabattwert <span className="text-muted-foreground/60">· Umrechenkurs {ptsFmt(pointsPerEuro)} P = €1,00</span>
                   </span>
                 </div>
                 <div className="flex flex-col gap-2">

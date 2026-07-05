@@ -1,0 +1,23 @@
+name: Booking reminders (T-1h)
+
+# Ruft die Supabase Edge Function send-match-reminders regelmäßig auf, damit
+# Nutzer ~1 Stunde vor ihrem Court-Termin eine Erinnerung (E-Mail + In-App) bekommen.
+# Voraussetzung: Repo-Secret SUPABASE_SERVICE_ROLE_KEY hinterlegen
+# (Repo -> Settings -> Secrets and variables -> Actions -> New repository secret).
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # alle 10 Minuten
+  workflow_dispatch: {}        # manuelles Auslösen möglich
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger send-match-reminders
+        run: |
+          curl -fsS -X POST \
+            "https://wvvdkuextsbsecqbfksb.supabase.co/functions/v1/send-match-reminders" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}'
