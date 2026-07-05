@@ -1,6 +1,8 @@
 # 📄 Plan & Handover — PADEL2GO Marketplace (Equipment-Shop)
 
 > Umfassender Plan für den Ausbau des Marketplace zu einem echten **Online-Shop für Padel-Equipment** mit eigenen Produktseiten, Katalog, Admin-Produktpflege und Checkout mit **Geld + P2G-Punkten**. Enthält: Vision, Datenmodell, Admin-Backend, Frontend-Seiten, Design-Handover für Claude Design und einen Phasenplan.
+>
+> **🔒 Scope-Entscheidungen (Florian, 2026-07-05):** (1) **Erstmal KEINE Varianten** — nur einfache Produkte (ein Preis, ein Bestand, ein Bild-Set). Varianten (Größe/Farbe/Gewicht) sind eine spätere Phase. (2) **Warenkorb später** — Phase 1 = Katalog + Produktseiten + Einzelkauf über den bestehenden Checkout. → Der Fokus des ersten Baus liegt auf **Kategorien/Marken + Bildergalerie + eigene Produktseiten + Admin-Katalogpflege**.
 
 ---
 
