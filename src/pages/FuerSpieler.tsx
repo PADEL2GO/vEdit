@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { SiteVisual } from "@/components/SiteVisual";
+import { HeroBackgroundVisual } from "@/components/HeroBackgroundVisual";
 import { NavLink } from "@/components/NavLink";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,7 +93,13 @@ const FuerSpieler = () => {
       <main className="bg-black text-foreground">
         {/* ① HERO */}
         <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
-          <SiteVisual visualKey="fuer-spieler.hero.image" alt="Padel-Spieler auf dem Court" className="absolute inset-0 w-full h-full object-cover" fallbackSrc={leagueHero} />
+          <HeroBackgroundVisual
+            videoKey="fuer-spieler.hero.video"
+            imageKey="fuer-spieler.hero.image"
+            alt="Padel-Spieler auf dem Court"
+            fallbackSrc={leagueHero}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 55% at 50% 15%, rgba(199,240,17,0.12), transparent), linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.72) 55%, #000)" }} />
           <div className="relative z-10 flex flex-col items-center gap-6 text-center max-w-[900px] mx-auto px-5 pt-[120px] pb-20">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-3 py-1 text-xs font-semibold text-primary">
