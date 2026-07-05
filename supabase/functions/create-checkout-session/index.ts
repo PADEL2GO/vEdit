@@ -240,10 +240,45 @@ serve(async (req) => {
       p_token: checkoutToken,
     });
     if (claimError || claimed !== true) {
-      logStep("Checkout claim rejected — concurrent attempt in progress", { bookingId: booking.id, error: claimError?.message });
+      logStep("Checkout claim not granted", { bookingId: booking.id, error: claimError?.message });
+
+      // Don't dead-end the user. Two recoverable cases:
+      //  (1) the booking is already paid → tell them clearly (no new session);
+      //  (2) a prior attempt (crash / abandoned redirect) left a STILL-OPEN Stripe
+      //      session → send them straight to it to finish paying, instead of erroring.
+      const { data: curBooking } = await supabaseAdmin
+        .from("bookings")
+        .select("status")
+        .eq("id", booking.id)
+        .maybeSingle();
+      if (curBooking?.status === "confirmed") {
+        return new Response(JSON.stringify({
+          error: "Diese Buchung ist bereits bezahlt.",
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 409 });
+      }
+
+      try {
+        const { data: existing } = await supabaseAdmin
+          .from("payments")
+          .select("stripe_checkout_session_id")
+          .eq("booking_id", booking.id)
+          .maybeSingle();
+        if (existing?.stripe_checkout_session_id) {
+          const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+          const existingSession = await stripe.checkout.sessions.retrieve(existing.stripe_checkout_session_id);
+          if (existingSession.status === "open" && existingSession.url) {
+            logStep("Returning existing open checkout session", { bookingId: booking.id, sessionId: existingSession.id });
+            return new Response(JSON.stringify({ url: existingSession.url }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200,
+            });
+          }
+        }
+      } catch (recoverErr) {
+        logStep("Could not recover existing session", { error: (recoverErr as Error).message });
+      }
+
       return new Response(JSON.stringify({
-        error: "checkout_in_progress",
-        message: "Ein Bezahlvorgang fuer diese Buchung laeuft bereits. Bitte einen Moment warten und erneut versuchen.",
+        error: "Ein Bezahlvorgang für diese Buchung läuft gerade. Bitte einige Sekunden warten und erneut versuchen.",
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 409,
