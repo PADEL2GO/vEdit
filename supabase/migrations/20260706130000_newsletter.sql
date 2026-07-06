@@ -43,12 +43,18 @@ CREATE TABLE IF NOT EXISTS public.newsletter_sends (
   UNIQUE (campaign_id, subscriber_id)
 );
 ALTER TABLE public.newsletter_sends ENABLE ROW LEVEL SECURITY;
+-- Idempotent: ensure `attempts` exists even if newsletter_sends was created by an earlier partial apply.
+ALTER TABLE public.newsletter_sends ADD COLUMN IF NOT EXISTS attempts int NOT NULL DEFAULT 0;
 
 -- 4. RLS: admin-only (edge functions use service role, which bypasses RLS)
 CREATE POLICY "Admins manage newsletter campaigns" ON public.newsletter_campaigns
   FOR ALL USING (has_role(auth.uid(),'admin'::app_role)) WITH CHECK (has_role(auth.uid(),'admin'::app_role));
 CREATE POLICY "Admins read newsletter sends" ON public.newsletter_sends
   FOR SELECT USING (has_role(auth.uid(),'admin'::app_role));
+
+-- Drop any pre-hardening helpers from an earlier partial apply (they lacked the anon lockdown).
+DROP FUNCTION IF EXISTS public.newsletter_next_batch(uuid, int);
+DROP FUNCTION IF EXISTS public.newsletter_bump_counters(uuid, int, int);
 
 -- Atomically select up to p_limit eligible subscribers (confirmed, not unsubscribed, not
 -- yet 'sent', and not given up after 3 attempts) for this campaign AND claim them in the
