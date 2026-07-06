@@ -90,6 +90,10 @@ export const useCancelEventRegistration = () => {
     mutationFn: async (eventId: string) => {
       const { error } = await db.rpc("cancel_event_registration", { p_event_id: eventId });
       if (error) throw new Error(error.message);
+      // Fire-and-forget branded cancellation email — never block/fail the cancel on it.
+      supabase.functions
+        .invoke("send-event-cancellation", { body: { event_id: eventId } })
+        .catch(() => {});
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["dashboard-events-list"] });

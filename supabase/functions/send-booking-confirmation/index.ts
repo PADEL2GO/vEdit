@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@4.0.0";
 import { encodeBase64 } from "https://deno.land/std@0.190.0/encoding/base64.ts";
+import { DEFAULT_FROM, REPLY_TO_EMAIL } from "../_shared/email.ts";
 
 // Resend is initialized lazily inside the handler so we can fall back to DB config
 
@@ -331,8 +332,9 @@ serve(async (req) => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "PADEL2GO <booking@padel2go.eu>",
+      from: DEFAULT_FROM,
       to: [recipientEmail],
+      reply_to: REPLY_TO_EMAIL,
       subject: subjectLine,
       html: htmlContent,
       attachments: [
@@ -344,6 +346,9 @@ serve(async (req) => {
       ],
     });
 
+    if (emailResponse.error) {
+      throw new Error(`Resend send failed: ${emailResponse.error.message ?? JSON.stringify(emailResponse.error)}`);
+    }
     logStep("Email sent successfully", { emailId: emailResponse.data?.id });
 
     return new Response(JSON.stringify({ success: true, emailId: emailResponse.data?.id }), {

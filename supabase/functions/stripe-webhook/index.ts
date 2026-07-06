@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@4.0.0";
+import { resolveResendKey, DEFAULT_FROM, INTERNAL_INBOX } from "../_shared/email.ts";
 
 // Stripe webhooks are server-to-server, minimal CORS needed
 const corsHeaders = {
@@ -176,12 +177,12 @@ serve(async (req) => {
               }
 
               try {
-                const resendApiKey = Deno.env.get("RESEND_API_KEY");
+                const resendApiKey = await resolveResendKey(supabaseAdmin);
                 if (resendApiKey) {
                   const resend = new Resend(resendApiKey);
                   await resend.emails.send({
-                    from: "Padel2Go <noreply@padel2go.eu>",
-                    to: ["contact@padel2go.eu"],
+                    from: DEFAULT_FROM,
+                    to: [INTERNAL_INBOX],
                     subject: `KRITISCH: Bezahlte Marketplace-Bestellung storniert - ${releasedOrder?.reference_code ?? redemptionId}`,
                     html: `
                       <html>
@@ -297,7 +298,7 @@ serve(async (req) => {
               fulfillmentClaimed = !!(notifyClaim && notifyClaim.length > 0);
             }
             if (fulfillmentClaimed) {
-              const resendApiKey = Deno.env.get("RESEND_API_KEY");
+              const resendApiKey = await resolveResendKey(supabaseAdmin);
               if (!resendApiKey) {
                 logStep("Marketplace: RESEND_API_KEY not configured — fulfillment email not sent, order stays in admin queue", { redemptionId });
                 // Release the claim so a later delivery re-sends once the key is configured.
@@ -320,8 +321,8 @@ serve(async (req) => {
                   const formattedAddress = `${order?.shipping_address_line1 ?? ""}\n${order?.shipping_postal_code ?? ""} ${order?.shipping_city ?? ""}\n${order?.shipping_country ?? "Deutschland"}`;
                   const resend = new Resend(resendApiKey);
                   await resend.emails.send({
-                    from: "Padel2Go <noreply@padel2go.eu>",
-                    to: ["contact@padel2go.eu"],
+                    from: DEFAULT_FROM,
+                    to: [INTERNAL_INBOX],
                     subject: `Neue Marketplace-Bestellung: ${item.name} - ${order?.reference_code ?? redemptionId}`,
                     html: `
                       <html>
@@ -365,6 +366,23 @@ serve(async (req) => {
                   });
                 }
               }
+            }
+
+            // Fire-and-forget customer order-confirmation. Idempotent inside the function
+            // (customer_confirmation_sent_at claim), so a retried webhook never double-mails;
+            // a failure here never blocks settlement.
+            try {
+              await fetch(`${supabaseUrl}/functions/v1/send-marketplace-confirmation`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${supabaseServiceKey}`,
+                },
+                body: JSON.stringify({ order_id: redemptionId }),
+              });
+              logStep("Marketplace: customer confirmation triggered", { redemptionId });
+            } catch (confErr) {
+              logStep("Marketplace: customer confirmation trigger failed", { redemptionId, error: (confErr as Error).message });
             }
           }
           // ============================================
@@ -623,12 +641,12 @@ serve(async (req) => {
               }
 
               try {
-                const resendApiKey = Deno.env.get("RESEND_API_KEY");
+                const resendApiKey = await resolveResendKey(supabaseAdmin);
                 if (resendApiKey) {
                   const resend = new Resend(resendApiKey);
                   await resend.emails.send({
-                    from: "Padel2Go <noreply@padel2go.eu>",
-                    to: ["contact@padel2go.eu"],
+                    from: DEFAULT_FROM,
+                    to: [INTERNAL_INBOX],
                     subject: `KRITISCH: Bezahlte Buchung storniert - ${bookingId}`,
                     html: `
                       <html>

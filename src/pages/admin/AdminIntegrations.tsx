@@ -386,11 +386,11 @@ export default function AdminIntegrations() {
                 <Input
                   value={resendState.from_email}
                   onChange={(e) => setResendState(p => ({ ...p, from_email: e.target.value }))}
-                  placeholder="noreply@padel2go.eu"
+                  placeholder="info@padel2go-official.de"
                   type="email"
                   className="text-sm"
                 />
-                <p className="text-xs text-muted-foreground">Muss in Resend als verifizierte Absenderadresse hinterlegt sein.</p>
+                <p className="text-xs text-muted-foreground">Versand läuft zentral über <strong>info@padel2go-official.de</strong> (in Resend verifizierte Domain, Kunden können direkt antworten). Nur den API-Key eintragen genügt.</p>
               </div>
             </div>
             <div className="flex justify-end pt-1">

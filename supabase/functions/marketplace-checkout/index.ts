@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@4.0.0";
+import { resolveResendKey, DEFAULT_FROM, INTERNAL_INBOX } from "../_shared/email.ts";
 
 const allowedOrigins = [
   "https://www.padel2go-official.com",
@@ -345,7 +346,7 @@ serve(async (req) => {
 
       if (item.product_type === "purchase") {
         try {
-          const resendApiKey = Deno.env.get("RESEND_API_KEY");
+          const resendApiKey = await resolveResendKey(supabaseAdmin);
           if (resendApiKey) {
             const { data: userProfile } = await supabaseAdmin
               .from("profiles")
@@ -356,8 +357,8 @@ serve(async (req) => {
             const formattedAddress = `${shipping!.address_line1}\n${shipping!.postal_code} ${shipping!.city}\n${shipping!.country || "Deutschland"}`;
             const resend = new Resend(resendApiKey);
             await resend.emails.send({
-              from: "Padel2Go <noreply@padel2go.eu>",
-              to: ["contact@padel2go.eu"],
+              from: DEFAULT_FROM,
+              to: [INTERNAL_INBOX],
               subject: `Neue Marketplace-Bestellung: ${item.name} - ${referenceCode}`,
               html: `
                 <html>
@@ -394,6 +395,20 @@ serve(async (req) => {
         } catch (emailError) {
           logStep("Free path: fulfillment email failed", { error: (emailError as Error).message });
         }
+      }
+
+      // Fire-and-forget customer order-confirmation (idempotent inside the function).
+      try {
+        await fetch(`${supabaseUrl}/functions/v1/send-marketplace-confirmation`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${supabaseServiceKey}`,
+          },
+          body: JSON.stringify({ order_id: orderId }),
+        });
+      } catch (confErr) {
+        logStep("Free path: customer confirmation trigger failed", { orderId, error: (confErr as Error).message });
       }
 
       logStep("Free path: order completed via points", { orderId, appliedPlay, appliedReward });

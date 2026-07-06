@@ -2,7 +2,13 @@
 // Keeps confirmation / cancellation / event / reminder mails visually consistent.
 import { Resend } from "npm:resend@4.0.0";
 
-const FROM = "PADEL2GO <booking@padel2go.eu>";
+// Single source of truth for the sender identity. padel2go-official.de is the
+// domain verified in Resend. We send FROM info@ (a real, forwarded mailbox) so
+// customers can simply reply — no unreachable noreply@ address.
+export const DEFAULT_FROM = "PADEL2GO <info@padel2go-official.de>";
+// Reply-to for customer-facing mail + inbox for internal notifications (same mailbox).
+export const REPLY_TO_EMAIL = "info@padel2go-official.de";
+export const INTERNAL_INBOX = "info@padel2go-official.de";
 
 /** Resolve the Resend API key: env var first, site_integration_configs (service='resend') fallback. */
 export async function resolveResendKey(supabaseAdmin: any): Promise<string | null> {
@@ -114,20 +120,32 @@ export function brandedEmailHtml(o: BrandedEmailOpts): string {
 </html>`;
 }
 
+export interface SendOpts {
+  attachments?: { filename: string; content: string; contentType?: string }[];
+  from?: string;            // defaults to DEFAULT_FROM
+  replyTo?: string | null;  // defaults to REPLY_TO_EMAIL; pass null to omit
+}
+
 /** Send a branded email via Resend. Returns the Resend response (throws on hard error). */
 export async function sendBrandedEmail(
   resendKey: string,
   to: string,
   subject: string,
   html: string,
-  attachments?: { filename: string; content: string; contentType?: string }[],
+  opts?: SendOpts,
 ) {
   const resend = new Resend(resendKey);
-  return resend.emails.send({
-    from: FROM,
+  const replyTo = opts?.replyTo === null ? undefined : (opts?.replyTo ?? REPLY_TO_EMAIL);
+  const res = await resend.emails.send({
+    from: opts?.from ?? DEFAULT_FROM,
     to: [to],
     subject,
     html,
-    ...(attachments && attachments.length ? { attachments } : {}),
+    ...(replyTo ? { reply_to: replyTo } : {}),
+    ...(opts?.attachments && opts.attachments.length ? { attachments: opts.attachments } : {}),
   });
+  // Resend's SDK does NOT throw on API errors — it returns { data, error }. Throw so callers
+  // don't silently report success while no mail was ever delivered.
+  if (res.error) throw new Error(`Resend send failed: ${res.error.message ?? JSON.stringify(res.error)}`);
+  return res;
 }

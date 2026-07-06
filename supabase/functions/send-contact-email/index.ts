@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { DEFAULT_FROM, INTERNAL_INBOX } from "../_shared/email.ts";
 
 // Resend is initialized lazily inside the handler so we can fall back to DB config
 
@@ -175,16 +176,16 @@ const handler = async (req: Request): Promise<Response> => {
       // Continue even if logging fails
     }
 
-    // Send email to contact@padel2go.eu
+    // Send the enquiry to the internal inbox; reply_to = the submitter so replies reach them.
     const emailResponse = await resend.emails.send({
-      from: "PADEL2GO <contact@padel2go.eu>",
-      to: ["contact@padel2go.eu"],
+      from: DEFAULT_FROM,
+      to: [INTERNAL_INBOX],
       reply_to: email,
       subject: `Kontaktanfrage: ${safeReasonLabel} - ${safeName}`,
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-            <h1 style="color: #d4ff00; margin: 0; font-size: 24px;">Neue Kontaktanfrage</h1>
+            <h1 style="color: #C7F011; margin: 0; font-size: 24px;">Neue Kontaktanfrage</h1>
           </div>
           
           <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid #e9ecef; border-top: none;">
@@ -214,11 +215,21 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <p style="color: #6c757d; font-size: 12px; text-align: center; margin-top: 20px;">
-            Diese E-Mail wurde automatisch über das Kontaktformular auf padel2go.eu gesendet.
+            Diese E-Mail wurde automatisch über das Kontaktformular auf padel2go-official.de gesendet.
           </p>
         </div>
       `,
     });
+
+    // Resend's SDK does NOT throw on API errors — it returns { data, error }. Surface it
+    // instead of silently reporting success with no message ever delivered.
+    if (emailResponse.error) {
+      console.error("Resend returned an error:", emailResponse.error);
+      return new Response(JSON.stringify({ error: "E-Mail konnte nicht gesendet werden", detail: emailResponse.error }), {
+        status: 502,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     console.log("Email sent successfully:", emailResponse);
 

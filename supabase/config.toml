@@ -33,6 +33,12 @@ verify_jwt = true
 [functions.send-event-confirmation]
 verify_jwt = true
 
+[functions.send-event-cancellation]
+verify_jwt = true
+
+[functions.send-marketplace-confirmation]
+verify_jwt = false
+
 [functions.p2g-points-api]
 verify_jwt = false
 

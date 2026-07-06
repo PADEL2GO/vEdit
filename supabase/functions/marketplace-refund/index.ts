@@ -1,5 +1,6 @@
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { resolveResendKey, brandedEmailHtml, sendBrandedEmail } from "../_shared/email.ts";
 
 // Admin-only refund/cancellation for a paid marketplace order.
 // Flow (idempotent + retry-safe):
@@ -58,7 +59,7 @@ Deno.serve(async (req) => {
     // ── Load order ─────────────────────────────────────────────────────────────
     const { data: order, error: orderErr } = await supabaseAdmin
       .from("marketplace_redemptions")
-      .select("id, status, amount_cents, stripe_session_id, reference_code")
+      .select("id, status, amount_cents, stripe_session_id, reference_code, user_id, item_id, quantity, play_spent, reward_spent, guest_email, guest_name")
       .eq("id", orderId)
       .maybeSingle();
     if (orderErr || !order) return json({ error: "Bestellung nicht gefunden" }, 404);
@@ -124,6 +125,70 @@ Deno.serve(async (req) => {
     });
     if (rpcErr) {
       return json({ error: "Rückabwicklung in der Datenbank fehlgeschlagen: " + rpcErr.message }, 500);
+    }
+
+    // Fire-and-forget branded refund confirmation to the customer (non-fatal to the refund).
+    // Idempotent claim so a concurrent admin double-refund can't send two emails.
+    const { data: mailClaim } = await supabaseAdmin
+      .from("marketplace_redemptions")
+      .update({ refund_confirmation_sent_at: new Date().toISOString() })
+      .eq("id", orderId)
+      .is("refund_confirmation_sent_at", null)
+      .select("id");
+    if (mailClaim && mailClaim.length > 0) try {
+      const resendKey = await resolveResendKey(supabaseAdmin);
+      if (resendKey) {
+        let email: string | null = (order as { guest_email?: string | null }).guest_email ?? null;
+        let name = (order as { guest_name?: string | null }).guest_name || "Gast";
+        const orderUserId = (order as { user_id?: string | null }).user_id ?? null;
+        if (!email && orderUserId) {
+          const { data: u } = await supabaseAdmin.auth.admin.getUserById(orderUserId);
+          email = u.user?.email ?? null;
+          const { data: profile } = await supabaseAdmin
+            .from("profiles")
+            .select("display_name, username")
+            .eq("user_id", orderUserId)
+            .maybeSingle();
+          name = profile?.display_name || profile?.username || "Spieler";
+        }
+        if (email) {
+          let itemName = "Artikel";
+          const itemId = (order as { item_id?: string | null }).item_id ?? null;
+          if (itemId) {
+            const { data: itemRow } = await supabaseAdmin
+              .from("marketplace_items")
+              .select("name")
+              .eq("id", itemId)
+              .maybeSingle();
+            if (itemRow?.name) itemName = itemRow.name;
+          }
+          const pointsBack =
+            ((order as { play_spent?: number }).play_spent ?? 0) +
+            ((order as { reward_spent?: number }).reward_spent ?? 0);
+          const rows = [
+            { label: "Produkt", value: itemName },
+            { label: "Bestellnr.", value: order.reference_code ?? order.id.substring(0, 8).toUpperCase() },
+          ];
+          if (amount > 0) rows.push({ label: "Zurückerstattet", value: `${(amount / 100).toFixed(2).replace(".", ",")} €` });
+          if (pointsBack > 0) rows.push({ label: "Punkte gutgeschrieben", value: `${pointsBack} Punkte` });
+          const html = brandedEmailHtml({
+            title: "Rückerstattung bestätigt",
+            emoji: "↩️",
+            heading: "Rückerstattung bestätigt",
+            intro: "Deine Bestellung wurde storniert und erstattet.",
+            greetingName: name,
+            rows,
+            note: amount > 0
+              ? "Der Betrag wird auf dein Zahlungsmittel zurückerstattet — das kann einige Tage dauern."
+              : "Deine Punkte wurden deinem Konto wieder gutgeschrieben.",
+            ctaLabel: "Zum Shop",
+            ctaUrl: "https://www.padel2go-official.de/marketplace",
+          });
+          await sendBrandedEmail(resendKey, email, `Rückerstattung bestätigt: ${itemName}`, html);
+        }
+      }
+    } catch (mailErr) {
+      console.log("[MARKETPLACE-REFUND] confirmation email failed:", (mailErr as Error).message);
     }
 
     return json({ success: true, refunded: !!refunded, reference_code: order.reference_code }, 200);
