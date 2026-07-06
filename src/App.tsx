@@ -85,6 +85,7 @@ const AdminQrPanel = lazy(() => import("./pages/admin/AdminQrPanel"));
 const QrLanding = lazy(() => import("./pages/QrLanding"));
 const AdminNews = lazy(() => import("./pages/admin/AdminNews"));
 const AdminIntegrations = lazy(() => import("./pages/admin/AdminIntegrations"));
+const AdminNewsletter = lazy(() => import("./pages/admin/AdminNewsletter"));
 const AGB = lazy(() => import("./pages/AGB"));
 const Datenschutz = lazy(() => import("./pages/Datenschutz"));
 
@@ -208,6 +209,7 @@ const App = () => (
                 <Route path="/admin/news" element={<AdminNews />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/integrations" element={<AdminIntegrations />} />
+                <Route path="/admin/newsletter" element={<AdminNewsletter />} />
               </Route>
 
               {/* Public Profile */}

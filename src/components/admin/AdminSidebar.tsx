@@ -35,6 +35,7 @@ import {
   Newspaper,
   QrCode,
   Gauge,
+  Send,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,7 @@ const menuItems = [
   { title: "News / Artikel", url: "/admin/news", icon: Newspaper },
   { title: "Benutzer", url: "/admin/users", icon: Users },
   { title: "Mitteilungen", url: "/admin/notifications", icon: Bell },
+  { title: "Newsletter", url: "/admin/newsletter", icon: Send },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
   { title: "Visuals", url: "/admin/visuals", icon: Image },
   { title: "Integrationen", url: "/admin/integrations", icon: Plug },
