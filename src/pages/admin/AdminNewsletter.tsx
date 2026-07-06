@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -119,6 +119,12 @@ export default function AdminNewsletter() {
   const [testing, setTesting] = useState(false);
   const [sending, setSending] = useState(false);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  // Synchronous in-flight guard: React state updates are async, so a state flag
+  // alone is set too late to stop a fast double-click. busyRef flips immediately
+  // (before the first await) so only one save/test/launch action can run at a
+  // time — prevents a double-launch creating two campaigns + double-mailing.
+  const busyRef = useRef(false);
+  const [busy, setBusy] = useState(false);
 
   // ── Load ──────────────────────────────────────────────────────────────────
   const loadCounts = async () => {
@@ -208,68 +214,100 @@ export default function AdminNewsletter() {
       });
   };
 
-  const saveDraft = async (): Promise<string | null> => {
+  // Unguarded save — the actual persistence, shared by all three actions. The
+  // public actions own the busy guard; this must NOT re-acquire it (they call it
+  // internally after already holding the guard). Returns the campaign id.
+  const persist = async (): Promise<string | null> => {
     if (!subject.trim()) {
       toast.error("Bitte einen Betreff eingeben");
       return null;
     }
+    const payload = { subject, preheader, blocks };
+    if (campaignId) {
+      const { error } = await db.from("newsletter_campaigns").update(payload).eq("id", campaignId);
+      if (error) throw error;
+      await loadCampaigns();
+      return campaignId;
+    }
+    const { data, error } = await db
+      .from("newsletter_campaigns")
+      .insert(payload)
+      .select("id")
+      .single();
+    if (error) throw error;
+    const id = (data as { id: string }).id;
+    setCampaignId(id);
+    await loadCampaigns();
+    return id;
+  };
+
+  const saveDraft = async () => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
     setSavingDraft(true);
     try {
-      const payload = { subject, preheader, blocks };
-      if (campaignId) {
-        const { error } = await db.from("newsletter_campaigns").update(payload).eq("id", campaignId);
-        if (error) throw error;
-        toast.success("Entwurf gespeichert");
-        await loadCampaigns();
-        return campaignId;
-      }
-      const { data, error } = await db
-        .from("newsletter_campaigns")
-        .insert(payload)
-        .select("id")
-        .single();
-      if (error) throw error;
-      const id = (data as { id: string }).id;
-      setCampaignId(id);
-      toast.success("Entwurf gespeichert");
-      await loadCampaigns();
-      return id;
+      const id = await persist();
+      if (id) toast.success("Entwurf gespeichert");
     } catch (err) {
       toast.error((err as Error).message || "Speichern fehlgeschlagen");
-      return null;
     } finally {
       setSavingDraft(false);
+      busyRef.current = false;
+      setBusy(false);
     }
   };
 
   const sendTest = async () => {
-    const id = await saveDraft();
-    if (!id) return;
-    const { data: u } = await supabase.auth.getUser();
-    const testTo = u.user?.email;
-    if (!testTo) {
-      toast.error("Keine E-Mail-Adresse für den Test gefunden");
-      return;
-    }
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
     setTesting(true);
-    const { error } = await supabase.functions.invoke("newsletter-send", {
-      body: { campaign_id: id, test_to: testTo },
-    });
-    setTesting(false);
-    toast[error ? "error" : "success"](
-      error ? "Test fehlgeschlagen" : `Test-Mail an ${testTo} verschickt`,
-    );
+    try {
+      const id = await persist();
+      if (!id) return;
+      const { data: u } = await supabase.auth.getUser();
+      const testTo = u.user?.email;
+      if (!testTo) {
+        toast.error("Keine E-Mail-Adresse für den Test gefunden");
+        return;
+      }
+      const { error } = await supabase.functions.invoke("newsletter-send", {
+        body: { campaign_id: id, test_to: testTo },
+      });
+      toast[error ? "error" : "success"](
+        error ? "Test fehlgeschlagen" : `Test-Mail an ${testTo} verschickt`,
+      );
+    } catch (err) {
+      toast.error((err as Error).message || "Test fehlgeschlagen");
+    } finally {
+      setTesting(false);
+      busyRef.current = false;
+      setBusy(false);
+    }
   };
 
   const launch = async () => {
-    const id = await saveDraft();
-    if (!id) return;
-    if (!window.confirm("Newsletter jetzt an ALLE bestätigten Abonnenten senden?")) return;
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
     setSending(true);
-    const { error } = await supabase.functions.invoke("newsletter-send", { body: { campaign_id: id } });
-    setSending(false);
-    toast[error ? "error" : "success"](error ? "Versand fehlgeschlagen" : "Versand gestartet");
-    await loadCampaigns();
+    try {
+      const id = await persist();
+      if (!id) return;
+      if (!window.confirm("Newsletter jetzt an ALLE bestätigten Abonnenten senden?")) return;
+      const { error } = await supabase.functions.invoke("newsletter-send", {
+        body: { campaign_id: id },
+      });
+      toast[error ? "error" : "success"](error ? "Versand fehlgeschlagen" : "Versand gestartet");
+      await loadCampaigns();
+    } catch (err) {
+      toast.error((err as Error).message || "Versand fehlgeschlagen");
+    } finally {
+      setSending(false);
+      busyRef.current = false;
+      setBusy(false);
+    }
   };
 
   const resetCampaign = async (id: string) => {
@@ -520,15 +558,15 @@ export default function AdminNewsletter() {
         {/* Actions */}
         <Card className="border-border">
           <CardContent className="flex flex-wrap gap-3 pt-5 pb-5">
-            <Button onClick={saveDraft} disabled={savingDraft} variant="outline">
+            <Button onClick={saveDraft} disabled={busy} variant="outline">
               {savingDraft ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
               Entwurf speichern
             </Button>
-            <Button onClick={sendTest} disabled={testing} variant="secondary">
+            <Button onClick={sendTest} disabled={busy} variant="secondary">
               {testing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
               Test an mich
             </Button>
-            <Button onClick={launch} disabled={sending}>
+            <Button onClick={launch} disabled={busy}>
               {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
               An alle senden
             </Button>

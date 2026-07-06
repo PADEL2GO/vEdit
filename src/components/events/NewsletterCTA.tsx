@@ -11,6 +11,7 @@ export const NewsletterCTA = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [alreadySubscribed, setAlreadySubscribed] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,10 +24,12 @@ export const NewsletterCTA = () => {
         body: { email, source: "events_page" },
       });
       if (error) throw error;
+      const already = !!(data as { already?: boolean } | null)?.already;
+      setAlreadySubscribed(already);
       setIsSuccess(true);
       setEmail("");
       toast.success(
-        (data as { already?: boolean } | null)?.already
+        already
           ? "Du bist bereits angemeldet!"
           : "Fast geschafft! Bitte bestätige die Anmeldung über den Link in deiner E-Mail.",
       );
@@ -65,7 +68,9 @@ export const NewsletterCTA = () => {
         >
           <CheckCircle2 className="w-[19px] h-[19px] text-primary flex-none" />
           <span className="text-sm font-semibold text-foreground">
-            Fast geschafft! Bitte bestätige die Anmeldung über den Link in deiner E-Mail. 📩
+            {alreadySubscribed
+              ? "Du bist bereits angemeldet! 🎾"
+              : "Fast geschafft! Bitte bestätige die Anmeldung über den Link in deiner E-Mail. 📩"}
           </span>
         </motion.div>
       ) : (
