@@ -40,6 +40,8 @@ const BookingCheckout = lazy(() => import("./pages/BookingCheckout"));
 const BookingSuccess = lazy(() => import("./pages/BookingSuccess"));
 const BookingCancel = lazy(() => import("./pages/BookingCancel"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const NewsletterConfirm = lazy(() => import("./pages/NewsletterConfirm"));
+const NewsletterUnsubscribe = lazy(() => import("./pages/NewsletterUnsubscribe"));
 const PublicProfile = lazy(() => import("./pages/PublicProfile"));
 const Lobbies = lazy(() => import("./pages/Lobbies"));
 
@@ -133,6 +135,8 @@ const App = () => (
               <Route path="/impressum" element={<Impressum />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/play" element={<Play />} />
+              <Route path="/newsletter/bestaetigen" element={<NewsletterConfirm />} />
+              <Route path="/newsletter/abmelden" element={<NewsletterUnsubscribe />} />
 
               {/* Public booking routes — no login required (guest checkout supported) */}
               <Route path="/booking" element={<Booking />} />
