@@ -10,6 +10,13 @@
 
 ---
 
+## Post-review hardening (2026-07-06, supersedes original Task 1 §helpers + Task 6 code)
+
+An adversarial review found a critical security hole + a data-loss bug in the first send design. The migration + `newsletter-send` were revised (see the actual files for the source of truth):
+- **Security:** the `SECURITY DEFINER` SQL functions now `REVOKE ALL … FROM PUBLIC, anon, authenticated` and `GRANT EXECUTE … TO service_role` (repo convention). Without this the anon key could dump the whole subscriber list + unsubscribe tokens.
+- **Send engine:** replaced the fragile all-or-nothing `batch.send` + `next_batch`/`bump_counters` with a **per-recipient** `emails.send` loop and a single atomic `newsletter_claim_batch(p_campaign_id, p_limit)` RPC. `newsletter_sends` gains an `attempts` column; a failed/orphaned send stays retryable (re-armed attempts+1) until 3 attempts, so a transient Resend error no longer permanently drops recipients or falsely reports the campaign as `sent`. `newsletter_progress` (live sent_count) + `newsletter_finalize` (final counts + terminal status) replace `bump_counters`.
+- **Guards:** atomic single-winner launch flip (no double-send on double-click), claim-RPC error is surfaced (no infinite self-continue spin), empty-service-key auth bypass closed, batched status writes, 350 ms send throttle.
+
 ## Shared Contracts (fixed interfaces — all tasks depend on these)
 
 **Sender/URLs:** `PADEL2GO <info@padel2go-official.de>` (via `_shared/email.ts`). App base URL: `https://www.padel2go-official.de`.

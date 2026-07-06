@@ -6,8 +6,10 @@ import { renderNewsletterHtml } from "../_shared/newsletter.ts";
 
 const APP = "https://www.padel2go-official.de";
 const BATCH = 100;
+const SEND_DELAY_MS = 350; // throttle to stay under Resend's rate limit
 const corsHeaders = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type" };
 const SUPERADMIN = "fsteinfelder@padel2go.eu";
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 serve(async (req) => {
   const H = { ...corsHeaders, "Content-Type": "application/json" };
@@ -18,8 +20,9 @@ serve(async (req) => {
     const admin = createClient(url, serviceKey);
 
     // Auth: service-role bearer (self-continue) OR an admin JWT (initial trigger).
+    // Guard against an unset service key turning `Bearer ` (empty token) into "internal".
     const authHeader = req.headers.get("Authorization") ?? "";
-    const isInternal = authHeader === `Bearer ${serviceKey}`;
+    const isInternal = serviceKey.length > 0 && authHeader === `Bearer ${serviceKey}`;
     if (!isInternal) {
       const anon = createClient(url, Deno.env.get("SUPABASE_ANON_KEY") ?? "");
       const { data: u } = await anon.auth.getUser(authHeader.replace("Bearer ", ""));
@@ -48,50 +51,63 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: true, test: true, id: r.data?.id }), { headers: H });
     }
 
-    // LAUNCH MODE
+    // LAUNCH MODE. The initial (admin) call sets up; self-continue calls skip setup.
     if (!_continue) {
+      if (campaign.status === "sent") return new Response(JSON.stringify({ error: "Kampagne wurde bereits gesendet" }), { status: 409, headers: H });
+      // Atomic single-winner flip prevents a double-click from starting two senders.
+      const { data: flipped } = await admin.from("newsletter_campaigns")
+        .update({ status: "sending" }).eq("id", campaign_id).neq("status", "sending").select("id");
+      if (!flipped || flipped.length === 0) return new Response(JSON.stringify({ error: "Versand läuft bereits" }), { status: 409, headers: H });
       const { count } = await admin.from("newsletter_subscribers").select("*", { count: "exact", head: true })
         .not("confirmed_at", "is", null).is("unsubscribed_at", null);
-      await admin.from("newsletter_campaigns").update({ status: "sending", recipient_count: count ?? 0 }).eq("id", campaign_id);
+      await admin.from("newsletter_campaigns").update({ recipient_count: count ?? 0 }).eq("id", campaign_id);
     }
 
     const deadline = Date.now() + 100_000; // soft time budget; self-continue past it
     let processedThisRun = 0;
     while (Date.now() < deadline) {
-      // Eligible subscribers NOT already logged for this campaign.
-      const { data: subs } = await admin.rpc("newsletter_next_batch", { p_campaign_id: campaign_id, p_limit: BATCH });
-      if (!subs || subs.length === 0) {
-        await admin.from("newsletter_campaigns").update({ status: "sent", sent_at: new Date().toISOString() }).eq("id", campaign_id);
+      // Atomically select + claim the next batch (one RPC; no separate unchecked claim step).
+      const { data: batch, error: claimError } = await admin.rpc("newsletter_claim_batch", { p_campaign_id: campaign_id, p_limit: BATCH });
+      if (claimError) {
+        // Never spin blindly on a DB error — surface it and stop so it's observable.
+        await admin.from("newsletter_campaigns").update({ status: "failed" }).eq("id", campaign_id);
+        return new Response(JSON.stringify({ error: `claim failed: ${claimError.message}` }), { status: 500, headers: H });
+      }
+      if (!batch || batch.length === 0) {
+        await admin.rpc("newsletter_finalize", { p_campaign_id: campaign_id });
         return new Response(JSON.stringify({ success: true, done: true, processedThisRun }), { headers: H });
       }
-      // Claim (insert 'pending'; UNIQUE prevents a concurrent double-claim).
-      const claims = subs.map((s: any) => ({ campaign_id, subscriber_id: s.id, email: s.email, status: "pending" }));
-      const { data: claimed } = await admin.from("newsletter_sends").insert(claims).select("id, subscriber_id, email");
-      const claimedList = claimed ?? [];
-      const byId = new Map(subs.map((s: any) => [s.id, s]));
-      // Batch send.
-      const messages = claimedList.map((c: any) => {
-        const sub = byId.get(c.subscriber_id);
-        const unsubscribeUrl = `${APP}/newsletter/abmelden?token=${sub.unsubscribe_token}`;
-        return {
-          from: DEFAULT_FROM, to: [c.email], reply_to: REPLY_TO_EMAIL, subject: campaign.subject,
-          html: renderNewsletterHtml(campaign, { unsubscribeUrl }),
-          headers: { "List-Unsubscribe": `<${unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
-        };
-      });
-      let ok = 0, failed = 0;
-      try {
-        const res = await resend.batch.send(messages);
-        // Resend batch returns data.data[] in order; treat a top-level error as all-failed for this batch.
-        if (res.error) throw new Error(res.error.message ?? "batch error");
-        ok = claimedList.length;
-        for (const c of claimedList) await admin.from("newsletter_sends").update({ status: "sent", sent_at: new Date().toISOString() }).eq("id", c.id);
-      } catch (e) {
-        failed = claimedList.length;
-        for (const c of claimedList) await admin.from("newsletter_sends").update({ status: "failed", error: (e as Error).message }).eq("id", c.id);
+
+      const sentIds: string[] = [];
+      const failed: Array<{ id: string; error: string }> = [];
+      for (const r of batch as Array<{ subscriber_id: string; email: string; unsubscribe_token: string }>) {
+        const unsubscribeUrl = `${APP}/newsletter/abmelden?token=${r.unsubscribe_token}`;
+        try {
+          const resp = await resend.emails.send({
+            from: DEFAULT_FROM, to: [r.email], reply_to: REPLY_TO_EMAIL, subject: campaign.subject,
+            html: renderNewsletterHtml(campaign, { unsubscribeUrl }),
+            headers: { "List-Unsubscribe": `<${unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+          });
+          if (resp.error) throw new Error(resp.error.message ?? "Resend-Fehler");
+          sentIds.push(r.subscriber_id);
+        } catch (e) {
+          // A failed send stays retryable: newsletter_claim_batch re-arms it (attempts+1) until 3.
+          failed.push({ id: r.subscriber_id, error: (e as Error).message });
+        }
+        await sleep(SEND_DELAY_MS);
       }
-      await admin.rpc("newsletter_bump_counters", { p_campaign_id: campaign_id, p_sent: ok, p_failed: failed });
-      processedThisRun += claimedList.length;
+
+      // Batched status writes: the common (all-sent) path is a single round-trip.
+      if (sentIds.length) {
+        await admin.from("newsletter_sends").update({ status: "sent", sent_at: new Date().toISOString(), error: null })
+          .eq("campaign_id", campaign_id).in("subscriber_id", sentIds);
+      }
+      for (const f of failed) {
+        await admin.from("newsletter_sends").update({ status: "failed", error: f.error })
+          .eq("campaign_id", campaign_id).eq("subscriber_id", f.id);
+      }
+      await admin.rpc("newsletter_progress", { p_campaign_id: campaign_id });
+      processedThisRun += batch.length;
     }
 
     // Budget hit with work remaining → fire a self-continue that survives the response.
