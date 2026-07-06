@@ -19,21 +19,17 @@ export const NewsletterCTA = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase
-        .from("newsletter_subscribers")
-        .insert({ email, source: "events_page" });
-
-      if (error) {
-        if (error.code === "23505") {
-          toast.info("Du bist bereits für den Newsletter angemeldet!");
-        } else {
-          throw error;
-        }
-      } else {
-        setIsSuccess(true);
-        setEmail("");
-        toast.success("Erfolgreich angemeldet! Du erhältst bald Updates zu unseren Events.");
-      }
+      const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
+        body: { email, source: "events_page" },
+      });
+      if (error) throw error;
+      setIsSuccess(true);
+      setEmail("");
+      toast.success(
+        (data as { already?: boolean } | null)?.already
+          ? "Du bist bereits angemeldet!"
+          : "Fast geschafft! Bitte bestätige die Anmeldung über den Link in deiner E-Mail.",
+      );
     } catch (error) {
       console.error("Newsletter subscription error:", error);
       toast.error("Anmeldung fehlgeschlagen. Bitte versuche es später erneut.");
@@ -69,7 +65,7 @@ export const NewsletterCTA = () => {
         >
           <CheckCircle2 className="w-[19px] h-[19px] text-primary flex-none" />
           <span className="text-sm font-semibold text-foreground">
-            Du bist dabei! 🎾 Wir melden uns vor jedem Event.
+            Fast geschafft! Bitte bestätige die Anmeldung über den Link in deiner E-Mail. 📩
           </span>
         </motion.div>
       ) : (
