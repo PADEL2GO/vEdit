@@ -47,6 +47,8 @@ ALTER TABLE public.newsletter_sends ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.newsletter_sends ADD COLUMN IF NOT EXISTS attempts int NOT NULL DEFAULT 0;
 
 -- 4. RLS: admin-only (edge functions use service role, which bypasses RLS)
+DROP POLICY IF EXISTS "Admins manage newsletter campaigns" ON public.newsletter_campaigns;
+DROP POLICY IF EXISTS "Admins read newsletter sends" ON public.newsletter_sends;
 CREATE POLICY "Admins manage newsletter campaigns" ON public.newsletter_campaigns
   FOR ALL USING (has_role(auth.uid(),'admin'::app_role)) WITH CHECK (has_role(auth.uid(),'admin'::app_role));
 CREATE POLICY "Admins read newsletter sends" ON public.newsletter_sends

@@ -81,12 +81,15 @@ serve(async (req) => {
       const sentIds: string[] = [];
       const failed: Array<{ id: string; error: string }> = [];
       for (const r of batch as Array<{ subscriber_id: string; email: string; unsubscribe_token: string }>) {
+        // In-body link → the branded SPA page (nice for humans). Header → the edge function,
+        // which handles the RFC 8058 one-click POST server-side (the SPA route can't).
         const unsubscribeUrl = `${APP}/newsletter/abmelden?token=${r.unsubscribe_token}`;
+        const oneClickUrl = `${url}/functions/v1/newsletter-unsubscribe?token=${r.unsubscribe_token}`;
         try {
           const resp = await resend.emails.send({
             from: DEFAULT_FROM, to: [r.email], reply_to: REPLY_TO_EMAIL, subject: campaign.subject,
             html: renderNewsletterHtml(campaign, { unsubscribeUrl }),
-            headers: { "List-Unsubscribe": `<${unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+            headers: { "List-Unsubscribe": `<${oneClickUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
           });
           if (resp.error) throw new Error(resp.error.message ?? "Resend-Fehler");
           sentIds.push(r.subscriber_id);
