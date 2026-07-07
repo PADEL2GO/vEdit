@@ -37,8 +37,13 @@ const DashboardHome = () => {
   const { data: myRegs } = useMyEventRegistrations();
   const { data: articles } = useArticles("logged_in");
 
-  // Live P2G points from the canonical summary (same source as "Mein P2G"), wallet fallback.
-  const balance = summary?.play_credits ?? wallet?.play_credits ?? 0;
+  // Live P2G points = the single spendable balance (play + reward), same as "Mein P2G",
+  // the nav and Account. (DashboardHome previously showed only play_credits → the 1.200 vs
+  // 2.200 mismatch.) Forward-compatible with merging both buckets into one score.
+  const balance =
+    summary?.redeemable_balance ??
+    summary?.reward_balance ??
+    ((wallet?.play_credits ?? 0) + (wallet?.reward_credits ?? 0));
   const lifetime = summary?.lifetime_credits ?? wallet?.lifetime_credits ?? balance;
   const pointsPerEuro = Math.round(100 / centsPerPoint);
   const userName = (profile?.display_name || user?.email?.split("@")[0] || "Spieler").trim();
