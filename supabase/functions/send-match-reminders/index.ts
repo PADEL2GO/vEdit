@@ -15,10 +15,15 @@ serve(async (req) => {
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const cronSecret = Deno.env.get("CRON_SECRET") ?? "";
 
-  // Cron-only: require the service-role key.
-  const authHeader = req.headers.get("Authorization");
-  if (authHeader !== `Bearer ${supabaseServiceKey}`) {
+  // Cron-only: accept a dedicated CRON_SECRET (preferred) or the service-role key (fallback).
+  // The length guards stop an unset secret from turning `Bearer ` (empty token) into a match.
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const authorized =
+    (cronSecret.length > 0 && authHeader === `Bearer ${cronSecret}`) ||
+    (supabaseServiceKey.length > 0 && authHeader === `Bearer ${supabaseServiceKey}`);
+  if (!authorized) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
