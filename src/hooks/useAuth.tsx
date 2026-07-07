@@ -10,6 +10,9 @@ interface AuthContextType {
   signInWithPassword: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
+  verifyPassword: (currentPassword: string) => Promise<{ error: any }>;
+  updatePassword: (currentPassword: string, newPassword: string) => Promise<{ error: any }>;
+  updateEmail: (currentPassword: string, newEmail: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -76,6 +79,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
+  // Verify the current password by re-authenticating. A failed sign-in leaves
+  // the existing session intact, so this is a safe "confirm it's really you"
+  // check before a sensitive change (email/password).
+  const verifyPassword = async (currentPassword: string) => {
+    if (!user?.email) return { error: { message: "no_user" } };
+    const { error } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    });
+    return { error };
+  };
+
+  const updatePassword = async (currentPassword: string, newPassword: string) => {
+    const { error: verifyError } = await verifyPassword(currentPassword);
+    if (verifyError) return { error: verifyError };
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    return { error };
+  };
+
+  const updateEmail = async (currentPassword: string, newEmail: string) => {
+    const { error: verifyError } = await verifyPassword(currentPassword);
+    if (verifyError) return { error: verifyError };
+    const redirectUrl = `${window.location.origin}/auth?mode=email-change`;
+    const { error } = await supabase.auth.updateUser(
+      { email: newEmail },
+      { emailRedirectTo: redirectUrl }
+    );
+    return { error };
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -85,6 +118,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithPassword,
       signOut,
       resetPassword,
+      verifyPassword,
+      updatePassword,
+      updateEmail,
     }}>
       {children}
     </AuthContext.Provider>
