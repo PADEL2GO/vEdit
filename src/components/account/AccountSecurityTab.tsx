@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { z } from "zod";
@@ -28,17 +28,36 @@ export function AccountSecurityTab() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwSaving, setPwSaving] = useState(false);
 
+  // Reflect a pending email change: Supabase keeps user.new_email set until both
+  // confirmation links are clicked, so re-entering the tab (or reloading) after
+  // starting a change should still show the "pending" banner, not an empty form.
+  useEffect(() => {
+    if ((user as { new_email?: string } | null)?.new_email) setEmailPending(true);
+  }, [user]);
+
+  // Never surface the raw Supabase error: it is English-only (breaks the German
+  // UI) and can leak whether an email is already registered (account enumeration).
+  // Log it for debugging, show friendly translated copy to the user.
+  const errorDescription = (error: { message?: string } | null) => {
+    if (error?.message) console.error("[AccountSecurity]", error.message);
+    return error?.message === "Invalid login credentials"
+      ? t("security.password.wrongCurrent")
+      : t("security.toast.genericError");
+  };
+
   const handleEmailChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emailSchema.safeParse(newEmail).success) {
+    const trimmedEmail = newEmail.trim();
+    const trimmedConfirm = confirmEmail.trim();
+    if (!emailSchema.safeParse(trimmedEmail).success) {
       toast.error(t("security.toast.errorTitle"), { description: t("security.email.invalid") });
       return;
     }
-    if (newEmail !== confirmEmail) {
+    if (trimmedEmail !== trimmedConfirm) {
       toast.error(t("security.toast.errorTitle"), { description: t("security.email.mismatch") });
       return;
     }
-    if (newEmail.toLowerCase() === (user?.email ?? "").toLowerCase()) {
+    if (trimmedEmail.toLowerCase() === (user?.email ?? "").toLowerCase()) {
       toast.error(t("security.toast.errorTitle"), { description: t("security.email.same") });
       return;
     }
@@ -47,14 +66,10 @@ export function AccountSecurityTab() {
       return;
     }
     setEmailSaving(true);
-    const { error } = await updateEmail(emailPassword, newEmail);
+    const { error } = await updateEmail(emailPassword, trimmedEmail);
     setEmailSaving(false);
     if (error) {
-      const description =
-        error.message === "Invalid login credentials"
-          ? t("security.password.wrongCurrent")
-          : error.message;
-      toast.error(t("security.toast.errorTitle"), { description });
+      toast.error(t("security.toast.errorTitle"), { description: errorDescription(error) });
       return;
     }
     setEmailPending(true);
@@ -81,11 +96,7 @@ export function AccountSecurityTab() {
     const { error } = await updatePassword(currentPassword, newPassword);
     setPwSaving(false);
     if (error) {
-      const description =
-        error.message === "Invalid login credentials"
-          ? t("security.password.wrongCurrent")
-          : error.message;
-      toast.error(t("security.toast.errorTitle"), { description });
+      toast.error(t("security.toast.errorTitle"), { description: errorDescription(error) });
       return;
     }
     toast.success(t("security.toast.successTitle"), { description: t("security.password.success") });

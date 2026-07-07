@@ -71,7 +71,8 @@
     },
     "toast": {
       "errorTitle": "Fehler",
-      "successTitle": "Erfolg"
+      "successTitle": "Erfolg",
+      "genericError": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
     }
   },
   "profileForm": {
