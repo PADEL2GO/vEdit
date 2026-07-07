@@ -66,6 +66,9 @@ DROP FUNCTION IF EXISTS public.newsletter_bump_counters(uuid, int, int);
 CREATE OR REPLACE FUNCTION public.newsletter_claim_batch(p_campaign_id uuid, p_limit int)
 RETURNS TABLE (subscriber_id uuid, email text, unsubscribe_token uuid)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+-- The OUT columns (subscriber_id/email/unsubscribe_token) share names with table columns;
+-- resolve any bare reference to the COLUMN (else e.g. ON CONFLICT (subscriber_id) errors 42702).
+#variable_conflict use_column
 BEGIN
   RETURN QUERY
   WITH eligible AS (
