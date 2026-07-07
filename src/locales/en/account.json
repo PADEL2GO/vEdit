@@ -13,7 +13,8 @@
       "bookings": "Bookings",
       "orders": "Orders",
       "p2gPoints": "P2G Points",
-      "stats": "Stats"
+      "stats": "Stats",
+      "security": "Security"
     },
     "delete": {
       "title": "Delete account",
@@ -41,6 +42,37 @@
     "balance": "Redeemable balance",
     "redeemableNote": "You can redeem these points in the marketplace.",
     "redeemCta": "Redeem in Marketplace"
+  },
+  "security": {
+    "email": {
+      "title": "Change email address",
+      "current": "Current email:",
+      "newLabel": "New email",
+      "newPlaceholder": "new@email.com",
+      "confirmLabel": "Confirm new email",
+      "submit": "Change email",
+      "invalid": "Please enter a valid email address.",
+      "mismatch": "The email addresses do not match.",
+      "same": "That is already your current email address.",
+      "pendingTitle": "Confirmation pending",
+      "pendingBody": "We've sent confirmation links to your old and your new email address. Please confirm both links for the change to take effect."
+    },
+    "password": {
+      "title": "Change password",
+      "currentLabel": "Current password",
+      "newLabel": "New password",
+      "confirmLabel": "Confirm new password",
+      "submit": "Change password",
+      "success": "Your password has been changed successfully.",
+      "tooShort": "Password must be at least 6 characters.",
+      "mismatch": "The passwords do not match.",
+      "currentRequired": "Please enter your current password.",
+      "wrongCurrent": "Your current password is incorrect."
+    },
+    "toast": {
+      "errorTitle": "Error",
+      "successTitle": "Success"
+    }
   },
   "profileForm": {
     "title": "Profile",

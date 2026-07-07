@@ -13,7 +13,8 @@
       "bookings": "Buchungen",
       "orders": "Bestellungen",
       "p2gPoints": "P2G Points",
-      "stats": "Stats"
+      "stats": "Stats",
+      "security": "Sicherheit"
     },
     "delete": {
       "title": "Konto löschen",
@@ -41,6 +42,37 @@
     "balance": "Einlösbares Guthaben",
     "redeemableNote": "Diese Points kannst du im Marketplace einlösen.",
     "redeemCta": "Im Marketplace einlösen"
+  },
+  "security": {
+    "email": {
+      "title": "E-Mail-Adresse ändern",
+      "current": "Aktuelle E-Mail:",
+      "newLabel": "Neue E-Mail",
+      "newPlaceholder": "neue@email.de",
+      "confirmLabel": "Neue E-Mail bestätigen",
+      "submit": "E-Mail ändern",
+      "invalid": "Bitte gib eine gültige E-Mail-Adresse ein.",
+      "mismatch": "Die E-Mail-Adressen stimmen nicht überein.",
+      "same": "Das ist bereits deine aktuelle E-Mail-Adresse.",
+      "pendingTitle": "Bestätigung ausstehend",
+      "pendingBody": "Wir haben Bestätigungslinks an deine alte und deine neue E-Mail-Adresse geschickt. Bitte bestätige beide Links, damit die Änderung wirksam wird."
+    },
+    "password": {
+      "title": "Passwort ändern",
+      "currentLabel": "Aktuelles Passwort",
+      "newLabel": "Neues Passwort",
+      "confirmLabel": "Neues Passwort bestätigen",
+      "submit": "Passwort ändern",
+      "success": "Dein Passwort wurde erfolgreich geändert.",
+      "tooShort": "Passwort muss mindestens 6 Zeichen haben.",
+      "mismatch": "Die Passwörter stimmen nicht überein.",
+      "currentRequired": "Bitte gib dein aktuelles Passwort ein.",
+      "wrongCurrent": "Dein aktuelles Passwort ist falsch."
+    },
+    "toast": {
+      "errorTitle": "Fehler",
+      "successTitle": "Erfolg"
+    }
   },
   "profileForm": {
     "title": "Profil",
