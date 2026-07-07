@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { Mail, Lock, ArrowLeft, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Loader2, AlertCircle, MailCheck } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/padel2go-logo.png";
 
-type AuthMode = "login" | "register" | "forgot" | "reset" | "confirm";
+type AuthMode = "login" | "register" | "forgot" | "reset" | "confirm" | "email-change";
 
 const Auth = () => {
   const { t } = useTranslation("auth");
@@ -30,6 +30,16 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+  // Captured synchronously on first render — Supabase strips the URL hash after
+  // processing, so read the error markers before they disappear.
+  const [linkError] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    return !!(params.get("error") || params.get("error_code"));
+  });
+  const [resetChecked, setResetChecked] = useState(false);
+  const [emailChangeStatus, setEmailChangeStatus] =
+    useState<"processing" | "partial" | "done" | "error">("processing");
 
   const emailSchema = z.string().email(t("validation.invalidEmail"));
   const passwordSchema = z.string().min(6, t("validation.passwordTooShort"));
@@ -62,20 +72,52 @@ const Auth = () => {
     }
   };
 
-  // Redirect if already logged in (not during password reset — the recovery link creates a session)
+  // Redirect if already logged in — but not during password reset or email-change,
+  // where the link creates/updates a session and we must show the flow first.
   useEffect(() => {
-    if (mode === "reset" || searchParams.get("mode") === "reset") return;
+    const m = searchParams.get("mode");
+    if (mode === "reset" || mode === "email-change" || m === "reset" || m === "email-change") return;
     if (user) {
       redirectBasedOnRole(user.id);
     }
   }, [user, mode]);
 
-  // Check for reset mode from URL
+  // Check for reset / email-change mode from URL
   useEffect(() => {
-    if (searchParams.get("mode") === "reset") {
-      setMode("reset");
-    }
+    const m = searchParams.get("mode");
+    if (m === "reset") setMode("reset");
+    else if (m === "email-change") setMode("email-change");
   }, [searchParams]);
+
+  // Reset flow: give the SDK a moment to process the recovery token before we
+  // decide the link is missing/expired.
+  useEffect(() => {
+    if (mode !== "reset") return;
+    const timer = setTimeout(() => setResetChecked(true), 2500);
+    return () => clearTimeout(timer);
+  }, [mode]);
+
+  // Email-change landing: after the SDK processes the token, read the user to
+  // distinguish "one link confirmed, one still pending" from "fully changed".
+  useEffect(() => {
+    if (mode !== "email-change") return;
+    if (linkError) {
+      setEmailChangeStatus("error");
+      return;
+    }
+    let active = true;
+    (async () => {
+      await new Promise((r) => setTimeout(r, 800));
+      const { data } = await supabase.auth.getUser();
+      if (!active) return;
+      const u = data.user as { new_email?: string } | null;
+      if (u && u.new_email) setEmailChangeStatus("partial");
+      else setEmailChangeStatus("done");
+    })();
+    return () => {
+      active = false;
+    };
+  }, [mode, linkError]);
 
   const validateEmail = (value: string) => {
     try {
@@ -421,8 +463,30 @@ const Auth = () => {
                 </>
               )}
 
-              {/* Reset Password */}
-              {mode === "reset" && (
+              {/* Reset Password — expired / invalid link */}
+              {mode === "reset" && (linkError || (resetChecked && !user)) && (
+                <div className="text-center space-y-4">
+                  <div className="flex justify-center">
+                    <AlertCircle className="w-12 h-12 text-destructive" />
+                  </div>
+                  <h1 className="text-2xl font-bold">{t("reset.expired.title")}</h1>
+                  <p className="text-muted-foreground text-sm">{t("reset.expired.description")}</p>
+                  <Button variant="lime" className="w-full" onClick={() => setMode("forgot")}>
+                    {t("reset.expired.requestNew")}
+                  </Button>
+                </div>
+              )}
+
+              {/* Reset Password — still verifying the recovery token */}
+              {mode === "reset" && !linkError && !user && !resetChecked && (
+                <div className="flex flex-col items-center gap-3 py-6">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-muted-foreground text-sm">{t("reset.checking")}</p>
+                </div>
+              )}
+
+              {/* Reset Password — recovery session ready, show the form */}
+              {mode === "reset" && !linkError && user && (
                 <>
                   <h1 className="text-2xl font-bold text-center mb-2">{t("reset.title")}</h1>
                   <p className="text-muted-foreground text-center text-sm mb-6">
@@ -482,6 +546,37 @@ const Auth = () => {
                     className="text-sm text-primary hover:underline font-medium"
                   >
                     {t("confirm.backToLogin")}
+                  </button>
+                </div>
+              )}
+
+              {/* Email change confirmation landing */}
+              {mode === "email-change" && (
+                <div className="text-center space-y-4">
+                  <div className="flex justify-center">
+                    {emailChangeStatus === "error" ? (
+                      <AlertCircle className="w-12 h-12 text-destructive" />
+                    ) : emailChangeStatus === "processing" ? (
+                      <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                    ) : (
+                      <MailCheck className="w-12 h-12 text-primary" />
+                    )}
+                  </div>
+                  <h1 className="text-2xl font-bold">{t("emailChange.title")}</h1>
+                  <p className="text-muted-foreground text-sm">
+                    {emailChangeStatus === "error"
+                      ? t("emailChange.error")
+                      : emailChangeStatus === "processing"
+                      ? t("emailChange.processing")
+                      : emailChangeStatus === "partial"
+                      ? t("emailChange.partial")
+                      : t("emailChange.done")}
+                  </p>
+                  <button
+                    onClick={() => navigate("/account")}
+                    className="text-sm text-primary hover:underline font-medium"
+                  >
+                    {t("emailChange.toAccount")}
                   </button>
                 </div>
               )}
