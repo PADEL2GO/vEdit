@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { LogOut, Loader2, Trash2, Coins, ShoppingBag, ArrowRight } from "lucide-react";
+import { LogOut, Loader2, Coins, ShoppingBag, ArrowRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { resizeAvatarToSquare } from "@/lib/resizeImage";
 import { MyBookings } from "@/components/booking/MyBookings";
 import { AccountProfileForm } from "@/components/account";
 import { AccountOrdersTab } from "@/components/account/AccountOrdersTab";
+import { AccountSecurityTab } from "@/components/account/AccountSecurityTab";
 import { LevelUpAnimation, ExpertLevelsGrid } from "@/components/p2g";
 import { EXPERT_LEVELS, getExpertLevelEmoji } from "@/lib/expertLevels";
 import { useExpertLevels, levelForPoints, nextLevelForPoints, progressToNext } from "@/hooks/useExpertLevels";
@@ -277,11 +278,12 @@ const Account = () => {
         {/* Tab Content */}
         <div className="container mx-auto px-4 max-w-2xl py-8">
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-y-1">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 gap-y-1">
               <TabsTrigger value="profile">{t("page.tabs.profile")}</TabsTrigger>
               <TabsTrigger value="bookings">{t("page.tabs.bookings")}</TabsTrigger>
               <TabsTrigger value="orders">{t("page.tabs.orders")}</TabsTrigger>
               <TabsTrigger value="p2g-points" className="text-xs sm:text-sm">{t("page.tabs.p2gPoints")}</TabsTrigger>
+              <TabsTrigger value="security">{t("page.tabs.security")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-6">
@@ -296,25 +298,6 @@ const Account = () => {
                 onAvatarUpload={handleAvatarUpload}
                 onUsernameChange={handleUsernameChange}
               />
-
-              {/* Account deletion — DSGVO Art. 17 Recht auf Löschung */}
-              <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
-                <div className="flex items-start gap-3">
-                  <Trash2 className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
-                  <div className="flex-1">
-                    <p className="font-medium text-sm text-destructive">{t("page.delete.title")}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {t("page.delete.description")}
-                    </p>
-                    <a
-                      href={`mailto:contact@padel2go.eu?subject=Kontol%C3%B6schung&body=Bitte%20l%C3%B6sche%20mein%20Konto%20mit%20der%20E-Mail-Adresse%3A%20${encodeURIComponent(user?.email ?? "")}`}
-                      className="inline-flex items-center gap-1.5 mt-3 text-xs font-medium text-destructive hover:underline"
-                    >
-                      {t("page.delete.cta")}
-                    </a>
-                  </div>
-                </div>
-              </div>
             </TabsContent>
 
             <TabsContent value="bookings" className="space-y-6">
@@ -323,6 +306,10 @@ const Account = () => {
 
             <TabsContent value="orders" className="space-y-6">
               <AccountOrdersTab />
+            </TabsContent>
+
+            <TabsContent value="security" className="space-y-6">
+              <AccountSecurityTab />
             </TabsContent>
 
             <TabsContent value="p2g-points" className="space-y-6">
