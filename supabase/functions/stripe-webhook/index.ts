@@ -780,7 +780,7 @@ serve(async (req) => {
               // (Payback points are awarded directly above via increment_play_and_lifetime;
               //  the old rewards-trigger percentage award has been removed.)
               try {
-                await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+                const emailResp = await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
@@ -793,14 +793,18 @@ serve(async (req) => {
                     amount_cents: priceCents,
                   }),
                 });
-                logStep("Owner confirmation email triggered", { userId });
+                if (!emailResp.ok) {
+                  logStep("Owner confirmation FAILED", { status: emailResp.status, body: await emailResp.text().catch(() => "") });
+                } else {
+                  logStep("Owner confirmation email triggered", { userId });
+                }
               } catch (emailErr) {
                 logStep("Failed to send owner confirmation", { error: (emailErr as Error).message });
               }
             } else if (isGuestWebhook && guestEmail) {
               // ── Guest: send confirmation to guest email, skip rewards ──
               try {
-                await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+                const emailResp = await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
@@ -814,7 +818,11 @@ serve(async (req) => {
                     amount_cents: priceCents,
                   }),
                 });
-                logStep("Guest confirmation email triggered", { guestEmail });
+                if (!emailResp.ok) {
+                  logStep("Guest confirmation FAILED", { status: emailResp.status, body: await emailResp.text().catch(() => "") });
+                } else {
+                  logStep("Guest confirmation email triggered", { guestEmail });
+                }
               } catch (emailErr) {
                 logStep("Failed to send guest confirmation", { error: (emailErr as Error).message });
               }

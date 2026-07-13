@@ -30,6 +30,12 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Set once we atomically claim the confirmation. If ANY step after the claim
+  // throws, the outer catch releases it so a retried delivery re-sends (mirrors
+  // send-marketplace-confirmation). Without this a transient blip would leave the
+  // booking marked 'confirmation sent' with no email ever delivered.
+  let releaseClaim: (() => Promise<void>) | null = null;
+
   try {
     logStep("Function started");
 
@@ -77,6 +83,8 @@ serve(async (req) => {
       .from("bookings")
       .select(`
         id,
+        status,
+        confirmation_sent_at,
         start_time,
         end_time,
         price_cents,
@@ -92,6 +100,41 @@ serve(async (req) => {
       throw new Error(`Failed to fetch booking: ${bookingError?.message || "Not found"}`);
     }
     logStep("Booking fetched", { bookingId: booking.id });
+
+    // Idempotency (mirrors send-marketplace-confirmation): only a CONFIRMED booking
+    // gets a confirmation, and only the caller that flips confirmation_sent_at NULL→now
+    // sends the mail. So a re-delivered Stripe webhook (or free-path + a retry) never
+    // double-mails, and a failed send releases the claim so a later retry re-sends.
+    if ((booking as any).status !== "confirmed") {
+      logStep("Skip — booking not confirmed", { status: (booking as any).status });
+      return new Response(JSON.stringify({ success: true, skipped: "not_confirmed" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if ((booking as any).confirmation_sent_at) {
+      logStep("Skip — confirmation already sent");
+      return new Response(JSON.stringify({ success: true, skipped: "already_sent" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: claimed } = await supabase
+      .from("bookings")
+      .update({ confirmation_sent_at: new Date().toISOString() })
+      .eq("id", booking_id)
+      .is("confirmation_sent_at", null)
+      .select("id");
+    if (!claimed || claimed.length === 0) {
+      logStep("Skip — confirmation already claimed");
+      return new Response(JSON.stringify({ success: true, skipped: "already_claimed" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    releaseClaim = async () => {
+      await supabase.from("bookings").update({ confirmation_sent_at: null }).eq("id", booking_id);
+    };
 
     // Resolve recipient email + name
     let recipientEmail: string;
@@ -359,6 +402,11 @@ serve(async (req) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
+    // Release the idempotency claim so a retried delivery re-sends instead of the
+    // booking being stuck 'confirmation sent' with no email out.
+    if (releaseClaim) {
+      try { await releaseClaim(); } catch (_) { /* best-effort */ }
+    }
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

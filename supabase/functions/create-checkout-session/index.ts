@@ -689,18 +689,22 @@ serve(async (req) => {
       // award reward points for money the user never paid.
       if (!isGuestBooking && user) {
         try {
-          await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+          const emailResp = await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseServiceKey}` },
             body: JSON.stringify({ booking_id: booking.id, user_id: user.id, payment_type: "owner", amount_cents: 0 }),
           });
-          logStep("Free path: owner confirmation email triggered", { userId: user.id });
+          if (!emailResp.ok) {
+            logStep("Free path: owner confirmation FAILED", { status: emailResp.status, body: await emailResp.text().catch(() => "") });
+          } else {
+            logStep("Free path: owner confirmation email triggered", { userId: user.id });
+          }
         } catch (emailErr) {
           logStep("Free path: failed to send owner confirmation", { error: (emailErr as Error).message });
         }
       } else if (isGuestBooking) {
         try {
-          await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
+          const emailResp = await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${supabaseServiceKey}` },
             body: JSON.stringify({
@@ -711,7 +715,11 @@ serve(async (req) => {
               amount_cents: 0,
             }),
           });
-          logStep("Free path: guest confirmation email triggered", { guestEmail: (booking as any).guest_email });
+          if (!emailResp.ok) {
+            logStep("Free path: guest confirmation FAILED", { status: emailResp.status, body: await emailResp.text().catch(() => "") });
+          } else {
+            logStep("Free path: guest confirmation email triggered", { guestEmail: (booking as any).guest_email });
+          }
         } catch (emailErr) {
           logStep("Free path: failed to send guest confirmation", { error: (emailErr as Error).message });
         }
