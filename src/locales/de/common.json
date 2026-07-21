@@ -5,8 +5,15 @@
   "newsHeadingPre": "Aktuelles aus der",
   "newsHeadingAccent": "P2G-Welt",
   "newsReadMore": "Weiterlesen",
+  "newsReadArticle": "Artikel lesen",
+  "newsShowLess": "Weniger anzeigen",
   "newsToSource": "Zur Quelle",
   "comingSoon": "Bald wieder für dich da",
+  "admin": {
+    "translateAll": "Alle übersetzen",
+    "translateAllRunning": "Übersetze {{done}}/{{total}} …",
+    "translateAllDone": "{{count}} Einträge übersetzt"
+  },
   "languageSwitch": {
     "label": "Sprache",
     "de": "Deutsch",

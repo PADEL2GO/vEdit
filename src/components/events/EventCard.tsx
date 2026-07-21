@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { NavLink } from "@/components/NavLink";
 import { Calendar, MapPin, Clock, Music, ArrowRight, Ticket } from "lucide-react";
 import { format, isPast } from "date-fns";
-import { de } from "date-fns/locale";
+import { de, enUS } from "date-fns/locale";
 
 interface EventArtist {
   id: string;
@@ -34,15 +35,6 @@ export interface EventCardProps {
   index?: number;
 }
 
-const EVENT_TYPE_LABELS: Record<string, string> = {
-  party: "Party",
-  day_drinking: "Day Drinking",
-  tournament: "Turnier",
-  community: "Community",
-  corporate: "Corporate",
-  open_play: "Open Play",
-};
-
 export const EventCard = ({
   slug,
   title,
@@ -55,6 +47,9 @@ export const EventCard = ({
   event_artists,
   index = 0,
 }: EventCardProps) => {
+  const { t, i18n } = useTranslation("events");
+  const dateLocale = i18n.language.startsWith("en") ? enUS : de;
+  const typeLabels = t("eventTypeLabels", { returnObjects: true }) as Record<string, string>;
   const startDate = start_at ? new Date(start_at) : null;
   const past = startDate ? isPast(startDate) : false;
   const artistLabel =
@@ -62,7 +57,7 @@ export const EventCard = ({
       ? null
       : event_artists.length === 1
       ? event_artists[0].name
-      : `${event_artists.length} Artists`;
+      : t("card.artistsCount", { count: event_artists.length });
 
   return (
     <motion.div
@@ -98,7 +93,7 @@ export const EventCard = ({
                   {format(startDate, "dd")}
                 </span>
                 <span className="font-stat text-[9.5px] tracking-[0.18em] text-[hsl(0_0%_70%)] uppercase">
-                  {format(startDate, "MMM", { locale: de })}
+                  {format(startDate, "MMM", { locale: dateLocale })}
                 </span>
               </span>
             )}
@@ -112,7 +107,7 @@ export const EventCard = ({
                     : "text-primary border-primary/40"
                 }`}
               >
-                {past ? "Vorbei" : EVENT_TYPE_LABELS[event_type!] || event_type}
+                {past ? t("card.past") : typeLabels[event_type!] || event_type}
               </span>
             )}
           </div>
@@ -128,13 +123,13 @@ export const EventCard = ({
               {startDate && (
                 <span className="inline-flex items-center gap-1.5 font-stat text-xs text-[hsl(0_0%_60%)]">
                   <Calendar className="w-3 h-3" />
-                  {format(startDate, "EEE, dd.MM.", { locale: de })}
+                  {format(startDate, "EEE, dd.MM.", { locale: dateLocale })}
                 </span>
               )}
               {startDate && (
                 <span className="inline-flex items-center gap-1.5 font-stat text-xs text-[hsl(0_0%_60%)]">
                   <Clock className="w-3 h-3" />
-                  {format(startDate, "HH:mm", { locale: de })}
+                  {format(startDate, "HH:mm", { locale: dateLocale })}
                 </span>
               )}
             </div>
@@ -161,7 +156,7 @@ export const EventCard = ({
                 <span className="font-stat text-base font-bold text-primary">{price_label}</span>
               )}
               <span className="inline-flex items-center gap-1.5 text-[13.5px] font-bold text-primary ml-auto">
-                Details
+                {t("card.detailsCta")}
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </div>

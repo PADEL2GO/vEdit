@@ -7,7 +7,7 @@
  *   const { i18n } = useTranslation();
  *   const title = localized(row, "title", i18n.language);
  */
-export const localized = <T extends Record<string, unknown>>(
+export const localized = <T extends object>(
   row: T | null | undefined,
   field: keyof T & string,
   lang: string | undefined,

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SectionDivider from "@/components/SectionDivider";
@@ -30,7 +30,8 @@ import {
 import { EventCard, FeaturedEvent, EventFilters, NewsletterCTA } from "@/components/events";
 import { useLaunchDate } from "@/hooks/useLaunchDate";
 import { isToday, isThisWeek, isThisMonth, isPast, format } from "date-fns";
-import { de } from "date-fns/locale";
+import { de, enUS } from "date-fns/locale";
+import { localized } from "@/lib/localized";
 
 interface DbArtist {
   id: string;
@@ -96,7 +97,8 @@ const benefits = [
 ];
 
 const Events = () => {
-  const { t } = useTranslation(["events", "common"]);
+  const { t, i18n } = useTranslation(["events", "common"]);
+  const dateLocale = i18n.language.startsWith("en") ? enUS : de;
   const { launchDate } = useLaunchDate();
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -300,13 +302,13 @@ const Events = () => {
               <div className="mx-auto max-w-[1200px] px-5">
                 <FeaturedEvent
                   slug={featuredEvent.slug}
-                  title={featuredEvent.title}
-                  description={featuredEvent.description}
+                  title={localized(featuredEvent, "title", i18n.language)}
+                  description={localized(featuredEvent, "description", i18n.language)}
                   city={featuredEvent.city}
                   start_at={featuredEvent.start_at}
                   image_url={featuredEvent.image_url}
                   event_type={featuredEvent.event_type}
-                  price_label={featuredEvent.price_label}
+                  price_label={localized(featuredEvent, "price_label", i18n.language)}
                   highlights={featuredEvent.highlights}
                   venue_name={featuredEvent.venue_name || featuredEvent.locations?.name || null}
                   event_artists={featuredEvent.event_artists}
@@ -339,7 +341,7 @@ const Events = () => {
                   {!isLoading && (
                     <span className="font-stat text-[13px] text-[hsl(0_0%_55%)]">
                       {upcomingEvents.length}{" "}
-                      {upcomingEvents.length === 1 ? "Event" : "Events"}
+                      {upcomingEvents.length === 1 ? t("list.countSingular") : t("list.countPlural")}
                     </span>
                   )}
                 </motion.div>
@@ -385,14 +387,14 @@ const Events = () => {
                 </span>
                 <div className="flex flex-col gap-2">
                   <h3 className="font-display font-bold text-xl text-foreground">
-                    Events kommen bald
+                    {t("list.comingSoonTitle")}
                   </h3>
                   <p className="text-[14.5px] leading-relaxed text-[hsl(0_0%_60%)]">
-                    Die ersten P2G Events gehen zum Launch am{" "}
-                    <span className="font-stat text-foreground">
-                      {format(launchDate, "d. MMMM yyyy", { locale: de })}
-                    </span>{" "}
-                    live. Trag dich in den Newsletter ein, um nichts zu verpassen.
+                    <Trans
+                      i18nKey="events:list.comingSoonText"
+                      values={{ date: format(launchDate, "d. MMMM yyyy", { locale: dateLocale }) }}
+                      components={[<span className="font-stat text-foreground" />]}
+                    />
                   </p>
                 </div>
                 <Button variant="hero" asChild>
@@ -406,14 +408,14 @@ const Events = () => {
                     key={event.id}
                     id={event.id}
                     slug={event.slug || event.id}
-                    title={event.title}
-                    description={event.description}
+                    title={localized(event, "title", i18n.language)}
+                    description={localized(event, "description", i18n.language)}
                     city={event.city}
                     start_at={event.start_at}
                     end_at={event.end_at}
                     image_url={event.image_url}
                     event_type={event.event_type}
-                    price_label={event.price_label}
+                    price_label={localized(event, "price_label", i18n.language)}
                     highlights={event.highlights}
                     venue_name={event.venue_name || event.locations?.name || null}
                     event_artists={event.event_artists}
@@ -434,18 +436,18 @@ const Events = () => {
                 </span>
                 <div className="flex flex-col gap-1.5">
                   <h3 className="font-display font-bold text-xl text-foreground">
-                    {showPast ? t("list.emptyTitlePast") : "Keine Events gefunden"}
+                    {showPast ? t("list.emptyTitlePast") : t("list.emptyTitleUpcoming")}
                   </h3>
                   <p className="text-[14.5px] text-[hsl(0_0%_55%)] max-w-md">
                     {showPast
                       ? t("list.emptyTextPast")
-                      : "Versuch andere Filter — oder schau bald wieder rein."}{" "}
+                      : t("list.emptyTextFiltered")}{" "}
                     <span className="text-primary">✨</span>
                   </p>
                 </div>
                 <Button variant="outline" onClick={resetAllFilters}>
                   <CalendarX className="w-4 h-4" />
-                  Filter zurücksetzen
+                  {t("list.resetFilters")}
                 </Button>
               </motion.div>
             )}
@@ -487,17 +489,17 @@ const Events = () => {
                 />
                 <div className="absolute inset-0 bg-[linear-gradient(200deg,hsl(0_0%_0%/0.1),hsl(0_0%_0%/0.92)_80%)]" />
                 <span className="absolute top-[18px] left-[18px] font-stat text-[11px] tracking-[0.14em] uppercase text-primary bg-black/60 backdrop-blur-md border border-primary/35 rounded-full px-3.5 py-[7px]">
-                  Community first
+                  {t("benefits.communityFirstBadge")}
                 </span>
                 <div className="relative flex flex-col gap-3 p-7">
                   <h3 className="font-display font-extrabold tracking-[-0.02em] text-white text-[clamp(24px,3.4vw,36px)] leading-[1.08]">
-                    Komm allein.
-                    <br />
-                    Geh mit <span className="italic text-primary">Crew.</span>
+                    <Trans
+                      i18nKey="events:benefits.networkingTitle"
+                      components={[<br />, <span className="italic text-primary" />]}
+                    />
                   </h3>
                   <p className="text-[15.5px] leading-relaxed text-white/80 max-w-[420px]">
-                    Matchmaking vor Ort: Wir mixen die Teams, die Courts rotieren — nach zwei
-                    Stunden kennst du den halben Court.
+                    {t("benefits.networkingText")}
                   </p>
                   <div className="flex items-center gap-3 flex-wrap mt-1">
                     <div className="flex">
@@ -518,7 +520,7 @@ const Events = () => {
                     </div>
                     <span className="inline-flex items-center gap-2 font-stat text-[12.5px] font-bold text-primary">
                       <Users className="w-3.5 h-3.5" />
-                      Teil vom P2G Network
+                      {t("benefits.networkBadge")}
                     </span>
                   </div>
                 </div>
@@ -532,27 +534,27 @@ const Events = () => {
                     <Handshake className="w-[21px] h-[21px]" />
                   </span>
                   <span className="font-display font-extrabold text-[clamp(30px,3.6vw,44px)] leading-[1.05] tracking-[-0.02em] text-primary [text-shadow:0_0_40px_hsl(71_91%_51%/0.35)]">
-                    Solo? Kein Problem.
+                    {t("benefits.soloStat")}
                   </span>
                   <h3 className="font-display font-extrabold text-xl tracking-[-0.01em] leading-tight text-foreground">
-                    Wir matchen dich vor Ort.
+                    {t("benefits.soloTitle")}
                   </h3>
                   <p className="text-[14.5px] leading-relaxed text-[hsl(0_0%_65%)]">
-                    Komm ohne festen Partner — geh mit neuen Kontakten nach Hause. Das Matchen übernehmen wir.
+                    {t("benefits.soloText")}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-border/60 bg-gradient-card p-5">
                   <div className="flex items-stretch gap-3.5">
                     <div className="flex flex-col gap-2 flex-1 min-w-0">
                       <Building2 className="w-[19px] h-[19px] text-primary" />
-                      <span className="font-display font-bold text-[17px] leading-tight text-foreground">Partnervereine</span>
-                      <span className="text-[12.5px] text-[hsl(0_0%_55%)]">Wir bauen das Netzwerk stetig aus.</span>
+                      <span className="font-display font-bold text-[17px] leading-tight text-foreground">{t("benefits.partnerClubsTitle")}</span>
+                      <span className="text-[12.5px] text-[hsl(0_0%_55%)]">{t("benefits.partnerClubsText")}</span>
                     </div>
                     <span className="w-px bg-[hsl(0_0%_14%)] flex-none" />
                     <div className="flex flex-col gap-2 flex-1 min-w-0">
                       <Users className="w-[19px] h-[19px] text-primary" />
-                      <span className="font-display font-bold text-[17px] leading-tight text-foreground">Für alle Level</span>
-                      <span className="text-[12.5px] text-[hsl(0_0%_55%)]">Anfänger bis Profi willkommen.</span>
+                      <span className="font-display font-bold text-[17px] leading-tight text-foreground">{t("benefits.allLevelsTitle")}</span>
+                      <span className="text-[12.5px] text-[hsl(0_0%_55%)]">{t("benefits.allLevelsText")}</span>
                     </div>
                   </div>
                 </div>
@@ -566,15 +568,14 @@ const Events = () => {
                 <img src={eventsHero} alt="" className="absolute inset-0 w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-[linear-gradient(200deg,hsl(0_0%_0%/0.15),hsl(0_0%_0%/0.92)_80%)]" />
                 <span className="absolute top-[18px] left-[18px] font-stat text-[11px] tracking-[0.14em] uppercase text-primary bg-black/60 backdrop-blur-md border border-primary/35 rounded-full px-3.5 py-[7px]">
-                  Afterplay
+                  {t("benefits.afterplayBadge")}
                 </span>
                 <div className="relative flex flex-col gap-2.5 p-6">
                   <h3 className="font-display font-extrabold tracking-[-0.02em] text-white text-[clamp(21px,2.6vw,28px)] leading-[1.12]">
-                    Bar, Beats, Bleiben.
+                    {t("benefits.afterplayTitle")}
                   </h3>
                   <p className="text-[14.5px] leading-relaxed text-white/80">
-                    Nach dem letzten Ballwechsel legt der DJ auf — die besten Rallyes werden an
-                    der Bar nachbesprochen.
+                    {t("benefits.afterplayText")}
                   </p>
                 </div>
               </div>
@@ -583,10 +584,10 @@ const Events = () => {
               <div className="lg:col-span-3 rounded-2xl border border-border/60 bg-gradient-card p-6 md:p-7 flex flex-col gap-4">
                 <div className="flex items-center gap-2.5 flex-wrap">
                   <h3 className="font-display font-bold text-xl tracking-[-0.01em] text-foreground">
-                    Was immer dabei ist
+                    {t("benefits.alwaysIncludedTitle")}
                   </h3>
                   <span className="font-stat text-[11px] tracking-[0.14em] uppercase text-[hsl(0_0%_50%)]">
-                    bei jedem Event
+                    {t("benefits.alwaysIncludedSub")}
                   </span>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-3.5 flex-1">

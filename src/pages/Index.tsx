@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import { localized } from "@/lib/localized";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -59,6 +59,7 @@ const revealProps = (delay = 0) => ({
 
 // ── Partner-Showcase (admin-verwaltet via partner_tiles / AdminPartnerTiles) ──
 const PartnerShowcase = () => {
+  const { t, i18n } = useTranslation("index");
   const { data: partners } = usePartnerTiles();
   const active = (partners ?? []).filter((p) => p.is_active !== false);
   if (active.length === 0) return null;
@@ -68,13 +69,13 @@ const PartnerShowcase = () => {
         <motion.div {...revealProps()} className="flex flex-col items-center gap-4 text-center max-w-2xl mx-auto mb-12">
           <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">
             <Handshake className="w-3.5 h-3.5" />
-            Partner
+            {t("partnerShowcase.badge")}
           </span>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground" style={{ lineHeight: 1.1 }}>
-            Gemeinsam mit unseren <span className="text-gradient-lime">Partnern</span>
+            <Trans i18nKey="index:partnerShowcase.title" components={[<span className="text-gradient-lime" />]} />
           </h2>
           <p className="text-base md:text-lg text-muted-foreground">
-            Starke Marken und lokale Vereine machen <BrandName /> möglich.
+            <Trans i18nKey="index:partnerShowcase.subtitle" components={[<BrandName />]} />
           </p>
         </motion.div>
 
@@ -88,10 +89,10 @@ const PartnerShowcase = () => {
                   <span className="font-display font-bold text-lg text-foreground">{p.name}</span>
                 )}
                 {p.logo_url && <span className="font-display font-semibold text-sm text-foreground">{p.name}</span>}
-                {p.description && <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{p.description}</p>}
+                {p.description && <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">{localized(p, "description", i18n.language)}</p>}
                 {p.website_url && (
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary mt-auto pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Website <ArrowRight className="w-3 h-3" />
+                    {t("partnerShowcase.website")} <ArrowRight className="w-3 h-3" />
                   </span>
                 )}
               </div>

@@ -1,4 +1,88 @@
 {
+  "metaNew": {
+    "title": "For Players | PADEL2GO",
+    "description": "Courts all across Germany, events & community — and payback points on every booking."
+  },
+  "heroNew": {
+    "imageAlt": "Padel player on the court",
+    "badge": "For Players",
+    "titleLine1": "Your game.",
+    "titleHighlight": "Your points.",
+    "titleLine2": "Your network.",
+    "description": "Courts all across Germany, events & community — and payback points on every booking.",
+    "primaryCta": "Book a court",
+    "secondaryCta": "Download the app",
+    "chipLaunch": "Launch",
+    "chipRegistration": "Registration",
+    "chipBooking": "Booking",
+    "chipPointsSuffix": "per booking"
+  },
+  "networkNew": {
+    "eyebrow": "The P2G Network",
+    "titlePrefix": "Play. Connect.",
+    "titleHighlight": "Redeem.",
+    "pillars": [
+      {
+        "tag": "Courts all across Germany",
+        "title": "Courts all across Germany",
+        "text": "SkyPadel courts on club grounds — the first locations get things started, with more to follow.",
+        "cta": "Book a court"
+      },
+      {
+        "tag": "Open Play from €0",
+        "title": "Events & network",
+        "text": "Night sessions, tournaments, open play — come solo or with your crew, matchmaking happens on site. Your level counts EU-wide in the P2G League.",
+        "cta": "To the events"
+      },
+      {
+        "tag": "Payback on every booking",
+        "title": "Marketplace & P2G Points",
+        "text": "You earn points automatically on every booking — and redeem them in the marketplace for equipment: as a discount or for the full price.",
+        "cta": "To the marketplace"
+      }
+    ]
+  },
+  "paybackNew": {
+    "badge": "P2G Points",
+    "titlePrefix": "How",
+    "titleHighlight": "payback works.",
+    "steps": [
+      {
+        "title": "Book",
+        "text": "Fixed points per booking — 1 h or 2 h of court time."
+      },
+      {
+        "title": "Multiplier",
+        "text": "Your tier level adds on top — the higher your level, the more payback."
+      },
+      {
+        "title": "Redeem",
+        "text": "In the marketplace for equipment — as a discount or for the full price."
+      }
+    ],
+    "tierTitlePrefix": "Your tier level =",
+    "tierTitleHighlight": "your multiplier",
+    "tierMeta": "{{count}} tiers · EU-wide ranking"
+  },
+  "kiNew": {
+    "comingSoon": "Coming Soon",
+    "poweredBy": "Powered by Wingfield",
+    "titlePrefix": "Coming next:",
+    "titleHighlight": "AI match analysis.",
+    "description": "The court camera captures your game automatically — 40+ metrics, auto clips and an objective skill rating after every match.",
+    "tags": ["Match IQ", "Speed & placement", "Auto clips", "Skill rating"],
+    "newsletterDone": "You're on the list — we'll reach out at launch!",
+    "emailPlaceholder": "your@email.com",
+    "notifyCta": "Get notified",
+    "emailError": "Please enter a valid email address."
+  },
+  "ctaNew": {
+    "titlePrefix": "Ready for your",
+    "titleHighlight": "first match?",
+    "primaryCta": "Book a court",
+    "secondaryCta": "Download the app",
+    "note": "Launch {{date}} · Registration free"
+  },
   "meta": {
     "title": "For Players | PADEL2GO – Book courts, earn P2G credits, redeem rewards",
     "description": "With PADEL2GO you book courts in seconds, earn P2G credits and redeem them in the marketplace."

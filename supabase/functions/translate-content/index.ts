@@ -39,6 +39,10 @@ const TRANSLATABLE_TABLES: Record<string, FieldName[]> = {
   skypadel_gallery: ["alt_text"],
   partner_touchpoint_slides: ["title", "description"],
   qr_sections: ["title", "description"],
+  articles: ["title", "excerpt", "body_html"],
+  events: ["title", "description", "price_label", "highlights"],
+  marketplace_items: ["name", "subtitle", "description", "long_description", "meta_title", "meta_description"],
+  marketplace_categories: ["name"],
 };
 
 const json = (status: number, body: unknown) =>
@@ -68,6 +72,7 @@ const deeplEndpoint = (key: string): string =>
 const translateBatch = async (
   texts: string[],
   apiKey: string,
+  isHtml = false,
 ): Promise<string[]> => {
   if (texts.length === 0) return [];
   const endpoint = deeplEndpoint(apiKey);
@@ -77,6 +82,12 @@ const translateBatch = async (
   body.append("target_lang", "EN-US");
   body.append("preserve_formatting", "1");
   body.append("formality", "default");
+  // HTML content (e.g. articles.body_html): let DeepL parse the markup so tags survive
+  // and only text nodes are translated. Without this DeepL escapes/splits the HTML.
+  if (isHtml) {
+    body.append("tag_handling", "html");
+    body.append("split_sentences", "nonewlines");
+  }
 
   const res = await fetch(endpoint, {
     method: "POST",
@@ -188,34 +199,59 @@ serve(async (req) => {
   if (fetchErr) return json(500, { error: `DB read failed: ${fetchErr.message}` });
   if (!row) return json(404, { error: `Row not found: ${table}/${id}` });
 
-  // Decide which fields actually need translation right now
-  const fieldsToTranslate: Array<{ field: string; sourceText: string }> = [];
+  // Decide which fields actually need translation right now. A field is either a plain-text
+  // string, an HTML string (body_html — DeepL needs tag_handling=html) or a text[] array
+  // (events.highlights — translated element-wise). Locked or empty fields are skipped.
+  type Work =
+    | { field: string; kind: "text" | "html"; text: string }
+    | { field: string; kind: "array"; arr: string[] };
+  const work: Work[] = [];
   for (const field of fields) {
     const isLocked = Boolean((row as Record<string, unknown>)[`${field}_en_locked`]);
     if (isLocked) continue;
     const source = (row as Record<string, unknown>)[field];
-    if (typeof source !== "string" || source.trim().length === 0) continue;
-    fieldsToTranslate.push({ field, sourceText: source });
+    if (Array.isArray(source)) {
+      const arr = source.filter(
+        (s): s is string => typeof s === "string" && s.trim().length > 0,
+      );
+      if (arr.length === 0) continue;
+      work.push({ field, kind: "array", arr });
+    } else if (typeof source === "string" && source.trim().length > 0) {
+      const kind = field === "body_html" || field.endsWith("_html") ? "html" : "text";
+      work.push({ field, kind, text: source });
+    }
   }
 
-  if (fieldsToTranslate.length === 0) {
+  if (work.length === 0) {
     return json(200, { row, updatedFields: [], skipped: fields });
   }
 
-  let translated: string[];
+  const updatePayload: Record<string, string | string[] | null> = {};
   try {
-    translated = await translateBatch(
-      fieldsToTranslate.map((f) => f.sourceText),
-      apiKey,
+    // Plain-text fields go in one batch call.
+    const textItems = work.filter(
+      (w): w is Extract<Work, { kind: "text" }> => w.kind === "text",
     );
+    if (textItems.length > 0) {
+      const out = await translateBatch(textItems.map((w) => w.text), apiKey, false);
+      textItems.forEach((w, i) => {
+        updatePayload[`${w.field}_en`] = out[i] ?? null;
+      });
+    }
+    // HTML fields — one call each (DeepL applies a single tag_handling mode per request).
+    for (const w of work) {
+      if (w.kind !== "html") continue;
+      const [out] = await translateBatch([w.text], apiKey, true);
+      updatePayload[`${w.field}_en`] = out ?? null;
+    }
+    // Array fields (text[]) — translate each element, persist back as an array.
+    for (const w of work) {
+      if (w.kind !== "array") continue;
+      updatePayload[`${w.field}_en`] = await translateBatch(w.arr, apiKey, false);
+    }
   } catch (err) {
     return json(502, { error: (err as Error).message });
   }
-
-  const updatePayload: Record<string, string | null> = {};
-  fieldsToTranslate.forEach((f, i) => {
-    updatePayload[`${f.field}_en`] = translated[i] ?? null;
-  });
 
   const { data: updated, error: updateErr } = await client
     .from(table)
@@ -228,7 +264,7 @@ serve(async (req) => {
 
   return json(200, {
     row: updated,
-    updatedFields: fieldsToTranslate.map((f) => f.field),
-    skipped: fields.filter((f) => !fieldsToTranslate.find((x) => x.field === f)),
+    updatedFields: work.map((w) => w.field),
+    skipped: fields.filter((f) => !work.find((x) => x.field === f)),
   });
 });

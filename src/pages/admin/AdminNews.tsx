@@ -20,8 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Newspaper, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Newspaper, Image as ImageIcon, Loader2, Languages } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ArticleEditor } from "@/components/admin/news/ArticleEditor";
 import { VoiceInArticle } from "@/components/admin/news/VoiceInArticle";
 import {
@@ -30,7 +32,10 @@ import {
   useDeleteArticle,
   uploadArticleImage,
 } from "@/hooks/useAdminArticles";
+import { useTranslateContent, toastTranslateResult } from "@/hooks/useTranslateContent";
 import { AUDIENCE_LABELS, type Article, type ArticleAudience } from "@/types/article";
+
+const ARTICLE_TRANSLATE_FIELDS = ["title", "excerpt", "body_html"];
 
 interface ArticleForm {
   title: string;
@@ -58,6 +63,39 @@ export default function AdminNews() {
   const { data: articles, isLoading } = useAdminArticles();
   const saveMutation = useSaveArticle();
   const deleteMutation = useDeleteArticle();
+  const { translateRow } = useTranslateContent();
+  const queryClient = useQueryClient();
+  const { t } = useTranslation("common");
+  const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
+
+  const invalidateArticles = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
+    queryClient.invalidateQueries({ queryKey: ["articles", "logged_in"] });
+    queryClient.invalidateQueries({ queryKey: ["articles", "logged_out"] });
+  };
+
+  const runTranslate = (id: string) => {
+    translateRow({ table: "articles", id, fields: ARTICLE_TRANSLATE_FIELDS }).then((result) => {
+      toastTranslateResult(result);
+      invalidateArticles();
+    });
+  };
+
+  // Backfill: translate every existing article (sequential to respect DeepL rate limits).
+  // Locked/empty fields are skipped server-side, so re-running is idempotent.
+  const translateAll = async () => {
+    if (!articles?.length) return;
+    setBulk({ done: 0, total: articles.length });
+    let ok = 0;
+    for (const a of articles) {
+      const result = await translateRow({ table: "articles", id: a.id, fields: ARTICLE_TRANSLATE_FIELDS });
+      if (!result.error) ok++;
+      setBulk((b) => (b ? { ...b, done: b.done + 1 } : b));
+    }
+    setBulk(null);
+    invalidateArticles();
+    toast.success(t("admin.translateAllDone", { count: ok }));
+  };
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -119,7 +157,12 @@ export default function AdminNews() {
         id: editId ?? undefined,
         existingPublishedAt,
       },
-      { onSuccess: () => setDialogOpen(false) },
+      {
+        onSuccess: (newId: string) => {
+          setDialogOpen(false);
+          if (newId) runTranslate(newId);
+        },
+      },
     );
   };
 
@@ -136,9 +179,25 @@ export default function AdminNews() {
               Artikel für die Startseite und das eingeloggte Dashboard verwalten
             </p>
           </div>
-          <Button onClick={openCreate}>
-            <Plus className="h-4 w-4 mr-2" /> Neuer Artikel
-          </Button>
+          <div className="flex gap-2">
+            {!!articles?.length && (
+              <Button variant="outline" onClick={translateAll} disabled={!!bulk}>
+                {bulk ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t("admin.translateAllRunning", { done: bulk.done, total: bulk.total })}
+                  </>
+                ) : (
+                  <>
+                    <Languages className="h-4 w-4 mr-2" /> {t("admin.translateAll")}
+                  </>
+                )}
+              </Button>
+            )}
+            <Button onClick={openCreate}>
+              <Plus className="h-4 w-4 mr-2" /> Neuer Artikel
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (

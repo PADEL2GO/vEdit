@@ -135,14 +135,16 @@ export interface TaxonomyInput {
 export const useUpsertTaxonomy = (kind: TaxonomyKind) => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...values }: TaxonomyInput & { id?: string }) => {
+    mutationFn: async ({ id, ...values }: TaxonomyInput & { id?: string }): Promise<string> => {
       const payload = { ...values, slug: values.slug || slugify(values.name) };
       if (id) {
         const { error } = await db.from(TABLE[kind]).update(payload).eq("id", id);
         if (error) throw error;
+        return id;
       } else {
-        const { error } = await db.from(TABLE[kind]).insert([payload]);
+        const { data, error } = await db.from(TABLE[kind]).insert([payload]).select("id").single();
         if (error) throw error;
+        return (data as { id: string }).id;
       }
     },
     onSuccess: () => {

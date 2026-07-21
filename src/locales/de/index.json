@@ -111,6 +111,12 @@
     "eventsDescription": "Jeder Court ist Community.",
     "eventsCta": "Werde Teil von etwas Größerem"
   },
+  "partnerShowcase": {
+    "badge": "Partner",
+    "title": "Gemeinsam mit unseren <1>Partnern</1>",
+    "subtitle": "Starke Marken und lokale Vereine machen <1></1> möglich.",
+    "website": "Website"
+  },
   "audience": {
     "badge": "Für jeden etwas dabei",
     "titlePart1": "Für wen ist",

@@ -52,7 +52,7 @@ function invalidateAll(qc: ReturnType<typeof useQueryClient>) {
 export function useSaveArticle() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: ArticleInput) => {
+    mutationFn: async (data: ArticleInput): Promise<string> => {
       const { data: userData } = await supabase.auth.getUser();
 
       // Stamp published_at the first time an article goes live; keep it thereafter.
@@ -79,10 +79,16 @@ export function useSaveArticle() {
           .update(payload)
           .eq("id", data.id);
         if (error) throw error;
+        return data.id;
       } else {
         payload.created_by = userData.user?.id ?? null;
-        const { error } = await (supabase as any).from("articles").insert(payload);
+        const { data: inserted, error } = await (supabase as any)
+          .from("articles")
+          .insert(payload)
+          .select("id")
+          .single();
         if (error) throw error;
+        return inserted.id as string;
       }
     },
     onSuccess: (_res, vars) => {

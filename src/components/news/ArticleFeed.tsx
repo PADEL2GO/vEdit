@@ -5,6 +5,7 @@ import { format, parseISO } from "date-fns";
 import { de } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { useArticles } from "@/hooks/useArticles";
+import { localized } from "@/lib/localized";
 import { ArticleCard } from "./ArticleCard";
 import type { Article } from "@/types/article";
 
@@ -17,7 +18,7 @@ interface ArticleFeedProps {
 
 /** Public homepage news card — image-top card matching the marketing design. */
 function PublicArticleCard({ article, index }: { article: Article; index: number }) {
-  const { t } = useTranslation("common");
+  const { t, i18n } = useTranslation("common");
   const [expanded, setExpanded] = useState(false);
 
   const dateLabel = article.published_at
@@ -37,7 +38,7 @@ function PublicArticleCard({ article, index }: { article: Article; index: number
         {article.cover_image_url ? (
           <img
             src={article.cover_image_url}
-            alt={article.title}
+            alt={localized(article, "title", i18n.language)}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
@@ -57,11 +58,11 @@ function PublicArticleCard({ article, index }: { article: Article; index: number
           </span>
         )}
         <h3 className="text-lg md:text-xl font-bold text-foreground font-display" style={{ lineHeight: 1.3 }}>
-          {article.title}
+          {localized(article, "title", i18n.language)}
         </h3>
         {article.excerpt && (
           <p className="text-sm text-muted-foreground line-clamp-3" style={{ textWrap: "pretty" }}>
-            {article.excerpt}
+            {localized(article, "excerpt", i18n.language)}
           </p>
         )}
 
@@ -105,7 +106,7 @@ function PublicArticleCard({ article, index }: { article: Article; index: number
             >
               <div
                 className="prose prose-sm dark:prose-invert max-w-none mt-3 pt-3 border-t border-border/60"
-                dangerouslySetInnerHTML={{ __html: article.body_html }}
+                dangerouslySetInnerHTML={{ __html: localized(article, "body_html", i18n.language) }}
               />
             </motion.div>
           )}

@@ -57,8 +57,10 @@ import {
   ArrowDown,
   X,
   Star,
+  Languages,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   useAdminMarketplaceItems,
   useCreateMarketplaceItem,
@@ -76,8 +78,11 @@ import {
 import { CatalogManagerDialog } from "@/components/admin/marketplace/CatalogManagerDialog";
 import { MarketplaceOrdersSection } from "@/components/admin/marketplace/MarketplaceOrdersSection";
 import type { MarketplaceItem, MarketplaceCategory, ProductType } from "@/hooks/useMarketplaceItems";
+import { useTranslateContent, toastTranslateResult } from "@/hooks/useTranslateContent";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const PRODUCT_TRANSLATE_FIELDS = ["name", "subtitle", "description", "long_description", "meta_title", "meta_description"];
 
 const CATEGORY_LABELS: Record<MarketplaceCategory, string> = {
   courtbooking: "Courtbuchung",
@@ -147,9 +152,40 @@ const AdminMarketplace = () => {
   const deleteMutation = useDeleteMarketplaceItem();
   const toggleStatusMutation = useToggleMarketplaceItemStatus();
   const syncImages = useSyncItemImages();
+  const { translateRow } = useTranslateContent();
+  const queryClient = useQueryClient();
+  const { t } = useTranslation("common");
+  const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
 
   const { data: categories } = useAdminCatalogCategories();
   const { data: brands } = useAdminCatalogBrands();
+
+  const invalidateItems = () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-marketplace-items"] });
+    queryClient.invalidateQueries({ queryKey: ["marketplace-items"] });
+  };
+
+  // Backfill: translate every product AND category's DE copy into its *_en columns. Sequential
+  // to respect DeepL rate limits; locked/empty fields are skipped server-side, so it is idempotent.
+  const translateAll = async () => {
+    const jobs = [
+      ...(items ?? []).map((i) => ({ table: "marketplace_items", id: i.id, fields: PRODUCT_TRANSLATE_FIELDS })),
+      ...(categories ?? []).map((c) => ({ table: "marketplace_categories", id: c.id, fields: ["name"] })),
+    ];
+    if (!jobs.length) return;
+    setBulk({ done: 0, total: jobs.length });
+    let ok = 0;
+    for (const job of jobs) {
+      const result = await translateRow(job);
+      if (!result.error) ok++;
+      setBulk((b) => (b ? { ...b, done: b.done + 1 } : b));
+    }
+    setBulk(null);
+    invalidateItems();
+    queryClient.invalidateQueries({ queryKey: ["admin-catalog-categories"] });
+    queryClient.invalidateQueries({ queryKey: ["catalog-categories"] });
+    toast.success(t("admin.translateAllDone", { count: ok }));
+  };
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
     queryKey: ["admin-marketplace-analytics"],
@@ -329,6 +365,12 @@ const AdminMarketplace = () => {
         itemId,
         images: gallery.filter((g) => g.url).map((g) => ({ url: g.url, alt: g.alt || null })),
       });
+      // Auto-translate the German product copy into *_en (fire-and-forget; DE stays visible
+      // immediately, EN fills in once DeepL returns).
+      translateRow({ table: "marketplace_items", id: itemId, fields: PRODUCT_TRANSLATE_FIELDS }).then((result) => {
+        toastTranslateResult(result);
+        invalidateItems();
+      });
       setDialogOpen(false);
       resetForm();
     } catch (err: any) {
@@ -384,6 +426,20 @@ const AdminMarketplace = () => {
               <Award className="w-4 h-4 mr-2" />
               Marken
             </Button>
+            {(!!items?.length || !!categories?.length) && (
+              <Button variant="outline" onClick={translateAll} disabled={!!bulk}>
+                {bulk ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t("admin.translateAllRunning", { done: bulk.done, total: bulk.total })}
+                  </>
+                ) : (
+                  <>
+                    <Languages className="w-4 h-4 mr-2" /> {t("admin.translateAll")}
+                  </>
+                )}
+              </Button>
+            )}
             <Button onClick={openCreateDialog} className="shrink-0">
               <Plus className="w-4 h-4 mr-2" />
               Neues Produkt

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Search, X, History, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -13,18 +14,18 @@ interface EventFiltersProps {
 }
 
 const EVENT_TYPES = [
-  { value: "party", label: "Party" },
-  { value: "day_drinking", label: "Day Drinking" },
-  { value: "tournament", label: "Turnier" },
-  { value: "community", label: "Community" },
-  { value: "corporate", label: "Corporate" },
-  { value: "open_play", label: "Open Play" },
+  { value: "party" },
+  { value: "day_drinking" },
+  { value: "tournament" },
+  { value: "community" },
+  { value: "corporate" },
+  { value: "open_play" },
 ];
 
 const TIME_FILTERS = [
-  { value: "today", label: "Heute" },
-  { value: "weekend", label: "Wochenende" },
-  { value: "month", label: "Diesen Monat" },
+  { value: "today", labelKey: "filters.timeToday" },
+  { value: "weekend", labelKey: "filters.timeWeekend" },
+  { value: "month", labelKey: "filters.timeMonth" },
 ];
 
 const pillClass = (active: boolean) =>
@@ -43,6 +44,8 @@ export const EventFilters = ({
   showPast,
   onShowPastChange,
 }: EventFiltersProps) => {
+  const { t } = useTranslation("events");
+  const typeLabels = t("eventTypeLabels", { returnObjects: true }) as Record<string, string>;
   const [searchValue, setSearchValue] = useState("");
 
   const handleSearchChange = (value: string) => {
@@ -67,7 +70,7 @@ export const EventFilters = ({
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(0_0%_45%)] pointer-events-none" />
         <Input
           type="text"
-          placeholder="Event, Ort oder Kategorie suchen …"
+          placeholder={t("filters.searchPlaceholder")}
           value={searchValue}
           onChange={(e) => handleSearchChange(e.target.value)}
           className="h-[46px] pl-10 pr-11 rounded-[13px] bg-[hsl(0_0%_6%)] border-[hsl(0_0%_16%)] text-base focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:ring-offset-0"
@@ -75,7 +78,7 @@ export const EventFilters = ({
         {searchValue && (
           <button
             onClick={() => handleSearchChange("")}
-            aria-label="Suche zurücksetzen"
+            aria-label={t("filters.clearSearchAria")}
             className="absolute right-2 top-1/2 -translate-y-1/2 w-[30px] h-[30px] rounded-[9px] bg-[hsl(0_0%_12%)] text-[hsl(0_0%_70%)] hover:text-foreground flex items-center justify-center transition-colors"
           >
             <X className="w-3.5 h-3.5" />
@@ -86,7 +89,7 @@ export const EventFilters = ({
       {/* Category Pills */}
       <div className="flex flex-wrap gap-2">
         <button onClick={() => onTypeChange(null)} className={pillClass(!selectedType)}>
-          Alle
+          {t("filters.all")}
         </button>
         {EVENT_TYPES.map((type) => (
           <button
@@ -94,7 +97,7 @@ export const EventFilters = ({
             onClick={() => onTypeChange(selectedType === type.value ? null : type.value)}
             className={pillClass(selectedType === type.value)}
           >
-            {type.label}
+            {typeLabels[type.value] || type.value}
           </button>
         ))}
       </div>
@@ -102,7 +105,7 @@ export const EventFilters = ({
       {/* Time Pills + Past + Reset */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-stat text-[11px] tracking-[0.14em] uppercase text-[hsl(0_0%_45%)] mr-1">
-          Zeitraum
+          {t("filters.timeframeLabel")}
         </span>
         {TIME_FILTERS.map((time) => (
           <button
@@ -110,7 +113,7 @@ export const EventFilters = ({
             onClick={() => onTimeChange(selectedTime === time.value ? null : time.value)}
             className={pillClass(selectedTime === time.value)}
           >
-            {time.label}
+            {t(time.labelKey)}
           </button>
         ))}
 
@@ -118,7 +121,7 @@ export const EventFilters = ({
 
         <button onClick={() => onShowPastChange(!showPast)} className={pillClass(showPast)}>
           <History className="w-[13px] h-[13px]" />
-          Vergangene
+          {t("filters.past")}
         </button>
 
         {hasActiveFilters && (
@@ -127,7 +130,7 @@ export const EventFilters = ({
             className="inline-flex items-center gap-1.5 px-2.5 py-2 min-h-[36px] text-[13px] font-semibold text-[hsl(0_0%_55%)] hover:text-foreground transition-colors"
           >
             <RotateCcw className="w-[13px] h-[13px]" />
-            Zurücksetzen
+            {t("filters.reset")}
           </button>
         )}
       </div>

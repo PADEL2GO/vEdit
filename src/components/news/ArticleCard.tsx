@@ -3,11 +3,14 @@ import { motion } from "framer-motion";
 import { CalendarDays, ChevronDown, ChevronUp, ExternalLink, Image as ImageIcon } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { de } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { localized } from "@/lib/localized";
 import type { Article } from "@/types/article";
 
 export function ArticleCard({ article }: { article: Article }) {
+  const { t, i18n } = useTranslation("common");
   const [expanded, setExpanded] = useState(false);
 
   const dateLabel = article.published_at
@@ -23,7 +26,7 @@ export function ArticleCard({ article }: { article: Article }) {
             {article.cover_image_url ? (
               <img
                 src={article.cover_image_url}
-                alt={article.title}
+                alt={localized(article, "title", i18n.language)}
                 className="h-full w-full object-cover"
                 loading="lazy"
               />
@@ -43,11 +46,11 @@ export function ArticleCard({ article }: { article: Article }) {
             )}
 
             <h3 className="text-xl md:text-2xl font-bold leading-tight text-foreground">
-              {article.title}
+              {localized(article, "title", i18n.language)}
             </h3>
 
             {article.excerpt && (
-              <p className="text-sm md:text-base text-muted-foreground">{article.excerpt}</p>
+              <p className="text-sm md:text-base text-muted-foreground">{localized(article, "excerpt", i18n.language)}</p>
             )}
 
             <div className="flex flex-wrap items-center gap-1 pt-1">
@@ -60,11 +63,11 @@ export function ArticleCard({ article }: { article: Article }) {
                 >
                   {expanded ? (
                     <>
-                      Weniger anzeigen <ChevronUp className="ml-1 h-4 w-4" />
+                      {t("newsShowLess")} <ChevronUp className="ml-1 h-4 w-4" />
                     </>
                   ) : (
                     <>
-                      Artikel lesen <ChevronDown className="ml-1 h-4 w-4" />
+                      {t("newsReadArticle")} <ChevronDown className="ml-1 h-4 w-4" />
                     </>
                   )}
                 </Button>
@@ -77,7 +80,7 @@ export function ArticleCard({ article }: { article: Article }) {
                   asChild
                 >
                   <a href={article.source_url} target="_blank" rel="noopener noreferrer">
-                    Zur Quelle <ExternalLink className="ml-1 h-4 w-4" />
+                    {t("newsToSource")} <ExternalLink className="ml-1 h-4 w-4" />
                   </a>
                 </Button>
               )}
@@ -90,7 +93,7 @@ export function ArticleCard({ article }: { article: Article }) {
           <div className="border-t border-border px-5 md:px-6 py-5">
             <div
               className="prose prose-sm md:prose-base dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: article.body_html }}
+              dangerouslySetInnerHTML={{ __html: localized(article, "body_html", i18n.language) }}
             />
           </div>
         )}

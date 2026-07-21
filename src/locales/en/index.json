@@ -111,6 +111,12 @@
     "eventsDescription": "Every court is community.",
     "eventsCta": "Become part of something bigger"
   },
+  "partnerShowcase": {
+    "badge": "Partners",
+    "title": "Together with our <1>partners</1>",
+    "subtitle": "Strong brands and local clubs make <1></1> possible.",
+    "website": "Website"
+  },
   "audience": {
     "badge": "Something for everyone",
     "titlePart1": "Who is",

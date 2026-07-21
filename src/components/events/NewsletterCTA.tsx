@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useTranslation, Trans } from "react-i18next";
 import { Mail, CheckCircle2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 import BrandName from "@/components/BrandName";
 
 export const NewsletterCTA = () => {
+  const { t } = useTranslation("events");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -30,12 +32,12 @@ export const NewsletterCTA = () => {
       setEmail("");
       toast.success(
         already
-          ? "Du bist bereits angemeldet!"
-          : "Fast geschafft! Bitte bestätige die Anmeldung über den Link in deiner E-Mail.",
+          ? t("newsletter.alreadyToast")
+          : t("newsletter.confirmToast"),
       );
     } catch (error) {
       console.error("Newsletter subscription error:", error);
-      toast.error("Anmeldung fehlgeschlagen. Bitte versuche es später erneut.");
+      toast.error(t("newsletter.errorToast"));
     } finally {
       setIsLoading(false);
     }
@@ -52,10 +54,10 @@ export const NewsletterCTA = () => {
         </span>
         <div className="flex flex-col gap-0.5">
           <h2 className="font-display font-bold text-xl tracking-[-0.01em] text-foreground">
-            Kein Event verpassen
+            {t("newsletter.title")}
           </h2>
           <span className="text-[13.5px] text-[hsl(0_0%_60%)]">
-            Neue Events zuerst in deinem Postfach — kein Spam, versprochen.
+            {t("newsletter.subtitle")}
           </span>
         </div>
       </div>
@@ -69,8 +71,8 @@ export const NewsletterCTA = () => {
           <CheckCircle2 className="w-[19px] h-[19px] text-primary flex-none" />
           <span className="text-sm font-semibold text-foreground">
             {alreadySubscribed
-              ? "Du bist bereits angemeldet! 🎾"
-              : "Fast geschafft! Bitte bestätige die Anmeldung über den Link in deiner E-Mail. 📩"}
+              ? t("newsletter.alreadyInline")
+              : t("newsletter.confirmInline")}
           </span>
         </motion.div>
       ) : (
@@ -78,20 +80,22 @@ export const NewsletterCTA = () => {
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2.5">
             <Input
               type="email"
-              placeholder="deine@email.de"
+              placeholder={t("newsletter.emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               className="h-[46px] flex-1 rounded-[13px] bg-[hsl(0_0%_6%)] border-[hsl(0_0%_16%)] text-base focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 focus-visible:ring-offset-0"
             />
             <Button type="submit" variant="lime" disabled={isLoading} className="h-[46px]">
-              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Anmelden"}
+              {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : t("newsletter.submit")}
             </Button>
           </form>
 
           <p className="text-xs text-[hsl(0_0%_50%)]">
-            Mit der Anmeldung stimmst du zu, Event-Updates von <BrandName inline /> zu erhalten.
-            Du kannst dich jederzeit abmelden.
+            <Trans
+              i18nKey="events:newsletter.consent"
+              components={[<BrandName inline />]}
+            />
           </p>
         </>
       )}

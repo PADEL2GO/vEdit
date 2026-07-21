@@ -38,28 +38,35 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Calendar, 
-  ExternalLink, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Calendar,
+  ExternalLink,
   Search,
+  Languages,
+  Loader2,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
-import { EventForm, EVENT_TYPES } from "@/components/admin/events";
+import { EventForm, EVENT_TYPES, EVENT_TRANSLATE_FIELDS } from "@/components/admin/events";
 import type { Event, Location } from "@/components/admin/events";
+import { useTranslateContent, toastTranslateResult } from "@/hooks/useTranslateContent";
 
 export default function AdminEvents() {
   const queryClient = useQueryClient();
+  const { translateRow } = useTranslateContent();
+  const { t } = useTranslation("common");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
 
   const { data: events, isLoading } = useQuery({
     queryKey: ["admin-events"],
@@ -153,6 +160,23 @@ export default function AdminEvents() {
   const publishedCount = events?.filter((e) => e.is_published).length || 0;
   const draftCount = events?.filter((e) => !e.is_published).length || 0;
 
+  // Backfill: translate every event's DE copy into its *_en columns. Sequential to respect
+  // DeepL rate limits; locked/empty fields are skipped server-side, so it is idempotent.
+  const translateAll = async () => {
+    if (!events?.length) return;
+    setBulk({ done: 0, total: events.length });
+    let ok = 0;
+    for (const event of events) {
+      const result = await translateRow({ table: "events", id: event.id, fields: EVENT_TRANSLATE_FIELDS });
+      if (!result.error) ok++;
+      setBulk((b) => (b ? { ...b, done: b.done + 1 } : b));
+    }
+    setBulk(null);
+    queryClient.invalidateQueries({ queryKey: ["admin-events"] });
+    queryClient.invalidateQueries({ queryKey: ["public-events"] });
+    toast.success(t("admin.translateAllDone", { count: ok }));
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -163,7 +187,22 @@ export default function AdminEvents() {
               {publishedCount} veröffentlicht, {draftCount} Entwürfe
             </p>
           </div>
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <div className="flex items-center gap-2">
+            {!!events?.length && (
+              <Button variant="outline" onClick={translateAll} disabled={!!bulk}>
+                {bulk ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t("admin.translateAllRunning", { done: bulk.done, total: bulk.total })}
+                  </>
+                ) : (
+                  <>
+                    <Languages className="h-4 w-4 mr-2" /> {t("admin.translateAll")}
+                  </>
+                )}
+              </Button>
+            )}
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                 <Plus className="h-4 w-4 mr-2" />
@@ -183,6 +222,7 @@ export default function AdminEvents() {
               />
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Filters */}

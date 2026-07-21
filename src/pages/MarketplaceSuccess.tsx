@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation, Trans } from "react-i18next";
 import { motion } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -19,6 +20,7 @@ interface OrderState {
 }
 
 const MarketplaceSuccess = () => {
+  const { t } = useTranslation("marketplace");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,8 +32,8 @@ const MarketplaceSuccess = () => {
   return (
     <>
       <Helmet>
-        <title>Bestellung bestätigt | PADEL2GO Marketplace</title>
-        <meta name="description" content="Deine Bestellung im PADEL2GO Marketplace ist bestätigt." />
+        <title>{t("success.metaTitle")}</title>
+        <meta name="description" content={t("success.metaDescription")} />
       </Helmet>
 
       <Navigation />
@@ -58,20 +60,26 @@ const MarketplaceSuccess = () => {
             className="flex flex-col gap-2.5"
           >
             <h1 className="font-display font-extrabold tracking-tight text-[clamp(30px,5vw,42px)]">
-              Bestellung bestätigt! 🎾
+              {t("success.title")}
             </h1>
             <p className="text-base leading-relaxed text-muted-foreground">
-              Deine Bestellbestätigung ist unterwegs
               {order?.mail ? (
-                <> an <span className="text-foreground font-semibold">{order.mail}</span></>
+                <Trans
+                  i18nKey="marketplace:success.bodyWithMail"
+                  values={{ mail: order.mail }}
+                  components={{ 1: <span className="text-foreground font-semibold" /> }}
+                />
               ) : (
-                " an deine E-Mail"
+                t("success.bodyNoMail")
               )}
-              .
             </p>
             {orderNumber && (
               <span className="font-stat text-[13px] text-muted-foreground break-all">
-                Bestellnummer <span className="text-primary">{orderNumber}</span>
+                <Trans
+                  i18nKey="marketplace:success.orderNumber"
+                  values={{ number: orderNumber }}
+                  components={{ 1: <span className="text-primary" /> }}
+                />
               </span>
             )}
           </motion.div>
@@ -86,14 +94,14 @@ const MarketplaceSuccess = () => {
               <div className="flex flex-col gap-3 text-left">
                 {order.product && (
                   <>
-                    <DetailRow label="Produkt" value={order.product} />
+                    <DetailRow label={t("success.rowProduct")} value={order.product} />
                     <div className="h-px bg-border/70" />
                   </>
                 )}
                 {order.addrName && (
                   <>
                     <div className="flex justify-between items-start gap-2.5">
-                      <span className="text-[13.5px] text-muted-foreground">Lieferung an</span>
+                      <span className="text-[13.5px] text-muted-foreground">{t("success.rowDeliveryTo")}</span>
                       <span className="flex flex-col items-end text-right">
                         <span className="text-sm font-semibold">{order.addrName}</span>
                         {order.addrLine && <span className="text-[13px] text-muted-foreground">{order.addrLine}</span>}
@@ -105,9 +113,9 @@ const MarketplaceSuccess = () => {
                 {!!order.spent && order.spent > 0 && (
                   <>
                     <div className="flex justify-between items-center gap-2.5">
-                      <span className="text-[13.5px] text-muted-foreground">Points eingelöst</span>
+                      <span className="text-[13.5px] text-muted-foreground">{t("success.rowPointsRedeemed")}</span>
                       <span className="font-stat text-[13.5px] font-bold text-primary">
-                        −{ptsFmt(order.spent)} Points
+                        {t("success.pointsValue", { points: ptsFmt(order.spent) })}
                       </span>
                     </div>
                     <div className="h-px bg-border/70" />
@@ -115,7 +123,7 @@ const MarketplaceSuccess = () => {
                 )}
                 {order.total && (
                   <div className="flex justify-between items-center gap-2.5">
-                    <span className="text-[13.5px] text-muted-foreground">Bezahlt</span>
+                    <span className="text-[13.5px] text-muted-foreground">{t("success.rowPaid")}</span>
                     <span className="inline-flex items-center gap-2">
                       <span className="font-stat text-[15px] font-bold text-primary">{order.total}</span>
                       {order.method && (
@@ -138,7 +146,7 @@ const MarketplaceSuccess = () => {
             className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-white/[0.04] px-4 py-2 text-[13px] font-semibold text-foreground/70"
           >
             <Truck className="w-3.5 h-3.5 text-primary" />
-            Versand in 1–2 Werktagen · Tracking-Link per Mail
+            {t("success.shippingNote")}
           </motion.span>
 
           <motion.div
@@ -150,13 +158,13 @@ const MarketplaceSuccess = () => {
             <div className="flex-1 min-w-[200px]">
               <Button variant="outline" size="lg" className="w-full" onClick={() => navigate("/marketplace")}>
                 <ShoppingBag className="w-4 h-4 mr-1" />
-                Weiter shoppen
+                {t("success.keepShopping")}
               </Button>
             </div>
             <div className="flex-1 min-w-[200px]">
               <Button variant="lime" size="lg" className="w-full" onClick={() => navigate("/booking")}>
                 <CalendarDays className="w-4 h-4 mr-1" />
-                Court buchen
+                {t("success.bookCourt")}
               </Button>
             </div>
           </motion.div>

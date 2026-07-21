@@ -26,6 +26,7 @@ import {
   CalendarX
 } from "lucide-react";
 import { EventCard } from "@/components/events";
+import { localized } from "@/lib/localized";
 
 interface DbArtist {
   id: string;
@@ -222,6 +223,13 @@ const EventDetail = () => {
     ? Math.ceil((startDate.getTime() - Date.now()) / 86_400_000)
     : null;
   const isSoon = !isPast && daysUntil !== null && daysUntil <= 7;
+  const localizedTitle = localized(event, "title", i18n.language);
+  const localizedDescription = localized(event, "description", i18n.language);
+  const localizedPriceLabel = localized(event, "price_label", i18n.language);
+  const highlights =
+    isEn && Array.isArray((event as any).highlights_en) && (event as any).highlights_en.length
+      ? ((event as any).highlights_en as string[])
+      : event.highlights;
   const fullAddress = [
     event.venue_name || event.locations?.name,
     event.address_line1 || event.locations?.address,
@@ -315,20 +323,20 @@ const EventDetail = () => {
                   )}
                   {isPast && (
                     <span className="inline-flex items-center rounded-full border border-white/20 bg-black/60 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur">
-                      Bereits vorbei
+                      {t("detail.past")}
                     </span>
                   )}
                   {isSoon && (
                     <span className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-black/60 px-3 py-1 text-xs font-semibold text-primary backdrop-blur">
                       <span className="w-[7px] h-[7px] rounded-full bg-primary animate-pulse" />
-                      {daysUntil === 0 ? "Heute!" : `In ${daysUntil} Tagen`}
+                      {daysUntil === 0 ? t("detail.today") : t("detail.inDays", { count: daysUntil })}
                     </span>
                   )}
                 </div>
 
                 {/* Title */}
                 <h1 className="max-w-[820px] text-[clamp(28px,4.6vw,48px)] font-black leading-[1.08] tracking-tight text-foreground">
-                  {event.title}
+                  {localizedTitle}
                 </h1>
 
                 {/* Meta Info */}
@@ -368,11 +376,11 @@ const EventDetail = () => {
                         {t("detail.aboutHeading")}
                       </h2>
                       <p className="text-[15.5px] leading-[1.7] text-muted-foreground whitespace-pre-line">
-                        {event.description}
+                        {localizedDescription}
                       </p>
-                      {event.highlights && event.highlights.length > 0 && (
+                      {highlights && highlights.length > 0 && (
                         <div className="flex flex-wrap gap-2 pt-0.5">
-                          {event.highlights.map((highlight) => (
+                          {highlights.map((highlight) => (
                             <span
                               key={highlight}
                               className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/[0.08] px-3.5 py-1.5 text-[12.5px] font-semibold text-primary"
@@ -396,7 +404,7 @@ const EventDetail = () => {
                           {t("detail.lineupHeading")}
                         </h2>
                         <span className="font-stat text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                          {event.event_artists.length} Acts
+                          {t("detail.actsCount", { count: event.event_artists.length })}
                         </span>
                       </div>
                       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(240px,100%),1fr))] gap-2.5">
@@ -464,7 +472,7 @@ const EventDetail = () => {
                           {t("detail.partnersHeading")}
                         </h2>
                         <span className="font-stat text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                          on board
+                          {t("detail.partnersOnBoard")}
                         </span>
                       </div>
                       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(130px,100%),1fr))] gap-3">
@@ -540,9 +548,9 @@ const EventDetail = () => {
                       </h3>
                     </div>
 
-                    {event.price_label && (
+                    {localizedPriceLabel && (
                       <div className="font-stat text-[34px] font-bold leading-none text-primary">
-                        {event.price_label}
+                        {localizedPriceLabel}
                       </div>
                     )}
 
@@ -612,14 +620,14 @@ const EventDetail = () => {
                       key={similar.id}
                       id={similar.id}
                       slug={similar.slug || similar.id}
-                      title={similar.title}
-                      description={similar.description}
+                      title={localized(similar, "title", i18n.language)}
+                      description={localized(similar, "description", i18n.language)}
                       city={similar.city}
                       start_at={similar.start_at}
                       end_at={similar.end_at}
                       image_url={similar.image_url}
                       event_type={similar.event_type}
-                      price_label={similar.price_label}
+                      price_label={localized(similar, "price_label", i18n.language)}
                       highlights={similar.highlights}
                       venue_name={similar.venue_name || similar.locations?.name || null}
                       event_artists={similar.event_artists || []}

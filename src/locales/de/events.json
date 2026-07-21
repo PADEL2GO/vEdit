@@ -22,8 +22,15 @@
     "subtitleUpcoming": "Finde dein nächstes Padel-Erlebnis.",
     "subtitlePast": "Schau dir an, was bisher bei uns los war.",
     "emptyTitlePast": "Keine vergangenen Events",
+    "emptyTitleUpcoming": "Keine Events gefunden",
     "emptyTextUpcoming": "Aktuell sind keine Events geplant. Trag dich für den Newsletter ein, um als Erster zu erfahren, wenn neue Events kommen.",
+    "emptyTextFiltered": "Versuch andere Filter — oder schau bald wieder rein.",
     "emptyTextPast": "Es gibt noch keine vergangenen Events zum Anzeigen.",
+    "resetFilters": "Filter zurücksetzen",
+    "comingSoonTitle": "Events kommen bald",
+    "comingSoonText": "Die ersten P2G Events gehen zum Launch am <1>{{date}}</1> live. Trag dich in den Newsletter ein, um nichts zu verpassen.",
+    "countSingular": "Event",
+    "countPlural": "Events",
     "newsletterCta": "Newsletter abonnieren"
   },
   "benefits": {
@@ -31,6 +38,22 @@
     "titlePrefix": "Was dich",
     "titleHighlight": "erwartet",
     "subtitle": "Unsere Events sind mehr als nur Padel – sie sind Community-Erlebnisse.",
+    "communityFirstBadge": "Community first",
+    "networkingTitle": "Komm allein.<1></1>Geh mit <2>Crew.</2>",
+    "networkingText": "Matchmaking vor Ort: Wir mixen die Teams, die Courts rotieren — nach zwei Stunden kennst du den halben Court.",
+    "networkBadge": "Teil vom P2G Network",
+    "soloStat": "Solo? Kein Problem.",
+    "soloTitle": "Wir matchen dich vor Ort.",
+    "soloText": "Komm ohne festen Partner — geh mit neuen Kontakten nach Hause. Das Matchen übernehmen wir.",
+    "partnerClubsTitle": "Partnervereine",
+    "partnerClubsText": "Wir bauen das Netzwerk stetig aus.",
+    "allLevelsTitle": "Für alle Level",
+    "allLevelsText": "Anfänger bis Profi willkommen.",
+    "afterplayBadge": "Afterplay",
+    "afterplayTitle": "Bar, Beats, Bleiben.",
+    "afterplayText": "Nach dem letzten Ballwechsel legt der DJ auf — die besten Rallyes werden an der Bar nachbesprochen.",
+    "alwaysIncludedTitle": "Was immer dabei ist",
+    "alwaysIncludedSub": "bei jedem Event",
     "items": [
       {
         "title": "DJs & Live Music",
@@ -74,7 +97,43 @@
     "capacityAvailable": "Nur {{n}} Plätze verfügbar",
     "ticketsCta": "Tickets sichern",
     "ticketsNote": "Ticketverkauf über externen Anbieter",
-    "similarHeading": "Ähnliche Events"
+    "similarHeading": "Ähnliche Events",
+    "past": "Bereits vorbei",
+    "today": "Heute!",
+    "inDays": "In {{count}} Tagen",
+    "actsCount": "{{count}} Acts",
+    "partnersOnBoard": "on board"
+  },
+  "card": {
+    "artistsCount": "{{count}} Artists",
+    "past": "Vorbei",
+    "detailsCta": "Details"
+  },
+  "filters": {
+    "searchPlaceholder": "Event, Ort oder Kategorie suchen …",
+    "clearSearchAria": "Suche zurücksetzen",
+    "all": "Alle",
+    "timeToday": "Heute",
+    "timeWeekend": "Wochenende",
+    "timeMonth": "Diesen Monat",
+    "timeframeLabel": "Zeitraum",
+    "past": "Vergangene",
+    "reset": "Zurücksetzen"
+  },
+  "featured": {
+    "detailsCta": "Details & Tickets"
+  },
+  "newsletter": {
+    "alreadyToast": "Du bist bereits angemeldet!",
+    "confirmToast": "Fast geschafft! Bitte bestätige die Anmeldung über den Link in deiner E-Mail.",
+    "errorToast": "Anmeldung fehlgeschlagen. Bitte versuche es später erneut.",
+    "title": "Kein Event verpassen",
+    "subtitle": "Neue Events zuerst in deinem Postfach — kein Spam, versprochen.",
+    "alreadyInline": "Du bist bereits angemeldet! 🎾",
+    "confirmInline": "Fast geschafft! Bitte bestätige die Anmeldung über den Link in deiner E-Mail. 📩",
+    "emailPlaceholder": "deine@email.de",
+    "submit": "Anmelden",
+    "consent": "Mit der Anmeldung stimmst du zu, Event-Updates von <1></1> zu erhalten. Du kannst dich jederzeit abmelden."
   },
   "time": {
     "withSuffix": "{{time}} Uhr",

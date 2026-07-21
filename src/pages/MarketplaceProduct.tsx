@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useTranslation, Trans } from "react-i18next";
 import { motion } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -15,9 +16,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useP2GPoints } from "@/hooks/useP2GPoints";
 import { usePointsValue } from "@/hooks/usePointsValue";
 import { eur, ptsFmt, discountPct, maxRedeemablePoints } from "@/lib/marketplace";
+import { localized } from "@/lib/localized";
 import type { MarketplaceItem } from "@/hooks/useMarketplaceItems";
 
 const MarketplaceProduct = () => {
+  const { t, i18n } = useTranslation("marketplace");
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { data, isLoading } = useMarketplaceProduct(slug);
@@ -58,10 +61,10 @@ const MarketplaceProduct = () => {
           <span className="w-16 h-16 rounded-full bg-white/5 border border-border flex items-center justify-center text-muted-foreground">
             <PackageX className="w-8 h-8" />
           </span>
-          <h1 className="text-2xl font-bold font-display">Produkt nicht gefunden</h1>
+          <h1 className="text-2xl font-bold font-display">{t("product.notFound")}</h1>
           <Button variant="lime" onClick={() => navigate("/marketplace")}>
             <ArrowLeft className="w-4 h-4 mr-1" />
-            Zurück zum Shop
+            {t("product.backToShop")}
           </Button>
         </main>
         <Footer />
@@ -70,7 +73,8 @@ const MarketplaceProduct = () => {
   }
 
   const brandName = brands?.find((b) => b.id === product.brand_id)?.name ?? product.partner_name ?? "P2G";
-  const categoryName = categories?.find((c) => c.id === product.category_id)?.name ?? "Equipment";
+  const categoryRow = categories?.find((c) => c.id === product.category_id);
+  const categoryName = categoryRow ? localized(categoryRow, "name", i18n.language) : t("product.categoryFallback");
   const price = product.price_cents ?? 0;
   const uvp = product.compare_at_price_cents ?? null;
   const off = discountPct(price, uvp);
@@ -83,7 +87,7 @@ const MarketplaceProduct = () => {
   const maxSaveCents = Math.floor(maxRedeem * centsPerPoint);
 
   const specs = Array.isArray(product.specs) ? product.specs : [];
-  const descParas = (product.long_description || product.description || "")
+  const descParas = (localized(product, "long_description", i18n.language) || localized(product, "description", i18n.language) || "")
     .split(/\n{2,}|\n/)
     .map((s) => s.trim())
     .filter(Boolean);
@@ -96,8 +100,8 @@ const MarketplaceProduct = () => {
   return (
     <>
       <Helmet>
-        <title>{product.meta_title || `${product.name} | PADEL2GO Marketplace`}</title>
-        <meta name="description" content={product.meta_description || product.description || ""} />
+        <title>{product.meta_title || t("product.metaTitle", { name: localized(product, "name", i18n.language) })}</title>
+        <meta name="description" content={product.meta_description || localized(product, "description", i18n.language) || ""} />
       </Helmet>
 
       <Navigation />
@@ -112,12 +116,12 @@ const MarketplaceProduct = () => {
           {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 flex-wrap text-[13.5px]">
             <button onClick={() => navigate("/marketplace")} className="text-muted-foreground hover:text-primary">
-              Marketplace
+              {t("breadcrumb.root")}
             </button>
             <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
             <span className="text-muted-foreground">{categoryName}</span>
             <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
-            <span className="font-semibold text-foreground">{product.name}</span>
+            <span className="font-semibold text-foreground">{localized(product, "name", i18n.language)}</span>
           </div>
 
           {/* Detail grid */}
@@ -125,10 +129,10 @@ const MarketplaceProduct = () => {
             {/* Gallery */}
             <div className="flex flex-col gap-3">
               <div className="relative rounded-[20px] overflow-hidden border border-border/80 bg-gradient-to-br from-white/[0.04] to-black min-h-[440px]">
-                <img src={images[mainIdx]} alt={product.name} className="w-full h-full object-cover absolute inset-0" />
+                <img src={images[mainIdx]} alt={localized(product, "name", i18n.language)} className="w-full h-full object-cover absolute inset-0" />
                 {soldOut && (
                   <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex rounded-full border border-border bg-black/80 px-5 py-2 text-sm font-bold backdrop-blur">
-                    Ausverkauft
+                    {t("stock.soldOut")}
                   </span>
                 )}
               </div>
@@ -158,47 +162,56 @@ const MarketplaceProduct = () => {
                 {product.is_featured && (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/35 bg-primary/10 px-2.5 py-1 text-[11.5px] font-bold text-primary">
                     <Flame className="w-3 h-3" />
-                    Bestseller
+                    {t("card.bestseller")}
                   </span>
                 )}
               </div>
 
               <div className="flex flex-col gap-2">
                 <h1 className="font-display font-extrabold tracking-tight text-[clamp(26px,3.4vw,34px)] leading-[1.12]">
-                  {product.name}
+                  {localized(product, "name", i18n.language)}
                 </h1>
                 {product.subtitle && (
-                  <p className="text-[15px] leading-relaxed text-muted-foreground">{product.subtitle}</p>
+                  <p className="text-[15px] leading-relaxed text-muted-foreground">{localized(product, "subtitle", i18n.language)}</p>
                 )}
               </div>
 
               <div className="flex flex-col gap-1">
                 <div className="flex items-baseline gap-3 flex-wrap">
                   <span className="font-stat font-bold text-[34px] text-primary leading-none">{eur(price)}</span>
-                  {uvp && <span className="font-stat text-[14.5px] text-muted-foreground/70 line-through">UVP {eur(uvp)}</span>}
+                  {uvp && <span className="font-stat text-[14.5px] text-muted-foreground/70 line-through">{t("product.rrp", { price: eur(uvp) })}</span>}
                   {off > 0 && (
                     <span className="inline-flex items-center rounded-full border border-primary/35 bg-primary/10 px-2.5 py-1 font-stat text-[12px] font-bold text-primary">
                       −{off}%
                     </span>
                   )}
                 </div>
-                <span className="text-xs text-muted-foreground">inkl. MwSt. · kostenloser Versand</span>
+                <span className="text-xs text-muted-foreground">{t("product.taxShipping")}</span>
               </div>
 
               {pointsEnabled && (user ? (
                 <div className="flex items-center gap-3 rounded-2xl border border-primary/25 bg-primary/[0.07] px-3.5 py-3">
                   <Coins className="w-[18px] h-[18px] text-primary shrink-0" />
                   <span className="text-[13px] leading-snug text-foreground/80">
-                    Mit deinen Points: bis zu{" "}
-                    <span className="font-stat font-bold text-primary">−{eur(maxSaveCents)}</span> Rabatt im Checkout.
+                    <Trans
+                      i18nKey="marketplace:product.pointsUser"
+                      values={{ amount: eur(maxSaveCents) }}
+                      components={{ 1: <span className="font-stat font-bold text-primary" /> }}
+                    />
                   </span>
                 </div>
               ) : (
                 <div className="flex items-center gap-3 rounded-2xl border border-border bg-white/[0.03] px-3.5 py-3">
                   <Gift className="w-[17px] h-[17px] text-primary shrink-0" />
                   <span className="text-[12.5px] leading-snug text-muted-foreground">
-                    Mit P2G Konto zahlst du bis zu <span className="font-stat font-bold text-primary">{maxPercent}%</span> mit Points.{" "}
-                    <button onClick={() => navigate("/auth")} className="font-bold text-primary underline">Einloggen</button>
+                    <Trans
+                      i18nKey="marketplace:product.pointsGuest"
+                      values={{ maxPercent }}
+                      components={{
+                        1: <span className="font-stat font-bold text-primary" />,
+                        2: <button onClick={() => navigate("/auth")} className="font-bold text-primary underline" />,
+                      }}
+                    />
                   </span>
                 </div>
               ))}
@@ -206,16 +219,20 @@ const MarketplaceProduct = () => {
               <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full ${stockDot}`} />
                 <span className={`text-[13.5px] font-bold ${stockCol}`}>
-                  {soldOut ? "Ausverkauft" : low ? `Nur noch ${product.stock_quantity} Stück` : "Auf Lager"}
+                  {soldOut
+                    ? t("stock.soldOut")
+                    : low
+                      ? t("stock.lowLong", { count: product.stock_quantity })
+                      : t("stock.inStock")}
                 </span>
                 <span className="text-[13px] text-muted-foreground">
-                  {soldOut ? "· bald wieder verfügbar" : "· Lieferung in 2–4 Werktagen"}
+                  {soldOut ? t("product.restockNote") : t("product.deliveryNote")}
                 </span>
               </div>
 
               {soldOut ? (
                 <Button variant="outline" size="xl" className="w-full" disabled>
-                  Zurzeit nicht verfügbar
+                  {t("product.unavailableCta")}
                 </Button>
               ) : (
                 <div className="flex gap-3 items-stretch">
@@ -238,7 +255,7 @@ const MarketplaceProduct = () => {
                   </div>
                   <Button variant="hero" size="xl" className="flex-1" onClick={buyNow}>
                     <Zap className="w-4 h-4 mr-1" />
-                    Jetzt kaufen
+                    {t("product.buyNow")}
                   </Button>
                 </div>
               )}
@@ -246,15 +263,15 @@ const MarketplaceProduct = () => {
               <div className="flex flex-col gap-2.5 pt-0.5">
                 <span className="inline-flex items-center gap-2.5 text-[13px] text-muted-foreground">
                   <Truck className="w-[15px] h-[15px] text-primary" />
-                  Kostenloser Versand
+                  {t("product.trustShipping")}
                 </span>
                 <span className="inline-flex items-center gap-2.5 text-[13px] text-muted-foreground">
                   <RotateCcw className="w-[15px] h-[15px] text-primary" />
-                  14 Tage Widerrufsrecht
+                  {t("product.trustReturns")}
                 </span>
                 <span className="inline-flex items-center gap-2.5 text-[13px] text-muted-foreground">
                   <ShieldCheck className="w-[15px] h-[15px] text-primary" />
-                  Sichere Zahlung über Stripe — Karte &amp; PayPal
+                  {t("product.trustPayment")}
                 </span>
               </div>
             </div>
@@ -264,7 +281,7 @@ const MarketplaceProduct = () => {
           <div className="grid gap-6 md:grid-cols-[1.05fr_0.95fr] items-start">
             {specs.length > 0 && (
               <div className="rounded-2xl border border-border/60 bg-gradient-card p-6">
-                <h3 className="font-display font-bold text-[17px] mb-2">Technische Details</h3>
+                <h3 className="font-display font-bold text-[17px] mb-2">{t("product.specsHeading")}</h3>
                 <div className="flex flex-col">
                   {specs.map((sp, i) => (
                     <div
@@ -280,7 +297,7 @@ const MarketplaceProduct = () => {
             )}
             {descParas.length > 0 && (
               <div className="rounded-2xl border border-border/60 bg-gradient-card p-6">
-                <h3 className="font-display font-bold text-[17px] mb-3">Beschreibung</h3>
+                <h3 className="font-display font-bold text-[17px] mb-3">{t("product.descriptionHeading")}</h3>
                 <div className="flex flex-col gap-3">
                   {descParas.map((text, i) => (
                     <p key={i} className="text-[14.5px] leading-relaxed text-foreground/70">{text}</p>
@@ -293,7 +310,7 @@ const MarketplaceProduct = () => {
           {/* Related */}
           {(data?.related.length || 0) > 0 && (
             <div className="flex flex-col gap-4 mt-2">
-              <h3 className="font-display font-bold text-[21px] tracking-tight">Passt dazu</h3>
+              <h3 className="font-display font-bold text-[21px] tracking-tight">{t("product.relatedHeading")}</h3>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-[18px]">
                 {data!.related.map((r) => (
                   <RelatedCard
@@ -319,6 +336,7 @@ const MarketplaceProduct = () => {
 };
 
 function RelatedCard({ p, brand, onOpen }: { p: MarketplaceItem; brand: string; onOpen: () => void }) {
+  const { t, i18n } = useTranslation("marketplace");
   const price = p.price_cents ?? 0;
   const uvp = p.compare_at_price_cents ?? null;
   const off = discountPct(price, uvp);
@@ -331,19 +349,19 @@ function RelatedCard({ p, brand, onOpen }: { p: MarketplaceItem; brand: string; 
     >
       <div className="relative overflow-hidden">
         <div className={`h-[170px] ${soldOut ? "opacity-45 grayscale" : ""}`}>
-          <img src={p.image_url || "/placeholder.svg"} alt={p.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <img src={p.image_url || "/placeholder.svg"} alt={localized(p, "name", i18n.language)} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
         </div>
         {off > 0 && (
           <span className="absolute top-3 right-3 inline-flex items-center rounded-full border border-white/15 bg-black/70 px-2.5 py-1 font-stat text-[11.5px] font-bold backdrop-blur">−{off}%</span>
         )}
         {soldOut && (
-          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex rounded-full border border-border bg-black/80 px-4 py-1.5 text-[12.5px] font-bold backdrop-blur">Ausverkauft</span>
+          <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex rounded-full border border-border bg-black/80 px-4 py-1.5 text-[12.5px] font-bold backdrop-blur">{t("stock.soldOut")}</span>
         )}
       </div>
       <div className="flex flex-col gap-2 p-[16px_18px_18px] flex-1">
         <div className="flex flex-col gap-0.5">
           <span className="font-stat text-[10.5px] tracking-[0.14em] uppercase text-muted-foreground/80">{brand}</span>
-          <h3 className="font-display font-bold text-[16.5px] leading-tight tracking-tight line-clamp-2">{p.name}</h3>
+          <h3 className="font-display font-bold text-[16.5px] leading-tight tracking-tight line-clamp-2">{localized(p, "name", i18n.language)}</h3>
         </div>
         <div className="flex items-center justify-between mt-auto pt-1">
           <div className="flex items-baseline gap-2">

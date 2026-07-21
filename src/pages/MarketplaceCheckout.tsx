@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useTranslation, Trans } from "react-i18next";
 import { motion } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -16,10 +17,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useP2GPoints } from "@/hooks/useP2GPoints";
 import { usePointsValue } from "@/hooks/usePointsValue";
 import { eur, ptsFmt, maxRedeemablePoints } from "@/lib/marketplace";
+import { localized } from "@/lib/localized";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const MarketplaceCheckout = () => {
+  const { t, i18n } = useTranslation("marketplace");
   const { slug } = useParams<{ slug: string }>();
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -61,10 +64,10 @@ const MarketplaceCheckout = () => {
 
   const payMethods = useMemo(
     () => [
-      { icon: CreditCard, name: "Karte", sub: "Visa · Mastercard · Amex" },
-      { icon: Wallet, name: "PayPal", sub: "Mit PayPal-Konto zahlen" },
+      { icon: CreditCard, name: t("checkout.payCardName"), sub: t("checkout.payCardSub") },
+      { icon: Wallet, name: t("checkout.payPaypalName"), sub: t("checkout.payPaypalSub") },
     ],
-    [],
+    [t],
   );
 
   if (isLoading) {
@@ -102,11 +105,11 @@ const MarketplaceCheckout = () => {
             order: {
               code: res.reference_code,
               mail: aMail.trim(),
-              product: `${product.name} × ${qty}`,
+              product: `${localized(product, "name", i18n.language)} × ${qty}`,
               addrName: aName.trim(),
               addrLine: `${aStreet.trim()} · ${aZip.trim()} ${aCity.trim()}`,
               total: eur(total),
-              method: payMethod === 0 ? "Karte" : "PayPal",
+              method: payMethod === 0 ? t("checkout.payCardName") : t("checkout.payPaypalName"),
               spent: redeem,
             },
           },
@@ -124,7 +127,7 @@ const MarketplaceCheckout = () => {
   return (
     <>
       <Helmet>
-        <title>Checkout | PADEL2GO Marketplace</title>
+        <title>{t("checkout.metaTitle")}</title>
       </Helmet>
 
       <Navigation />
@@ -144,13 +147,13 @@ const MarketplaceCheckout = () => {
             className="inline-flex items-center gap-2 self-start text-sm text-muted-foreground hover:text-primary py-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
-            Zurück zum Produkt
+            {t("checkout.backToProduct")}
           </button>
 
           <div className="flex flex-col gap-2">
-            <h1 className="font-display font-extrabold tracking-tight text-[clamp(26px,4vw,38px)]">Fast deins!</h1>
+            <h1 className="font-display font-extrabold tracking-tight text-[clamp(26px,4vw,38px)]">{t("checkout.title")}</h1>
             <p className="text-[15.5px] text-muted-foreground">
-              Lieferadresse angeben, Zahlart wählen — bezahlt wird sicher über Stripe.
+              {t("checkout.subtitle")}
             </p>
           </div>
 
@@ -159,42 +162,42 @@ const MarketplaceCheckout = () => {
             <div className="flex flex-col gap-4">
               {/* Address */}
               <div className="rounded-2xl border border-border/60 bg-gradient-card p-[22px] flex flex-col gap-4">
-                <StepHeader n="01" title="Lieferadresse" icon={MapPin} />
+                <StepHeader n="01" title={t("checkout.addressStep")} icon={MapPin} />
                 <div className="flex flex-col gap-3">
                   <div className={field}>
-                    <span className={fieldLabel}>Name</span>
-                    <Input value={aName} onChange={(e) => setAName(e.target.value)} placeholder="Vor- und Nachname" className="h-11" />
+                    <span className={fieldLabel}>{t("checkout.nameLabel")}</span>
+                    <Input value={aName} onChange={(e) => setAName(e.target.value)} placeholder={t("checkout.namePlaceholder")} className="h-11" />
                   </div>
                   <div className={field}>
                     <span className={fieldLabel}>
-                      E-Mail <span className="text-muted-foreground/70 font-medium">· für deine Bestellbestätigung</span>
+                      {t("checkout.emailLabel")} <span className="text-muted-foreground/70 font-medium">{t("checkout.emailHint")}</span>
                     </span>
-                    <Input type="email" value={aMail} onChange={(e) => setAMail(e.target.value)} placeholder="name@mail.de" className="h-11" />
+                    <Input type="email" value={aMail} onChange={(e) => setAMail(e.target.value)} placeholder={t("checkout.emailPlaceholder")} className="h-11" />
                   </div>
                   <div className={field}>
-                    <span className={fieldLabel}>Straße &amp; Hausnummer</span>
-                    <Input value={aStreet} onChange={(e) => setAStreet(e.target.value)} placeholder="z. B. Lindwurmstraße 42" className="h-11" />
+                    <span className={fieldLabel}>{t("checkout.streetLabel")}</span>
+                    <Input value={aStreet} onChange={(e) => setAStreet(e.target.value)} placeholder={t("checkout.streetPlaceholder")} className="h-11" />
                   </div>
                   <div className="grid grid-cols-[140px_1fr] gap-3">
                     <div className={field}>
-                      <span className={fieldLabel}>PLZ</span>
+                      <span className={fieldLabel}>{t("checkout.zipLabel")}</span>
                       <Input value={aZip} onChange={(e) => setAZip(e.target.value)} placeholder="80331" className="h-11" />
                     </div>
                     <div className={field}>
-                      <span className={fieldLabel}>Ort</span>
-                      <Input value={aCity} onChange={(e) => setACity(e.target.value)} placeholder="München" className="h-11" />
+                      <span className={fieldLabel}>{t("checkout.cityLabel")}</span>
+                      <Input value={aCity} onChange={(e) => setACity(e.target.value)} placeholder={t("checkout.cityPlaceholder")} className="h-11" />
                     </div>
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
                   <Lock className="w-3 h-3" />
-                  Deine Daten werden nur für diese Bestellung verwendet.
+                  {t("checkout.privacyNote")}
                 </span>
               </div>
 
               {/* Payment method */}
               <div className="rounded-2xl border border-border/60 bg-gradient-card p-[22px] flex flex-col gap-4">
-                <StepHeader n="02" title="Zahlart" icon={CreditCard} />
+                <StepHeader n="02" title={t("checkout.paymentStep")} icon={CreditCard} />
                 <div className="grid gap-2.5 sm:grid-cols-2">
                   {payMethods.map((m, i) => {
                     const on = payMethod === i;
@@ -225,22 +228,22 @@ const MarketplaceCheckout = () => {
                     );
                   })}
                 </div>
-                <span className="text-xs text-muted-foreground">Beide Zahlarten laufen sicher über Stripe.</span>
+                <span className="text-xs text-muted-foreground">{t("checkout.paymentStripeNote")}</span>
               </div>
             </div>
 
             {/* Right: summary */}
             <div className="lg:sticky lg:top-[90px]">
               <div className="rounded-2xl border border-border/60 bg-gradient-card p-6 flex flex-col gap-3.5">
-                <h3 className="font-display font-bold text-[17px]">Bestellübersicht</h3>
+                <h3 className="font-display font-bold text-[17px]">{t("checkout.summaryHeading")}</h3>
 
                 <div className="flex gap-3 items-center">
                   <div className="w-16 h-16 rounded-xl overflow-hidden border border-border shrink-0 bg-gradient-to-br from-white/[0.06] to-black">
-                    <img src={product.image_url || "/placeholder.svg"} alt={product.name} className="w-full h-full object-cover" />
+                    <img src={product.image_url || "/placeholder.svg"} alt={localized(product, "name", i18n.language)} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                    <span className="font-display font-bold text-[15px] leading-tight">{product.name}</span>
-                    <span className="text-[12.5px] text-muted-foreground">Menge: {qty} × {eur(price)}</span>
+                    <span className="font-display font-bold text-[15px] leading-tight">{localized(product, "name", i18n.language)}</span>
+                    <span className="text-[12.5px] text-muted-foreground">{t("checkout.quantityLine", { qty, price: eur(price) })}</span>
                   </div>
                   <span className="font-stat font-bold text-[15px] shrink-0">{eur(subtotal)}</span>
                 </div>
@@ -252,8 +255,8 @@ const MarketplaceCheckout = () => {
                   <div className="flex flex-col gap-3 rounded-2xl border border-primary/25 bg-primary/[0.06] px-4 py-3.5">
                     <div className="flex items-center gap-2.5">
                       <Coins className="w-4 h-4 text-primary" />
-                      <span className="text-[13.5px] font-bold flex-1">P2G Points einlösen</span>
-                      <span className="font-stat text-[11.5px] text-primary">{ptsFmt(balance)} Points</span>
+                      <span className="text-[13.5px] font-bold flex-1">{t("checkout.redeemPoints")}</span>
+                      <span className="font-stat text-[11.5px] text-primary">{t("checkout.pointsBalance", { points: ptsFmt(balance) })}</span>
                     </div>
                     {maxRedeem >= 10 ? (
                       <>
@@ -268,17 +271,19 @@ const MarketplaceCheckout = () => {
                           style={{ accentColor: "#C7F011" }}
                         />
                         <div className="flex justify-between items-baseline">
-                          <span className="font-stat text-[12.5px] text-foreground/70">{ptsFmt(redeem)} Points</span>
+                          <span className="font-stat text-[12.5px] text-foreground/70">{t("checkout.pointsSelected", { points: ptsFmt(redeem) })}</span>
                           <span className="font-stat font-bold text-sm text-primary">−{eur(discountCents)}</span>
                         </div>
                         <span className="text-[11.5px] text-muted-foreground">
-                          Max. {maxPercent}% des Warenwerts · {ptsFmt(Math.round(100 / centsPerPoint))} Points = €1,00
+                          {t("checkout.pointsRule", { maxPercent, points: ptsFmt(Math.round(100 / centsPerPoint)) })}
                         </span>
                       </>
                     ) : (
                       <span className="text-[12.5px] leading-snug text-muted-foreground">
-                        Noch keine Points — sammle welche bei deiner nächsten{" "}
-                        <button onClick={() => navigate("/booking")} className="text-primary font-bold">Court-Buchung</button>.
+                        <Trans
+                          i18nKey="marketplace:checkout.noPoints"
+                          components={{ 1: <button onClick={() => navigate("/booking")} className="text-primary font-bold" /> }}
+                        />
                       </span>
                     )}
                   </div>
@@ -287,21 +292,22 @@ const MarketplaceCheckout = () => {
                   <div className="flex items-start gap-3 rounded-2xl border border-border bg-white/[0.03] px-3.5 py-3">
                     <Gift className="w-[17px] h-[17px] text-primary mt-0.5 shrink-0" />
                     <span className="text-[12.5px] leading-snug text-muted-foreground">
-                      Points einlösen geht nur mit Konto.{" "}
-                      <button onClick={() => navigate("/auth")} className="font-bold text-primary underline">Kostenlos einloggen</button>{" "}
-                      — oder einfach als Gast bestellen.
+                      <Trans
+                        i18nKey="marketplace:checkout.guestPointsHint"
+                        components={{ 1: <button onClick={() => navigate("/auth")} className="font-bold text-primary underline" /> }}
+                      />
                     </span>
                   </div>
                 )}
 
                 {/* Totals */}
                 <div className="flex flex-col gap-2.5">
-                  <Row label="Zwischensumme" value={eur(subtotal)} />
+                  <Row label={t("checkout.subtotal")} value={eur(subtotal)} />
                   {discountCents > 0 && (
                     <div className="flex justify-between text-[13.5px] text-primary">
                       <span className="inline-flex items-center gap-1.5">
                         <Coins className="w-3.5 h-3.5" />
-                        {ptsFmt(redeem)} Points eingelöst
+                        {t("checkout.pointsRedeemedLine", { points: ptsFmt(redeem) })}
                       </span>
                       <span className="font-stat">−{eur(discountCents)}</span>
                     </div>
@@ -309,16 +315,16 @@ const MarketplaceCheckout = () => {
                   <div className="flex justify-between text-[13.5px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1.5">
                       <Truck className="w-3.5 h-3.5" />
-                      Versand
+                      {t("checkout.shipping")}
                     </span>
-                    <span className="font-stat font-bold text-primary">Kostenlos</span>
+                    <span className="font-stat font-bold text-primary">{t("checkout.free")}</span>
                   </div>
                   <div className="h-px bg-border" />
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[14.5px] font-bold">Gesamt</span>
+                    <span className="text-[14.5px] font-bold">{t("checkout.total")}</span>
                     <span className="flex flex-col items-end">
                       <span className="font-stat font-bold text-[30px] text-primary leading-none">{eur(total)}</span>
-                      <span className="text-[11px] text-muted-foreground">inkl. MwSt.</span>
+                      <span className="text-[11px] text-muted-foreground">{t("checkout.inclVat")}</span>
                     </span>
                   </div>
                 </div>
@@ -326,17 +332,17 @@ const MarketplaceCheckout = () => {
                 <div style={{ opacity: addrValid ? 1 : 0.45, pointerEvents: addrValid ? "auto" : "none" }} className="transition-opacity">
                   <Button variant="hero" size="xl" className="w-full" onClick={handlePay} disabled={checkout.isPending}>
                     <Lock className="w-4 h-4 mr-1" />
-                    Jetzt bezahlen · {eur(total)}
+                    {t("checkout.payNow", { total: eur(total) })}
                   </Button>
                 </div>
                 <span className={`text-xs text-center ${addrValid ? "text-muted-foreground" : "text-primary"}`}>
                   {addrValid
-                    ? "Mit Klick auf „Jetzt bezahlen“ geht's sicher weiter zu Stripe."
-                    : "Fülle deine Lieferadresse aus, um fortzufahren."}
+                    ? t("checkout.payReadyNote")
+                    : t("checkout.fillAddressNote")}
                 </span>
                 <span className="inline-flex items-center justify-center gap-2 text-xs text-muted-foreground">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  Sichere Zahlung über Stripe · SSL-verschlüsselt
+                  {t("checkout.securePayment")}
                 </span>
               </div>
             </div>
@@ -351,8 +357,8 @@ const MarketplaceCheckout = () => {
         <div className="fixed inset-0 z-[110] bg-black/[0.86] backdrop-blur-md flex items-center justify-center p-5">
           <div className="flex flex-col items-center gap-4 text-center">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            <span className="text-lg font-bold font-display">Weiter zu Stripe …</span>
-            <span className="text-sm text-muted-foreground">Du wirst sicher zur Zahlung weitergeleitet.</span>
+            <span className="text-lg font-bold font-display">{t("checkout.redirecting")}</span>
+            <span className="text-sm text-muted-foreground">{t("checkout.redirectingSub")}</span>
           </div>
         </div>
       )}
@@ -361,13 +367,14 @@ const MarketplaceCheckout = () => {
 };
 
 function StepHeader({ n, title, icon: Icon }: { n: string; title: string; icon: typeof MapPin }) {
+  const { t } = useTranslation("marketplace");
   return (
     <div className="flex items-center gap-3">
       <span className="w-[42px] h-[42px] rounded-xl bg-gradient-to-br from-primary/[0.18] to-primary/[0.04] border border-primary/35 flex items-center justify-center text-primary">
         <Icon className="w-[19px] h-[19px]" />
       </span>
       <div className="flex flex-col gap-0.5">
-        <span className="font-stat text-[10.5px] tracking-[0.16em] text-muted-foreground">SCHRITT {n}</span>
+        <span className="font-stat text-[10.5px] tracking-[0.16em] text-muted-foreground">{t("checkout.stepLabel", { n })}</span>
         <h3 className="font-display font-bold text-[17px]">{title}</h3>
       </div>
     </div>

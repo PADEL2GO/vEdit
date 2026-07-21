@@ -20,6 +20,7 @@ import {
   type MarketplaceCategoryRow,
   type MarketplaceBrandRow,
 } from "@/hooks/useMarketplaceCatalog";
+import { useTranslateContent, toastTranslateResult } from "@/hooks/useTranslateContent";
 
 interface Props {
   kind: "category" | "brand";
@@ -38,10 +39,18 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
 
   const upsert = useUpsertTaxonomy(kind);
   const del = useDeleteTaxonomy(kind);
+  const { translateRow } = useTranslateContent();
 
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+
+  // Category names are shown to the public (filter chips, breadcrumbs) → auto-translate to EN.
+  // Brand names are proper nouns and stay untouched.
+  const translateCategory = (id: string) => {
+    if (!isCategory) return;
+    translateRow({ table: "marketplace_categories", id, fields: ["name"] }).then(toastTranslateResult);
+  };
 
   const title = isCategory ? "Kategorien verwalten" : "Marken verwalten";
   const placeholder = isCategory ? "z.B. Schläger" : "z.B. Adidas";
@@ -51,7 +60,12 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
     if (!name) return;
     upsert.mutate(
       { name, slug: slugify(name), sort_order: rows.length + 1, is_active: true },
-      { onSuccess: () => setNewName("") },
+      {
+        onSuccess: (id: string) => {
+          setNewName("");
+          translateCategory(id);
+        },
+      },
     );
   };
 
@@ -65,7 +79,12 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
     if (!name) return;
     upsert.mutate(
       { id: row.id, name, slug: slugify(name), sort_order: row.sort_order, is_active: row.is_active },
-      { onSuccess: () => setEditingId(null) },
+      {
+        onSuccess: () => {
+          setEditingId(null);
+          translateCategory(row.id);
+        },
+      },
     );
   };
 

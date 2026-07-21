@@ -3,11 +3,117 @@
     "title": "P2G Marketplace | Padel2Go",
     "description": "Discover equipment, vouchers and extras in the Padel2Go Marketplace. Pay as a guest by card or PayPal."
   },
+  "page": {
+    "metaTitle": "Marketplace | PADEL2GO",
+    "metaDescription": "Padel equipment — rackets, balls, shoes & more, tested by the P2G team. Delivered straight to your door."
+  },
   "hero": {
-    "badge": "P2G Marketplace",
-    "title": "The",
+    "badge": "Marketplace",
+    "title": "Your game. Your <1>equipment.</1>",
+    "subtitle": "Rackets, balls, shoes & more — tested by the P2G team. Delivered straight to your door.",
+    "pointsBanner": "{{points}} points available — up to {{maxPercent}}% off at checkout",
+    "guestBanner": "Shop without an account — redeem points with one",
     "titleHighlight": "Padel2Go Store",
     "description": "Equipment, vouchers and exclusive extras – order online and pay by card or PayPal."
+  },
+  "filters": {
+    "all": "All",
+    "searchPlaceholder": "Search product or brand …",
+    "inStockOnly": "In stock only",
+    "countAll": "{{count}} products",
+    "countFiltered": "{{shown}} of {{total}}",
+    "brandLabel": "BRAND",
+    "priceLabel": "PRICE",
+    "reset": "Reset"
+  },
+  "sort": {
+    "pop": "Popular",
+    "asc": "Price ↑",
+    "desc": "Price ↓"
+  },
+  "price": {
+    "all": "All",
+    "low": "under €50",
+    "mid": "€50 – 150",
+    "high": "from €150"
+  },
+  "stock": {
+    "soldOut": "Sold out",
+    "lowShort": "Only {{count}} left",
+    "lowLong": "Only {{count}} left",
+    "inStock": "In stock"
+  },
+  "card": {
+    "bestseller": "Bestseller",
+    "details": "Details"
+  },
+  "breadcrumb": {
+    "root": "Marketplace"
+  },
+  "product": {
+    "notFound": "Product not found",
+    "backToShop": "Back to shop",
+    "categoryFallback": "Equipment",
+    "metaTitle": "{{name}} | PADEL2GO Marketplace",
+    "rrp": "RRP {{price}}",
+    "taxShipping": "incl. VAT · free shipping",
+    "pointsUser": "With your points: up to <1>−{{amount}}</1> off at checkout.",
+    "pointsGuest": "With a P2G account you can pay up to <1>{{maxPercent}}%</1> with points. <2>Log in</2>",
+    "restockNote": "· back in stock soon",
+    "deliveryNote": "· delivery in 2–4 business days",
+    "unavailableCta": "Currently unavailable",
+    "buyNow": "Buy now",
+    "trustShipping": "Free shipping",
+    "trustReturns": "14-day right of return",
+    "trustPayment": "Secure payment via Stripe — card & PayPal",
+    "specsHeading": "Technical details",
+    "descriptionHeading": "Description",
+    "relatedHeading": "Goes well with"
+  },
+  "checkout": {
+    "metaTitle": "Checkout | PADEL2GO Marketplace",
+    "backToProduct": "Back to product",
+    "title": "Almost yours!",
+    "subtitle": "Enter your shipping address, choose a payment method — payment is handled securely via Stripe.",
+    "addressStep": "Shipping address",
+    "nameLabel": "Name",
+    "namePlaceholder": "First and last name",
+    "emailLabel": "Email",
+    "emailHint": "· for your order confirmation",
+    "emailPlaceholder": "name@mail.com",
+    "streetLabel": "Street & house number",
+    "streetPlaceholder": "e.g. Baker Street 42",
+    "zipLabel": "Postal code",
+    "cityLabel": "City",
+    "cityPlaceholder": "Munich",
+    "privacyNote": "Your data is used only for this order.",
+    "paymentStep": "Payment method",
+    "payCardName": "Card",
+    "payCardSub": "Visa · Mastercard · Amex",
+    "payPaypalName": "PayPal",
+    "payPaypalSub": "Pay with your PayPal account",
+    "paymentStripeNote": "Both payment methods run securely via Stripe.",
+    "summaryHeading": "Order summary",
+    "quantityLine": "Qty: {{qty}} × {{price}}",
+    "redeemPoints": "Redeem P2G points",
+    "pointsBalance": "{{points}} points",
+    "pointsSelected": "{{points}} points",
+    "pointsRule": "Max. {{maxPercent}}% of the item value · {{points}} points = €1.00",
+    "noPoints": "No points yet — earn some with your next <1>court booking</1>.",
+    "guestPointsHint": "Redeeming points requires an account. <1>Log in for free</1> — or just order as a guest.",
+    "subtotal": "Subtotal",
+    "pointsRedeemedLine": "{{points}} points redeemed",
+    "shipping": "Shipping",
+    "free": "Free",
+    "total": "Total",
+    "inclVat": "incl. VAT",
+    "payNow": "Pay now · {{total}}",
+    "payReadyNote": "Clicking “Pay now” takes you securely on to Stripe.",
+    "fillAddressNote": "Fill in your shipping address to continue.",
+    "securePayment": "Secure payment via Stripe · SSL-encrypted",
+    "redirecting": "Continuing to Stripe …",
+    "redirectingSub": "You are being securely redirected to payment.",
+    "stepLabel": "STEP {{n}}"
   },
   "upsell": {
     "title": "Earn points & refer friends",
@@ -15,7 +121,8 @@
     "cta": "Register for free →"
   },
   "empty": {
-    "title": "See you soon",
+    "title": "Nothing found for your filters",
+    "resetFilters": "Reset filters",
     "description": "No products are available right now. Check back soon – we're restocking the store!"
   },
   "item": {
@@ -48,9 +155,20 @@
     }
   },
   "success": {
-    "metaTitle": "Thank you for your purchase | Padel2Go",
-    "metaDescription": "Your Padel2Go Marketplace order was successful.",
-    "title": "Thank you for your purchase",
+    "metaTitle": "Order confirmed | PADEL2GO Marketplace",
+    "metaDescription": "Your order in the PADEL2GO Marketplace is confirmed.",
+    "title": "Order confirmed! 🎾",
+    "bodyWithMail": "Your order confirmation is on its way to <1>{{mail}}</1>.",
+    "bodyNoMail": "Your order confirmation is on its way to your email.",
+    "orderNumber": "Order number <1>{{number}}</1>",
+    "rowProduct": "Product",
+    "rowDeliveryTo": "Delivery to",
+    "rowPointsRedeemed": "Points redeemed",
+    "pointsValue": "−{{points}} points",
+    "rowPaid": "Paid",
+    "shippingNote": "Shipping in 1–2 business days · tracking link by email",
+    "keepShopping": "Keep shopping",
+    "bookCourt": "Book a court",
     "subtitle": "We've received your order.",
     "note": "You'll receive a confirmation by email shortly – we'll ship your order as soon as possible.",
     "referenceLabel": "Order reference",

@@ -1,4 +1,5 @@
 import { useState, Fragment } from "react";
+import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -31,6 +32,7 @@ const reveal = (delay = 0) => ({
 });
 
 const FuerSpieler = () => {
+  const { t } = useTranslation("spieler");
   const { launchDate } = useLaunchDate();
   const { levels } = useExpertLevels();
 
@@ -65,15 +67,15 @@ const FuerSpieler = () => {
   const launchLabel = format(launchDate, "dd.MM.yyyy", { locale: de });
 
   const pillars = [
-    { img: skypadelOutdoor, tag: "Courts in ganz Deutschland", title: "Courts in ganz Deutschland", text: "SkyPadel-Courts auf Vereinsgeländen — die ersten Standorte machen den Anfang, weitere folgen.", cta: "Court buchen", to: "/booking" },
-    { img: eventsHero, tag: "Open Play ab 0 €", title: "Events & Netzwerk", text: "Night Sessions, Turniere, Open Play — komm allein oder mit Crew, gematcht wird vor Ort. Dein Level zählt EU-weit in der P2G Liga.", cta: "Zu den Events", to: "/events" },
-    { img: leagueHero, tag: "Payback bei jeder Buchung", title: "Marketplace & P2G Points", text: "Points sammelst du automatisch bei jeder Buchung — und löst sie im Marketplace gegen Equipment ein: als Rabatt oder für den vollen Preis.", cta: "Zum Marketplace", to: "/marketplace" },
+    { img: skypadelOutdoor, tag: t("networkNew.pillars.0.tag"), title: t("networkNew.pillars.0.title"), text: t("networkNew.pillars.0.text"), cta: t("networkNew.pillars.0.cta"), to: "/booking" },
+    { img: eventsHero, tag: t("networkNew.pillars.1.tag"), title: t("networkNew.pillars.1.title"), text: t("networkNew.pillars.1.text"), cta: t("networkNew.pillars.1.cta"), to: "/events" },
+    { img: leagueHero, tag: t("networkNew.pillars.2.tag"), title: t("networkNew.pillars.2.title"), text: t("networkNew.pillars.2.text"), cta: t("networkNew.pillars.2.cta"), to: "/marketplace" },
   ];
 
   const steps = [
-    { icon: CalendarCheck, chip: `+${p1} / +${p2} P`, title: "Buchen", text: "Fixe Points je Buchung — 1 h oder 2 h Court-Zeit." },
-    { icon: Gem, chip: `bis ×${maxMult}`, title: "Multiplikator", text: "Dein Tier-Level legt obendrauf — je höher dein Level, desto mehr Payback." },
-    { icon: ShoppingBag, chip: "bis 100 %", title: "Einlösen", text: "Im Marketplace gegen Equipment — als Rabatt oder für den vollen Preis." },
+    { icon: CalendarCheck, chip: `+${p1} / +${p2} P`, title: t("paybackNew.steps.0.title"), text: t("paybackNew.steps.0.text") },
+    { icon: Gem, chip: `bis ×${maxMult}`, title: t("paybackNew.steps.1.title"), text: t("paybackNew.steps.1.text") },
+    { icon: ShoppingBag, chip: "bis 100 %", title: t("paybackNew.steps.2.title"), text: t("paybackNew.steps.2.text") },
   ];
 
   const tierRange = (l: (typeof levels)[number]) => {
@@ -84,8 +86,8 @@ const FuerSpieler = () => {
   return (
     <>
       <Helmet>
-        <title>Für Spieler | PADEL2GO</title>
-        <meta name="description" content="Courts in ganz Deutschland, Events & Community — und Payback-Points bei jeder Buchung." />
+        <title>{t("metaNew.title")}</title>
+        <meta name="description" content={t("metaNew.description")} />
       </Helmet>
 
       <Navigation />
@@ -96,32 +98,32 @@ const FuerSpieler = () => {
           <HeroBackgroundVisual
             videoKey="fuer-spieler.hero.video"
             imageKey="fuer-spieler.hero.image"
-            alt="Padel-Spieler auf dem Court"
+            alt={t("heroNew.imageAlt")}
             fallbackSrc={leagueHero}
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 55% at 50% 15%, rgba(199,240,17,0.12), transparent), linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.72) 55%, #000)" }} />
           <div className="relative z-10 flex flex-col items-center gap-6 text-center max-w-[900px] mx-auto px-5 pt-[120px] pb-20">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-3 py-1 text-xs font-semibold text-primary">
-              <User className="w-3.5 h-3.5" />Für Spieler
+              <User className="w-3.5 h-3.5" />{t("heroNew.badge")}
             </span>
             <h1 className="font-display font-extrabold tracking-tight text-[clamp(38px,7.6vw,76px)] leading-[1.06]">
-              Dein Spiel. <span className="text-primary">Deine Points.</span><br />
-              <span className="italic">Dein Network.</span>
+              {t("heroNew.titleLine1")} <span className="text-primary">{t("heroNew.titleHighlight")}</span><br />
+              <span className="italic">{t("heroNew.titleLine2")}</span>
             </h1>
             <p className="max-w-[560px] text-[clamp(15px,2.3vw,19px)] leading-relaxed text-foreground/75">
-              Courts in ganz Deutschland, Events &amp; Community — und Payback-Points bei jeder Buchung.
+              {t("heroNew.description")}
             </p>
             <div className="flex flex-wrap gap-3.5 justify-center">
-              <Button variant="hero" size="xl" asChild><NavLink to="/booking"><Calendar className="w-[18px] h-[18px] mr-1" />Court buchen</NavLink></Button>
-              <Button variant="heroOutline" size="xl" asChild><NavLink to="/app-booking"><Smartphone className="w-[18px] h-[18px] mr-1" />App herunterladen</NavLink></Button>
+              <Button variant="hero" size="xl" asChild><NavLink to="/booking"><Calendar className="w-[18px] h-[18px] mr-1" />{t("heroNew.primaryCta")}</NavLink></Button>
+              <Button variant="heroOutline" size="xl" asChild><NavLink to="/app-booking"><Smartphone className="w-[18px] h-[18px] mr-1" />{t("heroNew.secondaryCta")}</NavLink></Button>
             </div>
             <div className="flex flex-wrap gap-2.5 justify-center">
               {[
-                <>Launch <span className="text-primary font-bold">{launchLabel}</span></>,
-                <>Registrierung <span className="text-primary font-bold">0 €</span></>,
-                <>Buchung <span className="text-primary font-bold">&lt;30 Sek</span></>,
-                <><span className="text-primary font-bold">+{p1}/+{p2} P</span> pro Buchung</>,
+                <>{t("heroNew.chipLaunch")} <span className="text-primary font-bold">{launchLabel}</span></>,
+                <>{t("heroNew.chipRegistration")} <span className="text-primary font-bold">0 €</span></>,
+                <>{t("heroNew.chipBooking")} <span className="text-primary font-bold">&lt;30 Sek</span></>,
+                <><span className="text-primary font-bold">+{p1}/+{p2} P</span> {t("heroNew.chipPointsSuffix")}</>,
               ].map((chip, i) => (
                 <span key={i} className="font-stat text-xs text-foreground/85 bg-white/[0.05] backdrop-blur border border-white/15 rounded-full px-4 py-2 whitespace-nowrap">{chip}</span>
               ))}
@@ -133,9 +135,9 @@ const FuerSpieler = () => {
         <section id="network" className="py-[clamp(72px,10vw,116px)] px-5">
           <div className="mx-auto max-w-[1200px]">
             <motion.div {...reveal()} className="flex flex-col items-center gap-3.5 text-center mb-12">
-              <span className="font-stat text-xs tracking-[0.2em] uppercase text-primary">Das P2G Network</span>
+              <span className="font-stat text-xs tracking-[0.2em] uppercase text-primary">{t("networkNew.eyebrow")}</span>
               <h2 className="font-display font-extrabold text-[clamp(30px,4.6vw,52px)] leading-tight tracking-tight">
-                Spielen. Connecten. <span className="text-gradient-lime">Einlösen.</span>
+                {t("networkNew.titlePrefix")} <span className="text-gradient-lime">{t("networkNew.titleHighlight")}</span>
               </h2>
             </motion.div>
             <div className="grid md:grid-cols-3 gap-5">
@@ -167,10 +169,10 @@ const FuerSpieler = () => {
           <div className="mx-auto max-w-[1100px] flex flex-col">
             <motion.div {...reveal()} className="flex flex-col items-center gap-3.5 text-center mb-11">
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-3 py-1 text-xs font-semibold text-primary">
-                <Coins className="w-3.5 h-3.5" />P2G Points
+                <Coins className="w-3.5 h-3.5" />{t("paybackNew.badge")}
               </span>
               <h2 className="font-display font-extrabold text-[clamp(30px,4.6vw,52px)] leading-tight tracking-tight">
-                So funktioniert <span className="text-gradient-lime">Payback.</span>
+                {t("paybackNew.titlePrefix")} <span className="text-gradient-lime">{t("paybackNew.titleHighlight")}</span>
               </h2>
             </motion.div>
 
@@ -199,9 +201,9 @@ const FuerSpieler = () => {
               <>
                 <motion.div {...reveal()} className="flex items-baseline justify-between gap-4 flex-wrap mt-[52px] mb-5">
                   <h3 className="font-display font-bold text-[clamp(19px,2.6vw,24px)] tracking-tight">
-                    Dein Tier-Level = <span className="text-primary">dein Multiplikator</span>
+                    {t("paybackNew.tierTitlePrefix")} <span className="text-primary">{t("paybackNew.tierTitleHighlight")}</span>
                   </h3>
-                  <span className="font-stat text-xs tracking-[0.12em] uppercase text-muted-foreground/70">{levels.length} Tiers · EU-weites Ranking</span>
+                  <span className="font-stat text-xs tracking-[0.12em] uppercase text-muted-foreground/70">{t("paybackNew.tierMeta", { count: levels.length })}</span>
                 </motion.div>
                 <motion.div {...reveal()} className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {levels.map((l) => (
@@ -225,35 +227,35 @@ const FuerSpieler = () => {
             <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 80% at 50% 0%, hsl(199 89% 60% / 0.14), transparent 60%), linear-gradient(180deg, hsl(210 60% 3% / 0.82), rgba(0,0,0,0.94))" }} />
             <div className="relative flex flex-col items-center gap-4 text-center p-[clamp(36px,6vw,60px)_clamp(20px,4vw,48px)]">
               <div className="flex items-center gap-3 flex-wrap justify-center">
-                <span className="inline-flex items-center rounded-full border border-border bg-white/[0.05] px-3 py-1 text-xs font-semibold text-muted-foreground">Coming Soon</span>
+                <span className="inline-flex items-center rounded-full border border-border bg-white/[0.05] px-3 py-1 text-xs font-semibold text-muted-foreground">{t("kiNew.comingSoon")}</span>
                 <span className="inline-flex items-center gap-2 font-stat text-[11px] tracking-[0.12em] uppercase rounded-full px-3.5 py-1.5" style={{ color: "hsl(199 89% 70%)", background: "hsl(199 89% 60% / 0.08)", border: "1px solid hsl(199 89% 60% / 0.3)" }}>
-                  <Video className="w-3 h-3" />Powered by Wingfield
+                  <Video className="w-3 h-3" />{t("kiNew.poweredBy")}
                 </span>
               </div>
               <h2 className="font-display font-extrabold text-[clamp(26px,4vw,42px)] leading-tight tracking-tight">
-                Als Nächstes: <span style={{ background: "linear-gradient(90deg, hsl(199 89% 62%), hsl(190 90% 70%))", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>KI-Matchanalyse.</span>
+                {t("kiNew.titlePrefix")} <span style={{ background: "linear-gradient(90deg, hsl(199 89% 62%), hsl(190 90% 70%))", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{t("kiNew.titleHighlight")}</span>
               </h2>
               <p className="max-w-[560px] text-[clamp(14.5px,2vw,16.5px)] leading-relaxed text-foreground/70">
-                Die Court-Kamera erfasst dein Spiel automatisch — 40+ Metriken, Auto-Clips und ein objektives Skill-Rating nach jedem Match.
+                {t("kiNew.description")}
               </p>
               <div className="flex flex-wrap gap-2 justify-center">
-                {["Match IQ", "Speed & Placement", "Auto-Clips", "Skill-Rating"].map((t) => (
-                  <span key={t} className="font-stat text-[11.5px] rounded-full px-3.5 py-1.5 whitespace-nowrap" style={{ color: "hsl(199 89% 70%)", border: "1px solid hsl(199 89% 60% / 0.28)" }}>{t}</span>
+                {[t("kiNew.tags.0"), t("kiNew.tags.1"), t("kiNew.tags.2"), t("kiNew.tags.3")].map((tag) => (
+                  <span key={tag} className="font-stat text-[11.5px] rounded-full px-3.5 py-1.5 whitespace-nowrap" style={{ color: "hsl(199 89% 70%)", border: "1px solid hsl(199 89% 60% / 0.28)" }}>{tag}</span>
                 ))}
               </div>
               {nlDone ? (
                 <div className="inline-flex items-center gap-2.5 text-[15px] font-semibold text-primary bg-primary/[0.08] border border-primary/30 rounded-full px-5 py-3 mt-1.5">
-                  <Check className="w-4 h-4" />Du stehst auf der Liste — wir melden uns zum Start!
+                  <Check className="w-4 h-4" />{t("kiNew.newsletterDone")}
                 </div>
               ) : (
                 <div className="w-full max-w-[440px] flex flex-col gap-2 mt-1.5">
                   <div className={`flex gap-2.5 flex-wrap justify-center ${nlErr ? "animate-[shake_0.4s]" : ""}`}>
                     <Input type="email" value={nlMail} onChange={(e) => { setNlMail(e.target.value); setNlErr(false); }}
-                      onKeyDown={(e) => e.key === "Enter" && submitNl()} placeholder="deine@email.de"
+                      onKeyDown={(e) => e.key === "Enter" && submitNl()} placeholder={t("kiNew.emailPlaceholder")}
                       className="flex-1 min-w-0 h-[46px] bg-white/[0.05] border-border/70" />
-                    <Button variant="lime" onClick={submitNl} className="h-[46px]"><Bell className="w-4 h-4 mr-1" />Benachrichtigt werden</Button>
+                    <Button variant="lime" onClick={submitNl} className="h-[46px]"><Bell className="w-4 h-4 mr-1" />{t("kiNew.notifyCta")}</Button>
                   </div>
-                  {nlErr && <span className="text-[12.5px] text-red-400">Bitte gib eine gültige E-Mail-Adresse ein.</span>}
+                  {nlErr && <span className="text-[12.5px] text-red-400">{t("kiNew.emailError")}</span>}
                 </div>
               )}
             </div>
@@ -264,13 +266,13 @@ const FuerSpieler = () => {
         <section id="cta" className="py-[clamp(72px,10vw,116px)] px-5 pb-[clamp(80px,11vw,128px)]" style={{ background: "radial-gradient(ellipse 55% 45% at 50% 100%, rgba(199,240,17,0.09), transparent), #000" }}>
           <motion.div {...reveal()} className="mx-auto max-w-[760px] flex flex-col items-center gap-5 text-center">
             <h2 className="font-display font-extrabold text-[clamp(30px,4.6vw,50px)] leading-tight tracking-tight">
-              Ready fürs <span className="italic text-primary">erste Match?</span>
+              {t("ctaNew.titlePrefix")} <span className="italic text-primary">{t("ctaNew.titleHighlight")}</span>
             </h2>
             <div className="flex flex-wrap gap-3.5 justify-center">
-              <Button variant="hero" size="xl" asChild><NavLink to="/booking"><Calendar className="w-[18px] h-[18px] mr-1" />Court buchen</NavLink></Button>
-              <Button variant="heroOutline" size="xl" asChild><NavLink to="/app-booking"><Smartphone className="w-[18px] h-[18px] mr-1" />App herunterladen</NavLink></Button>
+              <Button variant="hero" size="xl" asChild><NavLink to="/booking"><Calendar className="w-[18px] h-[18px] mr-1" />{t("ctaNew.primaryCta")}</NavLink></Button>
+              <Button variant="heroOutline" size="xl" asChild><NavLink to="/app-booking"><Smartphone className="w-[18px] h-[18px] mr-1" />{t("ctaNew.secondaryCta")}</NavLink></Button>
             </div>
-            <span className="font-stat text-[12.5px] text-muted-foreground">Launch {launchLabel} · Registrierung kostenlos</span>
+            <span className="font-stat text-[12.5px] text-muted-foreground">{t("ctaNew.note", { date: launchLabel })}</span>
           </motion.div>
         </section>
       </main>

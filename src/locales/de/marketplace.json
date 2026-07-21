@@ -3,11 +3,117 @@
     "title": "P2G Marketplace | Padel2Go",
     "description": "Entdecke Equipment, Gutscheine und Extras im Padel2Go Marketplace. Bequem als Gast per Karte oder PayPal bezahlen."
   },
+  "page": {
+    "metaTitle": "Marketplace | PADEL2GO",
+    "metaDescription": "Padel-Equipment — Schläger, Bälle, Schuhe & mehr, vom P2G Team getestet. Direkt zu dir nach Hause."
+  },
   "hero": {
-    "badge": "P2G Marketplace",
-    "title": "Der",
+    "badge": "Marketplace",
+    "title": "Dein Spiel. Dein <1>Equipment.</1>",
+    "subtitle": "Schläger, Bälle, Schuhe & mehr — vom P2G Team getestet. Direkt zu dir nach Hause.",
+    "pointsBanner": "{{points}} Points verfügbar — bis zu {{maxPercent}}% Rabatt im Checkout",
+    "guestBanner": "Ohne Konto shoppen — mit Konto Points einlösen",
     "titleHighlight": "Padel2Go Store",
     "description": "Equipment, Gutscheine und exklusive Extras – bequem online bestellen und bar bezahlen."
+  },
+  "filters": {
+    "all": "Alle",
+    "searchPlaceholder": "Produkt oder Marke suchen …",
+    "inStockOnly": "Nur verfügbare",
+    "countAll": "{{count}} Produkte",
+    "countFiltered": "{{shown}} von {{total}}",
+    "brandLabel": "MARKE",
+    "priceLabel": "PREIS",
+    "reset": "Zurücksetzen"
+  },
+  "sort": {
+    "pop": "Beliebt",
+    "asc": "Preis ↑",
+    "desc": "Preis ↓"
+  },
+  "price": {
+    "all": "Alle",
+    "low": "bis 50 €",
+    "mid": "50 – 150 €",
+    "high": "ab 150 €"
+  },
+  "stock": {
+    "soldOut": "Ausverkauft",
+    "lowShort": "Nur noch {{count}}",
+    "lowLong": "Nur noch {{count}} Stück",
+    "inStock": "Auf Lager"
+  },
+  "card": {
+    "bestseller": "Bestseller",
+    "details": "Details"
+  },
+  "breadcrumb": {
+    "root": "Marketplace"
+  },
+  "product": {
+    "notFound": "Produkt nicht gefunden",
+    "backToShop": "Zurück zum Shop",
+    "categoryFallback": "Equipment",
+    "metaTitle": "{{name}} | PADEL2GO Marketplace",
+    "rrp": "UVP {{price}}",
+    "taxShipping": "inkl. MwSt. · kostenloser Versand",
+    "pointsUser": "Mit deinen Points: bis zu <1>−{{amount}}</1> Rabatt im Checkout.",
+    "pointsGuest": "Mit P2G Konto zahlst du bis zu <1>{{maxPercent}}%</1> mit Points. <2>Einloggen</2>",
+    "restockNote": "· bald wieder verfügbar",
+    "deliveryNote": "· Lieferung in 2–4 Werktagen",
+    "unavailableCta": "Zurzeit nicht verfügbar",
+    "buyNow": "Jetzt kaufen",
+    "trustShipping": "Kostenloser Versand",
+    "trustReturns": "14 Tage Widerrufsrecht",
+    "trustPayment": "Sichere Zahlung über Stripe — Karte & PayPal",
+    "specsHeading": "Technische Details",
+    "descriptionHeading": "Beschreibung",
+    "relatedHeading": "Passt dazu"
+  },
+  "checkout": {
+    "metaTitle": "Checkout | PADEL2GO Marketplace",
+    "backToProduct": "Zurück zum Produkt",
+    "title": "Fast deins!",
+    "subtitle": "Lieferadresse angeben, Zahlart wählen — bezahlt wird sicher über Stripe.",
+    "addressStep": "Lieferadresse",
+    "nameLabel": "Name",
+    "namePlaceholder": "Vor- und Nachname",
+    "emailLabel": "E-Mail",
+    "emailHint": "· für deine Bestellbestätigung",
+    "emailPlaceholder": "name@mail.de",
+    "streetLabel": "Straße & Hausnummer",
+    "streetPlaceholder": "z. B. Lindwurmstraße 42",
+    "zipLabel": "PLZ",
+    "cityLabel": "Ort",
+    "cityPlaceholder": "München",
+    "privacyNote": "Deine Daten werden nur für diese Bestellung verwendet.",
+    "paymentStep": "Zahlart",
+    "payCardName": "Karte",
+    "payCardSub": "Visa · Mastercard · Amex",
+    "payPaypalName": "PayPal",
+    "payPaypalSub": "Mit PayPal-Konto zahlen",
+    "paymentStripeNote": "Beide Zahlarten laufen sicher über Stripe.",
+    "summaryHeading": "Bestellübersicht",
+    "quantityLine": "Menge: {{qty}} × {{price}}",
+    "redeemPoints": "P2G Points einlösen",
+    "pointsBalance": "{{points}} Points",
+    "pointsSelected": "{{points}} Points",
+    "pointsRule": "Max. {{maxPercent}}% des Warenwerts · {{points}} Points = €1,00",
+    "noPoints": "Noch keine Points — sammle welche bei deiner nächsten <1>Court-Buchung</1>.",
+    "guestPointsHint": "Points einlösen geht nur mit Konto. <1>Kostenlos einloggen</1> — oder einfach als Gast bestellen.",
+    "subtotal": "Zwischensumme",
+    "pointsRedeemedLine": "{{points}} Points eingelöst",
+    "shipping": "Versand",
+    "free": "Kostenlos",
+    "total": "Gesamt",
+    "inclVat": "inkl. MwSt.",
+    "payNow": "Jetzt bezahlen · {{total}}",
+    "payReadyNote": "Mit Klick auf „Jetzt bezahlen“ geht's sicher weiter zu Stripe.",
+    "fillAddressNote": "Fülle deine Lieferadresse aus, um fortzufahren.",
+    "securePayment": "Sichere Zahlung über Stripe · SSL-verschlüsselt",
+    "redirecting": "Weiter zu Stripe …",
+    "redirectingSub": "Du wirst sicher zur Zahlung weitergeleitet.",
+    "stepLabel": "SCHRITT {{n}}"
   },
   "upsell": {
     "title": "Punkte sammeln & Freunde werben",
@@ -15,7 +121,8 @@
     "cta": "Jetzt kostenlos registrieren →"
   },
   "empty": {
-    "title": "Bald wieder für dich da",
+    "title": "Nichts gefunden für deine Filter",
+    "resetFilters": "Filter zurücksetzen",
     "description": "Aktuell sind keine Produkte verfügbar. Schau bald wieder vorbei – wir füllen den Store gerade auf!"
   },
   "item": {
@@ -48,9 +155,20 @@
     }
   },
   "success": {
-    "metaTitle": "Vielen Dank für deinen Kauf | Padel2Go",
-    "metaDescription": "Deine Bestellung im Padel2Go Marketplace war erfolgreich.",
-    "title": "Vielen Dank für deinen Kauf",
+    "metaTitle": "Bestellung bestätigt | PADEL2GO Marketplace",
+    "metaDescription": "Deine Bestellung im PADEL2GO Marketplace ist bestätigt.",
+    "title": "Bestellung bestätigt! 🎾",
+    "bodyWithMail": "Deine Bestellbestätigung ist unterwegs an <1>{{mail}}</1>.",
+    "bodyNoMail": "Deine Bestellbestätigung ist unterwegs an deine E-Mail.",
+    "orderNumber": "Bestellnummer <1>{{number}}</1>",
+    "rowProduct": "Produkt",
+    "rowDeliveryTo": "Lieferung an",
+    "rowPointsRedeemed": "Points eingelöst",
+    "pointsValue": "−{{points}} Points",
+    "rowPaid": "Bezahlt",
+    "shippingNote": "Versand in 1–2 Werktagen · Tracking-Link per Mail",
+    "keepShopping": "Weiter shoppen",
+    "bookCourt": "Court buchen",
     "subtitle": "Deine Bestellung ist bei uns eingegangen.",
     "note": "Du erhältst in Kürze eine Bestätigung per E-Mail – wir versenden deine Bestellung schnellstmöglich.",
     "referenceLabel": "Bestellreferenz",

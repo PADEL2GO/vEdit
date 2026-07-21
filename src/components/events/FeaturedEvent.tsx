@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { NavLink } from "@/components/NavLink";
 import { Calendar, MapPin, Clock, ArrowRight, Sparkles } from "lucide-react";
 import { format } from "date-fns";
-import { de } from "date-fns/locale";
+import { de, enUS } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 
 interface FeaturedEventProps {
@@ -19,15 +20,6 @@ interface FeaturedEventProps {
   event_artists: { id: string; name: string; image_url: string | null }[];
 }
 
-const EVENT_TYPE_LABELS: Record<string, string> = {
-  party: "Party",
-  day_drinking: "Day Drinking",
-  tournament: "Turnier",
-  community: "Community",
-  corporate: "Corporate",
-  open_play: "Open Play",
-};
-
 export const FeaturedEvent = ({
   slug,
   title,
@@ -39,6 +31,9 @@ export const FeaturedEvent = ({
   price_label,
   venue_name,
 }: FeaturedEventProps) => {
+  const { t, i18n } = useTranslation("events");
+  const dateLocale = i18n.language.startsWith("en") ? enUS : de;
+  const typeLabels = t("eventTypeLabels", { returnObjects: true }) as Record<string, string>;
   const startDate = start_at ? new Date(start_at) : null;
 
   return (
@@ -71,7 +66,7 @@ export const FeaturedEvent = ({
               {format(startDate, "dd")}
             </span>
             <span className="font-stat text-[10.5px] tracking-[0.18em] text-[hsl(0_0%_70%)] uppercase">
-              {format(startDate, "MMM", { locale: de })}
+              {format(startDate, "MMM", { locale: dateLocale })}
             </span>
           </span>
         )}
@@ -83,11 +78,11 @@ export const FeaturedEvent = ({
         <div className="flex flex-wrap items-center gap-2.5">
           <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-primary/10 border border-primary/25 text-primary">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            Featured
+            {t("detail.featured")}
           </span>
           {event_type && (
             <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-white/5 border border-border text-foreground/75">
-              {EVENT_TYPE_LABELS[event_type] || event_type}
+              {typeLabels[event_type] || event_type}
             </span>
           )}
         </div>
@@ -109,13 +104,13 @@ export const FeaturedEvent = ({
           {startDate && (
             <span className="inline-flex items-center gap-2.5 font-stat text-[13px] text-[hsl(0_0%_75%)]">
               <Calendar className="w-3.5 h-3.5 text-primary" />
-              {format(startDate, "EEEE, d. MMMM yyyy", { locale: de })}
+              {format(startDate, i18n.language.startsWith("en") ? "EEEE, MMMM d, yyyy" : "EEEE, d. MMMM yyyy", { locale: dateLocale })}
             </span>
           )}
           {startDate && (
             <span className="inline-flex items-center gap-2.5 font-stat text-[13px] text-[hsl(0_0%_75%)]">
               <Clock className="w-3.5 h-3.5 text-primary" />
-              {format(startDate, "HH:mm", { locale: de })} Uhr
+              {t("time.withSuffix", { time: format(startDate, "HH:mm", { locale: dateLocale }) })}
             </span>
           )}
           {(venue_name || city) && (
@@ -131,7 +126,7 @@ export const FeaturedEvent = ({
         <div className="flex items-center gap-4 flex-wrap mt-1.5">
           <Button variant="hero" size="lg" className="group/btn" asChild>
             <NavLink to={`/events/${slug}`}>
-              Details & Tickets
+              {t("featured.detailsCta")}
               <ArrowRight className="w-4 h-4 ml-1 group-hover/btn:translate-x-1 transition-transform" />
             </NavLink>
           </Button>

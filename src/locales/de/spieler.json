@@ -1,4 +1,88 @@
 {
+  "metaNew": {
+    "title": "Für Spieler | PADEL2GO",
+    "description": "Courts in ganz Deutschland, Events & Community — und Payback-Points bei jeder Buchung."
+  },
+  "heroNew": {
+    "imageAlt": "Padel-Spieler auf dem Court",
+    "badge": "Für Spieler",
+    "titleLine1": "Dein Spiel.",
+    "titleHighlight": "Deine Points.",
+    "titleLine2": "Dein Network.",
+    "description": "Courts in ganz Deutschland, Events & Community — und Payback-Points bei jeder Buchung.",
+    "primaryCta": "Court buchen",
+    "secondaryCta": "App herunterladen",
+    "chipLaunch": "Launch",
+    "chipRegistration": "Registrierung",
+    "chipBooking": "Buchung",
+    "chipPointsSuffix": "pro Buchung"
+  },
+  "networkNew": {
+    "eyebrow": "Das P2G Network",
+    "titlePrefix": "Spielen. Connecten.",
+    "titleHighlight": "Einlösen.",
+    "pillars": [
+      {
+        "tag": "Courts in ganz Deutschland",
+        "title": "Courts in ganz Deutschland",
+        "text": "SkyPadel-Courts auf Vereinsgeländen — die ersten Standorte machen den Anfang, weitere folgen.",
+        "cta": "Court buchen"
+      },
+      {
+        "tag": "Open Play ab 0 €",
+        "title": "Events & Netzwerk",
+        "text": "Night Sessions, Turniere, Open Play — komm allein oder mit Crew, gematcht wird vor Ort. Dein Level zählt EU-weit in der P2G Liga.",
+        "cta": "Zu den Events"
+      },
+      {
+        "tag": "Payback bei jeder Buchung",
+        "title": "Marketplace & P2G Points",
+        "text": "Points sammelst du automatisch bei jeder Buchung — und löst sie im Marketplace gegen Equipment ein: als Rabatt oder für den vollen Preis.",
+        "cta": "Zum Marketplace"
+      }
+    ]
+  },
+  "paybackNew": {
+    "badge": "P2G Points",
+    "titlePrefix": "So funktioniert",
+    "titleHighlight": "Payback.",
+    "steps": [
+      {
+        "title": "Buchen",
+        "text": "Fixe Points je Buchung — 1 h oder 2 h Court-Zeit."
+      },
+      {
+        "title": "Multiplikator",
+        "text": "Dein Tier-Level legt obendrauf — je höher dein Level, desto mehr Payback."
+      },
+      {
+        "title": "Einlösen",
+        "text": "Im Marketplace gegen Equipment — als Rabatt oder für den vollen Preis."
+      }
+    ],
+    "tierTitlePrefix": "Dein Tier-Level =",
+    "tierTitleHighlight": "dein Multiplikator",
+    "tierMeta": "{{count}} Tiers · EU-weites Ranking"
+  },
+  "kiNew": {
+    "comingSoon": "Coming Soon",
+    "poweredBy": "Powered by Wingfield",
+    "titlePrefix": "Als Nächstes:",
+    "titleHighlight": "KI-Matchanalyse.",
+    "description": "Die Court-Kamera erfasst dein Spiel automatisch — 40+ Metriken, Auto-Clips und ein objektives Skill-Rating nach jedem Match.",
+    "tags": ["Match IQ", "Speed & Placement", "Auto-Clips", "Skill-Rating"],
+    "newsletterDone": "Du stehst auf der Liste — wir melden uns zum Start!",
+    "emailPlaceholder": "deine@email.de",
+    "notifyCta": "Benachrichtigt werden",
+    "emailError": "Bitte gib eine gültige E-Mail-Adresse ein."
+  },
+  "ctaNew": {
+    "titlePrefix": "Ready fürs",
+    "titleHighlight": "erste Match?",
+    "primaryCta": "Court buchen",
+    "secondaryCta": "App herunterladen",
+    "note": "Launch {{date}} · Registrierung kostenlos"
+  },
   "meta": {
     "title": "Für Spieler | PADEL2GO – Buche Courts, sammle P2G-Credits, löse Rewards ein",
     "description": "Mit PADEL2GO buchst du Courts in Sekunden, sammelst P2G-Credits und löst sie im Marketplace ein."
