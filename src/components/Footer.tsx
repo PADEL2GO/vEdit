@@ -3,7 +3,6 @@ import { MapPin, Mail, Phone } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "@/components/NavLink";
 import BrandName from "@/components/BrandName";
-import { useAuth } from "@/hooks/useAuth";
 import LanguageSwitch from "@/components/LanguageSwitch";
 import {
   WhatsAppIcon,
@@ -13,53 +12,23 @@ import {
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const { user } = useAuth();
   const { t } = useTranslation("common");
   const whatsappUrl = useWhatsAppUrl();
-  const isLoggedIn = !!user;
 
-  // Plattform-Links verweisen auf oeffentliche Marketing-Seiten.
-  // Nicht eingeloggte Besucher sehen zusaetzlich den Registrieren-Link.
-  const platformLinks: Array<{ label: string; href: string }> = isLoggedIn
-    ? [
-        { label: t("footer.links.bookCourt"), href: "/booking" },
-        { label: t("footer.links.events"), href: "/events" },
-        { label: t("footer.links.league"), href: "/league" },
-      ]
-    : [
-        { label: t("footer.links.bookCourt"), href: "/booking" },
-        { label: t("footer.links.signUp"), href: "/auth" },
-        { label: t("footer.links.events"), href: "/events" },
-        { label: t("footer.links.league"), href: "/league" },
-      ];
-
-  const showPlatformColumn = platformLinks.length > 0;
-
-  const links = {
-    unternehmen: [
-      { label: t("footer.links.forPlayers"), href: "/fuer-spieler" },
-      { label: t("footer.links.forClubs"), href: "/fuer-vereine" },
-      { label: t("footer.links.faqContact"), href: "/faq-kontakt" },
-    ],
-    legal: [
-      { label: t("footer.links.imprint"), href: "/impressum" },
-      { label: t("footer.links.privacy"), href: "/datenschutz" },
-      { label: t("footer.links.terms"), href: "/agb" },
-    ],
-  };
+  const legalLinks = [
+    { label: t("footer.links.imprint"), href: "/impressum" },
+    { label: t("footer.links.privacy"), href: "/datenschutz" },
+    { label: t("footer.links.terms"), href: "/agb" },
+  ];
 
   return (
     <footer className="bg-card/50 border-t border-border">
-      <div className="container mx-auto px-4 py-8 md:py-16">
-        <div
-          className={`grid grid-cols-2 ${
-            showPlatformColumn ? "md:grid-cols-4" : "md:grid-cols-3"
-          } gap-6 md:gap-8 mb-12`}
-        >
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
+      <div className="container mx-auto px-4 py-10 md:py-14">
+        <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
+          {/* Brand + contact */}
+          <div className="max-w-sm">
             <img src={logo} alt="PADEL2GO" className="h-8 mb-4" />
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-5">
               {t("footer.tagline")}
             </p>
             <div className="space-y-2">
@@ -99,48 +68,12 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Plattform */}
-          {showPlatformColumn && (
-            <div>
-              <h4 className="font-semibold mb-4">{t("footer.sections.platform")}</h4>
-              <ul className="space-y-2">
-                {platformLinks.map((link) => (
-                  <li key={link.label}>
-                    <NavLink
-                      to={link.href}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.label}
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Unternehmen */}
-          <div>
-            <h4 className="font-semibold mb-4">{t("footer.sections.company")}</h4>
-            <ul className="space-y-2">
-              {links.unternehmen.map((link) => (
-                <li key={link.label}>
-                  <NavLink
-                    to={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Rechtliches */}
-          <div>
+          {/* Legal */}
+          <nav className="md:text-right">
             <h4 className="font-semibold mb-4">{t("footer.sections.legal")}</h4>
-            <ul className="space-y-2">
-              {links.legal.map((link) => (
-                <li key={link.label}>
+            <ul className="space-y-2.5">
+              {legalLinks.map((link) => (
+                <li key={link.href}>
                   <NavLink
                     to={link.href}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -150,11 +83,11 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
         </div>
 
         {/* Bottom */}
-        <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-10 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
             © {currentYear} <BrandName inline />. {t("footer.copyrightSuffix")}
           </p>

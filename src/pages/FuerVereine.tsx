@@ -14,7 +14,6 @@ import BrandName from "@/components/BrandName";
 import partnerP2GLogo from "@/assets/partners/p2g-logo-vereine.png";
 import {
   WhatsAppIcon,
-  WHATSAPP_NUMBER_DISPLAY,
   useWhatsAppUrl,
 } from "@/components/WhatsAppBusiness";
 import { usePartnerTiles } from "@/hooks/usePartnerTiles";
@@ -27,7 +26,6 @@ import {
   ArrowRight,
   BarChart3,
   Building2,
-  CalendarCheck,
   Smartphone,
   Trophy,
   TrendingUp,
@@ -38,7 +36,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Mail,
-  MessageCircle,
   Video,
   QrCode,
   Brain,
@@ -154,8 +151,6 @@ type StepItem = { title: string; desc: string };
 type ServiceItem = { title: string; description: string };
 type CourtFeature = { title: string; description: string };
 type CuriosityItem = { label: string; sub: string };
-type TimelineStep = { title: string; details: string[]; highlight?: string };
-type WhatsappBenefit = { title: string; desc: string };
 
 const FuerVereine = () => {
   const { t, i18n } = useTranslation("vereine");
@@ -186,11 +181,6 @@ const FuerVereine = () => {
 
   const curiosityIcons = [TrendingUp, Users, Gem];
   const curiosityItems = t("curiosity.items", { returnObjects: true }) as CuriosityItem[];
-
-  const timelineSteps = t("timeline.steps", { returnObjects: true }) as TimelineStep[];
-
-  const whatsappBenefitIcons = [Zap, MessageCircle, CalendarCheck];
-  const whatsappBenefits = t("whatsapp.benefits", { returnObjects: true }) as WhatsappBenefit[];
 
   return (
     <>
@@ -244,7 +234,9 @@ const FuerVereine = () => {
           </p>
 
           <motion.a
-            href="#termin"
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -325,7 +317,9 @@ const FuerVereine = () => {
               className="text-center mt-12"
             >
               <a
-                href="#termin"
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#25D366] text-white hover:bg-[#1FB855] transition-colors font-semibold text-base shadow-lg shadow-[#25D366]/40">
                 <WhatsAppIcon className="w-5 h-5" />
                 {t("steps.cta")}
@@ -616,7 +610,9 @@ const FuerVereine = () => {
                 </div>
 
                 <a
-                  href="#termin"
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#25D366] text-white hover:bg-[#1FB855] transition-colors font-semibold text-lg group shadow-lg shadow-[#25D366]/40">
                   <WhatsAppIcon className="w-5 h-5" />
                   {t("curiosity.cta")}
@@ -624,172 +620,6 @@ const FuerVereine = () => {
                 </a>
                 <p className="text-sm text-muted-foreground mt-4">{t("curiosity.footnote")}</p>
               </motion.div>
-            </div>
-          </section>
-
-          <SectionDivider variant="glow" />
-
-          {/* SEKTION: Wie es jetzt konkret weitergeht */}
-          <section className="py-20 md:py-32 bg-background relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-hero opacity-60 pointer-events-none" />
-            <div className="container mx-auto px-4 relative z-10">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="max-w-5xl mx-auto">
-
-                <div className="text-center mb-16">
-                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-5">
-                    <Target className="w-4 h-4" />
-                    {t("timeline.badge")}
-                  </span>
-                  <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-3">
-                    {t("timeline.title")} <span className="text-gradient-lime">{t("timeline.titleHighlight")}</span>
-                  </h2>
-                  <p className="text-muted-foreground text-lg max-w-xl mx-auto">{t("timeline.intro")}</p>
-                </div>
-
-                {/* 4-Schritt-Timeline */}
-                <div className="relative">
-                  {/* Verbindungslinie */}
-                  <div className="hidden md:block absolute top-10 left-10 right-10 h-0.5 bg-gradient-to-r from-primary via-primary to-primary/30 z-0" />
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-4 relative z-10">
-                    {timelineSteps.map((step, index) => {
-                      const stepNumber = String(index + 1);
-                      return (
-                        <motion.div
-                          key={stepNumber}
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: index * 0.15 }}
-                          className="flex flex-col items-center text-center">
-
-                          {/* Circle */}
-                          <div className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold mb-4 shrink-0 shadow-lg ${
-                            index === 3 ?
-                              "bg-primary text-primary-foreground" :
-                              "bg-background border-2 border-primary text-primary"}`
-                          }>
-                            {stepNumber}
-                          </div>
-                          <h3 className="text-xl font-bold mb-3">{step.title}</h3>
-                          <ul className="space-y-1 text-sm text-muted-foreground">
-                            {step.details.map((d) =>
-                              <li key={d}>{d}</li>
-                            )}
-                          </ul>
-                          {step.highlight &&
-                            <p className="mt-3 text-sm font-semibold text-primary">{step.highlight}</p>
-                          }
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 2-Monate Banner */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.6 }}
-                  className="mt-14 p-8 rounded-3xl bg-primary text-primary-foreground text-center shadow-2xl shadow-primary/30">
-
-                  <p className="text-2xl md:text-4xl font-bold mb-2">
-                    {t("timeline.bannerLine1Prefix")} <span className="underline decoration-4 underline-offset-4">{t("timeline.bannerLine1Months")}</span> {t("timeline.bannerLine1Suffix")}
-                  </p>
-                  <p className="text-base md:text-lg opacity-80 font-medium">{t("timeline.bannerLine2")}</p>
-                </motion.div>
-              </motion.div>
-            </div>
-          </section>
-
-
-          {/* SEKTION: Termin per WhatsApp Business */}
-          <section
-            id="termin"
-            className="py-16 md:py-28 relative overflow-hidden bg-gradient-to-b from-background via-[#25D366]/[0.04] to-background">
-
-            <div
-              className="absolute inset-0 opacity-[0.025] pointer-events-none"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle at 1px 1px, #25D366 1px, transparent 0)",
-                backgroundSize: "24px 24px",
-              }} />
-
-            <div className="container mx-auto px-4 relative z-10">
-
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center max-w-2xl mx-auto mb-10 md:mb-12">
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#25D366]/10 border border-[#25D366]/30 text-[#1FB855] text-sm font-bold tracking-wide uppercase mb-5">
-                  <WhatsAppIcon className="w-4 h-4" />
-                  {t("whatsapp.badge")}
-                </span>
-                <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
-                  {t("whatsapp.title")}{" "}
-                  <span className="text-gradient-lime">{t("whatsapp.titleHighlight")}</span>
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  {t("whatsapp.intro")}
-                </p>
-              </motion.div>
-
-              {/* CTA – im gleichen Stil wie die anderen WhatsApp-Buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.15 }}
-                className="flex flex-col items-center mb-10">
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#25D366] text-white hover:bg-[#1FB855] transition-colors font-semibold text-lg shadow-lg shadow-[#25D366]/40">
-                  <WhatsAppIcon className="w-5 h-5" />
-                  {t("whatsapp.cta")}
-                </a>
-                <p className="text-xs text-muted-foreground mt-3">
-                  {WHATSAPP_NUMBER_DISPLAY} · {t("whatsapp.ctaCaption")}
-                </p>
-              </motion.div>
-
-              {/* Benefits */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.25 }}
-                className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                {whatsappBenefits.map((b, i) => {
-                  const Icon = whatsappBenefitIcons[i];
-                  return (
-                    <div
-                      key={b.title}
-                      className="p-5 rounded-2xl bg-card border border-border text-center hover:border-[#25D366]/30 transition-colors">
-                      <div className="w-10 h-10 rounded-xl bg-[#25D366]/10 flex items-center justify-center mx-auto mb-3">
-                        <Icon className="w-5 h-5 text-[#1FB855]" />
-                      </div>
-                      <p className="font-bold text-sm mb-1">{b.title}</p>
-                      <p className="text-xs text-muted-foreground">{b.desc}</p>
-                    </div>
-                  );
-                })}
-              </motion.div>
-
-              <p className="text-center text-sm text-muted-foreground mt-10">
-                {t("whatsapp.emailPrefix")}{" "}
-                <NavLink to="/faq-kontakt?reason=verein" className="text-primary hover:underline">
-                  {t("whatsapp.emailLink")}
-                </NavLink>
-              </p>
             </div>
           </section>
 

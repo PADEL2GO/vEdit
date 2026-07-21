@@ -39,20 +39,9 @@
     "country": "Deutschland",
     "whatsappBadge": "WhatsApp",
     "sections": {
-      "platform": "Plattform",
-      "company": "Unternehmen",
       "legal": "Rechtliches"
     },
     "links": {
-      "bookCourt": "Court buchen",
-      "signUp": "Jetzt anmelden",
-      "events": "Events",
-      "league": "Liga",
-      "forPlayers": "Für Spieler",
-      "forClubs": "Für Vereine",
-      "forPartners": "Für Partner",
-      "about": "Über uns",
-      "faqContact": "FAQ & Kontakt",
       "imprint": "Impressum",
       "privacy": "Datenschutz",
       "terms": "AGB"

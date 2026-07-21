@@ -39,20 +39,9 @@
     "country": "Germany",
     "whatsappBadge": "WhatsApp",
     "sections": {
-      "platform": "Platform",
-      "company": "Company",
       "legal": "Legal"
     },
     "links": {
-      "bookCourt": "Book a court",
-      "signUp": "Sign up",
-      "events": "Events",
-      "league": "League",
-      "forPlayers": "For Players",
-      "forClubs": "For Clubs",
-      "forPartners": "For Partners",
-      "about": "About us",
-      "faqContact": "FAQ & Contact",
       "imprint": "Imprint",
       "privacy": "Privacy",
       "terms": "Terms"
