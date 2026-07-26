@@ -56,6 +56,18 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (adminRole) return json({ error: "Admin accounts cannot be deleted here" }, 403);
 
+    // Option (b): transactional rows survive (FK SET NULL, migration 20260726150000) —
+    // strip the shipping PII from kept order rows before the user disappears.
+    await admin
+      .from("marketplace_redemptions")
+      .update({
+        shipping_address_line1: null,
+        shipping_postal_code: null,
+        shipping_city: null,
+        shipping_country: null,
+      })
+      .eq("user_id", user.id);
+
     const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
     if (deleteError) {
       console.error("delete-account failed:", deleteError);
