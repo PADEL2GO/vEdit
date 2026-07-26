@@ -36,6 +36,7 @@ export interface BrandedEmailOpts {
   ctaLabel?: string;
   ctaUrl?: string;
   note?: string;                 // footer note above the copyright
+  legalHtml?: string;            // pre-escaped legal block (e.g. Widerrufsbelehrung) below the note
 }
 
 const esc = (s: string) =>
@@ -105,10 +106,21 @@ export function brandedEmailHtml(o: BrandedEmailOpts): string {
               ${highlight}
               ${cta}
               ${o.note ? `<p style="text-align:center;color:#8a8a8a;font-size:14px;margin:0;">${esc(o.note)}</p>` : ""}
+              ${o.legalHtml ? `<div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);color:#8a8a8a;font-size:12px;line-height:1.6;">${o.legalHtml}</div>` : ""}
             </td>
           </tr>
           <tr>
             <td style="padding:24px 32px;background:rgba(0,0,0,0.3);text-align:center;">
+              <p style="margin:0 0 10px;color:#5a5a5a;font-size:12px;line-height:1.6;">
+                PADEL2GO UG (haftungsbeschränkt) · Am Neudeck 10 · 81541 München<br>
+                Geschäftsführer: Florian Steinfelder, David Klemm · Amtsgericht München, HRB 306377
+              </p>
+              <p style="margin:0 0 10px;font-size:12px;">
+                <a href="https://www.padel2go-official.de/impressum" style="color:#8a8a8a;">Impressum</a> ·
+                <a href="https://www.padel2go-official.de/agb" style="color:#8a8a8a;">AGB</a> ·
+                <a href="https://www.padel2go-official.de/widerruf" style="color:#8a8a8a;">Widerrufsbelehrung</a> ·
+                <a href="https://www.padel2go-official.de/datenschutz" style="color:#8a8a8a;">Datenschutz</a>
+              </p>
               <p style="margin:0;color:#5a5a5a;font-size:13px;">© ${new Date().getFullYear()} PADEL2GO. Alle Rechte vorbehalten.</p>
             </td>
           </tr>

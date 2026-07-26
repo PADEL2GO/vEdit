@@ -1,6 +1,12 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import "@fontsource-variable/bricolage-grotesque/opsz.css";
+import "@fontsource-variable/dm-sans/opsz.css";
+import "@fontsource-variable/dm-sans/opsz-italic.css";
+import "@fontsource/jetbrains-mono/400.css";
+import "@fontsource/jetbrains-mono/500.css";
+import "@fontsource/jetbrains-mono/700.css";
 import "./index.css";
 import "./i18n";
 

@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Building2, CircleDot } from "lucide-react";
 import { Outlet, Navigate } from "react-router-dom";
 import { useClubAuth } from "@/hooks/useClubAuth";
+import LegalFooterLinks from "@/components/LegalFooterLinks";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
@@ -77,6 +78,7 @@ export function ClubLayout() {
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6">
             <Outlet />
+            <LegalFooterLinks />
           </main>
         </SidebarInset>
       </div>

@@ -1,20 +1,18 @@
 {
   "meta": {
     "title": "Impressum | Padel2Go",
-    "description": "Impressum der PADEL2GO - Rechtliche Informationen, Kontaktdaten und Angaben gemäß § 5 TMG."
+    "description": "Impressum der PADEL2GO UG (haftungsbeschränkt) - Rechtliche Informationen, Kontaktdaten und Angaben gemäß § 5 DDG."
   },
   "header": {
     "title": "Impressum",
-    "subtitle": "Angaben gemäß § 5 TMG"
+    "subtitle": "Angaben gemäß § 5 DDG"
   },
   "sections": {
     "provider": "Anbieter",
     "managingDirectors": "Vertretungsberechtigte Geschäftsführer",
     "contact": "Kontakt",
     "registration": "Registereintrag",
-    "vatId": "Umsatzsteuer-ID",
-    "responsible": "Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV",
-    "euDispute": "EU-Streitschlichtung",
+    "responsible": "Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV",
     "consumerDispute": "Verbraucherstreitbeilegung/Universalschlichtungsstelle",
     "liabilityContent": "Haftung für Inhalte",
     "liabilityLinks": "Haftung für Links",
@@ -31,19 +29,11 @@
     "numberLabel": "Registernummer:",
     "number": "HRB 306377"
   },
-  "vat": {
-    "label": "Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG:",
-    "number": "DE [Nummer wird ergänzt]"
-  },
-  "euDispute": {
-    "intro": "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:",
-    "after": "Unsere E-Mail-Adresse finden Sie oben im Impressum."
-  },
   "consumerDispute": {
     "text": "Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen."
   },
   "liabilityContent": {
-    "p1": "Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.",
+    "p1": "Als Diensteanbieter sind wir für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Wir sind jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.",
     "p2": "Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werden wir diese Inhalte umgehend entfernen."
   },
   "liabilityLinks": {
@@ -54,6 +44,6 @@
     "p1": "Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.",
     "p2": "Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte umgehend entfernen."
   },
-  "lastUpdated": "Stand: Dezember 2025",
+  "lastUpdated": "Stand: Juli 2026",
   "legalNotice": ""
 }

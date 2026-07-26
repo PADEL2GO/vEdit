@@ -327,6 +327,7 @@ const MarketplaceCheckout = () => {
                       <span className="text-[11px] text-muted-foreground">{t("checkout.inclVat")}</span>
                     </span>
                   </div>
+                  <span className="text-[11.5px] text-muted-foreground">{t("checkout.deliveryTime")}</span>
                 </div>
 
                 <div style={{ opacity: addrValid ? 1 : 0.45, pointerEvents: addrValid ? "auto" : "none" }} className="transition-opacity">
@@ -344,6 +345,16 @@ const MarketplaceCheckout = () => {
                   <ShieldCheck className="w-3.5 h-3.5" />
                   {t("checkout.securePayment")}
                 </span>
+                <p className="text-xs text-center text-muted-foreground/70">
+                  <Trans
+                    i18nKey="marketplace:checkout.legalNote"
+                    components={{
+                      1: <button onClick={() => navigate("/agb")} className="underline hover:no-underline" />,
+                      2: <button onClick={() => navigate("/datenschutz")} className="underline hover:no-underline" />,
+                      3: <button onClick={() => navigate("/widerruf")} className="underline hover:no-underline" />,
+                    }}
+                  />
+                </p>
               </div>
             </div>
           </div>

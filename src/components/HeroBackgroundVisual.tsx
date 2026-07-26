@@ -41,7 +41,7 @@ export function HeroBackgroundVisual({ videoKey, imageKey, alt, fallbackSrc, cla
 
     if (yt || vm) {
       const src = yt
-        ? `https://www.youtube.com/embed/${yt}?autoplay=1&mute=1&loop=1&playlist=${yt}&controls=0&showinfo=0&modestbranding=1&rel=0&playsinline=1&disablekb=1`
+        ? `https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=1&loop=1&playlist=${yt}&controls=0&showinfo=0&modestbranding=1&rel=0&playsinline=1&disablekb=1`
         : `https://player.vimeo.com/video/${vm}?autoplay=1&muted=1&loop=1&background=1&controls=0`;
       return (
         <div className={cn("overflow-hidden", className)}>

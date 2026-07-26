@@ -5,7 +5,7 @@
   },
   "header": {
     "title": "Datenschutzerklärung",
-    "subtitle": "Gemäß DSGVO (EU) 2016/679 · Stand: April 2026"
+    "subtitle": "Gemäß DSGVO (EU) 2016/679 · Stand: Juli 2026"
   },
   "controller": {
     "heading": "1. Verantwortlicher",
@@ -42,8 +42,16 @@
     "legalText": "Art. 6 Abs. 1 lit. b DSGVO (Zahlungsabwicklung als Teil des Buchungsvertrags).",
     "privacyLinkLabel": "Datenschutzerklärung Stripe:"
   },
+  "shop": {
+    "heading": "5. Bestellungen im PADEL2GO Shop",
+    "p1": "Wenn Sie in unserem Shop bestellen, verarbeiten wir die für die Abwicklung des Kaufvertrags erforderlichen Daten: Name, E-Mail-Adresse, Lieferadresse, bestellte Produkte sowie Bestell- und Zahlungsstatus. Bestellungen sind auch als Gast ohne Nutzerkonto möglich; auch dabei werden nur die genannten Daten verarbeitet.",
+    "p2": "Zur Zustellung Ihrer Bestellung geben wir Ihren Namen und Ihre Lieferadresse an das mit dem Versand beauftragte Logistikunternehmen weiter.",
+    "p3": "Eingelöste P2G Points und gewährte Rabatte werden zu Abrechnungs- und Nachweiszwecken zusammen mit der Bestellung gespeichert.",
+    "legalLabel": "Rechtsgrundlage:",
+    "legalText": "Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung); für die Aufbewahrung abgeschlossener Bestellungen Art. 6 Abs. 1 lit. c DSGVO i. V. m. § 147 AO, § 257 HGB (gesetzliche Aufbewahrungspflichten). Bestelldaten werden nach Löschung des Nutzerkontos anonymisiert weiter aufbewahrt, soweit gesetzliche Aufbewahrungsfristen laufen."
+  },
   "email": {
-    "heading": "5. E-Mail-Kommunikation (Resend)",
+    "heading": "6. E-Mail-Kommunikation (Resend)",
     "p1": "Für den Versand transaktionaler E-Mails (Buchungsbestätigungen, Erinnerungen, Einladungen) nutzen wir den Dienst Resend (Resend Inc., San Francisco, USA). Resend verarbeitet dabei Ihre E-Mail-Adresse sowie den Inhalt der jeweiligen E-Mail.",
     "purposeLabel": "Zweck:",
     "purposeText": "Übermittlung buchungsrelevanter Informationen, die für die Vertragserfüllung erforderlich sind.",
@@ -52,7 +60,7 @@
     "privacyLinkLabel": "Datenschutzerklärung Resend:"
   },
   "cookies": {
-    "heading": "6. Cookies & lokale Speicherung",
+    "heading": "7. Cookies & lokale Speicherung",
     "p1": "Wir verwenden ausschließlich technisch notwendige Cookies und lokale Speichermechanismen (localStorage). Diese sind für den Betrieb der Plattform erforderlich und können nicht deaktiviert werden, ohne die Funktionalität der Website erheblich einzuschränken.",
     "sessionLabel": "Session-Cookie (Supabase Auth):",
     "sessionText": "Speichert Ihre Anmeldung, damit Sie angemeldet bleiben. Wird beim Ausloggen gelöscht.",
@@ -61,26 +69,47 @@
     "legalText": "Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb der Plattform)."
   },
   "retention": {
-    "heading": "7. Speicherdauer",
+    "heading": "8. Speicherdauer",
     "p1": "Personenbezogene Daten werden gelöscht, sobald sie für den Zweck ihrer Erhebung nicht mehr erforderlich sind. Buchungsdaten werden aus steuerrechtlichen Gründen für die gesetzlich vorgeschriebene Dauer (in Deutschland: 10 Jahre) aufbewahrt.",
     "p2": "Nutzerdaten (Profil, Rewards-History) werden nach Kontolöschung innerhalb von 30 Tagen gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen."
   },
   "rights": {
-    "heading": "8. Ihre Rechte als betroffene Person",
+    "heading": "9. Ihre Rechte als betroffene Person",
     "intro": "Sie haben gegenüber PADEL2GO folgende Rechte bezüglich Ihrer personenbezogenen Daten:",
     "list": [
-      { "term": "Auskunft", "text": "(Art. 15 DSGVO) – Welche Daten wir über Sie gespeichert haben" },
-      { "term": "Berichtigung", "text": "(Art. 16 DSGVO) – Korrektur unrichtiger Daten" },
-      { "term": "Löschung", "text": "(Art. 17 DSGVO) – Löschung Ihrer Daten, soweit keine gesetzlichen Aufbewahrungspflichten bestehen" },
-      { "term": "Einschränkung der Verarbeitung", "text": "(Art. 18 DSGVO)" },
-      { "term": "Datenübertragbarkeit", "text": "(Art. 20 DSGVO) – Erhalt Ihrer Daten in einem maschinenlesbaren Format" },
-      { "term": "Widerspruch", "text": "(Art. 21 DSGVO) – Widerspruch gegen Verarbeitungen auf Basis berechtigter Interessen" },
-      { "term": "Beschwerde", "text": "– Bei der zuständigen Aufsichtsbehörde (Bayerisches Landesamt für Datenschutzaufsicht, Promenade 18, 91522 Ansbach)" }
+      {
+        "term": "Auskunft",
+        "text": "(Art. 15 DSGVO) – Welche Daten wir über Sie gespeichert haben"
+      },
+      {
+        "term": "Berichtigung",
+        "text": "(Art. 16 DSGVO) – Korrektur unrichtiger Daten"
+      },
+      {
+        "term": "Löschung",
+        "text": "(Art. 17 DSGVO) – Löschung Ihrer Daten, soweit keine gesetzlichen Aufbewahrungspflichten bestehen"
+      },
+      {
+        "term": "Einschränkung der Verarbeitung",
+        "text": "(Art. 18 DSGVO)"
+      },
+      {
+        "term": "Datenübertragbarkeit",
+        "text": "(Art. 20 DSGVO) – Erhalt Ihrer Daten in einem maschinenlesbaren Format"
+      },
+      {
+        "term": "Widerspruch",
+        "text": "(Art. 21 DSGVO) – Widerspruch gegen Verarbeitungen auf Basis berechtigter Interessen"
+      },
+      {
+        "term": "Beschwerde",
+        "text": "– Bei der zuständigen Aufsichtsbehörde (Bayerisches Landesamt für Datenschutzaufsicht, Promenade 18, 91522 Ansbach)"
+      }
     ],
     "contactBefore": "Zur Ausübung Ihrer Rechte wenden Sie sich bitte an:"
   },
   "security": {
-    "heading": "9. Datensicherheit",
+    "heading": "10. Datensicherheit",
     "p1": "Wir treffen technische und organisatorische Maßnahmen, um Ihre Daten vor unbefugtem Zugriff, Verlust oder Manipulation zu schützen. Dazu gehören:",
     "list": [
       "Verschlüsselte Datenübertragung (TLS/HTTPS)",
@@ -90,9 +119,9 @@
     ]
   },
   "changes": {
-    "heading": "10. Änderungen dieser Datenschutzerklärung",
+    "heading": "11. Änderungen dieser Datenschutzerklärung",
     "p1": "Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an geänderte Rechtslagen oder Änderungen unserer Dienste anzupassen. Die jeweils aktuelle Version ist auf dieser Seite abrufbar. Bei wesentlichen Änderungen informieren wir registrierte Nutzer per E-Mail."
   },
-  "footer": "Stand: April 2026 · PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 München",
+  "footer": "Stand: Juli 2026 · PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 München",
   "legalNotice": ""
 }

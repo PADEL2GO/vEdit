@@ -136,6 +136,14 @@ serve(async (req) => {
         });
       }
 
+      // Statutory withdrawal instructions (Art. 246a EGBGB) — must reach the buyer
+      // on a durable medium, hence embedded in the confirmation mail for goods.
+      const widerrufsbelehrung = `
+        <p style="margin:0 0 8px;font-weight:700;color:#b0b0b0;">Widerrufsbelehrung</p>
+        <p style="margin:0 0 8px;"><strong>Widerrufsrecht:</strong> Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag, an dem Sie oder ein von Ihnen benannter Dritter, der nicht der Beförderer ist, die Waren in Besitz genommen haben bzw. hat. Um Ihr Widerrufsrecht auszuüben, müssen Sie uns (PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 München, E-Mail: info@padel2go-official.de) mittels einer eindeutigen Erklärung (z.&nbsp;B. ein mit der Post versandter Brief oder eine E-Mail) über Ihren Entschluss, diesen Vertrag zu widerrufen, informieren. Sie können dafür das Muster-Widerrufsformular unter <a href="https://www.padel2go-official.de/widerruf" style="color:#8a8a8a;">padel2go-official.de/widerruf</a> verwenden, das jedoch nicht vorgeschrieben ist. Zur Wahrung der Widerrufsfrist reicht es aus, dass Sie die Mitteilung über die Ausübung des Widerrufsrechts vor Ablauf der Widerrufsfrist absenden.</p>
+        <p style="margin:0 0 8px;"><strong>Folgen des Widerrufs:</strong> Wenn Sie diesen Vertrag widerrufen, haben wir Ihnen alle Zahlungen, die wir von Ihnen erhalten haben, einschließlich der Lieferkosten (mit Ausnahme zusätzlicher Kosten, die sich daraus ergeben, dass Sie eine andere Art der Lieferung als die von uns angebotene, günstigste Standardlieferung gewählt haben), unverzüglich und spätestens binnen vierzehn Tagen ab dem Tag zurückzuzahlen, an dem die Mitteilung über Ihren Widerruf bei uns eingegangen ist. Für die Rückzahlung verwenden wir dasselbe Zahlungsmittel wie bei der ursprünglichen Transaktion; es werden Ihnen dafür keine Entgelte berechnet. Wir können die Rückzahlung verweigern, bis wir die Waren zurückerhalten haben oder Sie den Nachweis der Rücksendung erbracht haben, je nachdem, welches der frühere Zeitpunkt ist. Sie haben die Waren unverzüglich und in jedem Fall spätestens binnen vierzehn Tagen ab dem Tag, an dem Sie uns über den Widerruf unterrichten, an uns zurückzusenden. Die Frist ist gewahrt, wenn Sie die Waren vor Ablauf der Frist absenden. <strong>Wir tragen die Kosten der Rücksendung der Waren.</strong> Sie müssen für einen etwaigen Wertverlust der Waren nur aufkommen, wenn dieser auf einen zur Prüfung der Beschaffenheit, Eigenschaften und Funktionsweise nicht notwendigen Umgang zurückzuführen ist.</p>
+        <p style="margin:0;"><strong>Ausschluss:</strong> Das Widerrufsrecht besteht nicht bei individuell angefertigten Waren sowie bei versiegelten Waren, die aus Gründen des Gesundheitsschutzes oder der Hygiene nicht zur Rückgabe geeignet sind, wenn die Versiegelung nach der Lieferung entfernt wurde. Es gelten unsere <a href="https://www.padel2go-official.de/agb" style="color:#8a8a8a;">AGB</a>.</p>`;
+
       const html = brandedEmailHtml({
         title: "Bestellung bestätigt",
         emoji: "🛍️",
@@ -144,10 +152,11 @@ serve(async (req) => {
         greetingName: recipientName,
         rows,
         note: shipsPhysical
-          ? "Wir bereiten deine Bestellung für den Versand vor und melden uns, sobald sie unterwegs ist."
+          ? "Wir bereiten deine Bestellung für den Versand vor. Lieferzeit: in der Regel 2–4 Werktage."
           : "Deine Bestellung ist abgeschlossen. Viel Spaß!",
         ctaLabel: "Zum Shop",
         ctaUrl: "https://www.padel2go-official.de/marketplace",
+        ...(isPhysical ? { legalHtml: widerrufsbelehrung } : {}),
       });
 
       await sendBrandedEmail(resendKey, recipientEmail, `Bestellung bestätigt: ${itemName}`, html);

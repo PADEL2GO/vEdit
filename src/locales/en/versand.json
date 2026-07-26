@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "title": "Shipping & Payment | Padel2Go",
+    "description": "Shipping costs, delivery times, payment methods and returns in the PADEL2GO shop."
+  },
+  "header": {
+    "title": "Shipping & Payment",
+    "subtitle": "Everything about delivery, payment methods and returns in the PADEL2GO shop"
+  },
+  "sections": {
+    "shipping": {
+      "heading": "Shipping & Delivery Time",
+      "items": [
+        { "label": "Shipping costs:", "text": "Shipping within Germany is free of charge. All product prices include statutory VAT." },
+        { "label": "Delivery area:", "text": "We currently deliver within Germany only." },
+        { "label": "Delivery time:", "text": "Unless stated otherwise for the respective product, the delivery time is 2–4 business days after receipt of payment." },
+        { "label": "Order confirmation:", "text": "After completing your order, you will receive an order confirmation by email with all the details of your order." }
+      ]
+    },
+    "payment": {
+      "heading": "Payment Methods",
+      "items": [
+        { "label": "Card:", "text": "Visa, Mastercard and American Express – processed securely via our payment service provider Stripe." },
+        { "label": "PayPal:", "text": "Pay with your PayPal account, also processed via Stripe." },
+        { "label": "P2G Points:", "text": "Registered users can pay up to 50% of the order value with P2G Points (100 points = €1.00 discount). Details in our Terms (§ 8)." }
+      ],
+      "note": "All payments are SSL-encrypted and processed via Stripe. We do not store any card data."
+    },
+    "returns": {
+      "heading": "Withdrawal & Returns",
+      "p1Prefix": "As a consumer, you have a 14-day right of withdrawal for purchases of goods, starting upon receipt of the goods. All details and the model withdrawal form can be found in our ",
+      "p1LinkText": "Withdrawal Policy",
+      "p1Suffix": ".",
+      "p2": "We cover the cost of the return shipment. Simply notify us of your withdrawal by email to info@padel2go-official.de – we will then send you all the information for the return.",
+      "p3": "The refund will be made within 14 days of receipt of your withdrawal to the original payment method; redeemed P2G Points will be credited back to your account."
+    },
+    "contact": {
+      "heading": "Questions?",
+      "text": "If you have any questions about your order, you can reach us at any time at info@padel2go-official.de."
+    }
+  }
+}

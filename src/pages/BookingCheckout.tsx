@@ -500,6 +500,12 @@ const BookingCheckout = () => {
                       </NavLink>
                       {t("checkout.legal.outro")}
                     </p>
+                    <p className="text-xs text-center text-muted-foreground/70">
+                      {t("checkout.legal.cancellation")}
+                    </p>
+                    <p className="text-xs text-center text-muted-foreground/70">
+                      {t("checkout.legal.withdrawal")}
+                    </p>
                   </div>
                 </div>
               </div>

@@ -9,6 +9,7 @@ const AGB = () => {
   const { t } = useTranslation("agb");
 
   const bookingItems = t("sections.booking.items", { returnObjects: true }) as BookingItem[];
+  const goodsItems = t("sections.goods.items", { returnObjects: true }) as BookingItem[];
   const cancellationList = t("sections.cancellation.userList", { returnObjects: true }) as string[];
   const userDutiesList = t("sections.userDuties.list", { returnObjects: true }) as string[];
   const liabilityList = t("sections.liability.list", { returnObjects: true }) as string[];
@@ -88,7 +89,34 @@ const AGB = () => {
               </div>
             </section>
 
-            {/* § 5 Pflichten des Nutzers */}
+            {/* § 5 Warenkauf im Shop */}
+            <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
+              <h2 className="text-xl font-bold mb-4 text-primary">{t("sections.goods.heading")}</h2>
+              <div className="space-y-3 text-foreground text-sm leading-relaxed">
+                {goodsItems.map((item, idx) => (
+                  <p key={idx}>
+                    <span className="font-medium">{item.label}</span> {item.text}
+                  </p>
+                ))}
+              </div>
+            </section>
+
+            {/* § 6 Widerrufsrecht Warenkauf */}
+            <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
+              <h2 className="text-xl font-bold mb-4 text-primary">{t("sections.withdrawal.heading")}</h2>
+              <div className="space-y-3 text-foreground text-sm leading-relaxed">
+                <p>
+                  {t("sections.withdrawal.p1Prefix")}
+                  <a href="/widerruf" className="text-primary underline hover:no-underline">{t("sections.withdrawal.p1LinkText")}</a>
+                  {t("sections.withdrawal.p1Suffix")}
+                </p>
+                <p>{t("sections.withdrawal.p2")}</p>
+                <p>{t("sections.withdrawal.p3")}</p>
+                <p>{t("sections.withdrawal.p4")}</p>
+              </div>
+            </section>
+
+            {/* § 7 Pflichten des Nutzers */}
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
               <h2 className="text-xl font-bold mb-4 text-primary">{t("sections.userDuties.heading")}</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
@@ -109,6 +137,7 @@ const AGB = () => {
                 <p>{t("sections.rewards.p1")}</p>
                 <p>{t("sections.rewards.p2")}</p>
                 <p>{t("sections.rewards.p3")}</p>
+                <p>{t("sections.rewards.p4")}</p>
               </div>
             </section>
 
@@ -153,12 +182,7 @@ const AGB = () => {
                 <p>{t("sections.final.p2")}</p>
                 <p>{t("sections.final.p3")}</p>
                 <p>{t("sections.final.p4")}</p>
-                <p>
-                  {t("sections.final.odrPrefix")}
-                  <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" className="text-primary underline hover:no-underline">
-                    https://ec.europa.eu/consumers/odr
-                  </a>{t("sections.final.odrSuffix")}
-                </p>
+                <p>{t("sections.final.p5")}</p>
               </div>
             </section>
 

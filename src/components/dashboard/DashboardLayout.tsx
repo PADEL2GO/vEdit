@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import DashboardNavigation from "@/components/DashboardNavigation";
 import { DailyLoginNotification } from "@/components/p2g/DailyLoginNotification";
+import LegalFooterLinks from "@/components/LegalFooterLinks";
 import { Loader2 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -38,6 +39,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <main className="pt-20 md:pt-24">
         {children}
       </main>
+      <LegalFooterLinks />
     </div>
   );
 };

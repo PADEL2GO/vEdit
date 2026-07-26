@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "title": "Versand & Zahlung | Padel2Go",
+    "description": "Versandkosten, Lieferzeiten, Zahlungsarten und Rücksendungen im PADEL2GO Shop."
+  },
+  "header": {
+    "title": "Versand & Zahlung",
+    "subtitle": "Alle Informationen zu Lieferung, Zahlungsarten und Rücksendungen im PADEL2GO Shop"
+  },
+  "sections": {
+    "shipping": {
+      "heading": "Versand & Lieferzeit",
+      "items": [
+        { "label": "Versandkosten:", "text": "Der Versand innerhalb Deutschlands ist kostenlos. Alle angegebenen Produktpreise verstehen sich inkl. gesetzlicher Mehrwertsteuer." },
+        { "label": "Liefergebiet:", "text": "Wir liefern derzeit ausschließlich innerhalb Deutschlands." },
+        { "label": "Lieferzeit:", "text": "Sofern beim jeweiligen Produkt nicht anders angegeben, beträgt die Lieferzeit 2–4 Werktage nach Zahlungseingang." },
+        { "label": "Bestellbestätigung:", "text": "Nach Abschluss deiner Bestellung erhältst du eine Bestellbestätigung per E-Mail mit allen Details zu deiner Bestellung." }
+      ]
+    },
+    "payment": {
+      "heading": "Zahlungsarten",
+      "items": [
+        { "label": "Karte:", "text": "Visa, Mastercard und American Express – sicher abgewickelt über unseren Zahlungsdienstleister Stripe." },
+        { "label": "PayPal:", "text": "Zahlung mit deinem PayPal-Konto, ebenfalls über Stripe abgewickelt." },
+        { "label": "P2G Points:", "text": "Registrierte Nutzer können bis zu 50 % des Warenwerts mit P2G Points bezahlen (100 Points = 1,00 € Rabatt). Details in unseren AGB (§ 8)." }
+      ],
+      "note": "Alle Zahlungen laufen SSL-verschlüsselt über Stripe. Wir speichern keine Kartendaten."
+    },
+    "returns": {
+      "heading": "Widerruf & Rücksendung",
+      "p1Prefix": "Als Verbraucher hast du beim Warenkauf ein 14-tägiges Widerrufsrecht ab Erhalt der Ware. Alle Details und das Muster-Widerrufsformular findest du in unserer ",
+      "p1LinkText": "Widerrufsbelehrung",
+      "p1Suffix": ".",
+      "p2": "Die Kosten der Rücksendung übernehmen wir. Melde deinen Widerruf einfach per E-Mail an info@padel2go-official.de – wir schicken dir dann alle Informationen zur Rücksendung.",
+      "p3": "Die Rückerstattung erfolgt innerhalb von 14 Tagen nach Eingang deines Widerrufs auf das ursprüngliche Zahlungsmittel; eingelöste P2G Points werden deinem Konto wieder gutgeschrieben."
+    },
+    "contact": {
+      "heading": "Fragen?",
+      "text": "Bei Fragen zu deiner Bestellung erreichst du uns jederzeit unter info@padel2go-official.de."
+    }
+  }
+}

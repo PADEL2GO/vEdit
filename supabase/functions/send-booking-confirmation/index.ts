@@ -360,6 +360,18 @@ serve(async (req) => {
           <!-- Footer -->
           <tr>
             <td style="padding: 24px 32px; background: rgba(0,0,0,0.2); text-align: center;">
+              <p style="margin: 0 0 10px; color: #64748b; font-size: 12px; line-height: 1.6;">
+                PADEL2GO UG (haftungsbeschränkt) · Am Neudeck 10 · 81541 München<br>
+                Geschäftsführer: Florian Steinfelder, David Klemm · Amtsgericht München, HRB 306377
+              </p>
+              <p style="margin: 0 0 10px; font-size: 12px;">
+                <a href="${resolvedAppUrl}/impressum" style="color: #8a8a8a;">Impressum</a> ·
+                <a href="${resolvedAppUrl}/agb" style="color: #8a8a8a;">AGB</a> ·
+                <a href="${resolvedAppUrl}/datenschutz" style="color: #8a8a8a;">Datenschutz</a>
+              </p>
+              <p style="margin: 0 0 10px; color: #64748b; font-size: 12px;">
+                Kostenlose Stornierung bis Spielbeginn. Kein gesetzliches Widerrufsrecht bei termingebundenen Freizeitleistungen (§ 312g Abs. 2 Nr. 9 BGB).
+              </p>
               <p style="margin: 0; color: #64748b; font-size: 13px;">
                 © ${new Date().getFullYear()} PADEL2GO. Alle Rechte vorbehalten.
               </p>

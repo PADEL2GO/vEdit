@@ -100,6 +100,18 @@ const Datenschutz = () => {
             </section>
 
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
+              <h2 className="text-xl font-bold mb-4 text-primary">{t("shop.heading")}</h2>
+              <div className="space-y-3 text-foreground text-sm leading-relaxed">
+                <p>{t("shop.p1")}</p>
+                <p>{t("shop.p2")}</p>
+                <p>{t("shop.p3")}</p>
+                <p>
+                  <span className="font-medium">{t("shop.legalLabel")}</span> {t("shop.legalText")}
+                </p>
+              </div>
+            </section>
+
+            <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
               <h2 className="text-xl font-bold mb-4 text-primary">{t("email.heading")}</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>{t("email.p1")}</p>

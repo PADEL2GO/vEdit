@@ -84,7 +84,7 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'DM Sans Variable', sans-serif;
     overflow-x: hidden;
   }
 
@@ -97,7 +97,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Bricolage Grotesque', sans-serif;
+    font-family: 'Bricolage Grotesque Variable', sans-serif;
   }
 
   /* Prevent iOS zoom on input focus */
@@ -157,11 +157,11 @@
 
   /* Bricolage Grotesque italic — for expressive headline emphasis */
   .font-display {
-    font-family: 'Bricolage Grotesque', sans-serif;
+    font-family: 'Bricolage Grotesque Variable', sans-serif;
   }
 
   .font-display-italic {
-    font-family: 'Bricolage Grotesque', sans-serif;
+    font-family: 'Bricolage Grotesque Variable', sans-serif;
     font-style: italic;
   }
 

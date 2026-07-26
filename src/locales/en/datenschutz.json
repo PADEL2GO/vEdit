@@ -5,7 +5,7 @@
   },
   "header": {
     "title": "Privacy Policy",
-    "subtitle": "Pursuant to GDPR (EU) 2016/679 · As of: April 2026"
+    "subtitle": "Pursuant to GDPR (EU) 2016/679 · As of: Juli 2026"
   },
   "controller": {
     "heading": "1. Data Controller",
@@ -42,8 +42,16 @@
     "legalText": "Art. 6 (1) (b) GDPR (payment processing as part of the booking contract).",
     "privacyLinkLabel": "Stripe privacy policy:"
   },
+  "shop": {
+    "heading": "5. Orders in the PADEL2GO Shop",
+    "p1": "When you place an order in our shop, we process the data required to perform the purchase contract: name, email address, shipping address, ordered products, and order and payment status. Orders are also possible as a guest without a user account; in this case, too, only the data mentioned is processed.",
+    "p2": "To deliver your order, we pass on your name and shipping address to the logistics company commissioned with the shipment.",
+    "p3": "Redeemed P2G Points and granted discounts are stored together with the order for billing and verification purposes.",
+    "legalLabel": "Legal basis:",
+    "legalText": "Art. 6 (1) (b) GDPR (performance of contract); for the retention of completed orders Art. 6 (1) (c) GDPR in conjunction with § 147 AO, § 257 HGB (statutory retention obligations). After deletion of the user account, order data is retained in anonymised form for as long as statutory retention periods apply."
+  },
   "email": {
-    "heading": "5. Email Communication (Resend)",
+    "heading": "6. Email Communication (Resend)",
     "p1": "For sending transactional emails (booking confirmations, reminders, invitations) we use the service Resend (Resend Inc., San Francisco, USA). Resend processes your email address and the content of each email.",
     "purposeLabel": "Purpose:",
     "purposeText": "Delivery of booking-relevant information required for contract performance.",
@@ -52,7 +60,7 @@
     "privacyLinkLabel": "Resend privacy policy:"
   },
   "cookies": {
-    "heading": "6. Cookies & Local Storage",
+    "heading": "7. Cookies & Local Storage",
     "p1": "We use only technically necessary cookies and local storage mechanisms (localStorage). These are required to operate the platform and cannot be disabled without significantly impairing the functionality of the website.",
     "sessionLabel": "Session cookie (Supabase Auth):",
     "sessionText": "Stores your login so you stay signed in. It is deleted when you log out.",
@@ -61,26 +69,47 @@
     "legalText": "Art. 6 (1) (f) GDPR (legitimate interest in the secure operation of the platform)."
   },
   "retention": {
-    "heading": "7. Retention Period",
+    "heading": "8. Retention Period",
     "p1": "Personal data is deleted as soon as it is no longer required for the purpose for which it was collected. Booking data is retained for the legally required period (in Germany: 10 years) for tax reasons.",
     "p2": "User data (profile, rewards history) is deleted within 30 days of account deletion, provided no statutory retention obligations apply."
   },
   "rights": {
-    "heading": "8. Your Rights as a Data Subject",
+    "heading": "9. Your Rights as a Data Subject",
     "intro": "You have the following rights vis-à-vis PADEL2GO regarding your personal data:",
     "list": [
-      { "term": "Access", "text": "(Art. 15 GDPR) – Which data we have stored about you" },
-      { "term": "Rectification", "text": "(Art. 16 GDPR) – Correction of inaccurate data" },
-      { "term": "Erasure", "text": "(Art. 17 GDPR) – Deletion of your data, unless statutory retention obligations apply" },
-      { "term": "Restriction of processing", "text": "(Art. 18 GDPR)" },
-      { "term": "Data portability", "text": "(Art. 20 GDPR) – Receipt of your data in a machine-readable format" },
-      { "term": "Objection", "text": "(Art. 21 GDPR) – Objection to processing based on legitimate interests" },
-      { "term": "Complaint", "text": "– With the competent supervisory authority (Bavarian State Office for Data Protection Supervision, Promenade 18, 91522 Ansbach, Germany)" }
+      {
+        "term": "Access",
+        "text": "(Art. 15 GDPR) – Which data we have stored about you"
+      },
+      {
+        "term": "Rectification",
+        "text": "(Art. 16 GDPR) – Correction of inaccurate data"
+      },
+      {
+        "term": "Erasure",
+        "text": "(Art. 17 GDPR) – Deletion of your data, unless statutory retention obligations apply"
+      },
+      {
+        "term": "Restriction of processing",
+        "text": "(Art. 18 GDPR)"
+      },
+      {
+        "term": "Data portability",
+        "text": "(Art. 20 GDPR) – Receipt of your data in a machine-readable format"
+      },
+      {
+        "term": "Objection",
+        "text": "(Art. 21 GDPR) – Objection to processing based on legitimate interests"
+      },
+      {
+        "term": "Complaint",
+        "text": "– With the competent supervisory authority (Bavarian State Office for Data Protection Supervision, Promenade 18, 91522 Ansbach, Germany)"
+      }
     ],
     "contactBefore": "To exercise your rights please contact:"
   },
   "security": {
-    "heading": "9. Data Security",
+    "heading": "10. Data Security",
     "p1": "We implement technical and organisational measures to protect your data against unauthorised access, loss or manipulation. These include:",
     "list": [
       "Encrypted data transmission (TLS/HTTPS)",
@@ -90,9 +119,9 @@
     ]
   },
   "changes": {
-    "heading": "10. Changes to this Privacy Policy",
+    "heading": "11. Changes to this Privacy Policy",
     "p1": "We reserve the right to adapt this privacy policy to reflect changes in the law or in our services. The current version is always available on this page. We will notify registered users by email of material changes."
   },
-  "footer": "As of: April 2026 · PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 München, Germany",
+  "footer": "As of: July 2026 · PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 München, Germany",
   "legalNotice": "This English version is provided for convenience. The legally binding version of this privacy policy is the German one."
 }

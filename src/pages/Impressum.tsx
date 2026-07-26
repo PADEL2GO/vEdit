@@ -34,8 +34,8 @@ const Impressum = () => {
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
               <h2 className="text-xl font-bold mb-4 text-primary">{t("sections.provider")}</h2>
               <div className="space-y-1 text-foreground">
-                <p className="font-semibold">PADEL2GO</p>
-                <p>Am Neudeck 12</p>
+                <p className="font-semibold">PADEL2GO UG (haftungsbeschränkt)</p>
+                <p>Am Neudeck 10</p>
                 <p>81541 München</p>
                 <p>Deutschland</p>
               </div>
@@ -94,29 +94,12 @@ const Impressum = () => {
             </section>
 
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-4 text-primary">{t("sections.vatId")}</h2>
-              <p className="text-foreground">
-                <span className="text-muted-foreground">{t("vat.label")}</span><br />
-                {t("vat.number")}
-              </p>
-            </section>
-
-            <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
               <h2 className="text-xl font-bold mb-4 text-primary">{t("sections.responsible")}</h2>
               <div className="space-y-1 text-foreground">
                 <p className="font-semibold">Florian Steinfelder & David Klemm</p>
-                <p>Am Neudeck 12</p>
+                <p>Am Neudeck 10</p>
                 <p>81541 München</p>
               </div>
-            </section>
-
-            <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
-              <h2 className="text-xl font-bold mb-4 text-primary">{t("sections.euDispute")}</h2>
-              <p className="text-muted-foreground mb-4">{t("euDispute.intro")}</p>
-              <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer" className="text-lime hover:underline">
-                https://ec.europa.eu/consumers/odr/
-              </a>
-              <p className="text-muted-foreground mt-4">{t("euDispute.after")}</p>
             </section>
 
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">

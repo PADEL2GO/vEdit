@@ -79,9 +79,9 @@
       "confirming": "Confirming booking...",
       "redirecting": "Redirecting to payment...",
       "bookFree": "Book for free",
-      "creditsTemplate": "{{credits}} credits – pay {{amount}}",
-      "voucherTemplate": "{{discount}} – pay {{amount}}",
-      "payNow": "Pay now"
+      "creditsTemplate": "Book with obligation to pay · {{amount}} ({{credits}} credits)",
+      "voucherTemplate": "Book with obligation to pay · {{amount}} ({{discount}})",
+      "payNow": "Book with obligation to pay"
     },
     "paymentMethods": {
       "card": "Card"
@@ -99,7 +99,9 @@
       "tos": "Terms",
       "and": " and ",
       "privacy": "Privacy Policy",
-      "outro": "."
+      "outro": ".",
+      "cancellation": "Free cancellation up to the start of play – you will receive a full refund.",
+      "withdrawal": "Date-specific leisure services are exempt from the statutory right of withdrawal (§ 312g (2) no. 9 German Civil Code)."
     }
   },
   "success": {
@@ -157,6 +159,7 @@
     "agbAnd": " and the ",
     "privacyLink": "Privacy Policy",
     "agbOutro": ".",
+    "cancellationNote": "Free cancellation until the start of play. No statutory right of withdrawal for date-specific leisure services (§ 312g (2) no. 9 German Civil Code).",
     "submitting": "Preparing booking…",
     "submit": "Continue as guest →",
     "hasAccount": "Already have an account?",

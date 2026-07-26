@@ -88,6 +88,8 @@ const AdminIntegrations = lazy(() => import("./pages/admin/AdminIntegrations"));
 const AdminNewsletter = lazy(() => import("./pages/admin/AdminNewsletter"));
 const AGB = lazy(() => import("./pages/AGB"));
 const Datenschutz = lazy(() => import("./pages/Datenschutz"));
+const Widerruf = lazy(() => import("./pages/Widerruf"));
+const Versand = lazy(() => import("./pages/Versand"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -216,6 +218,8 @@ const App = () => (
               <Route path="/u/:username" element={<PublicProfile />} />
               <Route path="/agb" element={<AGB />} />
               <Route path="/datenschutz" element={<Datenschutz />} />
+              <Route path="/widerruf" element={<Widerruf />} />
+              <Route path="/versand" element={<Versand />} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

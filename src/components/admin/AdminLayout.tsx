@@ -5,6 +5,7 @@ import { AdminSidebar } from "./AdminSidebar";
 import { AdminHeader } from "./AdminHeader";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Loader2 } from "lucide-react";
+import LegalFooterLinks from "@/components/LegalFooterLinks";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -38,6 +39,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           <main className="p-6">
             {children}
           </main>
+          <LegalFooterLinks />
         </SidebarInset>
       </div>
     </SidebarProvider>

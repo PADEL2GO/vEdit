@@ -44,7 +44,9 @@
     "links": {
       "imprint": "Impressum",
       "privacy": "Datenschutz",
-      "terms": "AGB"
+      "terms": "AGB",
+      "withdrawal": "Widerrufsbelehrung",
+      "shipping": "Versand & Zahlung"
     },
     "copyrightSuffix": "Alle Rechte vorbehalten.",
     "madeWith": "Made with ❤️ in Germany"

@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import LegalFooterLinks from "@/components/LegalFooterLinks";
 import { useAuth } from "@/hooks/useAuth";
 import { useFriendships } from "@/hooks/useFriendships";
 import { getExpertLevel, getProgressToNextLevel } from "@/lib/expertLevels";
@@ -341,6 +342,7 @@ export default function PublicProfile() {
           </p>
         </motion.div>
       </div>
+      <LegalFooterLinks />
     </div>
   );
 }

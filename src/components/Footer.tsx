@@ -19,6 +19,8 @@ const Footer = () => {
     { label: t("footer.links.imprint"), href: "/impressum" },
     { label: t("footer.links.privacy"), href: "/datenschutz" },
     { label: t("footer.links.terms"), href: "/agb" },
+    { label: t("footer.links.withdrawal"), href: "/widerruf" },
+    { label: t("footer.links.shipping"), href: "/versand" },
   ];
 
   return (

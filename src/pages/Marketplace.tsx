@@ -376,6 +376,7 @@ function ProductCard({
             <span className="font-stat text-[12.5px] text-muted-foreground/70 line-through">{eur(uvp)}</span>
           )}
         </div>
+        <span className="text-[10.5px] text-muted-foreground/70 -mt-1.5">{t("product.taxShipping")}</span>
         <div className="flex items-center justify-between gap-2">
           <span className="inline-flex items-center gap-1.5">
             <span className={`w-[7px] h-[7px] rounded-full ${stockDot}`} />

@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'sans-serif'],
-        display: ['Bricolage Grotesque', 'sans-serif'],
+        sans: ['DM Sans Variable', 'sans-serif'],
+        display: ['Bricolage Grotesque Variable', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {

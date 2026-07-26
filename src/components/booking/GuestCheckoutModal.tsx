@@ -166,6 +166,10 @@ export function GuestCheckoutModal({
               {t("guestModal.agbOutro")}
             </span>
           </button>
+
+          <p className="pl-8 text-[11.5px] leading-relaxed text-muted-foreground/80">
+            {t("guestModal.cancellationNote")}
+          </p>
         </div>
 
         <div className="flex flex-col gap-3">

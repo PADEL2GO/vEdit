@@ -79,9 +79,9 @@
       "confirming": "Buchung wird bestätigt...",
       "redirecting": "Weiterleitung zur Zahlung...",
       "bookFree": "Kostenlos buchen",
-      "creditsTemplate": "{{credits}} Credits – {{amount}} bezahlen",
-      "voucherTemplate": "{{discount}} – {{amount}} bezahlen",
-      "payNow": "Jetzt bezahlen"
+      "creditsTemplate": "Zahlungspflichtig buchen · {{amount}} ({{credits}} Credits)",
+      "voucherTemplate": "Zahlungspflichtig buchen · {{amount}} ({{discount}})",
+      "payNow": "Zahlungspflichtig buchen"
     },
     "paymentMethods": {
       "card": "Karte"
@@ -99,7 +99,9 @@
       "tos": "AGB",
       "and": " und der ",
       "privacy": "Datenschutzerklärung",
-      "outro": " zu."
+      "outro": " zu.",
+      "cancellation": "Kostenlose Stornierung bis zum Spielbeginn – du erhältst den vollen Betrag zurück.",
+      "withdrawal": "Bei termingebundenen Freizeitleistungen besteht kein gesetzliches Widerrufsrecht (§ 312g Abs. 2 Nr. 9 BGB)."
     }
   },
   "success": {
@@ -157,6 +159,7 @@
     "agbAnd": " und die ",
     "privacyLink": "Datenschutzerklärung",
     "agbOutro": ".",
+    "cancellationNote": "Kostenlose Stornierung bis Spielbeginn. Kein gesetzliches Widerrufsrecht bei termingebundenen Freizeitleistungen (§ 312g Abs. 2 Nr. 9 BGB).",
     "submitting": "Buchung wird vorbereitet…",
     "submit": "Als Gast weiterbuchen →",
     "hasAccount": "Du hast bereits ein Konto?",

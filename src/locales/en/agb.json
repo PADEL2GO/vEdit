@@ -1,114 +1,156 @@
 {
   "meta": {
     "title": "Terms & Conditions | Padel2Go",
-    "description": "General Terms and Conditions of PADEL2GO UG — terms of use for booking padel courts via padel2go.de."
+    "description": "General Terms and Conditions of PADEL2GO UG – terms of use for court bookings and purchases in the PADEL2GO shop."
   },
   "header": {
-    "title": "General Terms and Conditions",
-    "subtitle": "As of: April 2026"
+    "title": "General Terms & Conditions",
+    "subtitle": "As of: July 2026"
   },
   "sections": {
     "scope": {
       "heading": "§ 1 Scope",
-      "p1Prefix": "These General Terms and Conditions (hereinafter \"Terms\") apply to all contracts concluded between PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 Munich, Germany (hereinafter \"PADEL2GO\" or \"we\") and users (hereinafter \"User\") via the platform ",
-      "p1Domain": "padel2go.de",
-      "p1Suffix": ".",
-      "p2": "These Terms govern in particular the brokerage and booking of padel courts as well as the use of associated services (Rewards, Lobbies, community features).",
-      "p3": "Deviating terms and conditions of the User shall not be recognised unless PADEL2GO expressly agrees to their application in writing."
+      "p1Prefix": "These General Terms and Conditions (hereinafter \"Terms\") apply to all contracts concluded between PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 Munich, Germany (hereinafter \"PADEL2GO\" or \"we\") and users (hereinafter \"users\") via the platform ",
+      "p1Domain": "www.padel2go-official.de",
+      "p1Suffix": " (including associated apps).",
+      "p2": "These Terms cover in particular the arrangement and booking of padel courts, the sale of goods via the PADEL2GO shop (marketplace) and the use of associated services (P2G Points, lobbies, community features).",
+      "p3": "Deviating terms of the user are not recognised unless PADEL2GO expressly agrees to their validity in writing."
     },
     "registration": {
       "heading": "§ 2 Registration & User Account",
-      "p1": "The use of services requiring booking is subject to free registration. The User is obliged to provide truthful and complete information upon registration and to keep this information up to date.",
-      "p2": "The user account is non-transferable. The User is responsible for all activities carried out under their account and must keep their access credentials confidential.",
+      "p1": "Some services require free registration. Users must provide truthful and complete information when registering and keep it up to date. Court bookings and shop orders are also possible without registration as a guest; these Terms apply to guest bookings and guest orders as well.",
+      "p2": "The user account is non-transferable. Users are responsible for all activities carried out under their account and must keep their access credentials confidential.",
       "p3": "PADEL2GO reserves the right to temporarily suspend or permanently delete user accounts in the event of violations of these Terms or misuse."
     },
     "booking": {
-      "heading": "§ 3 Booking & Payment",
+      "heading": "§ 3 Court Booking & Payment",
       "items": [
         {
           "label": "Booking process:",
-          "text": "By clicking \"Pay now\", the User submits a binding offer to conclude a usage contract for the selected court and time slot. The contract is concluded upon receipt of payment confirmation."
+          "text": "By clicking \"Book with obligation to pay\", the user submits a binding offer to conclude a usage contract for the selected court and time slot. The contract is concluded upon receipt of the payment confirmation."
         },
         {
           "label": "Prices:",
-          "text": "All prices stated are final prices in euros including statutory VAT, unless otherwise indicated."
+          "text": "All prices stated are final prices in euros including statutory VAT, unless stated otherwise."
         },
         {
           "label": "Payment:",
-          "text": "Payment is processed via the payment service provider Stripe. Accepted payment methods include credit and debit cards as well as other methods offered by Stripe. The booking is only bindingly confirmed after successful payment."
+          "text": "Payment is processed via the payment service provider Stripe. Accepted payment methods are credit and debit cards as well as other methods offered by Stripe. The booking is only confirmed as binding after successful payment."
         },
         {
-          "label": "Split Payment:",
-          "text": "Users may split a booking across several co-players. The booking User remains responsible for the full receipt of payment. Unpaid shares will be charged to the booking User unless otherwise agreed in the respective booking details."
+          "label": "Split payment:",
+          "text": "Users can split a booking between several players. The booking user is responsible for full receipt of payment. Unpaid shares will be charged to the booking user unless otherwise agreed in the respective booking details."
         },
         {
           "label": "Voucher codes:",
-          "text": "Voucher codes can be redeemed at checkout. A maximum of one voucher code may be used per booking. Vouchers are non-transferable, cannot be combined with other promotions and cannot be exchanged for cash."
+          "text": "Voucher codes can be redeemed at checkout. A maximum of one voucher code can be used per booking. Vouchers are non-transferable, cannot be combined with other promotions and cannot be redeemed for cash."
         }
       ]
     },
     "cancellation": {
-      "heading": "§ 4 Cancellation & Right of Withdrawal",
+      "heading": "§ 4 Cancellation of Court Bookings; No Right of Withdrawal",
       "noWithdrawalLabel": "No statutory right of withdrawal:",
-      "noWithdrawalText": "Pursuant to § 312g (2) no. 9 BGB, there is no statutory right of withdrawal for contracts concerning leisure services where the entrepreneur undertakes to provide the service at a specific time. Court bookings fall under this exemption.",
-      "userLabel": "Cancellation by the User:",
-      "userText": "Cancellations are only possible via the user account. Depending on the time of cancellation, the following conditions apply:",
+      "noWithdrawalText": "Pursuant to § 312g (2) no. 9 of the German Civil Code (BGB), there is no statutory right of withdrawal for contracts for leisure services where the provider undertakes to perform the service at a specific time. Court bookings fall under this exemption. Instead, we grant the following cancellation right:",
+      "userLabel": "Cancellation by the user:",
+      "userText": "Registered users cancel via their user account; guests via the contact channel stated in the booking confirmation (an email is sufficient). The following conditions apply:",
       "userList": [
-        "More than 24 hours before the booking starts: full refund",
-        "Less than 24 hours before the booking starts: no refund"
+        "Cancellation up to the start of the booked playing time: free of charge, full refund of the amount paid to the original payment method",
+        "After the start of the booked playing time or in case of no-show: no refund"
       ],
       "providerLabel": "Cancellation by PADEL2GO:",
-      "providerText": "In the event of force majeure, technical issues or other unforeseeable events that make it impossible to carry out the booking, the full amount will be refunded."
+      "providerText": "In the event of force majeure, technical problems or other unforeseeable events that make it impossible to carry out the booking, the full amount will be refunded."
+    },
+    "goods": {
+      "heading": "§ 5 Purchase of Goods in the PADEL2GO Shop",
+      "items": [
+        {
+          "label": "Applicability:",
+          "text": "The following provisions additionally apply to the purchase of goods (e.g. rackets, balls, apparel, accessories) via the PADEL2GO shop."
+        },
+        {
+          "label": "Conclusion of contract:",
+          "text": "The product presentation in the shop does not constitute a binding offer. By clicking \"Order with obligation to pay\", the user submits a binding offer to conclude a purchase contract. The contract is concluded upon receipt of our order confirmation by email, at the latest upon dispatch of the goods."
+        },
+        {
+          "label": "Prices & shipping:",
+          "text": "All prices are final prices in euros including statutory VAT. Shipping within Germany is free of charge. Delivery to other countries is currently not possible."
+        },
+        {
+          "label": "Delivery time:",
+          "text": "Unless stated otherwise for the respective product, the delivery time is 2–4 business days after receipt of payment."
+        },
+        {
+          "label": "Payment:",
+          "text": "Payment is processed via the payment service provider Stripe (card, PayPal). Registered users can pay the purchase price partially or fully with P2G Points (§ 8)."
+        },
+        {
+          "label": "Retention of title:",
+          "text": "The delivered goods remain the property of PADEL2GO until full payment has been made."
+        },
+        {
+          "label": "Warranty:",
+          "text": "The statutory warranty rights apply. Complaints can be sent to info@padel2go-official.de."
+        }
+      ]
+    },
+    "withdrawal": {
+      "heading": "§ 6 Right of Withdrawal for Purchases of Goods",
+      "p1Prefix": "Consumers have a statutory right of withdrawal of 14 days from receipt of the goods. The full withdrawal instructions including the model withdrawal form can be found at ",
+      "p1LinkText": "Withdrawal Policy",
+      "p1Suffix": " and in your order confirmation.",
+      "p2": "PADEL2GO bears the costs of the return shipment.",
+      "p3": "The right of withdrawal does not apply to goods made to customer specifications or clearly personalised (e.g. individually printed textiles), or to sealed goods that are unsuitable for return for reasons of health protection or hygiene if their seal has been removed after delivery.",
+      "p4": "There is no right of withdrawal for court bookings (§ 4); the cancellation right granted there applies instead."
     },
     "userDuties": {
-      "heading": "§ 5 User Obligations",
-      "intro": "The User undertakes:",
+      "heading": "§ 7 User Obligations",
+      "intro": "The user undertakes:",
       "list": [
-        "to use the booked court punctually during the reserved time slot and to leave it in proper condition",
-        "to comply with the rules of use of the respective venue",
+        "to use the booked court punctually during the reserved period and to leave it in proper condition",
+        "to comply with the usage rules of the respective location",
         "not to make bookings for third parties without their express consent",
-        "not to misuse the platform (e.g. manipulation of rewards, use of stolen payment data)",
+        "not to misuse the platform (e.g. manipulation of P2G Points, use of stolen payment data)",
         "not to send automated requests (bots, scraping) to the platform"
       ],
-      "outro": "In the event of violations of these obligations, PADEL2GO reserves the right to assert claims for damages and to block the user account."
+      "outro": "In the event of violations of these obligations, PADEL2GO reserves the right to assert claims for damages and to suspend the user account."
     },
     "rewards": {
-      "heading": "§ 6 P2G Rewards & Credits",
-      "p1": "PADEL2GO operates a voluntary reward system (P2G Rewards). Credits and points have no monetary value and cannot be paid out. They serve exclusively to be redeemed against available rewards in the PADEL2GO Marketplace.",
-      "p2": "PADEL2GO reserves the right to modify, expand or discontinue the rewards system, point rules and available rewards at any time. There is no entitlement to the permanent retention of a specific credits balance.",
-      "p3": "If a booking is cancelled, the credits granted for that booking will be reversed accordingly."
+      "heading": "§ 8 P2G Points & Loyalty Programme",
+      "p1": "PADEL2GO operates a voluntary loyalty programme. Registered users receive P2G Points for paid court bookings. Points are not sold and cannot be purchased.",
+      "p2": "Points can only be redeemed as a discount in the PADEL2GO shop. Currently, 100 points equal a discount of €1.00; a maximum of 50% of the order value can be paid with points per order. Points are not legal tender, are non-transferable and are not paid out in cash.",
+      "p3": "Points expire 36 months after they are credited. If a booking is cancelled or an order is reversed, points credited or redeemed for it will be reversed accordingly.",
+      "p4": "PADEL2GO may adapt or discontinue the loyalty programme with effect for the future, insofar as this is reasonable taking into account the legitimate interests of users. In this case, points already collected can still be redeemed for at least 3 months. In the event of misuse (e.g. manipulation), points may be revoked."
     },
     "liability": {
-      "heading": "§ 7 Liability & Warranty",
-      "p1": "PADEL2GO shall be liable without limitation for intent and gross negligence as well as for damages resulting from injury to life, body or health.",
-      "p2": "In cases of slight negligence, PADEL2GO shall only be liable for breaches of essential contractual obligations (cardinal obligations) and only to the extent of the foreseeable damage typical for the contract. Liability is otherwise excluded.",
-      "intro": "PADEL2GO assumes no liability for:",
+      "heading": "§ 9 Liability",
+      "p1": "PADEL2GO is liable without limitation for intent and gross negligence as well as for damages resulting from injury to life, body or health.",
+      "p2": "In the event of slight negligence, PADEL2GO is only liable for breaches of essential contractual obligations (cardinal obligations) and only up to the amount of foreseeable damage typical for the contract. Any further liability is excluded.",
+      "intro": "Subject to the preceding paragraphs, PADEL2GO accepts no liability in particular for:",
       "list": [
-        "damage caused by the User themselves or by the respective court operator",
-        "technical failures of third-party services (in particular Stripe, Supabase)",
-        "loss or damage of User belongings at the venue"
+        "Damage caused by the user or by the respective court operator",
+        "Technical failures of third-party services (esp. Stripe, Supabase)",
+        "Loss of or damage to the user's belongings at the location"
       ]
     },
     "privacy": {
-      "heading": "§ 8 Data Protection",
-      "prefix": "The collection and processing of personal data takes place in accordance with our ",
-      "linkText": "privacy policy",
-      "suffix": ", which forms an integral part of these Terms."
+      "heading": "§ 10 Data Protection",
+      "prefix": "The collection and processing of personal data is carried out in accordance with our ",
+      "linkText": "Privacy Policy",
+      "suffix": "."
     },
     "changes": {
-      "heading": "§ 9 Amendments to the Terms",
-      "p1": "PADEL2GO reserves the right to amend these Terms with reasonable prior notice (at least 4 weeks). Users will be informed of material changes by email. Continued use of the platform after expiry of the notice period shall be deemed acceptance of the amended Terms."
+      "heading": "§ 11 Changes to these Terms",
+      "p1": "PADEL2GO reserves the right to amend these Terms with reasonable advance notice (at least 4 weeks). Users will be informed of significant changes by email. Continued use of the platform after expiry of the notice period is deemed to constitute consent to the amended Terms."
     },
     "final": {
-      "heading": "§ 10 Final Provisions",
+      "heading": "§ 12 Final Provisions",
       "p1": "The law of the Federal Republic of Germany applies, excluding the UN Convention on Contracts for the International Sale of Goods (CISG).",
-      "p2": "For consumers, this choice of law applies only to the extent that it does not deprive them of mandatory consumer protection provisions of the state in which the consumer has their habitual residence.",
+      "p2": "For consumers, this choice of law only applies insofar as it does not deprive them of mandatory consumer protection provisions of the state in which they have their habitual residence.",
       "p3": "The place of jurisdiction for merchants and legal entities under public law is Munich.",
-      "p4": "Should individual provisions of these Terms be or become invalid, the validity of the remaining provisions shall remain unaffected.",
-      "odrPrefix": "The European Commission provides a platform for online dispute resolution: ",
-      "odrSuffix": ". We are neither obliged nor willing to participate in dispute resolution proceedings before a consumer arbitration board."
+      "p4": "Should individual provisions of these Terms be or become invalid, the validity of the remaining provisions remains unaffected.",
+      "p5": "We are neither obliged nor willing to participate in dispute resolution proceedings before a consumer arbitration board."
     }
   },
-  "footerNote": "As of: April 2026 · PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 Munich, Germany",
-  "enLegalNotice": "This English version is provided for convenience. The legally binding version of these terms is the German one."
+  "footerNote": "As of: July 2026 · PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 Munich, Germany",
+  "enLegalNotice": "This English version is provided for convenience. The legally binding version of these Terms is the German one."
 }
