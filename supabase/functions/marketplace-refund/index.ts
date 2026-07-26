@@ -71,6 +71,8 @@ Deno.serve(async (req) => {
     // ── Stripe money refund (only if actually paid with money) ──────────────────
     const amount = Number((order as { amount_cents?: number }).amount_cents ?? 0);
     const sessionId = (order as { stripe_session_id?: string }).stripe_session_id;
+    let refundAmountCents = 0;
+    let stripeRefundId: string | null = null;
     if (amount > 0 && sessionId) {
       let stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
       if (!stripeKey) {
@@ -103,15 +105,20 @@ Deno.serve(async (req) => {
       // (succeeded or still pending). A prior failed/canceled refund must NOT block a
       // real one — otherwise the DB would flip to 'refunded' with no money returned.
       const existing = await stripe.refunds.list({ payment_intent: paymentIntentId, limit: 10 });
-      const alreadyRefunded = existing.data.some(
+      const alreadyActive = existing.data.find(
         (r) => r.status === "succeeded" || r.status === "pending",
       );
-      if (!alreadyRefunded) {
+      if (alreadyActive) {
+        refundAmountCents = alreadyActive.amount;
+        stripeRefundId = alreadyActive.id;
+      } else {
         try {
-          await stripe.refunds.create(
+          const created = await stripe.refunds.create(
             { payment_intent: paymentIntentId },
             { idempotencyKey: `mp_refund_${orderId}` },
           );
+          refundAmountCents = created.amount;
+          stripeRefundId = created.id;
         } catch (e) {
           // Money not refunded → do NOT touch the DB; admin can retry safely.
           return json({ error: "Stripe-Rückerstattung fehlgeschlagen: " + (e as Error).message }, 502);
@@ -119,12 +126,31 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ── Reverse the DB side (stock + points + status). Idempotent. ──────────────
+    // ── Reverse the DB side (stock + points + status + refund record). Idempotent. ──
     const { data: refunded, error: rpcErr } = await supabaseAdmin.rpc("refund_marketplace_order", {
       p_order_id: orderId,
+      p_refund_amount_cents: refundAmountCents,
+      p_stripe_refund_id: stripeRefundId,
     });
     if (rpcErr) {
       return json({ error: "Rückabwicklung in der Datenbank fehlgeschlagen: " + rpcErr.message }, 500);
+    }
+
+    // Negative receipt for the refund (idempotent per order; only when money flowed back).
+    if (refunded === true && refundAmountCents > 0) {
+      const { error: receiptError } = await supabaseAdmin.rpc("create_receipt", {
+        p_receipt_type: "marketplace_refund",
+        p_source_id: orderId,
+        p_user_id: null,
+        p_recipient_email: null,
+        p_recipient_name: null,
+        p_description: `Erstattung Bestellung ${orderId}`,
+        p_gross_cents: -refundAmountCents,
+        p_discount_cents: 0,
+        p_paid_cents: -refundAmountCents,
+        p_tax_rate: 19,
+      });
+      if (receiptError) console.log("[marketplace-refund] receipt creation failed:", receiptError.message);
     }
 
     // Fire-and-forget branded refund confirmation to the customer (non-fatal to the refund).

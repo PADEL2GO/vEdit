@@ -186,6 +186,21 @@ serve(async (req) => {
     // Determine paid amount
     const paidAmountCents = amount_cents ?? booking.price_cents ?? 0;
 
+    // Receipt (sequential number + VAT split) — created by the payment webhook; may
+    // not exist yet for free bookings or if this mail races the webhook.
+    const { data: bookingReceipt } = await supabase
+      .from("receipts")
+      .select("receipt_number, tax_rate, tax_cents")
+      .eq("receipt_type", "booking")
+      .eq("source_id", booking_id)
+      .maybeSingle();
+    const taxLine = bookingReceipt && (bookingReceipt.tax_cents ?? 0) > 0
+      ? `<div style="color: #94a3b8; font-size: 12px; margin-top: 4px;">enthaltene USt (${Number(bookingReceipt.tax_rate ?? 19).toFixed(0)} %): ${((bookingReceipt.tax_cents ?? 0) / 100).toFixed(2).replace(".", ",")} €</div>`
+      : "";
+    const receiptNumberLine = bookingReceipt?.receipt_number
+      ? `<div style="color: #94a3b8; font-size: 12px; margin-top: 4px;">Belegnr. ${bookingReceipt.receipt_number}</div>`
+      : "";
+
     const finalAmountCents = paidAmountCents ?? 0;
     const paidAmount = (finalAmountCents / 100).toFixed(2).replace('.', ',');
     const bookingRef = booking.id.substring(0, 8).toUpperCase();
@@ -327,10 +342,12 @@ serve(async (req) => {
                   <div>
                     <div style="color: #94a3b8; font-size: 13px; margin-bottom: 4px;">Bezahlt</div>
                     <div style="color: #C7F011; font-size: 24px; font-weight: 800;">${paidAmount} €</div>
+                    ${taxLine}
                   </div>
                   <div style="text-align: right;">
                     <div style="color: #94a3b8; font-size: 13px; margin-bottom: 4px;">Buchungsnr.</div>
                     <div style="color: #e2e8f0; font-size: 14px; font-weight: 600;">#${bookingRef}</div>
+                    ${receiptNumberLine}
                   </div>
                 </div>
               </div>

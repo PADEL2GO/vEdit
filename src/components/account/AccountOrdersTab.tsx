@@ -1,12 +1,22 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useTranslation, Trans } from "react-i18next";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Loader2, Package, ShoppingBag, ArrowRight, Coins, MapPin,
   Clock, Truck, PackageCheck, XCircle, RotateCcw, Image as ImageIcon,
 } from "lucide-react";
 import { useUserRedemptions, type UserRedemption } from "@/hooks/useUserRedemptions";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { eur } from "@/lib/marketplace";
 
 const dateFmt = (iso: string) =>
@@ -29,8 +39,55 @@ function statusView(o: UserRedemption): StatusView {
   }
 }
 
+const RETURN_BADGE: Record<string, string> = {
+  requested: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  received: "bg-primary/15 text-primary border-primary/30",
+  refunded: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  rejected: "bg-red-500/15 text-red-400 border-red-500/30",
+};
+
 export function AccountOrdersTab() {
+  const { t } = useTranslation("account");
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { data, isLoading } = useUserRedemptions();
+
+  const [returnOrderId, setReturnOrderId] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
+
+  const { data: returns } = useQuery({
+    queryKey: ["marketplace-returns", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data: rows, error } = await (supabase as any)
+        .from("marketplace_returns")
+        .select("order_id,status")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return rows as { order_id: string; status: string }[];
+    },
+  });
+  const returnByOrder = new Map((returns ?? []).map((r) => [r.order_id, r.status]));
+
+  const requestReturn = useMutation({
+    mutationFn: async ({ orderId, reason }: { orderId: string; reason: string }) => {
+      const { error } = await (supabase as any).from("marketplace_returns").insert({
+        order_id: orderId,
+        user_id: user!.id,
+        reason: reason.trim() || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success(t("orders.return.successToast"));
+      setReturnOrderId(null);
+      setReason("");
+      queryClient.invalidateQueries({ queryKey: ["marketplace-returns", user?.id] });
+    },
+    onError: () => {
+      toast.error(t("orders.return.errorToast"));
+    },
+  });
 
   // Only completed orders belong in the customer's history — hide abandoned
   // (pending) / failed checkout attempts.
@@ -72,6 +129,10 @@ export function AccountOrdersTab() {
         const Icon = sv.icon;
         const pointsSpent = (o.play_spent ?? 0) + (o.reward_spent ?? 0);
         const hasAddress = !!o.shipping_address_line1;
+        // Tracking columns not yet in generated types.ts
+        const tracking = (o as any).tracking_number as string | null;
+        const carrier = (o as any).carrier as string | null;
+        const returnStatus = returnByOrder.get(o.id);
         return (
           <motion.div
             key={o.id}
@@ -127,16 +188,84 @@ export function AccountOrdersTab() {
                   </div>
                 )}
 
+                {tracking && (
+                  <div className="flex items-start gap-1.5 mt-1.5 text-xs text-muted-foreground">
+                    <Truck className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                    <span className="font-mono">{[carrier, tracking].filter(Boolean).join(" · ")}</span>
+                  </div>
+                )}
+
                 {o.status === "refunded" && (
                   <p className="text-xs text-red-400 mt-2">
                     Diese Bestellung wurde storniert und erstattet. Eingelöste Punkte wurden zurückgebucht.
                   </p>
+                )}
+
+                {o.status === "success" && hasAddress && (
+                  returnStatus ? (
+                    <Badge variant="outline" className={`mt-3 gap-1.5 ${RETURN_BADGE[returnStatus] ?? RETURN_BADGE.requested}`}>
+                      <RotateCcw className="w-3 h-3" />
+                      {t(`orders.return.status.${returnStatus}`)}
+                    </Badge>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 text-xs"
+                      onClick={() => setReturnOrderId(o.id)}
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+                      {t("orders.return.reportButton")}
+                    </Button>
+                  )
                 )}
               </div>
             </div>
           </motion.div>
         );
       })}
+
+      <Dialog
+        open={!!returnOrderId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setReturnOrderId(null);
+            setReason("");
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("orders.return.dialogTitle")}</DialogTitle>
+            <DialogDescription>
+              <Trans
+                t={t}
+                i18nKey="orders.return.dialogBody"
+                components={{ 1: <Link to="/widerruf" className="underline text-primary" /> }}
+              />
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder={t("orders.return.reasonPlaceholder")}
+            rows={3}
+          />
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setReturnOrderId(null)}>
+              {t("orders.return.cancel")}
+            </Button>
+            <Button
+              variant="lime"
+              disabled={requestReturn.isPending}
+              onClick={() => returnOrderId && requestReturn.mutate({ orderId: returnOrderId, reason })}
+            >
+              {requestReturn.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              {t("orders.return.submit")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

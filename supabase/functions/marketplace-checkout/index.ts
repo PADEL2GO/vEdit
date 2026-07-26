@@ -225,6 +225,10 @@ serve(async (req) => {
       amount_cents: Math.max(0, remainderCents),
       play_spent: 0,
       reward_spent: 0,
+      unit_price_cents: unitPriceCents,
+      gross_cents: priceCents,
+      discount_cents: actualDiscountCents,
+      tax_rate: Number((item as any).tax_rate ?? 19),
       quantity,
       status: "pending",
       reference_code: referenceCode,
@@ -316,7 +320,7 @@ serve(async (req) => {
     if (user && remainderCents <= 0) {
       const { data: flipped } = await supabaseAdmin
         .from("marketplace_redemptions")
-        .update({ status: "success" })
+        .update({ status: "success", discount_cents: priceCents, tax_cents: 0 })
         .eq("id", orderId)
         .eq("status", "pending")
         .select("id");
@@ -324,6 +328,22 @@ serve(async (req) => {
       if (!flipped || flipped.length === 0) {
         logStep("Free path: order no longer pending", { orderId });
       }
+
+      // GoBD: every completed order gets a sequential receipt — €0.00 orders too
+      // (full points coverage = Entgeltminderung to zero, no VAT).
+      const { error: receiptError } = await supabaseAdmin.rpc("create_receipt", {
+        p_receipt_type: "marketplace_order",
+        p_source_id: orderId,
+        p_user_id: user.id,
+        p_recipient_email: effectiveEmail,
+        p_recipient_name: guestName ?? null,
+        p_description: `${item.name} × ${quantity} (${referenceCode})`,
+        p_gross_cents: priceCents,
+        p_discount_cents: priceCents,
+        p_paid_cents: 0,
+        p_tax_rate: Number((item as any).tax_rate ?? 19),
+      });
+      if (receiptError) logStep("Free path: receipt creation failed", { orderId, error: receiptError.message });
 
       const { data: postWallet } = await supabaseAdmin
         .from("wallets")
@@ -477,9 +497,17 @@ serve(async (req) => {
     }
 
     // Persist the session id (webhook idempotency key) + the actual charged amount.
+    // discount_cents reflects the discount actually delivered (the 50c floor can
+    // shrink it); tax on the amount actually paid (Entgeltminderung, § 17 UStG).
+    const mpTaxRate = Number((item as any).tax_rate ?? 19);
     const { error: persistError } = await supabaseAdmin
       .from("marketplace_redemptions")
-      .update({ stripe_session_id: session.id, amount_cents: chargeCents })
+      .update({
+        stripe_session_id: session.id,
+        amount_cents: chargeCents,
+        discount_cents: Math.max(0, priceCents - chargeCents),
+        tax_cents: Math.round(chargeCents - chargeCents / (1 + mpTaxRate / 100)),
+      })
       .eq("id", orderId);
     if (persistError) logStep("Failed to persist stripe_session_id", { error: persistError.message });
 

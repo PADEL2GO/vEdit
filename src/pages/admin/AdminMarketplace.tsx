@@ -58,6 +58,7 @@ import {
   X,
   Star,
   Languages,
+  Download,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -143,6 +144,19 @@ const emptyForm = (): Partial<MarketplaceItemInput> => ({
   status: "published",
   meta_title: "",
   meta_description: "",
+  manufacturer_name: "",
+  manufacturer_address: "",
+  manufacturer_email: "",
+  eu_responsible_name: "",
+  eu_responsible_address: "",
+  eu_responsible_email: "",
+  product_identifier: "",
+  safety_warnings: "",
+  textile_composition: "",
+  delivery_days_min: 2,
+  delivery_days_max: 4,
+  base_price_quantity: null,
+  base_price_unit: "",
 });
 
 const AdminMarketplace = () => {
@@ -209,6 +223,7 @@ const AdminMarketplace = () => {
   const [slugTouched, setSlugTouched] = useState(false);
   const [catManagerOpen, setCatManagerOpen] = useState(false);
   const [brandManagerOpen, setBrandManagerOpen] = useState(false);
+  const [exportingReceipts, setExportingReceipts] = useState(false);
 
   const [formData, setFormData] = useState<Partial<MarketplaceItemInput>>(emptyForm());
   const [specs, setSpecs] = useState<SpecRow[]>([]);
@@ -250,6 +265,20 @@ const AdminMarketplace = () => {
       status: (item.status as "draft" | "published") || "published",
       meta_title: item.meta_title || "",
       meta_description: item.meta_description || "",
+      // GPSR columns not yet in generated types.ts
+      manufacturer_name: (item as any).manufacturer_name || "",
+      manufacturer_address: (item as any).manufacturer_address || "",
+      manufacturer_email: (item as any).manufacturer_email || "",
+      eu_responsible_name: (item as any).eu_responsible_name || "",
+      eu_responsible_address: (item as any).eu_responsible_address || "",
+      eu_responsible_email: (item as any).eu_responsible_email || "",
+      product_identifier: (item as any).product_identifier || "",
+      safety_warnings: (item as any).safety_warnings || "",
+      textile_composition: (item as any).textile_composition || "",
+      delivery_days_min: (item as any).delivery_days_min ?? 2,
+      delivery_days_max: (item as any).delivery_days_max ?? 4,
+      base_price_quantity: (item as any).base_price_quantity ?? null,
+      base_price_unit: (item as any).base_price_unit || "",
     });
     setSpecs(Array.isArray(item.specs) ? (item.specs as SpecRow[]) : []);
     setGallery([]);
@@ -349,6 +378,19 @@ const AdminMarketplace = () => {
       specs: specs.filter((s) => s.label.trim() || s.value.trim()),
       meta_title: formData.meta_title || null,
       meta_description: formData.meta_description || null,
+      manufacturer_name: formData.manufacturer_name || null,
+      manufacturer_address: formData.manufacturer_address || null,
+      manufacturer_email: formData.manufacturer_email || null,
+      eu_responsible_name: formData.eu_responsible_name || null,
+      eu_responsible_address: formData.eu_responsible_address || null,
+      eu_responsible_email: formData.eu_responsible_email || null,
+      product_identifier: formData.product_identifier || null,
+      safety_warnings: formData.safety_warnings || null,
+      textile_composition: formData.textile_composition || null,
+      delivery_days_min: formData.delivery_days_min ?? 2,
+      delivery_days_max: formData.delivery_days_max ?? 4,
+      base_price_quantity: formData.base_price_quantity || null,
+      base_price_unit: formData.base_price_unit || null,
     };
 
     setSaving(true);
@@ -377,6 +419,56 @@ const AdminMarketplace = () => {
       toast.error("Fehler beim Speichern: " + (err?.message ?? ""));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const exportReceipts = async () => {
+    setExportingReceipts(true);
+    try {
+      const { data, error } = await (supabase as any)
+        .from("receipts")
+        .select("*")
+        .order("receipt_number", { ascending: true });
+      if (error) throw error;
+      const rows = (data ?? []) as Record<string, unknown>[];
+      if (!rows.length) {
+        toast.info("Keine Belege vorhanden");
+        return;
+      }
+      const num = (cents: unknown) => (((cents as number) ?? 0) / 100).toFixed(2).replace(".", ",");
+      const esc = (v: unknown) => {
+        const s = String(v ?? "");
+        return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const header = "Belegnummer;Typ;Datum;Beschreibung;Brutto;Rabatt;Zahlbetrag;Netto;USt-Satz;USt-Betrag;Währung";
+      const lines = rows.map((r) =>
+        [
+          esc(r.receipt_number),
+          esc(r.receipt_type),
+          r.issued_at ? new Date(r.issued_at as string).toLocaleDateString("de-DE") : "",
+          esc(r.description),
+          num(r.gross_cents),
+          num(r.discount_cents),
+          num(r.paid_cents),
+          num(r.net_cents),
+          String(r.tax_rate ?? 0).replace(".", ","),
+          num(r.tax_cents),
+          esc(r.currency ?? "EUR"),
+        ].join(";"),
+      );
+      // BOM, damit deutsches Excel Umlaute korrekt liest
+      const csv = "\uFEFF" + [header, ...lines].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `p2g-belege-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      toast.error("Export fehlgeschlagen: " + (err?.message ?? ""));
+    } finally {
+      setExportingReceipts(false);
     }
   };
 
@@ -678,6 +770,17 @@ const AdminMarketplace = () => {
         </Card>
 
         {/* Orders & fulfillment */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <h2 className="text-lg font-semibold">Bestellungen</h2>
+          <Button variant="outline" size="sm" onClick={exportReceipts} disabled={exportingReceipts}>
+            {exportingReceipts ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            Belege exportieren (CSV)
+          </Button>
+        </div>
         <MarketplaceOrdersSection />
       </div>
 
@@ -995,6 +1098,144 @@ const AdminMarketplace = () => {
                 checked={!!formData.is_featured}
                 onCheckedChange={(checked) => setFormData({ ...formData, is_featured: checked })}
               />
+            </div>
+
+            {/* GPSR / Kennzeichnung */}
+            <div className="space-y-3 rounded-lg border border-border/60 p-3">
+              <p className="text-sm font-medium">Produktsicherheit &amp; Kennzeichnung (GPSR)</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Hersteller Name</Label>
+                  <Input
+                    value={formData.manufacturer_name ?? ""}
+                    onChange={(e) => setFormData({ ...formData, manufacturer_name: e.target.value })}
+                    placeholder="z.B. Babolat VS S.A."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Hersteller E-Mail</Label>
+                  <Input
+                    type="email"
+                    value={formData.manufacturer_email ?? ""}
+                    onChange={(e) => setFormData({ ...formData, manufacturer_email: e.target.value })}
+                    placeholder="kontakt@hersteller.de"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Hersteller Anschrift</Label>
+                <Input
+                  value={formData.manufacturer_address ?? ""}
+                  onChange={(e) => setFormData({ ...formData, manufacturer_address: e.target.value })}
+                  placeholder="Straße, PLZ Ort, Land"
+                />
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  EU-Verantwortlicher: Nur nötig, wenn der Hersteller außerhalb der EU sitzt.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>EU-Verantwortlicher Name</Label>
+                    <Input
+                      value={formData.eu_responsible_name ?? ""}
+                      onChange={(e) => setFormData({ ...formData, eu_responsible_name: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>EU-Verantwortlicher E-Mail</Label>
+                    <Input
+                      type="email"
+                      value={formData.eu_responsible_email ?? ""}
+                      onChange={(e) => setFormData({ ...formData, eu_responsible_email: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>EU-Verantwortlicher Anschrift</Label>
+                  <Input
+                    value={formData.eu_responsible_address ?? ""}
+                    onChange={(e) => setFormData({ ...formData, eu_responsible_address: e.target.value })}
+                    placeholder="Straße, PLZ Ort, Land"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Produkt-ID / Charge</Label>
+                <Input
+                  value={formData.product_identifier ?? ""}
+                  onChange={(e) => setFormData({ ...formData, product_identifier: e.target.value })}
+                  placeholder="z.B. Artikelnummer, GTIN oder Chargennummer"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Warnhinweise</Label>
+                <Textarea
+                  value={formData.safety_warnings ?? ""}
+                  onChange={(e) => setFormData({ ...formData, safety_warnings: e.target.value })}
+                  placeholder="Sicherheits- und Warnhinweise zum Produkt..."
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Materialzusammensetzung</Label>
+                <Input
+                  value={formData.textile_composition ?? ""}
+                  onChange={(e) => setFormData({ ...formData, textile_composition: e.target.value })}
+                  placeholder="z.B. 90 % Polyester, 10 % Elasthan"
+                />
+                <p className="text-xs text-muted-foreground">Pflicht bei Textilien.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Lieferzeit min (Werktage)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={formData.delivery_days_min ?? 2}
+                    onChange={(e) =>
+                      setFormData({ ...formData, delivery_days_min: e.target.value ? parseInt(e.target.value) : 2 })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Lieferzeit max (Werktage)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={formData.delivery_days_max ?? 4}
+                    onChange={(e) =>
+                      setFormData({ ...formData, delivery_days_max: e.target.value ? parseInt(e.target.value) : 4 })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Grundpreis-Menge</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step="any"
+                    value={formData.base_price_quantity ?? ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        base_price_quantity: e.target.value ? parseFloat(e.target.value) : null,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Grundpreis-Einheit</Label>
+                  <Input
+                    value={formData.base_price_unit ?? ""}
+                    onChange={(e) => setFormData({ ...formData, base_price_unit: e.target.value })}
+                    placeholder="z.B. m, kg"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">Grundpreis: Nur bei Ware nach Maß/Gewicht.</p>
             </div>
 
             {/* SEO */}

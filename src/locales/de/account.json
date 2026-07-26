@@ -36,6 +36,24 @@
       "profileSaveFailed": "Konnte Profil nicht speichern."
     }
   },
+  "orders": {
+    "return": {
+      "reportButton": "Widerruf / Retoure melden",
+      "dialogTitle": "Widerruf / Retoure melden",
+      "dialogBody": "Du kannst deinen Kauf innerhalb von 14 Tagen nach Erhalt widerrufen. Die Rücksendung ist für dich kostenlos — nach der Meldung senden wir dir alle Infos per E-Mail. Details in der <1>Widerrufsbelehrung</1>.",
+      "reasonPlaceholder": "Grund (optional) — z. B. passt nicht, gefällt nicht …",
+      "cancel": "Abbrechen",
+      "submit": "Retoure melden",
+      "successToast": "Retoure gemeldet — wir melden uns per E-Mail.",
+      "errorToast": "Retoure konnte nicht gemeldet werden — möglicherweise wurde sie bereits gemeldet.",
+      "status": {
+        "requested": "Retoure gemeldet",
+        "received": "Retoure eingegangen",
+        "refunded": "Erstattet",
+        "rejected": "Retoure abgelehnt"
+      }
+    }
+  },
   "points": {
     "title": "P2G Points",
     "redeemableBadge": "Einlösbar",

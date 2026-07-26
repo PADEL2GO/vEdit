@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -13,13 +14,17 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Package, MapPin, Coins, Truck, RotateCcw, Image as ImageIcon } from "lucide-react";
+import { Loader2, Package, MapPin, Coins, Truck, RotateCcw, Image as ImageIcon, Send, Undo2 } from "lucide-react";
 import {
   useAdminMarketplaceOrders,
   useUpdateFulfillmentStatus,
   useRefundMarketplaceOrder,
+  useShipOrder,
+  useAdminReturns,
+  useUpdateReturn,
   type MarketplaceOrder,
   type FulfillmentStatus,
+  type ReturnStatus,
 } from "@/hooks/useAdminMarketplace";
 
 const eur = (cents: number | null | undefined) =>
@@ -35,13 +40,27 @@ const FULFILL_LABEL: Record<FulfillmentStatus, string> = {
 const dateFmt = (iso: string) =>
   new Date(iso).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
 
+const CARRIERS = ["DHL", "DPD", "GLS", "Hermes", "Andere"];
+
+const RETURN_LABEL: Record<ReturnStatus, string> = {
+  requested: "Angemeldet",
+  received: "Ware eingegangen",
+  refunded: "Erstattet",
+  rejected: "Abgelehnt",
+};
+
 export function MarketplaceOrdersSection() {
   const { data: orders, isLoading } = useAdminMarketplaceOrders();
   const updateFulfillment = useUpdateFulfillmentStatus();
   const refund = useRefundMarketplaceOrder();
+  const shipOrder = useShipOrder();
 
   const [filter, setFilter] = useState<string>("open");
   const [refundTarget, setRefundTarget] = useState<MarketplaceOrder | null>(null);
+  const [shipForms, setShipForms] = useState<Record<string, { carrier: string; tracking: string }>>({});
+
+  const setShipForm = (id: string, patch: Partial<{ carrier: string; tracking: string }>) =>
+    setShipForms((f) => ({ ...f, [id]: { ...(f[id] ?? { carrier: "DHL", tracking: "" }), ...patch } }));
 
   const all = orders ?? [];
   const openCount = all.filter((o) => o.status === "success" && o.fulfillment_status === "pending").length;
@@ -65,6 +84,7 @@ export function MarketplaceOrdersSection() {
   };
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -120,6 +140,8 @@ export function MarketplaceOrdersSection() {
                   const refunded = o.status !== "success";
                   const pointsSpent = (o.play_spent ?? 0) + (o.reward_spent ?? 0);
                   const hasAddress = !!o.shipping_address_line1;
+                  const form = shipForms[o.id] ?? { carrier: "DHL", tracking: "" };
+                  const shipping = shipOrder.isPending && shipOrder.variables?.order_id === o.id;
                   return (
                     <TableRow key={o.id} className={refunded ? "opacity-60" : ""}>
                       <TableCell className="whitespace-nowrap text-sm">{dateFmt(o.created_at)}</TableCell>
@@ -168,33 +190,80 @@ export function MarketplaceOrdersSection() {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell>{statusBadge(o)}</TableCell>
+                      <TableCell>
+                        {statusBadge(o)}
+                        {o.tracking_number && (o.fulfillment_status === "shipped" || o.fulfillment_status === "delivered") && (
+                          <div className="text-xs text-muted-foreground mt-1 whitespace-nowrap">
+                            {o.carrier} · {o.tracking_number}
+                            {o.shipped_at && <> · {dateFmt(o.shipped_at)}</>}
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Select
-                            value={o.fulfillment_status}
-                            onValueChange={(v) =>
-                              updateFulfillment.mutate({ id: o.id, fulfillment_status: v as FulfillmentStatus })
-                            }
-                            disabled={refunded}
-                          >
-                            <SelectTrigger className="h-8 w-[130px]"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">Offen</SelectItem>
-                              <SelectItem value="shipped">Versendet</SelectItem>
-                              <SelectItem value="delivered">Geliefert</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {!refunded && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-destructive hover:text-destructive shrink-0"
-                              onClick={() => setRefundTarget(o)}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-end gap-2">
+                            <Select
+                              value={o.fulfillment_status}
+                              onValueChange={(v) =>
+                                updateFulfillment.mutate({ id: o.id, fulfillment_status: v as FulfillmentStatus })
+                              }
+                              disabled={refunded}
                             >
-                              <RotateCcw className="w-4 h-4 mr-1" />
-                              Stornieren
-                            </Button>
+                              <SelectTrigger className="h-8 w-[130px]"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">Offen</SelectItem>
+                                <SelectItem value="shipped">Versendet</SelectItem>
+                                <SelectItem value="delivered">Geliefert</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {!refunded && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive shrink-0"
+                                onClick={() => setRefundTarget(o)}
+                              >
+                                <RotateCcw className="w-4 h-4 mr-1" />
+                                Stornieren
+                              </Button>
+                            )}
+                          </div>
+                          {!refunded && o.fulfillment_status === "pending" && hasAddress && (
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Select value={form.carrier} onValueChange={(v) => setShipForm(o.id, { carrier: v })}>
+                                <SelectTrigger className="h-8 w-[92px] shrink-0"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {CARRIERS.map((c) => (
+                                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Input
+                                className="h-8 w-[140px]"
+                                placeholder="Sendungsnummer"
+                                value={form.tracking}
+                                onChange={(e) => setShipForm(o.id, { tracking: e.target.value })}
+                              />
+                              <Button
+                                size="sm"
+                                className="h-8 shrink-0"
+                                disabled={!form.tracking.trim() || shipping}
+                                onClick={() =>
+                                  shipOrder.mutate({
+                                    order_id: o.id,
+                                    tracking_number: form.tracking.trim(),
+                                    carrier: form.carrier,
+                                  })
+                                }
+                              >
+                                {shipping ? (
+                                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                                ) : (
+                                  <Send className="w-4 h-4 mr-1" />
+                                )}
+                                Versenden + Mail
+                              </Button>
+                            </div>
                           )}
                         </div>
                       </TableCell>
@@ -244,6 +313,101 @@ export function MarketplaceOrdersSection() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </Card>
+
+    <MarketplaceReturnsSection />
+    </>
+  );
+}
+
+function MarketplaceReturnsSection() {
+  const { data: returns, isLoading } = useAdminReturns();
+  const updateReturn = useUpdateReturn();
+  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  const list = returns ?? [];
+  const openReturns = list.filter((r) => r.status === "requested").length;
+
+  const saveNote = (id: string, current: string | null) => {
+    const value = notes[id];
+    if (value === undefined || value === (current ?? "")) return;
+    updateReturn.mutate({ id, admin_note: value });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Undo2 className="w-5 h-5" />
+          Retouren &amp; Widerrufe
+          {openReturns > 0 && <Badge variant="default" className="ml-1">{openReturns} offen</Badge>}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : list.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">Keine Retouren vorhanden.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Datum</TableHead>
+                  <TableHead>Bestellung</TableHead>
+                  <TableHead>Grund</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Interne Notiz</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {list.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="whitespace-nowrap text-sm">{dateFmt(r.requested_at)}</TableCell>
+                    <TableCell className="text-sm min-w-[160px]">
+                      <div className="font-mono text-xs">{r.order?.reference_code || r.order_id.slice(0, 8)}</div>
+                      <div className="font-medium line-clamp-1">{r.order?.item?.name || "—"}</div>
+                      {r.order?.guest_email && (
+                        <div className="text-xs text-muted-foreground break-all">{r.order.guest_email}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm min-w-[180px] max-w-[280px]">
+                      <span className="whitespace-pre-wrap">{r.reason || "—"}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={r.status}
+                        onValueChange={(v) => updateReturn.mutate({ id: r.id, status: v as ReturnStatus })}
+                      >
+                        <SelectTrigger className="h-8 w-[160px]"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {(Object.keys(RETURN_LABEL) as ReturnStatus[]).map((s) => (
+                            <SelectItem key={s} value={s}>{RETURN_LABEL[s]}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell className="min-w-[200px]">
+                      <Input
+                        className="h-8"
+                        placeholder="Notiz…"
+                        value={notes[r.id] ?? r.admin_note ?? ""}
+                        onChange={(e) => setNotes((n) => ({ ...n, [r.id]: e.target.value }))}
+                        onBlur={() => saveNote(r.id, r.admin_note)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground mt-4">
+          Erstattung wie gewohnt über den Stornieren-Button der Bestellung auslösen.
+        </p>
+      </CardContent>
     </Card>
   );
 }

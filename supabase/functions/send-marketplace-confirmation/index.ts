@@ -118,12 +118,30 @@ serve(async (req) => {
 
       const pointsSpent = (order.play_spent ?? 0) + (order.reward_spent ?? 0);
       const amountCents = order.amount_cents ?? 0;
+      const eur = (c: number) => `${(c / 100).toFixed(2).replace(".", ",")} €`;
+
+      // Receipt with sequential number + VAT split (created at settle time).
+      const { data: receipt } = await supabase
+        .from("receipts")
+        .select("receipt_number, gross_cents, discount_cents, paid_cents, tax_rate, tax_cents")
+        .eq("receipt_type", "marketplace_order")
+        .eq("source_id", order.id)
+        .maybeSingle();
+
       const rows = [
         { label: "Produkt", value: `${itemName}${(order.quantity ?? 1) > 1 ? ` × ${order.quantity}` : ""}` },
         { label: "Bestellnr.", value: order.reference_code ?? order.id.substring(0, 8).toUpperCase() },
       ];
+      if (receipt?.receipt_number) rows.push({ label: "Belegnr.", value: receipt.receipt_number });
+      if (receipt && (receipt.discount_cents ?? 0) > 0) {
+        rows.push({ label: "Warenwert", value: eur(receipt.gross_cents ?? 0) });
+        rows.push({ label: "Punkte-Rabatt", value: `−${eur(receipt.discount_cents ?? 0)}` });
+      }
       if (pointsSpent > 0) rows.push({ label: "Mit Punkten bezahlt", value: `${pointsSpent} Punkte` });
-      if (amountCents > 0) rows.push({ label: "Betrag", value: `${(amountCents / 100).toFixed(2).replace(".", ",")} €` });
+      if (amountCents > 0) rows.push({ label: "Betrag", value: eur(amountCents) });
+      if (receipt && (receipt.tax_cents ?? 0) > 0) {
+        rows.push({ label: `enthaltene USt (${Number(receipt.tax_rate ?? 19).toFixed(0)} %)`, value: eur(receipt.tax_cents ?? 0) });
+      }
 
       // Physical products ship to the stored address; digital ones don't.
       const shipsPhysical = isPhysical && !!order.shipping_address_line1;

@@ -2059,12 +2059,10 @@ serve(async (req) => {
         .eq("user_id", userId);
       if (notifError) logStep("Warning: notifications delete", { error: notifError.message });
 
-      // 2. points_ledger
-      const { error: ledgerError } = await supabaseAdmin
-        .from("points_ledger")
-        .delete()
-        .eq("user_id", userId);
-      if (ledgerError) logStep("Warning: points_ledger delete", { error: ledgerError.message });
+      // 2. points_ledger: NOT deleted — the ledger is an append-only audit trail
+      // (GoBD/§147 AO). The FK is ON DELETE SET NULL, so deleting the auth user
+      // below anonymizes the rows automatically; a manual delete would be blocked
+      // by the append-only trigger anyway.
 
       // 3. reward_instances
       const { error: rewardInstError } = await supabaseAdmin

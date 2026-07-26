@@ -218,7 +218,7 @@ serve(async (req) => {
 
             const { data: order, error: orderReadError } = await supabaseAdmin
               .from("marketplace_redemptions")
-              .select("user_id, item_id, quantity, play_spent, reward_spent, amount_cents, reference_code, guest_email, guest_name, shipping_address_line1, shipping_postal_code, shipping_city, shipping_country, fulfillment_notified_at")
+              .select("user_id, item_id, quantity, play_spent, reward_spent, amount_cents, gross_cents, discount_cents, tax_rate, reference_code, guest_email, guest_name, shipping_address_line1, shipping_postal_code, shipping_city, shipping_country, fulfillment_notified_at")
               .eq("id", redemptionId)
               .single();
 
@@ -242,6 +242,23 @@ serve(async (req) => {
                 .eq("id", order.item_id)
                 .single();
               item = itemRow as typeof item;
+            }
+
+            // GoBD: sequential receipt for the settled order (idempotent per source).
+            if (settled === true) {
+              const { error: receiptError } = await supabaseAdmin.rpc("create_receipt", {
+                p_receipt_type: "marketplace_order",
+                p_source_id: redemptionId,
+                p_user_id: order.user_id ?? null,
+                p_recipient_email: order.guest_email ?? null,
+                p_recipient_name: order.guest_name ?? null,
+                p_description: `${item?.name ?? "Artikel"} × ${order.quantity ?? 1} (${order.reference_code ?? redemptionId})`,
+                p_gross_cents: (order as any).gross_cents ?? order.amount_cents ?? 0,
+                p_discount_cents: (order as any).discount_cents ?? 0,
+                p_paid_cents: order.amount_cents ?? 0,
+                p_tax_rate: Number((order as any).tax_rate ?? 19),
+              });
+              if (receiptError) logStep("Marketplace: receipt creation failed", { redemptionId, error: receiptError.message });
             }
 
             // Finalize the points spend in the ledger. The wallet was already debited at
@@ -763,6 +780,24 @@ serve(async (req) => {
               logStep("Payment record updated");
             }
 
+            // GoBD: sequential receipt for the paid booking (idempotent per source).
+            {
+              const paidCents = session.amount_total ?? 0;
+              const { error: receiptError } = await supabaseAdmin.rpc("create_receipt", {
+                p_receipt_type: "booking",
+                p_source_id: bookingId,
+                p_user_id: isGuestWebhook ? null : (session.metadata?.user_id || null),
+                p_recipient_email: isGuestWebhook ? (guestEmail ?? null) : null,
+                p_recipient_name: isGuestWebhook ? (guestName ?? null) : null,
+                p_description: `Court-Buchung ${bookingId}`,
+                p_gross_cents: paidCents,
+                p_discount_cents: 0,
+                p_paid_cents: paidCents,
+                p_tax_rate: 19,
+              });
+              if (receiptError) logStep("Booking: receipt creation failed", { bookingId, error: receiptError.message });
+            }
+
             // Record voucher redemption if a partial-discount voucher was applied.
             // (current_uses was already incremented as a soft-reserve in create-checkout-session)
             const appliedVoucherId = session.metadata?.voucher_id;
@@ -977,16 +1012,36 @@ serve(async (req) => {
           }
         }
 
-        // Update payment status
+        // Update payment status + persist the refund record (GoBD: amounts must survive).
         const { error: paymentUpdateError } = await supabaseAdmin
           .from("payments")
-          .update({ 
-            status: isFullRefund ? "refunded" : "partially_refunded"
+          .update({
+            status: isFullRefund ? "refunded" : "partially_refunded",
+            refunded_amount_cents: charge.amount_refunded,
+            refunded_at: new Date().toISOString(),
+            stripe_refund_id: (charge as any).refunds?.data?.[0]?.id ?? null,
           })
           .eq("stripe_payment_intent_id", paymentIntentId);
 
         if (paymentUpdateError) {
           logStep("Failed to update payment status", { error: paymentUpdateError.message });
+        }
+
+        // Negative receipt for the booking refund (idempotent per booking).
+        {
+          const { error: receiptError } = await supabaseAdmin.rpc("create_receipt", {
+            p_receipt_type: "booking_refund",
+            p_source_id: bookingId,
+            p_user_id: userId ?? null,
+            p_recipient_email: null,
+            p_recipient_name: null,
+            p_description: `Erstattung Court-Buchung ${bookingId}`,
+            p_gross_cents: -charge.amount_refunded,
+            p_discount_cents: 0,
+            p_paid_cents: -charge.amount_refunded,
+            p_tax_rate: 19,
+          });
+          if (receiptError) logStep("Booking refund: receipt creation failed", { bookingId, error: receiptError.message });
         }
 
         // Trigger rewards reversal

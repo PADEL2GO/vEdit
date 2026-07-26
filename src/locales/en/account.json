@@ -36,6 +36,24 @@
       "profileSaveFailed": "Could not save profile."
     }
   },
+  "orders": {
+    "return": {
+      "reportButton": "Report withdrawal / return",
+      "dialogTitle": "Report withdrawal / return",
+      "dialogBody": "You can withdraw from your purchase within 14 days of receipt. Return shipping is free for you — after you report it, we'll email you all the details. See the <1>withdrawal policy</1> for details.",
+      "reasonPlaceholder": "Reason (optional) — e.g. doesn't fit, don't like it …",
+      "cancel": "Cancel",
+      "submit": "Report return",
+      "successToast": "Return reported — we'll get back to you by email.",
+      "errorToast": "Could not report the return — it may already have been reported.",
+      "status": {
+        "requested": "Return reported",
+        "received": "Return received",
+        "refunded": "Refunded",
+        "rejected": "Return declined"
+      }
+    }
+  },
   "points": {
     "title": "P2G Points",
     "redeemableBadge": "Redeemable",

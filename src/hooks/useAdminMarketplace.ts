@@ -27,6 +27,20 @@ export interface MarketplaceItemInput {
   status?: ProductStatus;
   meta_title?: string | null;
   meta_description?: string | null;
+  // GPSR / Kennzeichnung (columns not yet in generated types.ts)
+  manufacturer_name?: string | null;
+  manufacturer_address?: string | null;
+  manufacturer_email?: string | null;
+  eu_responsible_name?: string | null;
+  eu_responsible_address?: string | null;
+  eu_responsible_email?: string | null;
+  product_identifier?: string | null;
+  safety_warnings?: string | null;
+  textile_composition?: string | null;
+  delivery_days_min?: number;
+  delivery_days_max?: number;
+  base_price_quantity?: number | null;
+  base_price_unit?: string | null;
 }
 
 // Fetch all items (including inactive) for admin
@@ -139,6 +153,9 @@ export interface MarketplaceOrder {
   shipping_postal_code: string | null;
   shipping_city: string | null;
   shipping_country: string | null;
+  tracking_number?: string | null;
+  carrier?: string | null;
+  shipped_at?: string | null;
   item?: { name: string; image_url: string | null } | null;
 }
 
@@ -152,6 +169,7 @@ export const useAdminMarketplaceOrders = () => {
           id, status, fulfillment_status, reference_code, created_at, quantity,
           amount_cents, play_spent, reward_spent, guest_email, guest_name, user_id,
           shipping_address_line1, shipping_postal_code, shipping_city, shipping_country,
+          tracking_number, carrier, shipped_at,
           item:marketplace_items(name, image_url)
         `)
         .in("status", ["success", "refunded", "cancelled"])
@@ -197,6 +215,102 @@ export const useRefundMarketplaceOrder = () => {
     },
     onError: (error: Error) => {
       toast.error("Stornierung fehlgeschlagen: " + error.message);
+    },
+  });
+};
+
+// Mark order as shipped (tracking + carrier) and send shipping confirmation mail
+export const useShipOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: { order_id: string; tracking_number: string; carrier: string }) => {
+      const { data, error } = await supabase.functions.invoke("send-marketplace-shipped", {
+        body: input,
+      });
+      if (error) {
+        let serverMessage: string | null = null;
+        const ctx = (error as { context?: Response }).context;
+        if (ctx && typeof ctx.json === "function") {
+          try {
+            const body = await ctx.json();
+            serverMessage = body?.error ?? null;
+          } catch {
+            /* ignore */
+          }
+        }
+        throw new Error(serverMessage || error.message);
+      }
+      if ((data as { error?: string })?.error) throw new Error((data as { error?: string }).error!);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-marketplace-orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-marketplace-redemptions"] });
+      toast.success("Als versendet markiert & Versandbestätigung gesendet");
+    },
+    onError: (error: Error) => {
+      toast.error("Versand fehlgeschlagen: " + error.message);
+    },
+  });
+};
+
+// ── Returns / Widerrufe ──────────────────────────────────────────────────────
+export type ReturnStatus = "requested" | "received" | "refunded" | "rejected";
+
+export interface MarketplaceReturn {
+  id: string;
+  order_id: string;
+  user_id: string | null;
+  reason: string | null;
+  status: ReturnStatus;
+  admin_note: string | null;
+  requested_at: string;
+  order?: {
+    reference_code: string | null;
+    guest_email: string | null;
+    user_id: string | null;
+    item?: { name: string } | null;
+  } | null;
+}
+
+export const useAdminReturns = () => {
+  return useQuery({
+    queryKey: ["admin-marketplace-returns"],
+    queryFn: async () => {
+      // marketplace_returns is not yet in generated types.ts
+      const { data, error } = await (supabase as any)
+        .from("marketplace_returns")
+        .select(`
+          *,
+          order:marketplace_redemptions(reference_code, guest_email, user_id, item:marketplace_items(name))
+        `)
+        .order("requested_at", { ascending: false });
+
+      if (error) throw error;
+      return (data ?? []) as MarketplaceReturn[];
+    },
+  });
+};
+
+export const useUpdateReturn = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...fields }: { id: string; status?: ReturnStatus; admin_note?: string }) => {
+      const { error } = await (supabase as any)
+        .from("marketplace_returns")
+        .update(fields)
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-marketplace-returns"] });
+      toast.success("Retoure aktualisiert");
+    },
+    onError: (error: Error) => {
+      toast.error("Fehler: " + error.message);
     },
   });
 };

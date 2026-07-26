@@ -30,6 +30,9 @@ verify_jwt = true
 [functions.marketplace-refund]
 verify_jwt = true
 
+[functions.send-marketplace-shipped]
+verify_jwt = true
+
 [functions.send-event-confirmation]
 verify_jwt = true
 

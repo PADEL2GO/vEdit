@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useTranslation, Trans } from "react-i18next";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,20 @@ const MarketplaceProduct = () => {
     const urls = [product?.image_url, ...gallery.map((g) => g.url)].filter(Boolean) as string[];
     return urls.length ? urls : ["/placeholder.svg"];
   }, [product, gallery]);
+
+  // § 11 PAngV: lowest effective price of the trailing 30 days, only relevant
+  // while a strike price (UVP) is advertised.
+  const { data: lowest30d } = useQuery({
+    queryKey: ["marketplace-lowest-price-30d", product?.id],
+    enabled: !!product?.id && !!product?.compare_at_price_cents,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).rpc("marketplace_lowest_price_30d", {
+        p_item_id: product!.id,
+      });
+      if (error) throw error;
+      return (data ?? 0) as number;
+    },
+  });
 
   if (isLoading) {
     return (
@@ -85,6 +101,11 @@ const MarketplaceProduct = () => {
   const balance = summary?.play_credits ?? 0;
   const maxRedeem = maxRedeemablePoints(price * qty, balance, centsPerPoint, maxPercent);
   const maxSaveCents = Math.floor(maxRedeem * centsPerPoint);
+
+  // New DB columns not yet in generated types.ts
+  const ext = product as any;
+  const deliveryMin = ext.delivery_days_min ?? 2;
+  const deliveryMax = ext.delivery_days_max ?? 4;
 
   const specs = Array.isArray(product.specs) ? product.specs : [];
   const descParas = (localized(product, "long_description", i18n.language) || localized(product, "description", i18n.language) || "")
@@ -187,6 +208,16 @@ const MarketplaceProduct = () => {
                   )}
                 </div>
                 <span className="text-xs text-muted-foreground">{t("product.taxShipping")}</span>
+                {uvp && (lowest30d ?? 0) > 0 && (
+                  <span className="text-xs text-muted-foreground">
+                    {t("product.lowestPrice30d", { price: eur(lowest30d!) })}
+                  </span>
+                )}
+                {ext.base_price_quantity && ext.base_price_unit && (
+                  <span className="text-xs text-muted-foreground">
+                    {t("product.basePrice", { price: eur(Math.round(price / ext.base_price_quantity)), unit: ext.base_price_unit })}
+                  </span>
+                )}
               </div>
 
               {pointsEnabled && (user ? (
@@ -226,7 +257,7 @@ const MarketplaceProduct = () => {
                       : t("stock.inStock")}
                 </span>
                 <span className="text-[13px] text-muted-foreground">
-                  {soldOut ? t("product.restockNote") : t("product.deliveryNote")}
+                  {soldOut ? t("product.restockNote") : t("product.deliveryNoteDynamic", { min: deliveryMin, max: deliveryMax })}
                 </span>
               </div>
 
@@ -306,6 +337,48 @@ const MarketplaceProduct = () => {
               </div>
             )}
           </div>
+
+          {/* Manufacturer information (GPSR) */}
+          {ext.manufacturer_name && (
+            <div className="rounded-2xl border border-border/60 bg-gradient-card p-6">
+              <h3 className="font-display font-bold text-[17px] mb-3">{t("product.manufacturerHeading")}</h3>
+              <div className="flex flex-col gap-3 text-[13.5px]">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-semibold">{ext.manufacturer_name}</span>
+                  {ext.manufacturer_address && (
+                    <span className="whitespace-pre-line text-muted-foreground">{ext.manufacturer_address}</span>
+                  )}
+                  {ext.manufacturer_email && (
+                    <span className="text-muted-foreground">{ext.manufacturer_email}</span>
+                  )}
+                </div>
+                {ext.eu_responsible_name && (
+                  <div className="flex flex-col gap-0.5 pt-2.5 border-t border-border/60">
+                    <span className="font-semibold">{t("product.euResponsibleHeading")}</span>
+                    <span className="text-muted-foreground">{ext.eu_responsible_name}</span>
+                    {ext.eu_responsible_address && (
+                      <span className="whitespace-pre-line text-muted-foreground">{ext.eu_responsible_address}</span>
+                    )}
+                    {ext.eu_responsible_email && (
+                      <span className="text-muted-foreground">{ext.eu_responsible_email}</span>
+                    )}
+                  </div>
+                )}
+                {ext.product_identifier && (
+                  <span className="text-muted-foreground">{t("product.productIdentifier", { value: ext.product_identifier })}</span>
+                )}
+                {ext.safety_warnings && (
+                  <div className="flex flex-col gap-0.5 pt-2.5 border-t border-border/60">
+                    <span className="font-semibold">{t("product.safetyWarningsHeading")}</span>
+                    <span className="whitespace-pre-line text-muted-foreground">{ext.safety_warnings}</span>
+                  </div>
+                )}
+                {ext.textile_composition && (
+                  <span className="text-muted-foreground">{t("product.textileComposition", { value: ext.textile_composition })}</span>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Related */}
           {(data?.related.length || 0) > 0 && (

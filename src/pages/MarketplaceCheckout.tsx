@@ -327,7 +327,12 @@ const MarketplaceCheckout = () => {
                       <span className="text-[11px] text-muted-foreground">{t("checkout.inclVat")}</span>
                     </span>
                   </div>
-                  <span className="text-[11.5px] text-muted-foreground">{t("checkout.deliveryTime")}</span>
+                  <span className="text-[11.5px] text-muted-foreground">
+                    {t("checkout.deliveryTimeDynamic", {
+                      min: (product as any).delivery_days_min ?? 2,
+                      max: (product as any).delivery_days_max ?? 4,
+                    })}
+                  </span>
                 </div>
 
                 <div style={{ opacity: addrValid ? 1 : 0.45, pointerEvents: addrValid ? "auto" : "none" }} className="transition-opacity">
