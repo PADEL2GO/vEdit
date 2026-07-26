@@ -107,3 +107,13 @@ verify_jwt = false
 
 [functions.newsletter-send]
 verify_jwt = false
+
+# Called by the notifications AFTER-INSERT trigger with the CRON_SECRET bearer (not a JWT) —
+# in-code auth, same pattern as send-match-reminders.
+[functions.push-notify]
+verify_jwt = false
+
+# Called from the app with the caller's own JWT; gateway verification adds a first gate on
+# top of the in-code getUser() check.
+[functions.delete-account]
+verify_jwt = true
