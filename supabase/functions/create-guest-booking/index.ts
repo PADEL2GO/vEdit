@@ -100,6 +100,41 @@ serve(async (req) => {
       throw new Error(`Invalid booking duration: ${durationMinutes} min`);
     }
 
+    // ── Booking window (REQ-G06): never in the past, never outside the
+    // location's opening hours. Mirrors the authoritative DB trigger
+    // enforce_booking_window, but with a readable error for the UI.
+    if (startDate.getTime() < Date.now() - 15 * 60 * 1000) {
+      throw new Error("Der gewählte Zeitraum liegt in der Vergangenheit");
+    }
+    const { data: locationRow } = await supabaseAdmin
+      .from("locations")
+      .select("is_24_7, opening_hours_json")
+      .eq("id", location_id)
+      .maybeSingle();
+    if (locationRow && !locationRow.is_24_7 && locationRow.opening_hours_json) {
+      const berlin = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Europe/Berlin",
+        weekday: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      const parts = berlin.formatToParts(startDate);
+      const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+      const dayName = get("weekday").toLowerCase();
+      const startMin = (parseInt(get("hour"), 10) % 24) * 60 + parseInt(get("minute"), 10);
+      const endMin = startMin + durationMinutes;
+      const hours = (locationRow.opening_hours_json as Record<string, { open?: string; close?: string }>)[dayName];
+      if (!hours?.open || !hours?.close) {
+        throw new Error("Der Standort ist an diesem Tag geschlossen");
+      }
+      const [oh, om] = hours.open.split(":").map(Number);
+      const [ch, cm] = hours.close.split(":").map(Number);
+      if (startMin < oh * 60 + om || endMin > ch * 60 + cm) {
+        throw new Error(`Der gewählte Zeitraum liegt außerhalb der Öffnungszeiten (${hours.open}–${hours.close} Uhr)`);
+      }
+    }
+
     // ── Fetch price (court-specific, fallback to global) ──────────────────────
     let priceCents: number | null = null;
 

@@ -18,8 +18,17 @@
     },
     "delete": {
       "title": "Delete account",
-      "description": "You have the right to request the deletion of your data (Art. 17 GDPR). Send us an email and we will delete your account within 30 days.",
-      "cta": "Request deletion →"
+      "description": "You can permanently delete your account right here (Art. 17 GDPR). Booking and invoice data subject to statutory retention periods is kept in anonymised form.",
+      "cta": "Delete account permanently",
+      "confirmTitle": "Really delete your account?",
+      "confirmBody": "This action cannot be undone.\n\nYour profile, points and balance will be permanently deleted. Completed bookings and receipts are retained in anonymised form for tax-law reasons (§ 147 AO).",
+      "confirmLabel": "Type {{word}} to confirm:",
+      "confirmWord": "DELETE",
+      "confirmCta": "Delete permanently",
+      "cancel": "Cancel",
+      "successTitle": "Account deleted",
+      "successBody": "Your account and personal data have been deleted.",
+      "error": "Deletion failed – please try again or contact us."
     },
     "toast": {
       "errorTitle": "Error",
@@ -34,6 +43,16 @@
       "usernameTaken": "This username is already taken.",
       "profileSaved": "Your profile has been updated.",
       "profileSaveFailed": "Could not save profile."
+    },
+    "pushMarketing": {
+      "title": "Marketing push notifications",
+      "description": "Receive news, promotions and offers as push notifications (optional). Booking and order notifications are not affected."
+    },
+    "dataExport": {
+      "title": "Data export",
+      "description": "Download a copy of the data we store about you as JSON (Art. 15/20 GDPR).",
+      "cta": "Export data",
+      "success": "Export created — download started."
     }
   },
   "orders": {

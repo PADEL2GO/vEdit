@@ -131,6 +131,48 @@ const Datenschutz = () => {
             </section>
 
             <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
+              <h2 className="text-xl font-bold mb-4 text-primary">{t("push.heading")}</h2>
+              <div className="space-y-3 text-foreground text-sm leading-relaxed">
+                <p>{t("push.p1")}</p>
+                <p>{t("push.p2")}</p>
+                <p>
+                  <span className="font-medium">{t("push.legalLabel")}</span> {t("push.legalText")}
+                </p>
+              </div>
+            </section>
+
+            <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
+              <h2 className="text-xl font-bold mb-4 text-primary">{t("community.heading")}</h2>
+              <div className="space-y-3 text-foreground text-sm leading-relaxed">
+                <p>{t("community.p1")}</p>
+                <p>{t("community.p2")}</p>
+                <p>
+                  <span className="font-medium">{t("community.legalLabel")}</span> {t("community.legalText")}
+                </p>
+              </div>
+            </section>
+
+            <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
+              <h2 className="text-xl font-bold mb-4 text-primary">{t("cameras.heading")}</h2>
+              <div className="space-y-3 text-foreground text-sm leading-relaxed">
+                <p>{t("cameras.p1")}</p>
+                <p>
+                  <span className="font-medium">{t("cameras.legalLabel")}</span> {t("cameras.legalText")}
+                </p>
+              </div>
+            </section>
+
+            <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
+              <h2 className="text-xl font-bold mb-4 text-primary">{t("thirdcountry.heading")}</h2>
+              <div className="space-y-3 text-foreground text-sm leading-relaxed">
+                <p>{t("thirdcountry.p1")}</p>
+                <p>
+                  <span className="font-medium">{t("thirdcountry.legalLabel")}</span> {t("thirdcountry.legalText")}
+                </p>
+              </div>
+            </section>
+
+            <section className="bg-card/50 border border-border rounded-2xl p-6 md:p-8">
               <h2 className="text-xl font-bold mb-4 text-primary">{t("cookies.heading")}</h2>
               <div className="space-y-3 text-foreground text-sm leading-relaxed">
                 <p>{t("cookies.p1")}</p>

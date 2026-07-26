@@ -10,6 +10,8 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { NavLink } from "@/components/NavLink";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +30,8 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [adultConfirmed, setAdultConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
   // Captured synchronously on first render — Supabase strips the URL hash after
@@ -184,8 +188,20 @@ const Auth = () => {
       return;
     }
 
+    if (!termsAccepted) {
+      toast.error(t("toasts.registerFailed"), { description: t("validation.termsRequired") });
+      return;
+    }
+    if (!adultConfirmed) {
+      toast.error(t("toasts.registerFailed"), { description: t("validation.adultRequired") });
+      return;
+    }
+
     setLoading(true);
-    const { data, error } = await signUp(email, password);
+    const { data, error } = await signUp(email, password, {
+      terms_accepted_at: new Date().toISOString(),
+      adult_confirmed: true,
+    });
     setLoading(false);
 
     if (error) {
@@ -408,6 +424,38 @@ const Auth = () => {
                       </div>
                       {errors.confirmPassword && <p className="text-destructive text-sm mt-1">{errors.confirmPassword}</p>}
                     </div>
+
+                    <div className="space-y-3 pt-1">
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <Checkbox
+                          checked={termsAccepted}
+                          onCheckedChange={(v) => setTermsAccepted(v === true)}
+                          className="mt-0.5"
+                        />
+                        <span className="text-[12.5px] leading-relaxed text-muted-foreground">
+                          {t("signUp.termsIntro")}
+                          <NavLink to="/agb" target="_blank" className="text-primary underline hover:no-underline">
+                            {t("signUp.termsLink")}
+                          </NavLink>
+                          {t("signUp.termsAnd")}
+                          <NavLink to="/datenschutz" target="_blank" className="text-primary underline hover:no-underline">
+                            {t("signUp.privacyLink")}
+                          </NavLink>
+                          {t("signUp.termsOutro")}
+                        </span>
+                      </label>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <Checkbox
+                          checked={adultConfirmed}
+                          onCheckedChange={(v) => setAdultConfirmed(v === true)}
+                          className="mt-0.5"
+                        />
+                        <span className="text-[12.5px] leading-relaxed text-muted-foreground">
+                          {t("signUp.adultConfirm")}
+                        </span>
+                      </label>
+                    </div>
+
                     <Button type="submit" variant="lime" className="w-full" disabled={loading}>
                       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("signUp.submit")}
                     </Button>

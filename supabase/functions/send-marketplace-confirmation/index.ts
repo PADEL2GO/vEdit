@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveResendKey, brandedEmailHtml, sendBrandedEmail } from "../_shared/email.ts";
+import { AGB_ATTACHMENT } from "../_shared/agb-text.ts";
 
 // Sends the branded customer order-confirmation for a completed marketplace order.
 // Called server-to-server (service role) by marketplace-checkout (free/points path) and
@@ -177,7 +178,9 @@ serve(async (req) => {
         ...(isPhysical ? { legalHtml: widerrufsbelehrung } : {}),
       });
 
-      await sendBrandedEmail(resendKey, recipientEmail, `Bestellung bestätigt: ${itemName}`, html);
+      await sendBrandedEmail(resendKey, recipientEmail, `Bestellung bestätigt: ${itemName}`, html, {
+        attachments: [AGB_ATTACHMENT],
+      });
       logStep("Customer confirmation sent", { order_id, email: recipientEmail });
       return json({ success: true }, 200);
     } catch (postClaimErr) {

@@ -18,8 +18,17 @@
     },
     "delete": {
       "title": "Konto löschen",
-      "description": "Du hast das Recht, die Löschung deiner Daten zu beantragen (Art. 17 DSGVO). Schreib uns eine E-Mail und wir löschen dein Konto innerhalb von 30 Tagen.",
-      "cta": "Löschung beantragen →"
+      "description": "Du kannst dein Konto hier direkt und endgültig löschen (Art. 17 DSGVO). Buchungs- und Rechnungsdaten, die gesetzlichen Aufbewahrungspflichten unterliegen, werden anonymisiert aufbewahrt.",
+      "cta": "Konto endgültig löschen",
+      "confirmTitle": "Konto wirklich löschen?",
+      "confirmBody": "Diese Aktion kann nicht rückgängig gemacht werden.\n\nDein Profil, deine Punkte und dein Guthaben werden dauerhaft gelöscht. Abgeschlossene Buchungen und Belege bleiben aus steuerrechtlichen Gründen anonymisiert erhalten (§ 147 AO).",
+      "confirmLabel": "Tippe {{word}} zur Bestätigung:",
+      "confirmWord": "LÖSCHEN",
+      "confirmCta": "Endgültig löschen",
+      "cancel": "Abbrechen",
+      "successTitle": "Konto gelöscht",
+      "successBody": "Dein Konto und deine persönlichen Daten wurden gelöscht.",
+      "error": "Löschung fehlgeschlagen – bitte versuche es erneut oder kontaktiere uns."
     },
     "toast": {
       "errorTitle": "Fehler",
@@ -34,6 +43,16 @@
       "usernameTaken": "Dieser Username ist bereits vergeben.",
       "profileSaved": "Dein Profil wurde aktualisiert.",
       "profileSaveFailed": "Konnte Profil nicht speichern."
+    },
+    "pushMarketing": {
+      "title": "Marketing-Push-Nachrichten",
+      "description": "Neuigkeiten, Aktionen und Angebote als Push-Nachricht erhalten (optional). Buchungs- und Bestellbenachrichtigungen sind davon nicht betroffen."
+    },
+    "dataExport": {
+      "title": "Datenexport",
+      "description": "Lade eine Kopie deiner bei uns gespeicherten Daten als JSON herunter (Art. 15/20 DSGVO).",
+      "cta": "Daten exportieren",
+      "success": "Export erstellt — Download gestartet."
     }
   },
   "orders": {

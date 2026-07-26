@@ -159,10 +159,14 @@ async function handleSendBroadcast(supabase: SupabaseClientAny, body: BroadcastR
 
   const broadcastId = broadcast.id;
 
-  // Create notification entries for each user
+  // Create notification entries for each user. Admin broadcasts are marketing
+  // by default (REQ-D09): the notify_push trigger only pushes them to users
+  // with push_marketing_opt_in; the in-app notification is always created.
+  const category = body.category === "transactional" ? "transactional" : "marketing";
   const notifications = targetUserIds.map((userId) => ({
     user_id: userId,
     type: "admin_broadcast",
+    category,
     title: body.title,
     message: body.message,
     cta_url: body.cta_url || null,

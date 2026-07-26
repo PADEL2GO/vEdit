@@ -1,19 +1,112 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { z } from "zod";
-import { Mail, Lock, Loader2, Save, MailCheck, Trash2 } from "lucide-react";
+import { Mail, Lock, Loader2, Save, MailCheck, Trash2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const emailSchema = z.string().email();
 
 export function AccountSecurityTab() {
   const { t } = useTranslation("account");
-  const { user, updateEmail, updatePassword } = useAuth();
+  const { user, updateEmail, updatePassword, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  // Marketing push opt-in (default off; own-row profiles update)
+  const [pushMarketingOptIn, setPushMarketingOptIn] = useState(false);
+  const [pushSaving, setPushSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("push_marketing_opt_in")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setPushMarketingOptIn(((data as any).push_marketing_opt_in) === true);
+      });
+  }, [user]);
+
+  const handlePushMarketingChange = async (checked: boolean) => {
+    if (!user) return;
+    setPushSaving(true);
+    const prev = pushMarketingOptIn;
+    setPushMarketingOptIn(checked);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ push_marketing_opt_in: checked } as any)
+      .eq("user_id", user.id);
+    setPushSaving(false);
+    if (error) {
+      setPushMarketingOptIn(prev);
+      toast.error(t("security.toast.errorTitle"), { description: t("security.toast.genericError") });
+    }
+  };
+
+  // Data export (Art. 15/20 DSGVO)
+  const [exporting, setExporting] = useState(false);
+
+  const handleDataExport = async () => {
+    setExporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("export-my-data", { body: {} });
+      if (error || (data as { error?: string } | null)?.error) {
+        throw new Error((data as { error?: string } | null)?.error ?? error?.message);
+      }
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `padel2go-datenexport-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(t("page.dataExport.success"));
+    } catch (err) {
+      console.error("[AccountSecurity] export-my-data", err);
+      toast.error(t("security.toast.errorTitle"), { description: t("security.toast.genericError") });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // Account deletion (two-step, DSGVO Art. 17 / Apple 5.1.1(v))
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText.trim().toUpperCase() !== t("page.delete.confirmWord").toUpperCase()) return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account", { body: {} });
+      if (error || (data as { error?: string } | null)?.error) {
+        throw new Error((data as { error?: string } | null)?.error ?? error?.message);
+      }
+      toast.success(t("page.delete.successTitle"), { description: t("page.delete.successBody") });
+      await signOut();
+      navigate("/", { replace: true });
+    } catch (err) {
+      console.error("[AccountSecurity] delete-account", err);
+      toast.error(t("security.toast.errorTitle"), { description: t("page.delete.error") });
+      setDeleting(false);
+    }
+  };
 
   // Email change
   const [newEmail, setNewEmail] = useState("");
@@ -241,6 +334,35 @@ export function AccountSecurityTab() {
         </form>
       </motion.div>
 
+      {/* Marketing push opt-in (REQ-D09, § 7 UWG: strictly opt-in, default off) */}
+      <div className="rounded-xl border border-border p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="font-medium text-sm">{t("page.pushMarketing.title")}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("page.pushMarketing.description")}</p>
+          </div>
+          <Switch
+            checked={pushMarketingOptIn}
+            disabled={pushSaving}
+            onCheckedChange={handlePushMarketingChange}
+          />
+        </div>
+      </div>
+
+      {/* Data export (Art. 15/20 DSGVO) */}
+      <div className="rounded-xl border border-border p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="font-medium text-sm">{t("page.dataExport.title")}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t("page.dataExport.description")}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleDataExport} disabled={exporting}>
+            {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
+            {t("page.dataExport.cta")}
+          </Button>
+        </div>
+      </div>
+
       {/* Account deletion — moved from the Profile tab. DSGVO Art. 17. */}
       <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
         <div className="flex items-start gap-3">
@@ -248,15 +370,53 @@ export function AccountSecurityTab() {
           <div className="flex-1">
             <p className="font-medium text-sm text-destructive">{t("page.delete.title")}</p>
             <p className="text-xs text-muted-foreground mt-1">{t("page.delete.description")}</p>
-            <a
-              href={`mailto:contact@padel2go.eu?subject=Kontol%C3%B6schung&body=Bitte%20l%C3%B6sche%20mein%20Konto%20mit%20der%20E-Mail-Adresse%3A%20${encodeURIComponent(user?.email ?? "")}`}
-              className="inline-flex items-center gap-1.5 mt-3 text-xs font-medium text-destructive hover:underline"
+            <Button
+              variant="destructive"
+              size="sm"
+              className="mt-3"
+              onClick={() => { setDeleteConfirmText(""); setDeleteOpen(true); }}
             >
+              <Trash2 className="w-3.5 h-3.5 mr-1.5" />
               {t("page.delete.cta")}
-            </a>
+            </Button>
           </div>
         </div>
       </div>
+
+      <Dialog open={deleteOpen} onOpenChange={(open) => !deleting && setDeleteOpen(open)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">{t("page.delete.confirmTitle")}</DialogTitle>
+            <DialogDescription className="whitespace-pre-line">
+              {t("page.delete.confirmBody")}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="delete-confirm">{t("page.delete.confirmLabel", { word: t("page.delete.confirmWord") })}</Label>
+            <Input
+              id="delete-confirm"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder={t("page.delete.confirmWord")}
+              disabled={deleting}
+              autoComplete="off"
+            />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleting}>
+              {t("page.delete.cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAccount}
+              disabled={deleting || deleteConfirmText.trim().toUpperCase() !== t("page.delete.confirmWord").toUpperCase()}
+            >
+              {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              {t("page.delete.confirmCta")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

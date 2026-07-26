@@ -127,6 +127,13 @@ serve(async (req) => {
       throw new Error(`Booking is not awaiting payment. Status: ${booking.status}`);
     }
 
+    // Never sell a slot that already started (REQ-G06; opening hours themselves
+    // are enforced by the enforce_booking_window trigger at INSERT time).
+    if (new Date(booking.start_time).getTime() < Date.now() - 15 * 60 * 1000) {
+      logStep("Booking start in the past", { booking_id, start_time: booking.start_time });
+      throw new Error("Der gebuchte Zeitraum liegt in der Vergangenheit");
+    }
+
     // Hold limit: max 3 active unpaid holds per authenticated user.
     // Guests are exempt — each guest booking is a one-off transaction.
     if (!isGuestBooking && user) {

@@ -59,8 +59,34 @@
     "legalText": "Art. 6 (1) (b) GDPR.",
     "privacyLinkLabel": "Resend privacy policy:"
   },
+  "push": {
+    "heading": "7. Push Notifications (App)",
+    "p1": "For the PADEL2GO app we send push notifications via Expo (Expo, Inc., USA) and the push services of Apple (APNs) and Google (FCM). For this purpose we store a pseudonymous device token.",
+    "p2": "Transactional notifications (e.g. booking confirmations, match reminders) are sent to perform the contract. You will only receive marketing notifications with your consent (opt-in in your account under “Security”); you can withdraw this consent there at any time.",
+    "legalLabel": "Legal basis:",
+    "legalText": "Art. 6 (1) (b) GDPR (transactional notifications); Art. 6 (1) (a) GDPR (marketing notifications, consent)."
+  },
+  "community": {
+    "heading": "8. Community, Matchmaking & Skill Level",
+    "p1": "If you use community features (profile, lobbies, chat, friendships, player matching), we process the content you share there as well as your match results. Your skill level is calculated automatically from your recent match results and used for player matching and points calculation.",
+    "p2": "Your profile can be accessed by others under your username.",
+    "legalLabel": "Legal basis:",
+    "legalText": "Art. 6 (1) (b) GDPR (provision of the community features)."
+  },
+  "cameras": {
+    "heading": "9. Match Recording & Camera Systems",
+    "p1": "Camera systems for game analysis (e.g. match recording, match score) may be used at selected locations. Recordings are made exclusively with the prior consent of the players involved. Details on scope, retention and withdrawal are provided at the respective location and in the app before activation; no biometric identification takes place.",
+    "legalLabel": "Legal basis:",
+    "legalText": "Art. 6 (1) (a) GDPR (consent)."
+  },
+  "thirdcountry": {
+    "heading": "10. Data Transfers to Third Countries",
+    "p1": "Some service providers process data in the USA (in particular Stripe and Expo). Transfers are based on an adequacy decision (EU-U.S. Data Privacy Framework) or the EU Standard Contractual Clauses (Art. 46 GDPR).",
+    "legalLabel": "Legal basis:",
+    "legalText": "Art. 44 et seq. GDPR."
+  },
   "cookies": {
-    "heading": "7. Cookies & Local Storage",
+    "heading": "11. Cookies & Local Storage",
     "p1": "We use only technically necessary cookies and local storage mechanisms (localStorage). These are required to operate the platform and cannot be disabled without significantly impairing the functionality of the website.",
     "sessionLabel": "Session cookie (Supabase Auth):",
     "sessionText": "Stores your login so you stay signed in. It is deleted when you log out.",
@@ -69,12 +95,12 @@
     "legalText": "Art. 6 (1) (f) GDPR (legitimate interest in the secure operation of the platform)."
   },
   "retention": {
-    "heading": "8. Retention Period",
+    "heading": "12. Retention Period",
     "p1": "Personal data is deleted as soon as it is no longer required for the purpose for which it was collected. Booking data is retained for the legally required period (in Germany: 10 years) for tax reasons.",
     "p2": "User data (profile, rewards history) is deleted within 30 days of account deletion, provided no statutory retention obligations apply."
   },
   "rights": {
-    "heading": "9. Your Rights as a Data Subject",
+    "heading": "13. Your Rights as a Data Subject",
     "intro": "You have the following rights vis-à-vis PADEL2GO regarding your personal data:",
     "list": [
       {
@@ -109,7 +135,7 @@
     "contactBefore": "To exercise your rights please contact:"
   },
   "security": {
-    "heading": "10. Data Security",
+    "heading": "14. Data Security",
     "p1": "We implement technical and organisational measures to protect your data against unauthorised access, loss or manipulation. These include:",
     "list": [
       "Encrypted data transmission (TLS/HTTPS)",
@@ -119,7 +145,7 @@
     ]
   },
   "changes": {
-    "heading": "11. Changes to this Privacy Policy",
+    "heading": "15. Changes to this Privacy Policy",
     "p1": "We reserve the right to adapt this privacy policy to reflect changes in the law or in our services. The current version is always available on this page. We will notify registered users by email of material changes."
   },
   "footer": "As of: July 2026 · PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 München, Germany",

@@ -59,8 +59,34 @@
     "legalText": "Art. 6 Abs. 1 lit. b DSGVO.",
     "privacyLinkLabel": "Datenschutzerklärung Resend:"
   },
+  "push": {
+    "heading": "7. Push-Benachrichtigungen (App)",
+    "p1": "Für die PADEL2GO App versenden wir Push-Benachrichtigungen über den Dienst Expo (Expo, Inc., USA) bzw. die Push-Dienste von Apple (APNs) und Google (FCM). Dazu speichern wir einen pseudonymen Geräte-Token.",
+    "p2": "Transaktionale Benachrichtigungen (z. B. Buchungsbestätigungen, Spielerinnerungen) versenden wir zur Vertragserfüllung. Marketing-Benachrichtigungen erhalten Sie nur mit Ihrer Einwilligung (Opt-in im Konto unter „Sicherheit“); die Einwilligung können Sie dort jederzeit widerrufen.",
+    "legalLabel": "Rechtsgrundlage:",
+    "legalText": "Art. 6 Abs. 1 lit. b DSGVO (transaktionale Benachrichtigungen); Art. 6 Abs. 1 lit. a DSGVO (Marketing-Benachrichtigungen, Einwilligung)."
+  },
+  "community": {
+    "heading": "8. Community, Matchmaking & Skill-Level",
+    "p1": "Wenn Sie Community-Funktionen nutzen (Profil, Lobbies, Chat, Freundschaften, Spielersuche), verarbeiten wir die von Ihnen dort geteilten Inhalte sowie Ihre Match-Ergebnisse. Ihr Skill-Level wird automatisiert aus Ihren letzten Match-Ergebnissen berechnet und für die Spielersuche sowie die Punkteberechnung verwendet.",
+    "p2": "Ihr Profil ist unter Ihrem Nutzernamen für andere abrufbar.",
+    "legalLabel": "Rechtsgrundlage:",
+    "legalText": "Art. 6 Abs. 1 lit. b DSGVO (Bereitstellung der Community-Funktionen)."
+  },
+  "cameras": {
+    "heading": "9. Match-Aufzeichnung & Kamerasysteme",
+    "p1": "An ausgewählten Standorten können Kamerasysteme zur Spielanalyse (z. B. Match-Aufzeichnung, Match-Score) eingesetzt werden. Aufzeichnungen erfolgen ausschließlich nach vorheriger Einwilligung der beteiligten Spielerinnen und Spieler. Details zu Umfang, Speicherdauer und Widerruf stellen wir vor der Aktivierung am jeweiligen Standort und in der App bereit; eine biometrische Identifizierung findet nicht statt.",
+    "legalLabel": "Rechtsgrundlage:",
+    "legalText": "Art. 6 Abs. 1 lit. a DSGVO (Einwilligung)."
+  },
+  "thirdcountry": {
+    "heading": "10. Datenübermittlung in Drittländer",
+    "p1": "Einzelne Dienstleister verarbeiten Daten in den USA (insbesondere Stripe und Expo). Die Übermittlung erfolgt auf Grundlage eines Angemessenheitsbeschlusses (EU-U.S. Data Privacy Framework) bzw. der EU-Standardvertragsklauseln (Art. 46 DSGVO).",
+    "legalLabel": "Rechtsgrundlage:",
+    "legalText": "Art. 44 ff. DSGVO."
+  },
   "cookies": {
-    "heading": "7. Cookies & lokale Speicherung",
+    "heading": "11. Cookies & lokale Speicherung",
     "p1": "Wir verwenden ausschließlich technisch notwendige Cookies und lokale Speichermechanismen (localStorage). Diese sind für den Betrieb der Plattform erforderlich und können nicht deaktiviert werden, ohne die Funktionalität der Website erheblich einzuschränken.",
     "sessionLabel": "Session-Cookie (Supabase Auth):",
     "sessionText": "Speichert Ihre Anmeldung, damit Sie angemeldet bleiben. Wird beim Ausloggen gelöscht.",
@@ -69,12 +95,12 @@
     "legalText": "Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb der Plattform)."
   },
   "retention": {
-    "heading": "8. Speicherdauer",
+    "heading": "12. Speicherdauer",
     "p1": "Personenbezogene Daten werden gelöscht, sobald sie für den Zweck ihrer Erhebung nicht mehr erforderlich sind. Buchungsdaten werden aus steuerrechtlichen Gründen für die gesetzlich vorgeschriebene Dauer (in Deutschland: 10 Jahre) aufbewahrt.",
     "p2": "Nutzerdaten (Profil, Rewards-History) werden nach Kontolöschung innerhalb von 30 Tagen gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen."
   },
   "rights": {
-    "heading": "9. Ihre Rechte als betroffene Person",
+    "heading": "13. Ihre Rechte als betroffene Person",
     "intro": "Sie haben gegenüber PADEL2GO folgende Rechte bezüglich Ihrer personenbezogenen Daten:",
     "list": [
       {
@@ -109,7 +135,7 @@
     "contactBefore": "Zur Ausübung Ihrer Rechte wenden Sie sich bitte an:"
   },
   "security": {
-    "heading": "10. Datensicherheit",
+    "heading": "14. Datensicherheit",
     "p1": "Wir treffen technische und organisatorische Maßnahmen, um Ihre Daten vor unbefugtem Zugriff, Verlust oder Manipulation zu schützen. Dazu gehören:",
     "list": [
       "Verschlüsselte Datenübertragung (TLS/HTTPS)",
@@ -119,7 +145,7 @@
     ]
   },
   "changes": {
-    "heading": "11. Änderungen dieser Datenschutzerklärung",
+    "heading": "15. Änderungen dieser Datenschutzerklärung",
     "p1": "Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an geänderte Rechtslagen oder Änderungen unserer Dienste anzupassen. Die jeweils aktuelle Version ist auf dieser Seite abrufbar. Bei wesentlichen Änderungen informieren wir registrierte Nutzer per E-Mail."
   },
   "footer": "Stand: Juli 2026 · PADEL2GO UG (haftungsbeschränkt), Am Neudeck 10, 81541 München",

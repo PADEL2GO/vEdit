@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@4.0.0";
 import { encodeBase64 } from "https://deno.land/std@0.190.0/encoding/base64.ts";
 import { DEFAULT_FROM, REPLY_TO_EMAIL } from "../_shared/email.ts";
+import { AGB_ATTACHMENT } from "../_shared/agb-text.ts";
 
 // Resend is initialized lazily inside the handler so we can fall back to DB config
 
@@ -415,6 +416,7 @@ serve(async (req) => {
           content: encodeBase64(icsContent),
           contentType: "text/calendar",
         },
+        AGB_ATTACHMENT,
       ],
     });
 
