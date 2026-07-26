@@ -218,7 +218,7 @@ serve(async (req) => {
 
             const { data: order, error: orderReadError } = await supabaseAdmin
               .from("marketplace_redemptions")
-              .select("user_id, item_id, quantity, play_spent, reward_spent, amount_cents, gross_cents, discount_cents, tax_rate, reference_code, guest_email, guest_name, shipping_address_line1, shipping_postal_code, shipping_city, shipping_country, fulfillment_notified_at")
+              .select("user_id, item_id, quantity, play_spent, reward_spent, amount_cents, reference_code, guest_email, guest_name, shipping_address_line1, shipping_postal_code, shipping_city, shipping_country, fulfillment_notified_at")
               .eq("id", redemptionId)
               .single();
 
@@ -245,7 +245,22 @@ serve(async (req) => {
             }
 
             // GoBD: sequential receipt for the settled order (idempotent per source).
+            // Snapshot columns are read in a SEPARATE query so a pending migration
+            // can never break the settle/fulfillment path (fallback: amount only).
             if (settled === true) {
+              let grossCents = order.amount_cents ?? 0;
+              let discountCents = 0;
+              let taxRate = 19;
+              const { data: snapshot } = await supabaseAdmin
+                .from("marketplace_redemptions")
+                .select("gross_cents, discount_cents, tax_rate")
+                .eq("id", redemptionId)
+                .maybeSingle();
+              if (snapshot) {
+                grossCents = (snapshot as any).gross_cents ?? grossCents;
+                discountCents = (snapshot as any).discount_cents ?? 0;
+                taxRate = Number((snapshot as any).tax_rate ?? 19);
+              }
               const { error: receiptError } = await supabaseAdmin.rpc("create_receipt", {
                 p_receipt_type: "marketplace_order",
                 p_source_id: redemptionId,
@@ -253,10 +268,10 @@ serve(async (req) => {
                 p_recipient_email: order.guest_email ?? null,
                 p_recipient_name: order.guest_name ?? null,
                 p_description: `${item?.name ?? "Artikel"} × ${order.quantity ?? 1} (${order.reference_code ?? redemptionId})`,
-                p_gross_cents: (order as any).gross_cents ?? order.amount_cents ?? 0,
-                p_discount_cents: (order as any).discount_cents ?? 0,
+                p_gross_cents: grossCents,
+                p_discount_cents: discountCents,
                 p_paid_cents: order.amount_cents ?? 0,
-                p_tax_rate: Number((order as any).tax_rate ?? 19),
+                p_tax_rate: taxRate,
               });
               if (receiptError) logStep("Marketplace: receipt creation failed", { redemptionId, error: receiptError.message });
             }

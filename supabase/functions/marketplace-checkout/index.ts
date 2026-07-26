@@ -320,7 +320,7 @@ serve(async (req) => {
     if (user && remainderCents <= 0) {
       const { data: flipped } = await supabaseAdmin
         .from("marketplace_redemptions")
-        .update({ status: "success", discount_cents: priceCents, tax_cents: 0 })
+        .update({ status: "success" })
         .eq("id", orderId)
         .eq("status", "pending")
         .select("id");
@@ -328,6 +328,14 @@ serve(async (req) => {
       if (!flipped || flipped.length === 0) {
         logStep("Free path: order no longer pending", { orderId });
       }
+
+      // Economic snapshot in a SEPARATE update: must never block the status flip
+      // (columns only exist once the July-2026 compliance migrations ran).
+      const { error: snapshotError } = await supabaseAdmin
+        .from("marketplace_redemptions")
+        .update({ discount_cents: priceCents, tax_cents: 0 })
+        .eq("id", orderId);
+      if (snapshotError) logStep("Free path: snapshot update failed (migration pending?)", { error: snapshotError.message });
 
       // GoBD: every completed order gets a sequential receipt — €0.00 orders too
       // (full points coverage = Entgeltminderung to zero, no VAT).
@@ -497,19 +505,25 @@ serve(async (req) => {
     }
 
     // Persist the session id (webhook idempotency key) + the actual charged amount.
-    // discount_cents reflects the discount actually delivered (the 50c floor can
-    // shrink it); tax on the amount actually paid (Entgeltminderung, § 17 UStG).
-    const mpTaxRate = Number((item as any).tax_rate ?? 19);
     const { error: persistError } = await supabaseAdmin
       .from("marketplace_redemptions")
+      .update({ stripe_session_id: session.id, amount_cents: chargeCents })
+      .eq("id", orderId);
+    if (persistError) logStep("Failed to persist stripe_session_id", { error: persistError.message });
+
+    // Economic snapshot in a SEPARATE, non-fatal update: discount_cents is the
+    // discount actually delivered (the 50c floor can shrink it), tax on the amount
+    // actually paid (Entgeltminderung, § 17 UStG). Columns exist only after the
+    // July-2026 compliance migrations.
+    const mpTaxRate = Number((item as any).tax_rate ?? 19);
+    const { error: snapshotError } = await supabaseAdmin
+      .from("marketplace_redemptions")
       .update({
-        stripe_session_id: session.id,
-        amount_cents: chargeCents,
         discount_cents: Math.max(0, priceCents - chargeCents),
         tax_cents: Math.round(chargeCents - chargeCents / (1 + mpTaxRate / 100)),
       })
       .eq("id", orderId);
-    if (persistError) logStep("Failed to persist stripe_session_id", { error: persistError.message });
+    if (snapshotError) logStep("Snapshot update failed (migration pending?)", { error: snapshotError.message });
 
     logStep("Checkout session created", { orderId, sessionId: session.id });
     return json({ url: session.url }, 200);

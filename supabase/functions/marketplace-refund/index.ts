@@ -127,11 +127,17 @@ Deno.serve(async (req) => {
     }
 
     // ── Reverse the DB side (stock + points + status + refund record). Idempotent. ──
-    const { data: refunded, error: rpcErr } = await supabaseAdmin.rpc("refund_marketplace_order", {
+    let { data: refunded, error: rpcErr } = await supabaseAdmin.rpc("refund_marketplace_order", {
       p_order_id: orderId,
       p_refund_amount_cents: refundAmountCents,
       p_stripe_refund_id: stripeRefundId,
     });
+    if (rpcErr && /does not exist|PGRST202/i.test(rpcErr.message ?? "")) {
+      // Pre-migration DB still has the single-arg signature — degrade gracefully.
+      ({ data: refunded, error: rpcErr } = await supabaseAdmin.rpc("refund_marketplace_order", {
+        p_order_id: orderId,
+      }));
+    }
     if (rpcErr) {
       return json({ error: "Rückabwicklung in der Datenbank fehlgeschlagen: " + rpcErr.message }, 500);
     }
