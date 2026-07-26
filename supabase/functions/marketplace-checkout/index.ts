@@ -344,7 +344,9 @@ serve(async (req) => {
       });
       if (ledgerError) logStep("Free path: ledger insert failed", { error: ledgerError.message });
 
-      if (item.product_type === "purchase") {
+      // Admin order alert for EVERY product type (previously physical-only, which left
+      // digital/rental orders invisible until someone opened the admin queue).
+      {
         try {
           const resendApiKey = await resolveResendKey(supabaseAdmin);
           if (resendApiKey) {
@@ -354,7 +356,9 @@ serve(async (req) => {
               .eq("user_id", user.id)
               .single();
             const displayName = userProfile?.display_name || userProfile?.username || "Unbekannt";
-            const formattedAddress = `${shipping!.address_line1}\n${shipping!.postal_code} ${shipping!.city}\n${shipping!.country || "Deutschland"}`;
+            const formattedAddress = item.product_type === "purchase"
+              ? `${shipping!.address_line1}\n${shipping!.postal_code} ${shipping!.city}\n${shipping!.country || "Deutschland"}`
+              : "— (kein Versand nötig)";
             const resend = new Resend(resendApiKey);
             await resend.emails.send({
               from: DEFAULT_FROM,

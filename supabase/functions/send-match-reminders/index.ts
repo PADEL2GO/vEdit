@@ -64,6 +64,24 @@ serve(async (req) => {
       const court = (Array.isArray(b.courts) ? b.courts[0] : b.courts) as { name: string };
       const location = (Array.isArray(b.locations) ? b.locations[0] : b.locations) as { name: string };
 
+      // Respect the user's booking-reminder opt-out (profiles.booking_reminder_opt_out,
+      // set via the app's "Buchungserinnerung" toggle). Guests have no profile — always
+      // reminded. Column missing (migration not applied yet) -> select errors -> data null
+      // -> treated as opted-in, so this is safe to deploy in any order.
+      let remindersOff = false;
+      if (b.user_id) {
+        const { data: pref } = await supabase
+          .from("profiles")
+          .select("booking_reminder_opt_out")
+          .eq("user_id", b.user_id)
+          .maybeSingle();
+        remindersOff = (pref as { booking_reminder_opt_out?: boolean } | null)?.booking_reminder_opt_out === true;
+      }
+      if (remindersOff) {
+        logStep("Reminder skipped (user opted out)", { bookingId: b.id });
+        continue;
+      }
+
       // In-app notification (authenticated users only).
       if (b.user_id) {
         const { error } = await supabase.from("notifications").insert({

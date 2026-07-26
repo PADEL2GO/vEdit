@@ -285,10 +285,11 @@ serve(async (req) => {
             // returns 500 so Stripe re-delivers and this block retries until it lands.
             // Atomically CLAIM the fulfillment notification (flip fulfillment_notified_at from
             // NULL to now) so two concurrent duplicate webhook deliveries cannot both email the
-            // admin (a double physical-ship signal). Only the instance that wins the flip sends;
-            // the claim is released back to NULL if the send cannot complete, so it still retries.
+            // admin. Sent for EVERY product type (admin order alert); for physical products it
+            // doubles as the ship signal. Only the instance that wins the flip sends; the claim
+            // is released back to NULL if the send cannot complete, so it still retries.
             let fulfillmentClaimed = false;
-            if (item?.product_type === "purchase" && !order.fulfillment_notified_at) {
+            if (!order.fulfillment_notified_at) {
               const { data: notifyClaim } = await supabaseAdmin
                 .from("marketplace_redemptions")
                 .update({ fulfillment_notified_at: new Date().toISOString() })
@@ -318,7 +319,9 @@ serve(async (req) => {
                     customerName = profile?.display_name || profile?.username || "Unbekannt";
                   }
                   const customerEmail = session.customer_details?.email || session.customer_email || order?.guest_email || "";
-                  const formattedAddress = `${order?.shipping_address_line1 ?? ""}\n${order?.shipping_postal_code ?? ""} ${order?.shipping_city ?? ""}\n${order?.shipping_country ?? "Deutschland"}`;
+                  const formattedAddress = item?.product_type === "purchase"
+                    ? `${order?.shipping_address_line1 ?? ""}\n${order?.shipping_postal_code ?? ""} ${order?.shipping_city ?? ""}\n${order?.shipping_country ?? "Deutschland"}`
+                    : "— (kein Versand nötig)";
                   const resend = new Resend(resendApiKey);
                   await resend.emails.send({
                     from: DEFAULT_FROM,
