@@ -60,6 +60,11 @@ function PublicArticleCard({ article, index }: { article: Article; index: number
         <h3 className="text-lg md:text-xl font-bold text-foreground font-display" style={{ lineHeight: 1.3 }}>
           {localized(article, "title", i18n.language)}
         </h3>
+        {(article as { ai_generated?: boolean }).ai_generated && (
+          <span className="inline-flex w-fit items-center rounded-full border border-border bg-white/[0.04] px-2 py-0.5 text-[10.5px] font-medium text-muted-foreground">
+            {t("news.aiBadge")}
+          </span>
+        )}
         {article.excerpt && (
           <p className="text-sm text-muted-foreground line-clamp-3" style={{ textWrap: "pretty" }}>
             {localized(article, "excerpt", i18n.language)}

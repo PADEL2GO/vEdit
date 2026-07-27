@@ -50,5 +50,8 @@
     },
     "copyrightSuffix": "All rights reserved.",
     "madeWith": "Made with ❤️ in Germany"
+  },
+  "news": {
+    "aiBadge": "AI-assisted content"
   }
 }

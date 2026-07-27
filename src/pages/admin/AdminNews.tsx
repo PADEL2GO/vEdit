@@ -20,8 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Newspaper, Image as ImageIcon, Loader2, Languages } from "lucide-react";
+import { Plus, Pencil, Trash2, Newspaper, Image as ImageIcon, Loader2, Languages, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { ArticleEditor } from "@/components/admin/news/ArticleEditor";
@@ -67,6 +68,39 @@ export default function AdminNews() {
   const queryClient = useQueryClient();
   const { t } = useTranslation("common");
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
+  const [genUrls, setGenUrls] = useState<string[]>(["", "", ""]);
+  const [generating, setGenerating] = useState(false);
+
+  const runGenerator = async () => {
+    const urls = genUrls.map((u) => u.trim()).filter(Boolean);
+    if (!urls.length) return;
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-news-from-urls", { body: { urls } });
+      if (error || (data as { error?: string } | null)?.error) {
+        throw new Error((data as { error?: string } | null)?.error ?? error?.message);
+      }
+      const results = ((data as { results?: Array<{ url: string; ok: boolean; title?: string; error?: string; translated?: boolean }> })?.results) ?? [];
+      const okCount = results.filter((r) => r.ok).length;
+      const failed = results.filter((r) => !r.ok);
+      if (okCount > 0) {
+        toast.success(`${okCount} Artikel als Entwurf erstellt`, {
+          description: "Jetzt Titelbild hinterlegen und veröffentlichen.",
+        });
+      }
+      for (const f of failed) {
+        toast.error(`Fehlgeschlagen: ${f.url}`, { description: f.error });
+      }
+      if (okCount > 0) {
+        setGenUrls(["", "", ""]);
+        invalidateArticles();
+      }
+    } catch (err) {
+      toast.error("Generator fehlgeschlagen", { description: (err as Error).message });
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const invalidateArticles = () => {
     queryClient.invalidateQueries({ queryKey: ["admin-articles"] });
@@ -199,6 +233,43 @@ export default function AdminNews() {
             </Button>
           </div>
         </div>
+
+        {/* Wochen-News-Generator: 3 Quell-URLs → 3 KI-Entwürfe (DE + EN) */}
+        <Card className="p-5 border-primary/30">
+          <div className="flex items-start gap-3 mb-4">
+            <Sparkles className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <div>
+              <h2 className="font-bold">Wochen-News-Generator (KI)</h2>
+              <p className="text-sm text-muted-foreground">
+                Bis zu 3 URLs aus der Padel-Presse einfügen — pro URL entsteht ein eigenständig
+                formulierter Artikel als <strong>Entwurf</strong> (DE + automatische EN-Übersetzung,
+                mit KI-Kennzeichnung und Quellenlink). Danach: Titelbild hinterlegen und veröffentlichen.
+              </p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {genUrls.map((url, idx) => (
+              <Input
+                key={idx}
+                value={url}
+                onChange={(e) => setGenUrls((prev) => prev.map((u, i) => (i === idx ? e.target.value : u)))}
+                placeholder={`https://… (Quelle ${idx + 1}${idx > 0 ? " – optional" : ""})`}
+                disabled={generating}
+              />
+            ))}
+          </div>
+          <Button className="mt-3" onClick={runGenerator} disabled={generating || !genUrls.some((u) => u.trim())}>
+            {generating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Artikel werden generiert…
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 mr-2" /> Artikel generieren
+              </>
+            )}
+          </Button>
+        </Card>
 
         {isLoading ? (
           <p className="text-muted-foreground">Laden…</p>

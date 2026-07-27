@@ -36,6 +36,9 @@ verify_jwt = true
 [functions.export-my-data]
 verify_jwt = true
 
+[functions.generate-news-from-urls]
+verify_jwt = true
+
 [functions.send-event-confirmation]
 verify_jwt = true
 
