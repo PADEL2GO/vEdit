@@ -35,7 +35,10 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 };
 
 serve(async (req) => {
-  const origin = req.headers.get("origin");
+  // Native app calls (React Native fetch) send no Origin header — fall back to the
+  // public site so success/cancel URLs always resolve (the app polls booking/order
+  // status itself and shows its own confirmation).
+  const origin = req.headers.get("origin") ?? "https://www.padel2go-official.de";
   const corsHeaders = getCorsHeaders(origin);
 
   if (req.method === "OPTIONS") {
