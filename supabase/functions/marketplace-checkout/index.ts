@@ -457,6 +457,16 @@ serve(async (req) => {
         .single();
       stripeKey = (ic?.config as Record<string, string>)?.secret_key;
     }
+    // TEST MODE: allowlisted tester accounts pay against Stripe TEST mode (sandbox cards).
+    {
+      const testKey = Deno.env.get("STRIPE_TEST_SECRET_KEY");
+      const testEmails = (Deno.env.get("STRIPE_TEST_USER_EMAILS") ?? "")
+        .split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+      if (testKey && user?.email && testEmails.includes(user.email.toLowerCase())) {
+        stripeKey = testKey;
+        logStep("TEST MODE checkout (sandbox key)", { email: user.email });
+      }
+    }
     if (!stripeKey) {
       logStep("Stripe key missing — rolling back");
       await releaseOrder();

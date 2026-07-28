@@ -50,7 +50,7 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not configured");
     if (!webhookSecret) throw new Error("STRIPE_WEBHOOK_SECRET is not configured");
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    let stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
 
     const signature = req.headers.get("stripe-signature");
     if (!signature) throw new Error("No Stripe signature found");
@@ -61,11 +61,27 @@ serve(async (req) => {
     try {
       event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
     } catch (err) {
-      logStep("Webhook signature verification failed", { error: (err as Error).message });
-      return new Response(JSON.stringify({ error: "Invalid signature" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // TEST MODE events (sandbox checkouts by allowlisted testers) are signed with the
+      // test webhook secret — retry with it and switch the API client to the test key so
+      // follow-up calls (refunds etc.) hit the matching Stripe mode.
+      const testKey = Deno.env.get("STRIPE_TEST_SECRET_KEY");
+      const testSecret = Deno.env.get("STRIPE_TEST_WEBHOOK_SECRET");
+      let verified = false;
+      if (testKey && testSecret) {
+        try {
+          event = await stripe.webhooks.constructEventAsync(body, signature, testSecret);
+          stripe = new Stripe(testKey, { apiVersion: "2025-08-27.basil" });
+          verified = true;
+          logStep("TEST MODE event verified (sandbox)");
+        } catch { /* fall through to 400 below */ }
+      }
+      if (!verified) {
+        logStep("Webhook signature verification failed", { error: (err as Error).message });
+        return new Response(JSON.stringify({ error: "Invalid signature" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     logStep("Event verified", { type: event.type, id: event.id });

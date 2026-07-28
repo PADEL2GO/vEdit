@@ -74,6 +74,18 @@ serve(async (req) => {
     }
     logStep("Auth resolved", { userId: user?.id ?? "guest" });
 
+    // TEST MODE: allowlisted tester accounts check out against Stripe TEST mode
+    // (sandbox cards like 4242 4242 4242 4242) — everyone else stays on the live key.
+    {
+      const testKey = Deno.env.get("STRIPE_TEST_SECRET_KEY");
+      const testEmails = (Deno.env.get("STRIPE_TEST_USER_EMAILS") ?? "")
+        .split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+      if (testKey && user?.email && testEmails.includes(user.email.toLowerCase())) {
+        stripeKey = testKey;
+        logStep("TEST MODE checkout (sandbox key)", { email: user.email });
+      }
+    }
+
     const body = await req.json();
     const { booking_id, voucher_id } = body;
     // Court bookings are MONEY-ONLY: P2G points are never redeemable for court
