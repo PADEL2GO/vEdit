@@ -136,7 +136,7 @@ const DashboardEvents = () => {
               Mein P2G
             </span>
             <h1 className="font-display font-extrabold tracking-tight text-[clamp(30px,4.6vw,48px)] leading-[1.08]">
-              Event <span className="text-gradient-lime">Booking.</span>
+              Event <span className="text-gradient-acc">Booking.</span>
             </h1>
             <p className="max-w-[520px] text-base leading-relaxed text-muted-foreground">
               Spot sichern, Ticket in der Tasche, auf dem Court sehen wir uns. Storno bis 48 h vorher kostenlos.

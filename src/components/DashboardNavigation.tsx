@@ -19,6 +19,7 @@ import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useClubAuth } from "@/hooks/useClubAuth";
 import { useChatRealtime } from "@/hooks/useChat";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
+import { useSectionThemes } from "@/hooks/useSectionThemes";
 import { useAccountData } from "@/hooks/useAccountData";
 import { usePointsValue } from "@/hooks/usePointsValue";
 import wordmark from "@/assets/padel2go-wordmark.png";
@@ -31,6 +32,7 @@ const DashboardNavigation = () => {
   const { isAdmin } = useAdminAuth();
   const { isClubUser } = useClubAuth();
   const { canSee } = useFeatureToggles();
+  const sectionThemes = useSectionThemes();
   const { wallet, profile } = useAccountData(user);
   const { centsPerPoint } = usePointsValue();
 
@@ -53,11 +55,11 @@ const DashboardNavigation = () => {
   // Feature-gated nav links: canSee folds in the 3-state model (visible for
   // everyone, demo for admins only), so hidden features drop out for both.
   const dashboardItems = [
-    { name: t("nav.meinP2G"), url: "/dashboard/home", show: true },
-    { name: t("nav.booking"), url: "/booking", show: true },
-    { name: t("nav.marketplace"), url: "/marketplace", show: canSee("marketplace") },
-    { name: t("nav.events"), url: "/dashboard/events", show: true },
-    { name: t("nav.news"), url: "/news", show: true },
+    { name: t("nav.meinP2G"), url: "/dashboard/home", show: true, color: sectionThemes.home },
+    { name: t("nav.booking"), url: "/booking", show: true, color: sectionThemes.booking },
+    { name: t("nav.marketplace"), url: "/marketplace", show: canSee("marketplace"), color: sectionThemes.market },
+    { name: t("nav.events"), url: "/dashboard/events", show: true, color: sectionThemes.events },
+    { name: t("nav.news"), url: "/news", show: true, color: sectionThemes.news },
   ]
     .filter((item) => item.show)
     .map(({ show, ...item }) => item);

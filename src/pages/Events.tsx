@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useTranslation, Trans } from "react-i18next";
 import Navigation from "@/components/Navigation";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import Footer from "@/components/Footer";
 import SectionDivider from "@/components/SectionDivider";
 import { Button } from "@/components/ui/button";
@@ -97,6 +99,7 @@ const benefits = [
 ];
 
 const Events = () => {
+  const sectionColor = useSectionTheme("events");
   const { t, i18n } = useTranslation(["events", "common"]);
   const dateLocale = i18n.language.startsWith("en") ? enUS : de;
   const { launchDate } = useLaunchDate();
@@ -223,7 +226,9 @@ const Events = () => {
 
       <Navigation />
       
-      <main className="min-h-screen bg-background pt-20">
+      <main className="relative min-h-screen bg-background pt-20" style={sectionThemeVars(sectionColor)}>
+        <SectionShaderBackdrop color={sectionColor} />
+        <div className="relative z-[1]">
         {/* Hero Section */}
         <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-black">
           {/* Hintergrundbild */}
@@ -471,7 +476,7 @@ const Events = () => {
               </span>
               <h2 className="font-display font-extrabold text-3xl md:text-[44px] leading-[1.1] tracking-[-0.02em]">
                 {t("benefits.titlePrefix")}{" "}
-                <span className="text-gradient-lime">{t("benefits.titleHighlight")}</span>
+                <span className="text-gradient-acc">{t("benefits.titleHighlight")}</span>
               </h2>
               <p className="text-[17px] leading-relaxed text-[hsl(0_0%_65%)]">
                 {t("benefits.subtitle")}
@@ -648,6 +653,7 @@ const Events = () => {
             </div>
           </div>
         </section>
+      </div>
       </main>
 
       <Footer />

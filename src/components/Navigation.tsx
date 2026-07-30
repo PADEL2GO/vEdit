@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, User, LogOut, Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useSectionThemes } from "@/hooks/useSectionThemes";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
 import { TubelightNavBar } from "@/components/ui/tubelight-navbar";
@@ -29,13 +30,14 @@ const PublicNavigation = () => {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdminAuth();
   const { t } = useTranslation("common");
+  const sectionThemes = useSectionThemes();
 
   const navItems = [
     { label: t("nav.home"), href: "/" },
-    { label: t("nav.bookCourt"), href: "/booking" },
-    { label: t("nav.marketplace"), href: "/marketplace" },
-    { label: t("nav.events"), href: "/events" },
-    { label: t("nav.news"), href: "/news" },
+    { label: t("nav.bookCourt"), href: "/booking", color: sectionThemes.booking },
+    { label: t("nav.marketplace"), href: "/marketplace", color: sectionThemes.market },
+    { label: t("nav.events"), href: "/events", color: sectionThemes.events },
+    { label: t("nav.news"), href: "/news", color: sectionThemes.news },
     { label: t("nav.players"), href: "/fuer-spieler" },
     { label: t("nav.clubs"), href: "/fuer-vereine" },
   ];
@@ -43,6 +45,7 @@ const PublicNavigation = () => {
   const tubelightItems = navItems.map(item => ({
     name: item.label,
     url: item.href,
+    color: item.color,
   }));
 
   const handleLogout = async () => {

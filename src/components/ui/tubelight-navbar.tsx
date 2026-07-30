@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils"
 interface NavItem {
   name: string
   url: string
+  /** Section-Akzentfarbe (hex) — färbt den aktiven Zustand */
+  color?: string
 }
 
 interface TubelightNavBarProps {
@@ -51,14 +53,21 @@ export function TubelightNavBar({ items, className }: TubelightNavBarProps) {
             className={cn(
               "relative cursor-pointer text-sm font-medium px-4 py-2 rounded-full transition-colors duration-150",
               "text-muted-foreground hover:text-primary",
-              isActive && "text-primary"
+              isActive && !item.color && "text-primary"
             )}
+            style={isActive && item.color ? { color: item.color } : undefined}
           >
             <span className="relative z-10">{item.name}</span>
 
             {isActive && (
-              <span className="absolute inset-0 rounded-full bg-primary/15 -z-0 pointer-events-none">
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-[2px] bg-primary rounded-full" />
+              <span
+                className={cn("absolute inset-0 rounded-full -z-0 pointer-events-none", !item.color && "bg-primary/15")}
+                style={item.color ? { background: `${item.color}26` } : undefined}
+              >
+                <span
+                  className={cn("absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-[2px] rounded-full", !item.color && "bg-primary")}
+                  style={item.color ? { background: item.color } : undefined}
+                />
               </span>
             )}
           </Link>

@@ -33,7 +33,6 @@ type SortKey = "pop" | "asc" | "desc";
 type PriceKey = "all" | "low" | "mid" | "high";
 
 const Marketplace = () => {
-  const { user: sectionUser } = useAuth();
   const sectionColor = useSectionTheme("market");
   const { t, i18n } = useTranslation("marketplace");
   const navigate = useNavigate();
@@ -133,9 +132,9 @@ const Marketplace = () => {
 
       <main
         className="relative min-h-screen bg-background pt-[92px] pb-24"
-        style={sectionUser ? sectionThemeVars(sectionColor) : { background: "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(199,240,17,0.06), transparent), #000" }}
+        style={sectionThemeVars(sectionColor)}
       >
-        {sectionUser && <SectionShaderBackdrop color={sectionColor} />}
+        <SectionShaderBackdrop color={sectionColor} />
         <div className="relative z-[1] mx-auto max-w-[1200px] px-5 flex flex-col gap-8">
           {/* Hero */}
           <motion.div
@@ -149,7 +148,7 @@ const Marketplace = () => {
               {t("hero.badge")}
             </span>
             <h1 className="font-display font-extrabold tracking-tight text-[clamp(32px,5vw,54px)] leading-[1.08]">
-              <Trans i18nKey="marketplace:hero.title" components={{ 1: <span className="text-gradient-lime" /> }} />
+              <Trans i18nKey="marketplace:hero.title" components={{ 1: <span className="text-gradient-acc" /> }} />
             </h1>
             <p className="max-w-[560px] text-[17.5px] leading-relaxed text-muted-foreground">
               {t("hero.subtitle")}

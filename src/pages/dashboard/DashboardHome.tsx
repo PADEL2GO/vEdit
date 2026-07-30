@@ -143,7 +143,7 @@ const DashboardHome = () => {
                 <span className="w-1.5 h-1.5 rounded-full bg-primary" />Mein P2G
               </span>
               <h1 className="font-display font-extrabold tracking-tight text-[clamp(30px,5vw,50px)] leading-[1.06]">
-                Moin, <span className="text-gradient-lime">{userName}.</span>
+                Moin, <span className="text-gradient-acc">{userName}.</span>
               </h1>
               <p className="text-[15.5px] text-muted-foreground">{dateLabel} — bereit für dein nächstes Match?</p>
             </div>
@@ -422,7 +422,7 @@ const DashboardHome = () => {
                 <div className="flex flex-col items-start gap-2.5">
                   <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-3 py-1 text-xs font-semibold text-primary">News</span>
                   <h2 className="font-display font-extrabold text-[clamp(26px,3.8vw,38px)] leading-tight tracking-tight">
-                    Aktuelles aus der <span className="text-gradient-lime">P2G-Welt</span>
+                    Aktuelles aus der <span className="text-gradient-acc">P2G-Welt</span>
                   </h2>
                 </div>
               </div>

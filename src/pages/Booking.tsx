@@ -23,7 +23,6 @@ interface LocationWithAvailability extends DbLocation {
 }
 
 const Booking = () => {
-  const { user: sectionUser } = useAuth();
   const sectionColor = useSectionTheme("booking");
   const { t } = useTranslation("booking");
   const { user } = useAuth();
@@ -157,9 +156,9 @@ const Booking = () => {
 
       <main
         className="relative min-h-screen bg-background pt-16 md:pt-20"
-        style={sectionUser ? sectionThemeVars(sectionColor) : undefined}
+        style={sectionThemeVars(sectionColor)}
       >
-        {sectionUser && <SectionShaderBackdrop color={sectionColor} />}
+        <SectionShaderBackdrop color={sectionColor} />
         <div className="relative z-[1]">
         <BookingStepper currentStep={0} />
 
@@ -175,7 +174,7 @@ const Booking = () => {
                 Court buchen
               </span>
               <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-[1.08]">
-                {t("landing.heading")}<span className="text-gradient-lime">{t("landing.headingHighlight")}</span>
+                {t("landing.heading")}<span className="text-gradient-acc">{t("landing.headingHighlight")}</span>
               </h1>
               <p className="max-w-[520px] text-base md:text-lg text-muted-foreground">
                 {t("landing.intro")}
