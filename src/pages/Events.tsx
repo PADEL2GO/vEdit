@@ -101,7 +101,6 @@ const benefits = [
 
 const Events = () => {
   const sectionColor = useSectionTheme("events");
-  const { user: themeUser } = useAuth();
   const { t, i18n } = useTranslation(["events", "common"]);
   const dateLocale = i18n.language.startsWith("en") ? enUS : de;
   const { launchDate } = useLaunchDate();
@@ -229,7 +228,7 @@ const Events = () => {
       <Navigation />
       
       <main className="relative min-h-screen bg-background pt-20" style={sectionThemeVars(sectionColor)}>
-        <SectionShaderBackdrop color={sectionColor} full={!!themeUser} />
+        <SectionShaderBackdrop color={sectionColor} />
         <div className="relative z-[1]">
         {/* Hero Section */}
         <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-black">

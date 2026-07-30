@@ -126,7 +126,7 @@ const DashboardEvents = () => {
       </Helmet>
 
       <div className="relative min-h-screen bg-background" style={sectionThemeVars(sectionColor)}>
-      <SectionShaderBackdrop color={sectionColor} full />
+      <SectionShaderBackdrop color={sectionColor} />
       <div className="relative z-[1] mx-auto max-w-[1200px] px-4 sm:px-5 py-6 md:py-8 flex flex-col gap-6">
         {/* Header */}
         <div className="flex items-end justify-between gap-4 flex-wrap">

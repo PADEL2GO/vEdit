@@ -133,7 +133,7 @@ const DashboardHome = () => {
       <Helmet><title>Mein P2G | PADEL2GO</title></Helmet>
 
       <main className="relative min-h-screen bg-background pb-16" style={sectionThemeVars(sectionColor)}>
-        <SectionShaderBackdrop color={sectionColor} full />
+        <SectionShaderBackdrop color={sectionColor} />
         <div className="relative z-[1] mx-auto max-w-[1200px] px-4 sm:px-5 pt-6 md:pt-8 flex flex-col gap-6">
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}

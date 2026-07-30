@@ -158,7 +158,7 @@ const Booking = () => {
         className="relative min-h-screen bg-background pt-16 md:pt-20"
         style={sectionThemeVars(sectionColor)}
       >
-        <SectionShaderBackdrop color={sectionColor} full={!!user} />
+        <SectionShaderBackdrop color={sectionColor} />
         <div className="relative z-[1]">
         <BookingStepper currentStep={0} />
 

@@ -230,7 +230,7 @@ const Account = () => {
       <Navigation />
 
       <main className="relative min-h-screen bg-background" style={sectionThemeVars(sectionColor)}>
-        <SectionShaderBackdrop color={sectionColor} full />
+        <SectionShaderBackdrop color={sectionColor} />
         <div className="relative z-[1]">
         {/* Hero Header with Expert Level Gradient */}
         <div className={`relative pt-24 pb-8 bg-gradient-to-br ${levelBgGradient}`}>
