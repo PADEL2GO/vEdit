@@ -24,7 +24,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-card/50 border-t border-border">
+    <footer className="relative z-[1] bg-card border-t border-border">
       <div className="container mx-auto px-4 py-10 md:py-14">
         <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
           {/* Brand + contact */}
