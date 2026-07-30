@@ -197,6 +197,7 @@ export default function AdminNews() {
   const { t } = useTranslation("common");
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
   const [genUrls, setGenUrls] = useState<string[]>(["", "", ""]);
+  const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
   const { data: locations = [] } = useQuery({
@@ -287,11 +288,16 @@ export default function AdminNews() {
   };
 
   const runTranslate = (id: string) => {
-    translateRow({ table: "articles", id, fields: ARTICLE_TRANSLATE_FIELDS }).then((result) => {
-      toastTranslateResult(result);
-      invalidateArticles();
-    });
+    setTranslatingId(id);
+    translateRow({ table: "articles", id, fields: ARTICLE_TRANSLATE_FIELDS })
+      .then((result) => {
+        toastTranslateResult(result);
+        invalidateArticles();
+      })
+      .finally(() => setTranslatingId(null));
   };
+
+  const isTranslated = (a: Article) => !!a.title_en?.trim() && !!a.body_html_en?.trim();
 
   // Backfill: translate every existing article (sequential to respect DeepL rate limits).
   // Locked/empty fields are skipped server-side, so re-running is idempotent.
@@ -519,6 +525,11 @@ export default function AdminNews() {
                     >
                       {a.topic}
                     </Badge>
+                    {isTranslated(a) && (
+                      <Badge variant="outline" className="gap-1 border-sky-500/40 text-sky-500">
+                        <Languages className="h-3 w-3" /> Übersetzt
+                      </Badge>
+                    )}
                     <span className="text-xs text-muted-foreground">{AUDIENCE_LABELS[a.audience]}</span>
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                       <ThumbsUp className="h-3 w-3" /> {a.like_count ?? 0}
@@ -541,6 +552,15 @@ export default function AdminNews() {
                       {a.is_published ? "Live" : "Entwurf"}
                     </span>
                   </label>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    title={isTranslated(a) ? "Erneut übersetzen (DE → EN)" : "Ins Englische übersetzen"}
+                    onClick={() => runTranslate(a.id)}
+                    disabled={translatingId === a.id}
+                  >
+                    {translatingId === a.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
+                  </Button>
                   <Button variant="outline" size="icon" onClick={() => openEdit(a)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
