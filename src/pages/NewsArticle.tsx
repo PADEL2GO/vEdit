@@ -210,7 +210,7 @@ export default function NewsArticle() {
               <div className="flex max-w-[720px] flex-col gap-6">
                 {article.body_html?.trim() && (
                   <div
-                    className="prose prose-invert max-w-none text-[17px] leading-[1.75] prose-headings:font-display prose-headings:font-extrabold prose-headings:tracking-tight prose-h2:text-3xl prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-[color:var(--acc)] prose-blockquote:rounded-2xl prose-blockquote:border prose-blockquote:border-[color:var(--acc-brd)] prose-blockquote:bg-gradient-card prose-blockquote:px-7 prose-blockquote:py-6 prose-blockquote:font-display prose-blockquote:text-xl prose-blockquote:not-italic prose-blockquote:text-foreground prose-li:text-muted-foreground prose-img:rounded-2xl"
+                    className="prose prose-invert max-w-none text-justify [hyphens:auto] text-[17px] leading-[1.75] prose-headings:font-display prose-headings:font-extrabold prose-headings:tracking-tight prose-headings:text-left prose-h2:text-3xl prose-p:my-5 prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-[color:var(--acc)] prose-blockquote:rounded-2xl prose-blockquote:border prose-blockquote:border-[color:var(--acc-brd)] prose-blockquote:bg-gradient-card prose-blockquote:px-7 prose-blockquote:py-6 prose-blockquote:font-display prose-blockquote:text-xl prose-blockquote:not-italic prose-blockquote:text-left prose-blockquote:text-foreground prose-li:text-muted-foreground prose-img:rounded-2xl"
                     dangerouslySetInnerHTML={{ __html: localized(article, "body_html", i18n.language) }}
                   />
                 )}

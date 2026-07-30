@@ -43,6 +43,8 @@ Regeln:
 - body_html: 300–500 Wörter, einfaches semantisches HTML — erlaubt sind <p>, <h3>, <ul>, <li>, <strong>, <em>,
   <blockquote> für gekennzeichnete Zitate; KEIN <script>, KEIN inline-Style, KEINE Class-Attribute,
   KEINE Links (die Quelle wird separat verlinkt)
+- Zeitungsstruktur: Gliedere den Text in KURZE Absätze (je 2–4 Sätze, jeweils ein eigenes <p>)
+  und setze 1–2 <h3>-Zwischenüberschriften. Niemals den ganzen Text in einen einzigen Absatz packen.
 - Ton: sachlich, freundlich, deutsch (Du-Form ist okay)`;
 
 const TOOL_DEFINITION = {

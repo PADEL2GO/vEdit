@@ -133,7 +133,7 @@ export function ArticleEditor({ value, onChange }: ArticleEditorProps) {
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm dark:prose-invert max-w-none min-h-[200px] px-3 py-3 focus:outline-none",
+          "prose prose-sm dark:prose-invert max-w-none min-h-[200px] px-3 py-3 focus:outline-none text-justify [hyphens:auto] prose-headings:text-left",
       },
     },
   });
