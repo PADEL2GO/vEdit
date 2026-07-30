@@ -223,3 +223,74 @@ const { data, error } = await supabase.functions.invoke("generate-news-from-urls
 - Laufzeit: ~20–60 s je nach URL-Anzahl (sequenzielle Claude-Calls) — Timeout großzügig
   setzen, Spinner zeigen, Fehler pro URL isoliert behandeln (`ok: false` + `error`).
 - Danach Admin-Flow: Cover hochladen → prüfen → `is_published` setzen (oder im Web-Admin).
+
+---
+
+## 11. Update (31.07.2026) — Änderungen seit dem ersten Handover
+
+### A. Artikel-Detail: Hero ist jetzt ein Farb-Shader (kein Cover mehr)
+
+Der Web-Artikel rendert den Querformat-Hero **immer** als animierten Shader in der
+Topic-Farbe — das 4:5-Cover erscheint nur noch auf den Cards (og:image bleibt Cover).
+Die App soll das spiegeln:
+
+- Gleicher Shader wie der Homepage-Hero; die GLSL→SKSL-Portierung liegt bereits in
+  `docs/mobile-app/` (Hero-Shader-Handoff). Einzige Änderung: `u_color`-Uniform
+  statt hartem Lime — Topic-Hex als vec3 (`topicColor(post.topic)`).
+- Darüber der dunkle Verlauf (≈ `195deg, #00000033 18% → #000000C7 76% → #000`)
+  und die komplette Schrift-Ebene (Badge, Datum, H1 + Highlight, Lead).
+- `prefers-reduced-motion` / Accessibility: Standbild (u_time fix, z. B. 8.0).
+
+### B. Autoren — „Geschrieben von"
+
+- Neue Tabelle `news_authors`: `id, name, role, role_en, avatar_url, user_id`.
+  `user_id` = verknüpfter Account; das Profilbild wird **per DB-Trigger** aus
+  `profiles.avatar_url` synchron gehalten — die App liest einfach `avatar_url`,
+  kein eigener Sync nötig. RLS: öffentlich lesbar.
+- `articles.author_id` → Join im Select:
+  `select("*, author:news_authors(id, name, role, role_en, avatar_url)")`
+- Anzeige: rundes Foto (Fallback: Initialen auf Topic-Farbe), Name,
+  Rolle lokalisiert (`role_en` → Fallback `role`); ganz ohne Autor:
+  „PADEL2GO Redaktion" / „PADEL2GO Editorial".
+
+### C. Like-Zustand für eingeloggte User aus der DB
+
+`news_likes` hat jetzt eine Read-own-Policy: mit User-JWT liefert
+`supabase.from("news_likes").select("article_id")` **nur die eigenen** Likes.
+Damit den aktiven Daumen-Zustand initialisieren (geräteübergreifend synchron);
+AsyncStorage nur noch für Gäste. Nach dem Toggle Response übernehmen und die
+eigene Like-Liste refetchen.
+
+### D. Zeitungssatz im Artikel-Body
+
+Blocksatz + Silbentrennung, kurze Absätze mit Luft; Überschriften und Zitate
+bleiben linksbündig. RN: `textAlign: "justify"` (iOS), auf Android zusätzlich
+`android_hyphenationFrequency="full"` am `Text`. Der KI-Generator erzwingt
+kurze Absätze (2–4 Sätze, eigene `<p>`) + 1–2 `<h3>`-Zwischenüberschriften.
+
+### E. Datenmodell-Ergänzungen
+
+- `articles.author_id` (uuid | null) — NEU, siehe B.
+- `_en`-Felder komplett: `title_en`, `title_highlight_en`, `excerpt_en`,
+  `lead_en`, `body_html_en` (+ je ein `*_en_locked` — nur fürs CMS, App ignoriert es).
+- „Übersetzt"-Kriterium (falls die App es anzeigen will): `title_en` **und**
+  `body_html_en` befüllt.
+- `seo_title`/`seo_description` bleiben Web-only; die EN-Domain nutzt lokalisierte Texte.
+
+### F. Admin-Panel (Web) — nur relevant, falls die App einen Admin-Bereich bekommt
+
+- **Entwurf/Live-Switch** pro Artikel in der Liste: Update `is_published`;
+  `published_at` wird beim ersten Publish gestempelt und danach beibehalten.
+- **Filterleiste**: Status (Alle/Live/Entwurf) + Topic-Chips in Topic-Farben.
+  Drag-and-Drop-Sortierung nur ohne aktive Filter (schützt die globale Reihenfolge).
+- **Einzel-Übersetzung** pro Artikel: `translate-content` mit
+  `{ table: "articles", id, fields: ["title","excerpt","body_html","title_highlight","lead"] }`
+  (Admin-JWT nötig) + „Übersetzt"-Badge nach Kriterium aus E.
+- **Editor**: Sprach-Tabs Deutsch/English — beim manuellen Ändern eines EN-Felds
+  `*_en_locked = true` mitschreiben (Feld geleert → `false`), sonst überschreibt
+  DeepL die Handarbeit.
+- **Live-Vorschau**: 4:5-Card + Artikel-Kopf in der Topic-Farbe des Formulars.
+- **KI-Generator** befüllt alle Textfelder inkl. Topic/Highlight/Lead/SEO
+  (Abschnitt 10); Lesezeit aus Wortzahl.
+- **Autoren-Verwaltung**: anlegen, Rolle DE/EN, Foto-Upload per Klick auf den
+  Avatar — deaktiviert bei Account-verknüpften Autoren (Bild kommt aus dem Profil).
