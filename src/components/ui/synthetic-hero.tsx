@@ -173,6 +173,8 @@ interface HeroProps {
   countdownTargetDate?: Date;
   microDetails?: Array<string>;
   showLogo?: boolean;
+  /** false → kein eigener Canvas/Overlay; der Seiten-Backdrop (SectionShaderBackdrop) übernimmt */
+  showShader?: boolean;
   children?: React.ReactNode;
 }
 
@@ -185,6 +187,7 @@ const SyntheticHero = ({
   countdownTargetDate = new Date("2026-07-01T00:00:00"),
   microDetails = [],
   showLogo = false,
+  showShader = true,
   children,
 }: HeroProps) => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -271,23 +274,27 @@ const SyntheticHero = ({
       ref={sectionRef}
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      {/* WebGL Canvas Background */}
-      <div className="absolute inset-0 z-0">
-        <Canvas
-          gl={{ antialias: true }}
-          camera={{ position: [0, 0, 1] }}
-          style={{ width: "100%", height: "100%" }}
-        >
-          <ShaderPlane
-            vertexShader={vertexShader}
-            fragmentShader={fragmentShader}
-            uniforms={shaderUniforms}
-          />
-        </Canvas>
-      </div>
+      {/* WebGL Canvas Background (entfällt, wenn der Seiten-Backdrop den Shader stellt) */}
+      {showShader && (
+        <>
+          <div className="absolute inset-0 z-0">
+            <Canvas
+              gl={{ antialias: true }}
+              camera={{ position: [0, 0, 1] }}
+              style={{ width: "100%", height: "100%" }}
+            >
+              <ShaderPlane
+                vertexShader={vertexShader}
+                fragmentShader={fragmentShader}
+                uniforms={shaderUniforms}
+              />
+            </Canvas>
+          </div>
 
-      {/* Dark Overlay for readability */}
-      <div className="absolute inset-0 bg-background/70 z-[1]" />
+          {/* Dark Overlay for readability */}
+          <div className="absolute inset-0 bg-background/70 z-[1]" />
+        </>
+      )}
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 pt-24 md:pt-32 pb-20 max-w-5xl">

@@ -18,7 +18,7 @@ export function ArticleFeed() {
   if (isLoading || articles.length === 0) return null;
 
   return (
-    <section id="news" className="py-16 md:py-24 bg-background">
+    <section id="news" className="py-16 md:py-24">
       <div className="mx-auto max-w-[1200px] px-5">
         <div className="flex flex-col items-center gap-4 text-center mb-12 md:mb-16">
           <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">

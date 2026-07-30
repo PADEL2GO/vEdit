@@ -8,6 +8,8 @@ import SectionDivider from "@/components/SectionDivider";
 import { SiteVisual } from "@/components/SiteVisual";
 import { Button } from "@/components/ui/button";
 import SyntheticHero from "@/components/ui/synthetic-hero";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import { NavLink } from "@/components/NavLink";
 import BrandName from "@/components/BrandName";
 import { LocationTeasersSection } from "@/components/LocationTeasersSection";
@@ -64,7 +66,7 @@ const PartnerShowcase = () => {
   const active = (partners ?? []).filter((p) => p.is_active !== false);
   if (active.length === 0) return null;
   return (
-    <section id="partner" className="py-16 md:py-24 relative overflow-hidden bg-background">
+    <section id="partner" className="py-16 md:py-24 relative overflow-hidden">
       <div className="mx-auto max-w-[1200px] px-5">
         <motion.div {...revealProps()} className="flex flex-col items-center gap-4 text-center max-w-2xl mx-auto mb-12">
           <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">
@@ -112,6 +114,7 @@ const PartnerShowcase = () => {
 };
 
 const Index = () => {
+  const sectionColor = useSectionTheme("home");
   const { user, isLoading } = useAuth();
   const { t } = useTranslation("index");
   const { launchDate } = useLaunchDate();
@@ -141,10 +144,13 @@ const Index = () => {
 
       <Navigation />
 
-      <main className="min-h-screen bg-background">
+      <main className="relative min-h-screen bg-background" style={sectionThemeVars(sectionColor)}>
+        <SectionShaderBackdrop color={sectionColor} />
+        <div className="relative z-[1]">
 
         {/* ── HERO ──────────────────────────────────────────────── */}
         <SyntheticHero
+          showShader={false}
           title={t("hero.title")}
           description={
             <>
@@ -352,6 +358,7 @@ const Index = () => {
 
         <PartnerShowcase />
 
+      </div>
       </main>
 
       <Footer />
