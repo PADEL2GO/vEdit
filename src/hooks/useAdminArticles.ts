@@ -146,6 +146,29 @@ export function useSaveArticle() {
   });
 }
 
+/** Schnell-Toggle Entwurf ↔ Live aus der Liste; stempelt published_at beim ersten Publish. */
+export function usePublishArticle() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, publish, publishedAt }: { id: string; publish: boolean; publishedAt: string | null }) => {
+      const { error } = await (supabase as any)
+        .from("articles")
+        .update({
+          is_published: publish,
+          published_at: publish ? (publishedAt ?? new Date().toISOString()) : publishedAt,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_res, vars) => {
+      invalidateAll(qc);
+      toast.success(vars.publish ? "Artikel ist live" : "Artikel auf Entwurf gesetzt");
+    },
+    onError: (e: Error) => toast.error(e.message || "Fehler beim Umschalten"),
+  });
+}
+
 export function useDeleteArticle() {
   const qc = useQueryClient();
   return useMutation({

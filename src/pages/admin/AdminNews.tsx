@@ -47,6 +47,7 @@ import {
   uploadArticleImage,
   useAdminArticles,
   useDeleteArticle,
+  usePublishArticle,
   useReorderArticles,
   useSaveArticle,
 } from "@/hooks/useAdminArticles";
@@ -190,6 +191,7 @@ export default function AdminNews() {
   const saveMutation = useSaveArticle();
   const deleteMutation = useDeleteArticle();
   const reorderMutation = useReorderArticles();
+  const publishMutation = usePublishArticle();
   const { translateRow } = useTranslateContent();
   const queryClient = useQueryClient();
   const { t } = useTranslation("common");
@@ -511,11 +513,6 @@ export default function AdminNews() {
                     {a.title}
                   </p>
                   <div className="flex flex-wrap items-center gap-2 mt-1">
-                    {a.is_published ? (
-                      <Badge className="bg-green-500/15 text-green-600 border-green-500/30">Veröffentlicht</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-muted-foreground">Entwurf</Badge>
-                    )}
                     <Badge
                       variant="outline"
                       style={{ color: topicColor(a.topic), borderColor: `${topicColor(a.topic)}66` }}
@@ -531,7 +528,19 @@ export default function AdminNews() {
                     </span>
                   </div>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <label className="mr-1 flex cursor-pointer flex-col items-center gap-1">
+                    <Switch
+                      checked={a.is_published}
+                      disabled={publishMutation.isPending}
+                      onCheckedChange={(v) =>
+                        publishMutation.mutate({ id: a.id, publish: v, publishedAt: a.published_at })
+                      }
+                    />
+                    <span className={`text-[10.5px] font-semibold ${a.is_published ? "text-green-500" : "text-muted-foreground"}`}>
+                      {a.is_published ? "Live" : "Entwurf"}
+                    </span>
+                  </label>
                   <Button variant="outline" size="icon" onClick={() => openEdit(a)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
