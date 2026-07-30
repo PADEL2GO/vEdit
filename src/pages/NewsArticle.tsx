@@ -111,6 +111,12 @@ export default function NewsArticle() {
     : null;
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
+  // seo_title/seo_description existieren nur auf Deutsch — auf der EN-Domain
+  // stattdessen die lokalisierten Inhalte verwenden.
+  const isEn = i18n.language.startsWith("en");
+  const seoTitle = !isEn && article.seo_title ? article.seo_title : `${title} | PADEL2GO`;
+  const seoDescription = !isEn && article.seo_description ? article.seo_description : excerpt;
+
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -124,11 +130,11 @@ export default function NewsArticle() {
   return (
     <>
       <Helmet>
-        <title>{article.seo_title ?? `${title} | PADEL2GO`}</title>
-        <meta name="description" content={article.seo_description ?? excerpt} />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
         {article.cover_image_url && <meta property="og:image" content={article.cover_image_url} />}
-        <meta property="og:title" content={article.seo_title ?? title} />
-        <meta property="og:description" content={article.seo_description ?? excerpt} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="article" />
       </Helmet>
 
