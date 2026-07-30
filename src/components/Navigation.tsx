@@ -35,6 +35,7 @@ const PublicNavigation = () => {
     { label: t("nav.bookCourt"), href: "/booking" },
     { label: t("nav.marketplace"), href: "/marketplace" },
     { label: t("nav.events"), href: "/events" },
+    { label: t("nav.news"), href: "/news" },
     { label: t("nav.players"), href: "/fuer-spieler" },
     { label: t("nav.clubs"), href: "/fuer-vereine" },
   ];

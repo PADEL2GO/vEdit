@@ -32,7 +32,8 @@
     "account": "Konto",
     "myAccount": "Mein Konto",
     "admin": "Admin",
-    "logout": "Ausloggen"
+    "logout": "Ausloggen",
+    "news": "News"
   },
   "footer": {
     "tagline": "Padel dorthin bringen, wo die Menschen schon sind.",
@@ -53,5 +54,6 @@
   },
   "news": {
     "aiBadge": "KI-unterstützt erstellt"
-  }
+  },
+  "newsAllLink": "Alle News ansehen"
 }

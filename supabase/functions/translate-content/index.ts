@@ -39,7 +39,7 @@ const TRANSLATABLE_TABLES: Record<string, FieldName[]> = {
   skypadel_gallery: ["alt_text"],
   partner_touchpoint_slides: ["title", "description"],
   qr_sections: ["title", "description"],
-  articles: ["title", "excerpt", "body_html"],
+  articles: ["title", "excerpt", "body_html", "title_highlight", "lead"],
   events: ["title", "description", "price_label", "highlights"],
   marketplace_items: ["name", "subtitle", "description", "long_description", "meta_title", "meta_description"],
   marketplace_categories: ["name"],

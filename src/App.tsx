@@ -40,6 +40,8 @@ const BookingCheckout = lazy(() => import("./pages/BookingCheckout"));
 const BookingSuccess = lazy(() => import("./pages/BookingSuccess"));
 const BookingCancel = lazy(() => import("./pages/BookingCancel"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const News = lazy(() => import("./pages/News"));
+const NewsArticle = lazy(() => import("./pages/NewsArticle"));
 const NewsletterConfirm = lazy(() => import("./pages/NewsletterConfirm"));
 const NewsletterUnsubscribe = lazy(() => import("./pages/NewsletterUnsubscribe"));
 const PublicProfile = lazy(() => import("./pages/PublicProfile"));
@@ -130,6 +132,8 @@ const App = () => (
               <Route path="/league" element={<League />} />
               <Route path="/events" element={<Events />} />
               <Route path="/events/:slug" element={<EventDetail />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/news/:slug" element={<NewsArticle />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/marketplace/success" element={<MarketplaceSuccess />} />
               <Route path="/marketplace/:slug" element={<MarketplaceProduct />} />

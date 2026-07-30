@@ -32,7 +32,8 @@
     "account": "Account",
     "myAccount": "My account",
     "admin": "Admin",
-    "logout": "Log out"
+    "logout": "Log out",
+    "news": "News"
   },
   "footer": {
     "tagline": "Bringing padel to where people already are.",
@@ -53,5 +54,6 @@
   },
   "news": {
     "aiBadge": "AI-assisted content"
-  }
+  },
+  "newsAllLink": "View all news"
 }

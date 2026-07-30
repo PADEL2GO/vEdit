@@ -126,3 +126,6 @@ verify_jwt = false
 # top of the in-code getUser() check.
 [functions.delete-account]
 verify_jwt = true
+
+[functions.news-like]
+verify_jwt = false

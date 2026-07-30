@@ -1,124 +1,15 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Newspaper, CalendarDays, ArrowRight, ChevronUp, ExternalLink, Image as ImageIcon } from "lucide-react";
-import { format, parseISO } from "date-fns";
-import { de } from "date-fns/locale";
+import { Link } from "react-router-dom";
+import { ArrowRight, Newspaper } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useArticles } from "@/hooks/useArticles";
-import { localized } from "@/lib/localized";
 import { ArticleCard } from "./ArticleCard";
-import type { Article } from "@/types/article";
+import { NewsCard } from "./NewsCard";
 
 interface ArticleFeedProps {
   /** "logged_in" → dashboard Übersicht, "logged_out" → public home */
   surface: "logged_in" | "logged_out";
   /** "public" wraps the feed in a page section with a container; "dashboard" renders bare */
   placement: "public" | "dashboard";
-}
-
-/** Public homepage news card — image-top card matching the marketing design. */
-function PublicArticleCard({ article, index }: { article: Article; index: number }) {
-  const { t, i18n } = useTranslation("common");
-  const [expanded, setExpanded] = useState(false);
-
-  const dateLabel = article.published_at
-    ? format(parseISO(article.published_at), "d. MMMM yyyy", { locale: de })
-    : null;
-
-  return (
-    <motion.div
-      className="group flex flex-col rounded-2xl overflow-hidden bg-gradient-card border border-border/60 hover:border-primary/30 transition-colors duration-300"
-      initial={{ opacity: 0, y: 24, filter: "blur(4px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.6, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-    >
-      {/* Cover */}
-      <div className="aspect-[16/9] overflow-hidden bg-muted">
-        {article.cover_image_url ? (
-          <img
-            src={article.cover_image_url}
-            alt={localized(article, "title", i18n.language)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageIcon className="w-10 h-10 text-muted-foreground/30" />
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="flex flex-col gap-2.5 p-5 md:p-6">
-        {dateLabel && (
-          <span className="inline-flex items-center gap-1.5 font-stat text-xs text-muted-foreground">
-            <CalendarDays className="w-3.5 h-3.5 text-primary" />
-            {dateLabel}
-          </span>
-        )}
-        <h3 className="text-lg md:text-xl font-bold text-foreground font-display" style={{ lineHeight: 1.3 }}>
-          {localized(article, "title", i18n.language)}
-        </h3>
-        {(article as { ai_generated?: boolean }).ai_generated && (
-          <span className="inline-flex w-fit items-center rounded-full border border-border bg-white/[0.04] px-2 py-0.5 text-[10.5px] font-medium text-muted-foreground">
-            {t("news.aiBadge")}
-          </span>
-        )}
-        {article.excerpt && (
-          <p className="text-sm text-muted-foreground line-clamp-3" style={{ textWrap: "pretty" }}>
-            {localized(article, "excerpt", i18n.language)}
-          </p>
-        )}
-
-        <div className="flex flex-wrap items-center gap-3 mt-1">
-          {article.body_html?.trim() && (
-            <button
-              onClick={() => setExpanded((v) => !v)}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-            >
-              {expanded ? (
-                <>
-                  {t("newsReadMore")} <ChevronUp className="w-4 h-4" />
-                </>
-              ) : (
-                <>
-                  {t("newsReadMore")} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </>
-              )}
-            </button>
-          )}
-          {article.source_url && (
-            <a
-              href={article.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-            >
-              {t("newsToSource")} <ExternalLink className="w-4 h-4" />
-            </a>
-          )}
-        </div>
-
-        <AnimatePresence initial={false}>
-          {expanded && article.body_html && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <div
-                className="prose prose-sm dark:prose-invert max-w-none mt-3 pt-3 border-t border-border/60"
-                dangerouslySetInnerHTML={{ __html: localized(article, "body_html", i18n.language) }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.div>
-  );
 }
 
 export function ArticleFeed({ surface, placement }: ArticleFeedProps) {
@@ -128,7 +19,7 @@ export function ArticleFeed({ surface, placement }: ArticleFeedProps) {
   // Render nothing while loading or when there's no news — avoid an empty section.
   if (isLoading || articles.length === 0) return null;
 
-  // Public homepage — marketing design (badge header + image-top card grid).
+  // Public homepage — 4:5-Hochformat-Cards (News-Web-Design) + Link zur News-Seite.
   if (placement === "public") {
     return (
       <section id="news" className="py-16 md:py-24 bg-background">
@@ -142,10 +33,18 @@ export function ArticleFeed({ surface, placement }: ArticleFeedProps) {
               {t("newsHeadingPre")} <span className="text-gradient-lime">{t("newsHeadingAccent")}</span>
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-            {articles.map((article, i) => (
-              <PublicArticleCard key={article.id} article={article} index={i} />
+          <div className="grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-3">
+            {articles.slice(0, 3).map((article, i) => (
+              <NewsCard key={article.id} article={article} index={i} />
             ))}
+          </div>
+          <div className="flex justify-center pt-10">
+            <Link
+              to="/news"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-white/[0.04] px-7 py-3.5 text-[15px] font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            >
+              {t("newsAllLink")} <ArrowRight className="h-[17px] w-[17px]" />
+            </Link>
           </div>
         </div>
       </section>
