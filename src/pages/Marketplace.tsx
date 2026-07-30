@@ -134,7 +134,7 @@ const Marketplace = () => {
         className="relative min-h-screen bg-background pt-[92px] pb-24"
         style={sectionThemeVars(sectionColor)}
       >
-        <SectionShaderBackdrop color={sectionColor} />
+        <SectionShaderBackdrop color={sectionColor} full={!!user} />
         <div className="relative z-[1] mx-auto max-w-[1200px] px-5 flex flex-col gap-8">
           {/* Hero */}
           <motion.div

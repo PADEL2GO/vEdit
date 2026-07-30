@@ -1,10 +1,10 @@
 {
   "page": {
     "meta": {
-      "title": "Mein Konto | Padel2Go",
+      "title": "Mein Profil | PADEL2GO",
       "description": "Verwalte dein Padel2Go Profil, sieh deine Rewards und dein Skill-Level."
     },
-    "title": "Mein Konto",
+    "title": "Mein Profil",
     "playCredits": "Play Credits",
     "logout": "Ausloggen",
     "progressRemaining": "{{remaining}} bis {{level}}",

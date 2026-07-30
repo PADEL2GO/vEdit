@@ -3,6 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import { LogOut, Loader2, Coins, ShoppingBag, ArrowRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -24,6 +26,7 @@ import { useLevelUpDetection } from "@/hooks/useLevelUpDetection";
 import { usePointsValue } from "@/hooks/usePointsValue";
 
 const Account = () => {
+  const sectionColor = useSectionTheme("profile");
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("account");
   const numberLocale = i18n.language === "en" ? "en-US" : "de-DE";
@@ -226,7 +229,9 @@ const Account = () => {
 
       <Navigation />
 
-      <main className="min-h-screen bg-background">
+      <main className="relative min-h-screen bg-background" style={sectionThemeVars(sectionColor)}>
+        <SectionShaderBackdrop color={sectionColor} full />
+        <div className="relative z-[1]">
         {/* Hero Header with Expert Level Gradient */}
         <div className={`relative pt-24 pb-8 bg-gradient-to-br ${levelBgGradient}`}>
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent" />
@@ -360,6 +365,7 @@ const Account = () => {
             </TabsContent>
           </Tabs>
         </div>
+      </div>
       </main>
 
       <Footer />
