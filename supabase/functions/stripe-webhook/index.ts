@@ -86,6 +86,43 @@ serve(async (req) => {
 
     logStep("Event verified", { type: event.type, id: event.id });
 
+    // Native PaymentSheet (Apple Pay / saved cards, see create-payment-intent) settles
+    // through the SAME code path as hosted checkout: normalize the succeeded intent into a
+    // Checkout-Session-shaped object. Guarded by metadata.flow so intents created BY a
+    // checkout session (which already fire checkout.session.completed) are never touched —
+    // no double settlement.
+    if (event.type === "payment_intent.succeeded") {
+      const pi = event.data.object as Stripe.PaymentIntent;
+      if (pi.metadata?.flow !== "native_sheet") {
+        logStep("payment_intent.succeeded ignored (not a native-sheet intent)", { intentId: pi.id });
+        return new Response(JSON.stringify({ received: true }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      logStep("Native-sheet intent — normalizing to session shape", { intentId: pi.id, amount: pi.amount });
+      event = {
+        ...event,
+        type: "checkout.session.completed",
+        data: {
+          object: {
+            id: pi.id,
+            object: "checkout.session",
+            mode: "payment",
+            payment_status: "paid",
+            status: "complete",
+            amount_total: pi.amount,
+            currency: pi.currency,
+            customer: pi.customer,
+            customer_email: pi.receipt_email,
+            customer_details: { email: pi.receipt_email },
+            payment_intent: pi.id,
+            metadata: pi.metadata,
+          } as unknown as Stripe.Checkout.Session,
+        },
+      } as Stripe.Event;
+    }
+
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
