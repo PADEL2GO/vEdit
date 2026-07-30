@@ -183,3 +183,10 @@
   0%, 100% { box-shadow: 0 0 20px hsl(71 91% 51% / 0.3); }
   50% { box-shadow: 0 0 40px hsl(71 91% 51% / 0.5); }
 }
+
+/* News-Section: Input-Focus folgt dem Topic-Akzent (--acc kommt vom .news-root) */
+.news-root input:focus-visible,
+.news-root textarea:focus-visible {
+  --tw-ring-color: var(--acc);
+  border-color: var(--acc);
+}

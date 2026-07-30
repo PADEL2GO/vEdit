@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Article, NewsCategory } from "@/types/article";
+import type { Article } from "@/types/article";
 
-const ARTICLE_SELECT = "*, category:news_categories(id, name, name_en, slug, sort_order, is_active)";
+const ARTICLE_SELECT = "*";
 
 /**
  * Public read hook for the news feed.
@@ -23,22 +23,6 @@ export function useArticles(surface: "logged_in" | "logged_out") {
         .order("published_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Article[];
-    },
-  });
-}
-
-/** Active categories for the filter chips, in admin-defined order. */
-export function useNewsCategories() {
-  return useQuery({
-    queryKey: ["news-categories"],
-    queryFn: async (): Promise<NewsCategory[]> => {
-      const { data, error } = await (supabase as any)
-        .from("news_categories")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as NewsCategory[];
     },
   });
 }
@@ -74,7 +58,7 @@ export function useRelatedArticles(article: Article | null | undefined) {
         .neq("id", article!.id)
         .order("published_at", { ascending: false })
         .limit(4);
-      if (article!.category_id) query = query.eq("category_id", article!.category_id);
+      if (article!.topic) query = query.eq("topic", article!.topic);
       const { data, error } = await query;
       if (error) throw error;
       return (data ?? []) as Article[];
@@ -141,6 +125,7 @@ export function useArticleLike(article: Article | null | undefined) {
         /* ignore */
       }
       queryClient.invalidateQueries({ queryKey: ["article", article.slug] });
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
     } finally {
       setPending(false);
     }

@@ -1,12 +1,40 @@
+import type { CSSProperties } from "react";
+
 export type ArticleAudience = "logged_in" | "logged_out" | "everyone";
 
-export interface NewsCategory {
-  id: string;
-  name: string;
-  name_en: string | null;
-  slug: string;
-  sort_order: number;
-  is_active: boolean;
+// ── Topic-Colorcode-System ────────────────────────────────────────────────────
+// Der Topic-String ist der Schlüssel (kommt exakt so aus dem Backend);
+// die Farbzuordnung lebt nur hier im Frontend. „Alle" ist kein Topic,
+// sondern der Filter-Default (Brand-Lime).
+export const TOPIC_COLORS = {
+  "Alle": "#C7F011",
+  "Inside P2G": "#C7F011",
+  "Events": "#B06BFF",
+  "Marketplace": "#FF8A1F",
+  "Community": "#FF4D4D",
+  "Business": "#2FE0C0",
+} as const;
+
+export type Topic = Exclude<keyof typeof TOPIC_COLORS, "Alle">;
+
+export const TOPICS: Topic[] = ["Inside P2G", "Events", "Marketplace", "Community", "Business"];
+
+/** Volltonfarbe eines Topics — unbekannte Werte fallen auf Inside P2G zurück. */
+export function topicColor(topic: string | null | undefined): string {
+  return TOPIC_COLORS[topic as keyof typeof TOPIC_COLORS] ?? TOPIC_COLORS["Inside P2G"];
+}
+
+/**
+ * Akzent als CSS Custom Properties für einen Seiten-Root.
+ * Abgeleitete Alphas per 8-stelligem Hex: bg 12%, border 40%, glow 15%.
+ */
+export function accentVars(color: string): CSSProperties {
+  return {
+    "--acc": color,
+    "--acc-bg": `${color}1F`,
+    "--acc-brd": `${color}66`,
+    "--acc-glow": `${color}26`,
+  } as CSSProperties;
 }
 
 export interface Article {
@@ -21,8 +49,7 @@ export interface Article {
   cover_alt: string | null;
   source_url: string | null;
   audience: ArticleAudience;
-  category_id: string | null;
-  category?: NewsCategory | null;
+  topic: Topic | string;
   is_featured: boolean;
   featured_rank: number;
   reading_minutes: number;
@@ -49,9 +76,3 @@ export const AUDIENCE_LABELS: Record<ArticleAudience, string> = {
   logged_in: "Nur eingeloggte Nutzer",
   logged_out: "Nur Besucher (nicht eingeloggt)",
 };
-
-/** Kategoriename in der aktiven Sprache (EN fällt auf DE zurück). */
-export function categoryLabel(cat: NewsCategory | null | undefined, lang: string): string {
-  if (!cat) return "";
-  return lang.startsWith("en") && cat.name_en ? cat.name_en : cat.name;
-}

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { Article, ArticleAudience, NewsCategory } from "@/types/article";
+import type { Article, ArticleAudience } from "@/types/article";
 
 /** URL-Slug aus einem Titel (Umlaute transliteriert, Rest zu Bindestrichen). */
 export function slugify(input: string): string {
@@ -22,7 +22,7 @@ export function useAdminArticles() {
     queryFn: async (): Promise<Article[]> => {
       const { data, error } = await (supabase as any)
         .from("articles")
-        .select("*, category:news_categories(id, name, name_en, slug, sort_order, is_active)")
+        .select("*")
         .order("sort_order", { ascending: false })
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -43,7 +43,7 @@ export interface ArticleInput {
   cover_alt: string;
   source_url: string;
   audience: ArticleAudience;
-  category_id: string;
+  topic: string;
   is_featured: boolean;
   featured_rank: number;
   reading_minutes: number;
@@ -98,7 +98,7 @@ export function useSaveArticle() {
         cover_alt: data.cover_alt || null,
         source_url: data.source_url || null,
         audience: data.audience,
-        category_id: data.category_id || null,
+        topic: data.topic || "Inside P2G",
         is_featured: data.is_featured,
         featured_rank: data.featured_rank,
         reading_minutes: data.reading_minutes || 3,
@@ -188,73 +188,3 @@ export function useReorderArticles() {
   });
 }
 
-// ── Kategorien ────────────────────────────────────────────────────────────────
-
-/** Admin list — includes inactive categories. */
-export function useAdminNewsCategories() {
-  return useQuery({
-    queryKey: ["admin-news-categories"],
-    queryFn: async (): Promise<NewsCategory[]> => {
-      const { data, error } = await (supabase as any)
-        .from("news_categories")
-        .select("*")
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as NewsCategory[];
-    },
-  });
-}
-
-export interface CategoryInput {
-  id?: string;
-  name: string;
-  name_en: string;
-  sort_order: number;
-  is_active: boolean;
-}
-
-export function useSaveNewsCategory() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: CategoryInput) => {
-      const payload = {
-        name: data.name,
-        name_en: data.name_en || null,
-        slug: slugify(data.name),
-        sort_order: data.sort_order,
-        is_active: data.is_active,
-      };
-      if (data.id) {
-        const { error } = await (supabase as any).from("news_categories").update(payload).eq("id", data.id);
-        if (error) throw error;
-      } else {
-        const { error } = await (supabase as any).from("news_categories").insert(payload);
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-news-categories"] });
-      qc.invalidateQueries({ queryKey: ["news-categories"] });
-      invalidateAll(qc);
-    },
-    onError: (e: Error & { code?: string }) =>
-      toast.error(e.code === "23505" ? "Kategorie mit diesem Namen existiert bereits" : e.message),
-  });
-}
-
-export function useDeleteNewsCategory() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await (supabase as any).from("news_categories").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["admin-news-categories"] });
-      qc.invalidateQueries({ queryKey: ["news-categories"] });
-      invalidateAll(qc);
-      toast.success("Kategorie gelöscht");
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-}

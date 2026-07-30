@@ -31,9 +31,9 @@ import {
   useArticleLocation,
   useRelatedArticles,
 } from "@/hooks/useArticles";
-import { categoryLabel } from "@/types/article";
+import { accentVars, topicColor } from "@/types/article";
 
-/** Scroll-Lesefortschritt als Lime-Balken direkt unter der Navigation. */
+/** Scroll-Lesefortschritt als Akzent-Balken am oberen Rand. */
 function ReadingProgress() {
   const [pct, setPct] = useState(0);
   useEffect(() => {
@@ -48,8 +48,8 @@ function ReadingProgress() {
   return (
     <div className="fixed inset-x-0 top-0 z-[70] h-[3px] bg-transparent">
       <div
-        className="h-full bg-gradient-to-r from-primary to-[hsl(71,91%,61%)] shadow-[0_0_12px_hsl(71_91%_51%/0.6)]"
-        style={{ width: `${pct}%` }}
+        className="h-full transition-[width] duration-100 ease-linear"
+        style={{ width: `${pct}%`, background: "var(--acc)", boxShadow: "0 0 12px var(--acc-brd)" }}
       />
     </div>
   );
@@ -99,6 +99,7 @@ export default function NewsArticle() {
   }
   if (!article) return null;
 
+  const acc = topicColor(article.topic);
   const title = localized(article, "title", i18n.language);
   const highlight = localized(article, "title_highlight", i18n.language);
   const lead = localized(article, "lead", i18n.language);
@@ -108,7 +109,6 @@ export default function NewsArticle() {
         locale: i18n.language.startsWith("en") ? enUS : de,
       })
     : null;
-  const catLabel = categoryLabel(article.category, i18n.language);
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
   const copyLink = async () => {
@@ -133,9 +133,10 @@ export default function NewsArticle() {
       </Helmet>
 
       <Navigation />
-      <ReadingProgress />
 
-      <main className="min-h-screen bg-background">
+      {/* Seiten-Akzent = Topic dieses Artikels (Colorcode Regel 1) */}
+      <main className="news-root min-h-screen bg-background" style={accentVars(acc)}>
+        <ReadingProgress />
         <article>
           {/* ── Hero ── */}
           <div className="relative flex min-h-[min(78vh,720px)] items-end overflow-hidden">
@@ -161,16 +162,17 @@ export default function NewsArticle() {
             >
               <Link
                 to="/news"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-white/70 transition-colors hover:text-primary"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-white/70 transition-colors hover:text-[color:var(--acc)]"
               >
                 <ArrowLeft className="h-4 w-4" /> {t("backToNews")}
               </Link>
               <div className="flex flex-wrap items-center gap-3">
-                {catLabel && (
-                  <span className="whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-3.5 py-1.5 font-stat text-[10.5px] uppercase tracking-[0.18em] text-primary">
-                    {catLabel}
-                  </span>
-                )}
+                <span
+                  className="whitespace-nowrap rounded-full border bg-black/60 px-3.5 py-1.5 font-stat text-[10.5px] uppercase tracking-[0.18em] backdrop-blur-md"
+                  style={{ color: acc, borderColor: `${acc}66` }}
+                >
+                  {article.topic}
+                </span>
                 {dateLabel && <span className="font-stat text-xs tracking-[0.08em] text-white/65">{dateLabel}</span>}
                 <span className="h-1 w-1 rounded-full bg-white/35" />
                 <span className="font-stat text-xs tracking-[0.08em] text-white/65">
@@ -185,7 +187,9 @@ export default function NewsArticle() {
                 {highlight && (
                   <>
                     {" "}
-                    <span className="italic text-primary">{highlight}</span>
+                    <span className="italic" style={{ color: acc }}>
+                      {highlight}
+                    </span>
                   </>
                 )}
               </h1>
@@ -206,14 +210,14 @@ export default function NewsArticle() {
               <div className="flex max-w-[720px] flex-col gap-6">
                 {article.body_html?.trim() && (
                   <div
-                    className="prose prose-invert max-w-none text-[17px] leading-[1.75] prose-headings:font-display prose-headings:font-extrabold prose-headings:tracking-tight prose-h2:text-3xl prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-primary prose-blockquote:rounded-2xl prose-blockquote:border prose-blockquote:border-primary/25 prose-blockquote:bg-gradient-card prose-blockquote:px-7 prose-blockquote:py-6 prose-blockquote:font-display prose-blockquote:text-xl prose-blockquote:not-italic prose-blockquote:text-foreground prose-li:text-muted-foreground prose-img:rounded-2xl"
+                    className="prose prose-invert max-w-none text-[17px] leading-[1.75] prose-headings:font-display prose-headings:font-extrabold prose-headings:tracking-tight prose-h2:text-3xl prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-[color:var(--acc)] prose-blockquote:rounded-2xl prose-blockquote:border prose-blockquote:border-[color:var(--acc-brd)] prose-blockquote:bg-gradient-card prose-blockquote:px-7 prose-blockquote:py-6 prose-blockquote:font-display prose-blockquote:text-xl prose-blockquote:not-italic prose-blockquote:text-foreground prose-li:text-muted-foreground prose-img:rounded-2xl"
                     dangerouslySetInnerHTML={{ __html: localized(article, "body_html", i18n.language) }}
                   />
                 )}
 
                 {(article.ai_generated || article.source_url) && (
                   <div className="flex flex-wrap items-center gap-3">
-                    {(article as { ai_generated?: boolean }).ai_generated && (
+                    {article.ai_generated && (
                       <span className="inline-flex w-fit items-center rounded-full border border-border bg-white/[0.04] px-2.5 py-1 text-[10.5px] font-medium text-muted-foreground">
                         {t("aiBadge")}
                       </span>
@@ -223,7 +227,8 @@ export default function NewsArticle() {
                         href={article.source_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
+                        style={{ color: "var(--acc)" }}
                       >
                         {t("toSource")} <ExternalLink className="h-4 w-4" />
                       </a>
@@ -233,10 +238,13 @@ export default function NewsArticle() {
 
                 {/* CTA-Box */}
                 {article.cta_title && (
-                  <div className="relative mt-5 flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-3xl border border-primary/25 bg-gradient-card p-7 md:p-10">
+                  <div
+                    className="relative mt-5 flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-3xl border bg-gradient-card p-7 md:p-10"
+                    style={{ borderColor: "var(--acc-brd)" }}
+                  >
                     <div
                       className="pointer-events-none absolute -right-28 -top-28 h-[300px] w-[300px] rounded-full"
-                      style={{ background: "radial-gradient(circle, hsl(71 91% 51% / 0.14), transparent 70%)" }}
+                      style={{ background: "radial-gradient(circle, var(--acc-glow), transparent 70%)" }}
                     />
                     <div className="relative flex flex-col gap-2">
                       <h3 className="m-0 font-display text-2xl font-extrabold tracking-tight text-foreground">
@@ -246,7 +254,7 @@ export default function NewsArticle() {
                         <p className="m-0 text-[15px] text-muted-foreground">{article.cta_subtitle}</p>
                       )}
                     </div>
-                    <Button asChild size="lg" className="relative">
+                    <Button asChild size="lg" className="relative" style={{ background: "var(--acc)", color: "#0A0A0A" }}>
                       <a href={article.cta_url ?? "/booking"}>
                         {article.cta_label || t("ctaDefaultLabel")} <ArrowRight className="ml-2 h-4 w-4" />
                       </a>
@@ -262,7 +270,10 @@ export default function NewsArticle() {
                     {t("writtenBy")}
                   </span>
                   <div className="flex items-center gap-3">
-                    <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-gradient-to-br from-primary to-[hsl(71,80%,45%)] font-display text-base font-extrabold text-primary-foreground">
+                    <span
+                      className="flex h-11 w-11 flex-none items-center justify-center rounded-full font-display text-base font-extrabold"
+                      style={{ background: "var(--acc)", color: "#0A0A0A" }}
+                    >
                       {(authorName ?? "P2G").slice(0, 2).toUpperCase()}
                     </span>
                     <div className="flex flex-col">
@@ -280,7 +291,7 @@ export default function NewsArticle() {
                       href="https://www.instagram.com/padel2go"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white/[0.04] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white/[0.04] text-muted-foreground transition-colors hover:border-[color:var(--acc-brd)] hover:text-[color:var(--acc)]"
                     >
                       <Instagram className="h-[17px] w-[17px]" />
                     </a>
@@ -298,29 +309,35 @@ export default function NewsArticle() {
                       href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white/[0.04] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white/[0.04] text-muted-foreground transition-colors hover:border-[color:var(--acc-brd)] hover:text-[color:var(--acc)]"
                     >
                       <Linkedin className="h-[17px] w-[17px]" />
                     </a>
                     <button
                       aria-label={t("copyLink")}
                       onClick={copyLink}
-                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white/[0.04] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white/[0.04] text-muted-foreground transition-colors hover:border-[color:var(--acc-brd)] hover:text-[color:var(--acc)]"
                     >
-                      {copied ? <Check className="h-[17px] w-[17px] text-primary" /> : <LinkIcon className="h-[17px] w-[17px]" />}
+                      {copied ? (
+                        <Check className="h-[17px] w-[17px]" style={{ color: "var(--acc)" }} />
+                      ) : (
+                        <LinkIcon className="h-[17px] w-[17px]" />
+                      )}
                     </button>
                   </div>
                   <div className="h-px bg-border" />
                   <button
                     onClick={toggle}
                     disabled={pending}
-                    className={`inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                    aria-pressed={liked}
+                    className="inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors"
+                    style={
                       liked
-                        ? "border-primary bg-primary/15 text-primary"
-                        : "border-border bg-white/[0.04] text-muted-foreground hover:border-primary/40 hover:text-primary"
-                    }`}
+                        ? { color: "var(--acc)", borderColor: "var(--acc)", background: "var(--acc-bg)" }
+                        : { color: "hsl(var(--muted-foreground))", borderColor: "hsl(var(--border))", background: "rgba(255,255,255,0.04)" }
+                    }
                   >
-                    <ThumbsUp className={`h-4 w-4 ${liked ? "fill-primary" : ""}`} />
+                    <ThumbsUp className="h-4 w-4" style={liked ? { fill: acc } : undefined} />
                     {likeCount}
                   </button>
                 </div>
@@ -331,7 +348,7 @@ export default function NewsArticle() {
                       {t("location")}
                     </span>
                     <div className="flex items-start gap-2.5">
-                      <MapPin className="mt-0.5 h-[17px] w-[17px] flex-none text-primary" />
+                      <MapPin className="mt-0.5 h-[17px] w-[17px] flex-none" style={{ color: "var(--acc)" }} />
                       <div className="flex flex-col gap-0.5">
                         <span className="text-[15px] font-semibold text-foreground">{location.name}</span>
                         <span className="text-[13.5px] leading-normal text-muted-foreground">
@@ -343,7 +360,8 @@ export default function NewsArticle() {
                     </div>
                     <Link
                       to="/booking"
-                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
+                      style={{ color: "var(--acc)" }}
                     >
                       {t("checkAvailability")} <ArrowRight className="h-[15px] w-[15px]" />
                     </Link>
@@ -353,12 +371,16 @@ export default function NewsArticle() {
             </div>
           </div>
 
-          {/* ── Related ── */}
+          {/* ── Related — Cards tragen ihre eigene Topic-Farbe (Regel 2) ── */}
           {related.length > 0 && (
             <div className="mx-auto flex max-w-[1280px] flex-col gap-5 px-5 pb-24 pt-5">
               <div className="flex items-center justify-between gap-4 border-b border-border pb-1.5">
                 <h2 className="m-0 font-display text-xl font-bold text-foreground">{t("related")}</h2>
-                <Link to="/news" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+                <Link
+                  to="/news"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
+                  style={{ color: "var(--acc)" }}
+                >
                   {t("allNews")} <ArrowRight className="h-[15px] w-[15px]" />
                 </Link>
               </div>

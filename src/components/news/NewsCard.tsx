@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Image as ImageIcon } from "lucide-react";
+import { ArrowRight, Image as ImageIcon, ThumbsUp } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { localized } from "@/lib/localized";
-import { categoryLabel, type Article } from "@/types/article";
+import { useArticleLike } from "@/hooks/useArticles";
+import { topicColor, type Article } from "@/types/article";
 
 interface NewsCardProps {
   article: Article;
@@ -14,10 +15,16 @@ interface NewsCardProps {
   index?: number;
 }
 
-/** 4:5-Hochformat-News-Card nach Claude Design (News Web). */
+/**
+ * 4:5-Hochformat-News-Card nach Claude Design (News Web).
+ * Badge, Weiterlesen-Link und Hover-Border tragen immer die Farbe des
+ * EIGENEN Topics — unabhängig vom aktiven Seitenfilter (Colorcode Regel 2).
+ */
 export function NewsCard({ article, variant = "grid", index = 0 }: NewsCardProps) {
   const { t, i18n } = useTranslation("news");
+  const { liked, likeCount, toggle, pending } = useArticleLike(article);
   const isRail = variant === "rail";
+  const acc = topicColor(article.topic);
 
   const title = localized(article, "title", i18n.language);
   const dateLabel = article.published_at
@@ -25,7 +32,12 @@ export function NewsCard({ article, variant = "grid", index = 0 }: NewsCardProps
         locale: i18n.language.startsWith("en") ? enUS : de,
       })
     : null;
-  const catLabel = categoryLabel(article.category, i18n.language);
+
+  const onLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!pending) toggle();
+  };
 
   return (
     <motion.div
@@ -34,10 +46,11 @@ export function NewsCard({ article, variant = "grid", index = 0 }: NewsCardProps
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.5, delay: Math.min(index, 5) * 0.07, ease: [0.16, 1, 0.3, 1] }}
       className={isRail ? "flex-none w-[min(340px,78vw)] snap-start" : undefined}
+      style={{ "--card-acc": acc, "--card-acc-brd": `${acc}66` } as React.CSSProperties}
     >
       <Link to={`/news/${article.slug}`} className="group flex flex-col gap-3.5 no-underline">
         <div
-          className={`relative aspect-[4/5] overflow-hidden border border-border/80 bg-gradient-card transition-all duration-300 group-hover:border-primary/50 group-hover:-translate-y-1 ${
+          className={`relative aspect-[4/5] overflow-hidden border border-border/80 bg-gradient-card transition-all duration-300 group-hover:border-[color:var(--card-acc-brd)] group-hover:-translate-y-1 ${
             isRail ? "rounded-3xl group-hover:shadow-[0_18px_46px_rgba(0,0,0,0.6)]" : "rounded-[20px]"
           }`}
         >
@@ -62,17 +75,25 @@ export function NewsCard({ article, variant = "grid", index = 0 }: NewsCardProps
             }}
           />
 
-          {catLabel && (
-            <span
-              className={`absolute font-stat uppercase whitespace-nowrap rounded-full border backdrop-blur-md ${
-                isRail
-                  ? "top-4 left-4 text-[10px] tracking-[0.16em] text-primary bg-black/60 border-primary/35 px-3 py-1.5"
-                  : "top-3.5 left-3.5 text-[9.5px] tracking-[0.16em] text-white bg-black/60 border-white/15 px-2.5 py-1"
-              }`}
-            >
-              {catLabel}
-            </span>
-          )}
+          <span
+            className={`absolute left-3.5 top-3.5 whitespace-nowrap rounded-full border bg-black/60 font-stat uppercase backdrop-blur-md ${
+              isRail ? "px-3 py-1.5 text-[10px] tracking-[0.16em]" : "px-2.5 py-1 text-[9.5px] tracking-[0.16em]"
+            }`}
+            style={{ color: acc, borderColor: `${acc}59` }}
+          >
+            {article.topic}
+          </span>
+
+          <button
+            onClick={onLike}
+            aria-label={t("like")}
+            aria-pressed={liked}
+            className="absolute right-3.5 top-3.5 inline-flex items-center gap-1.5 rounded-full border bg-black/60 px-2.5 py-1.5 text-[11.5px] font-semibold backdrop-blur-md transition-colors"
+            style={liked ? { color: acc, borderColor: `${acc}66` } : { color: "rgba(255,255,255,0.75)", borderColor: "rgba(255,255,255,0.16)" }}
+          >
+            <ThumbsUp className="h-3.5 w-3.5" style={liked ? { fill: acc } : undefined} />
+            {likeCount}
+          </button>
 
           <div className={`absolute inset-x-0 bottom-0 flex flex-col ${isRail ? "gap-2 p-5" : "gap-1.5 p-4"}`}>
             <span className={`font-stat tracking-[0.1em] text-white/60 ${isRail ? "text-[11px]" : "text-[10.5px]"}`}>
@@ -86,7 +107,7 @@ export function NewsCard({ article, variant = "grid", index = 0 }: NewsCardProps
               {title}
             </h3>
             {isRail && (
-              <span className="inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-primary">
+              <span className="inline-flex items-center gap-1.5 text-[13.5px] font-semibold" style={{ color: acc }}>
                 {t("readMore")} <ArrowRight className="h-[15px] w-[15px] transition-transform group-hover:translate-x-1" />
               </span>
             )}
