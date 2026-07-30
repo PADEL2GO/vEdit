@@ -53,7 +53,7 @@ export default function News() {
       <Navigation />
 
       {/* Seiten-Akzent folgt dem aktiven Filter (Colorcode Regel 1) */}
-      <main className="news-root min-h-screen bg-background" style={accentVars(TOPIC_COLORS[activeFilter])}>
+      <main className="news-root min-h-screen bg-background pt-16 md:pt-20" style={accentVars(TOPIC_COLORS[activeFilter])}>
         <div className="mx-auto flex max-w-[1280px] flex-col gap-11 px-5 pb-24 pt-14">
           {/* ── Header ── */}
           <motion.div
@@ -82,7 +82,7 @@ export default function News() {
               <p className="m-0 text-[17px] leading-[1.6] text-muted-foreground">{t("subline")}</p>
             </div>
             <a
-              href="https://www.instagram.com/padel2go"
+              href="https://www.instagram.com/padel2go.official"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-border bg-white/[0.04] px-5 py-2.5 text-[14.5px] font-semibold text-muted-foreground transition-colors hover:border-[color:var(--acc-brd)] hover:text-[color:var(--acc)]"

@@ -288,7 +288,7 @@ export default function NewsArticle() {
                   <div className="flex gap-2">
                     <a
                       aria-label="Instagram"
-                      href="https://www.instagram.com/padel2go"
+                      href="https://www.instagram.com/padel2go.official"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white/[0.04] text-muted-foreground transition-colors hover:border-[color:var(--acc-brd)] hover:text-[color:var(--acc)]"
