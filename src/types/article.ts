@@ -41,8 +41,11 @@ export interface Article {
   id: string;
   slug: string;
   title: string;
-  /** EN-Übersetzungen (DeepL) — befüllt = Artikel gilt als übersetzt */
+  /** EN-Übersetzungen (DeepL oder manuell) — title_en + body_html_en befüllt = Artikel gilt als übersetzt */
   title_en?: string | null;
+  title_highlight_en?: string | null;
+  excerpt_en?: string | null;
+  lead_en?: string | null;
   body_html_en?: string | null;
   title_highlight: string | null;
   excerpt: string | null;

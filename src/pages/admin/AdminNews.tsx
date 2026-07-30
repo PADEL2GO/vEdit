@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -64,6 +65,11 @@ interface ArticleForm {
   excerpt: string;
   lead: string;
   body_html: string;
+  title_en: string;
+  title_highlight_en: string;
+  excerpt_en: string;
+  lead_en: string;
+  body_html_en: string;
   cover_image_url: string;
   cover_alt: string;
   source_url: string;
@@ -91,6 +97,11 @@ const emptyForm: ArticleForm = {
   excerpt: "",
   lead: "",
   body_html: "",
+  title_en: "",
+  title_highlight_en: "",
+  excerpt_en: "",
+  lead_en: "",
+  body_html_en: "",
   cover_image_url: "",
   cover_alt: "",
   source_url: "",
@@ -109,6 +120,10 @@ const emptyForm: ArticleForm = {
   is_published: false,
   sort_order: 0,
 };
+
+const EN_FIELDS = ["title_en", "title_highlight_en", "excerpt_en", "lead_en", "body_html_en"] as const;
+
+const isEmptyHtml = (v: string) => !v.trim() || v.trim() === "<p></p>";
 
 /** Live-Vorschau: 4:5-Card + Artikel-Kopf, exakt in der Topic-Farbe des Formulars. */
 function ArticlePreview({ form }: { form: ArticleForm }) {
@@ -320,6 +335,8 @@ export default function AdminNews() {
   const [existingPublishedAt, setExistingPublishedAt] = useState<string | null>(null);
   const [form, setForm] = useState<ArticleForm>(emptyForm);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [langTab, setLangTab] = useState<"de" | "en">("de");
+  const [initialEn, setInitialEn] = useState<Record<string, string>>({});
   // Bumped whenever AI-generation replaces the body — forces Tiptap (uncontrolled) to remount.
   const [editorKey, setEditorKey] = useState(0);
 
@@ -333,6 +350,8 @@ export default function AdminNews() {
     setEditId(null);
     setExistingPublishedAt(null);
     setForm(emptyForm);
+    setInitialEn(Object.fromEntries(EN_FIELDS.map((f) => [f, ""])));
+    setLangTab("de");
     setEditorKey(0);
     setDialogOpen(true);
   };
@@ -340,6 +359,8 @@ export default function AdminNews() {
   const openEdit = (a: Article) => {
     setEditId(a.id);
     setExistingPublishedAt(a.published_at);
+    setInitialEn(Object.fromEntries(EN_FIELDS.map((f) => [f, (a[f] ?? "") as string])));
+    setLangTab("de");
     setEditorKey(0);
     setForm({
       title: a.title,
@@ -349,6 +370,11 @@ export default function AdminNews() {
       excerpt: a.excerpt ?? "",
       lead: a.lead ?? "",
       body_html: a.body_html ?? "",
+      title_en: a.title_en ?? "",
+      title_highlight_en: a.title_highlight_en ?? "",
+      excerpt_en: a.excerpt_en ?? "",
+      lead_en: a.lead_en ?? "",
+      body_html_en: a.body_html_en ?? "",
       cover_image_url: a.cover_image_url ?? "",
       cover_alt: a.cover_alt ?? "",
       source_url: a.source_url ?? "",
@@ -392,11 +418,20 @@ export default function AdminNews() {
       return;
     }
     const { slugTouched: _ignored, ...payload } = form;
+    const enUpdates: Record<string, string | boolean | null> = {};
+    for (const f of EN_FIELDS) {
+      if (form[f] !== initialEn[f]) {
+        const v = f === "body_html_en" && isEmptyHtml(form[f]) ? "" : form[f].trim();
+        enUpdates[f] = v || null;
+        enUpdates[`${f}_locked`] = !!v;
+      }
+    }
     saveMutation.mutate(
       {
         ...payload,
         id: editId ?? undefined,
         existingPublishedAt,
+        enUpdates,
       },
       {
         onSuccess: (newId: string) => {
@@ -596,37 +631,148 @@ export default function AdminNews() {
               }}
             />
 
-            <div>
-              <div className="flex items-center justify-between">
-                <Label>Titel *</Label>
-                <CharCount value={form.title} limit={60} />
-              </div>
-              <Input
-                value={form.title}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    title: e.target.value,
-                    slug: f.slugTouched ? f.slug : slugify(e.target.value),
-                  }))
-                }
-                required
-              />
-            </div>
+            <Tabs value={langTab} onValueChange={(v) => setLangTab(v as "de" | "en")}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="de">Deutsch</TabsTrigger>
+                <TabsTrigger value="en">English</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="de" className="mt-4 space-y-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label>Titel *</Label>
+                    <CharCount value={form.title} limit={60} />
+                  </div>
+                  <Input
+                    value={form.title}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        title: e.target.value,
+                        slug: f.slugTouched ? f.slug : slugify(e.target.value),
+                      }))
+                    }
+                    required
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label>Titel-Highlight</Label>
+                    <CharCount value={form.title_highlight} limit={30} />
+                  </div>
+                  <Input
+                    value={form.title_highlight}
+                    onChange={(e) => setForm((f) => ({ ...f, title_highlight: e.target.value }))}
+                    placeholder="z. B. zwei Courts, ein Statement."
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Wird in der H1 in Topic-Farbe + kursiv angehängt.</p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label>Kurzbeschreibung (Vorschau)</Label>
+                    <CharCount value={form.excerpt} limit={120} />
+                  </div>
+                  <Textarea
+                    value={form.excerpt}
+                    onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
+                    rows={2}
+                    placeholder="Kurzer Anreißer unter der Card im News-Grid."
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label>Lead (Einstiegsabsatz)</Label>
+                    <CharCount value={form.lead} limit={280} />
+                  </div>
+                  <Textarea
+                    value={form.lead}
+                    onChange={(e) => setForm((f) => ({ ...f, lead: e.target.value }))}
+                    rows={3}
+                    placeholder="Fett gesetzter Einstieg im Artikel-Hero (optional)."
+                  />
+                </div>
+
+                <div>
+                  <Label>Inhalt</Label>
+                  <ArticleEditor
+                    key={`de-${editId ?? "new"}-${editorKey}`}
+                    value={form.body_html}
+                    onChange={(html) => setForm((f) => ({ ...f, body_html: html }))}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="en" className="mt-4 space-y-4">
+                <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                  Leere Felder zeigen auf der englischen Seite automatisch die deutsche Fassung.
+                  Von Hand geänderte Felder werden gesperrt und von der Auto-Übersetzung nicht mehr überschrieben.
+                </p>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label>Title (EN)</Label>
+                    <CharCount value={form.title_en} limit={60} />
+                  </div>
+                  <Input
+                    value={form.title_en}
+                    onChange={(e) => setForm((f) => ({ ...f, title_en: e.target.value }))}
+                    placeholder={form.title || "English title"}
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label>Title-Highlight (EN)</Label>
+                    <CharCount value={form.title_highlight_en} limit={30} />
+                  </div>
+                  <Input
+                    value={form.title_highlight_en}
+                    onChange={(e) => setForm((f) => ({ ...f, title_highlight_en: e.target.value }))}
+                    placeholder={form.title_highlight || "—"}
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label>Excerpt (EN)</Label>
+                    <CharCount value={form.excerpt_en} limit={120} />
+                  </div>
+                  <Textarea
+                    value={form.excerpt_en}
+                    onChange={(e) => setForm((f) => ({ ...f, excerpt_en: e.target.value }))}
+                    rows={2}
+                    placeholder={form.excerpt || "English excerpt"}
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label>Lead (EN)</Label>
+                    <CharCount value={form.lead_en} limit={280} />
+                  </div>
+                  <Textarea
+                    value={form.lead_en}
+                    onChange={(e) => setForm((f) => ({ ...f, lead_en: e.target.value }))}
+                    rows={3}
+                    placeholder={form.lead || "English lead paragraph"}
+                  />
+                </div>
+
+                <div>
+                  <Label>Content (EN)</Label>
+                  <ArticleEditor
+                    key={`en-${editId ?? "new"}-${editorKey}`}
+                    value={form.body_html_en}
+                    onChange={(html) => setForm((f) => ({ ...f, body_html_en: html }))}
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center justify-between">
-                  <Label>Titel-Highlight</Label>
-                  <CharCount value={form.title_highlight} limit={30} />
-                </div>
-                <Input
-                  value={form.title_highlight}
-                  onChange={(e) => setForm((f) => ({ ...f, title_highlight: e.target.value }))}
-                  placeholder="z. B. zwei Courts, ein Statement."
-                />
-                <p className="text-xs text-muted-foreground mt-1">Wird in der H1 lime + kursiv angehängt.</p>
-              </div>
               <div>
                 <Label>Slug (URL)</Label>
                 <Input
@@ -636,45 +782,18 @@ export default function AdminNews() {
                 />
                 <p className="text-xs text-muted-foreground mt-1">/news/{form.slug || "…"}</p>
               </div>
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <Label>Kurzbeschreibung (Vorschau)</Label>
-                <CharCount value={form.excerpt} limit={120} />
+              <div>
+                <Label>Quelle / Link (optional)</Label>
+                <Input
+                  type="url"
+                  value={form.source_url}
+                  onChange={(e) => setForm((f) => ({ ...f, source_url: e.target.value }))}
+                  placeholder="https://…"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Wird als "Zur Quelle"-Link unter dem Artikel angezeigt.
+                </p>
               </div>
-              <Textarea
-                value={form.excerpt}
-                onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
-                rows={2}
-                placeholder="Kurzer Anreißer unter der Card im News-Grid."
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <Label>Lead (Einstiegsabsatz)</Label>
-                <CharCount value={form.lead} limit={280} />
-              </div>
-              <Textarea
-                value={form.lead}
-                onChange={(e) => setForm((f) => ({ ...f, lead: e.target.value }))}
-                rows={3}
-                placeholder="Fett gesetzter Einstieg im Artikel-Hero (optional)."
-              />
-            </div>
-
-            <div>
-              <Label>Quelle / Link (optional)</Label>
-              <Input
-                type="url"
-                value={form.source_url}
-                onChange={(e) => setForm((f) => ({ ...f, source_url: e.target.value }))}
-                placeholder="https://…"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Wird als "Zur Quelle"-Link unter dem Artikel angezeigt.
-              </p>
             </div>
 
             <div>
@@ -694,15 +813,6 @@ export default function AdminNews() {
                 value={form.cover_alt}
                 onChange={(e) => setForm((f) => ({ ...f, cover_alt: e.target.value }))}
                 placeholder="Alt-Text (Barrierefreiheit)"
-              />
-            </div>
-
-            <div>
-              <Label>Inhalt</Label>
-              <ArticleEditor
-                key={`${editId ?? "new"}-${editorKey}`}
-                value={form.body_html}
-                onChange={(html) => setForm((f) => ({ ...f, body_html: html }))}
               />
             </div>
 
@@ -864,7 +974,19 @@ export default function AdminNews() {
             </div>
 
             <div className="lg:sticky lg:top-2 self-start">
-              <ArticlePreview form={form} />
+              <ArticlePreview
+                form={
+                  langTab === "en"
+                    ? {
+                        ...form,
+                        title: form.title_en || form.title,
+                        title_highlight: form.title_highlight_en || form.title_highlight,
+                        excerpt: form.excerpt_en || form.excerpt,
+                        lead: form.lead_en || form.lead,
+                      }
+                    : form
+                }
+              />
             </div>
             </div>
 

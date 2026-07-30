@@ -58,6 +58,11 @@ export interface ArticleInput {
   sort_order: number;
   /** existing published_at of the row being edited — used to preserve first-publish timestamp */
   existingPublishedAt?: string | null;
+  /**
+   * Manuell geänderte EN-Felder (title_en, …, jeweils + _en_locked) — nur die
+   * tatsächlich geänderten, damit unangetastete DeepL-Werte erhalten bleiben.
+   */
+  enUpdates?: Record<string, string | boolean | null>;
 }
 
 /** Upload an image to the shared `media` bucket under news/, return its public URL. */
@@ -113,6 +118,7 @@ export function useSaveArticle() {
         published_at: publishedAt,
         sort_order: data.sort_order,
         updated_at: new Date().toISOString(),
+        ...(data.enUpdates ?? {}),
       };
 
       if (data.id) {
