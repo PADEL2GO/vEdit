@@ -164,7 +164,10 @@ function ArticlePreview({ form }: { form: ArticleForm }) {
         {form.excerpt && <p className="mt-2 px-0.5 text-xs leading-normal text-muted-foreground">{form.excerpt}</p>}
       </div>
 
-      <div className="rounded-2xl border border-border bg-black p-4">
+      <div
+        className="rounded-2xl border border-border p-4"
+        style={{ background: `radial-gradient(120% 120% at 85% 0%, ${acc}26, transparent 60%), #000` }}
+      >
         <div className="flex flex-wrap items-center gap-2">
           <span
             className="rounded-full border bg-black/60 px-2.5 py-1 font-stat text-[9px] uppercase tracking-[0.16em]"
@@ -806,7 +809,9 @@ export default function AdminNews() {
               <Input type="file" accept="image/*" onChange={handleCoverUpload} disabled={uploadingCover} />
               {uploadingCover && <p className="text-xs text-muted-foreground mt-1">Hochladen…</p>}
               <p className="text-xs text-muted-foreground mt-1">
-                Unten liegt ein dunkler Verlauf mit Titel — wichtige Bildelemente in die obere Hälfte legen.
+                Wird nur auf den 4:5-News-Cards gezeigt (unten liegt ein dunkler Verlauf mit Titel —
+                wichtige Bildelemente in die obere Hälfte). Die Artikelseite nutzt als Hero den
+                Farb-Shader in Topic-Farbe.
               </p>
               <Input
                 className="mt-2"

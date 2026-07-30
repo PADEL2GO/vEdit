@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { NewsCard } from "@/components/news/NewsCard";
+import { NewsHeroShader } from "@/components/news/NewsHeroShader";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { localized } from "@/lib/localized";
@@ -144,20 +145,16 @@ export default function NewsArticle() {
       <main className="news-root min-h-screen bg-background" style={accentVars(acc)}>
         <ReadingProgress />
         <article>
-          {/* ── Hero ── */}
+          {/* ── Hero: immer der Farb-Shader in Topic-Farbe (das 4:5-Cover bleibt den Cards vorbehalten) ── */}
           <div className="relative flex min-h-[min(78vh,720px)] items-end overflow-hidden">
-            {article.cover_image_url && (
-              <img
-                src={article.cover_image_url}
-                alt={article.cover_alt ?? title}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            )}
+            <div className="absolute inset-0">
+              <NewsHeroShader color={acc} />
+            </div>
             <div
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(195deg, hsl(0 0% 0% / 0.28) 18%, hsl(0 0% 0% / 0.86) 76%, hsl(var(--background)))",
+                  "linear-gradient(195deg, hsl(0 0% 0% / 0.2) 18%, hsl(0 0% 0% / 0.78) 76%, hsl(var(--background)))",
               }}
             />
             <motion.div
