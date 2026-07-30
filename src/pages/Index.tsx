@@ -242,7 +242,7 @@ const Index = () => {
         <LocationTeasersSection />
 
         {/* ── NEWS / ARTICLES (backend: articles) ───────────────── */}
-        <ArticleFeed surface="logged_out" placement="public" />
+        <ArticleFeed />
 
         <SectionDivider variant="glow" />
 

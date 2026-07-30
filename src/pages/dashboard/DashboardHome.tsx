@@ -21,7 +21,7 @@ import { useMarketplaceItems } from "@/hooks/useMarketplaceItems";
 import { useDashboardEvents, useMyEventRegistrations } from "@/hooks/useEventRegistrations";
 import { eur as eurFmt, ptsFmt, maxRedeemablePoints } from "@/lib/marketplace";
 import { useArticles } from "@/hooks/useArticles";
-import type { Article } from "@/types/article";
+import { NewsCard } from "@/components/news/NewsCard";
 import courtHero from "@/assets/courts/skypadel-outdoor.jpg";
 
 const MON = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
@@ -123,9 +123,6 @@ const DashboardHome = () => {
     { icon: ShoppingBag, label: "Marketplace", sub: `${shopItems.length} Artikel im Shop`, to: "/marketplace" },
     { icon: UserIcon, label: "Mein Profil", sub: "Konto & Einstellungen", to: "/account" },
   ];
-
-  const featured = articles?.[0];
-  const sideArticles = (articles ?? []).slice(1, 3);
 
   return (
     <DashboardLayout>
@@ -414,11 +411,18 @@ const DashboardHome = () => {
                   </h2>
                 </div>
               </div>
-              <div className="grid gap-5 lg:grid-cols-[7fr_5fr]">
-                {featured && <NewsFeatured article={featured} />}
-                <div className="flex flex-col gap-5">
-                  {sideArticles.map((a) => <NewsSmall key={a.id} article={a} />)}
-                </div>
+              <div className="grid grid-cols-1 gap-[22px] sm:grid-cols-2 lg:grid-cols-3">
+                {(articles ?? []).slice(0, 3).map((a, i) => (
+                  <NewsCard key={a.id} article={a} index={i} />
+                ))}
+              </div>
+              <div className="flex justify-center pt-2">
+                <Link
+                  to="/news"
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-white/[0.04] px-6 py-3 text-[15px] font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                >
+                  Alle News ansehen <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
           )}
@@ -428,42 +432,7 @@ const DashboardHome = () => {
   );
 };
 
-const articleDate = (iso: string | null) => (iso ? format(new Date(iso), "d. MMMM yyyy", { locale: de }) : "");
 
-function NewsFeatured({ article }: { article: Article }) {
-  const href = article.source_url;
-  const inner = (
-    <div className="relative min-h-[380px] h-full flex flex-col justify-end rounded-2xl overflow-hidden border border-border/60">
-      {article.cover_image_url && <img src={article.cover_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(200deg, rgba(0,0,0,0.1), rgba(0,0,0,0.94) 80%)" }} />
-      <span className="absolute top-[18px] left-[18px] font-stat text-[11px] tracking-[0.14em] uppercase bg-black/60 backdrop-blur border border-white/15 rounded-full px-3.5 py-1.5">Featured</span>
-      <div className="relative flex flex-col items-start gap-2.5 p-[clamp(22px,3vw,30px)]">
-        <span className="font-stat text-xs text-primary">{articleDate(article.published_at)}</span>
-        <h3 className="font-display font-extrabold text-[clamp(23px,3vw,31px)] leading-tight tracking-tight">{article.title}</h3>
-        {article.excerpt && <p className="text-[15px] leading-relaxed text-foreground/70 max-w-[480px]">{article.excerpt}</p>}
-        {href && <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">Weiterlesen<ArrowRight className="w-4 h-4" /></span>}
-      </div>
-    </div>
-  );
-  return href ? <a href={href} target="_blank" rel="noopener noreferrer">{inner}</a> : <div>{inner}</div>;
-}
 
-function NewsSmall({ article }: { article: Article }) {
-  const href = article.source_url;
-  const inner = (
-    <div className="flex h-full min-h-[190px] rounded-2xl overflow-hidden border border-border/60 bg-gradient-card">
-      <span className="relative w-[120px] sm:w-[132px] flex-none">
-        {article.cover_image_url && <img src={article.cover_image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />}
-        <span className="absolute inset-0" style={{ background: "linear-gradient(90deg, transparent 55%, #0a0a0a)" }} />
-      </span>
-      <span className="flex flex-col gap-2 p-5 min-w-0 flex-1">
-        <span className="font-stat text-[11.5px] text-muted-foreground">{articleDate(article.published_at)}</span>
-        <span className="font-display font-bold text-[17.5px] leading-tight line-clamp-3">{article.title}</span>
-        {href && <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-primary mt-auto">Weiterlesen<ArrowRight className="w-3 h-3" /></span>}
-      </span>
-    </div>
-  );
-  return href ? <a href={href} target="_blank" rel="noopener noreferrer" className="flex-1">{inner}</a> : <div className="flex-1">{inner}</div>;
-}
 
 export default DashboardHome;

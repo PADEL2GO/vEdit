@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import type { Article } from "@/types/article";
 
 const ARTICLE_SELECT = "*";
@@ -93,17 +94,40 @@ const readLiked = (): string[] => {
   }
 };
 
+/** Eigene Likes des eingeloggten Users — RLS liefert nur die eigenen Zeilen. */
+function useMyNewsLikes() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["my-news-likes", user?.id ?? "anon"],
+    enabled: !!user,
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await (supabase as any).from("news_likes").select("article_id");
+      if (error) throw error;
+      return (data ?? []).map((r: { article_id: string }) => r.article_id);
+    },
+  });
+}
+
 /**
  * Like-Toggle über die Edge Function news-like (1× pro User bzw. IP, serverseitig
- * erzwungen). localStorage spiegelt nur den Button-Zustand des Geräts.
+ * erzwungen). Eingeloggt kommt der Button-Zustand aus der DB (geräteübergreifend),
+ * für Gäste spiegelt localStorage den Zustand dieses Geräts.
  */
 export function useArticleLike(article: Article | null | undefined) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { data: myLikes } = useMyNewsLikes();
   const [pending, setPending] = useState(false);
   const [localLiked, setLocalLiked] = useState<boolean | null>(null);
   const [localCount, setLocalCount] = useState<number | null>(null);
 
-  const liked = localLiked ?? (article ? readLiked().includes(article.id) : false);
+  const liked =
+    localLiked ??
+    (article
+      ? user
+        ? (myLikes ?? []).includes(article.id)
+        : readLiked().includes(article.id)
+      : false);
   const likeCount = localCount ?? article?.like_count ?? 0;
 
   const toggle = async () => {
@@ -126,6 +150,7 @@ export function useArticleLike(article: Article | null | undefined) {
       }
       queryClient.invalidateQueries({ queryKey: ["article", article.slug] });
       queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["my-news-likes"] });
     } finally {
       setPending(false);
     }
