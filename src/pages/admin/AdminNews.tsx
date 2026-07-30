@@ -34,6 +34,7 @@ import {
   Plus,
   Sparkles,
   ThumbsUp,
+  UserRound,
   Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -47,13 +48,16 @@ import {
   slugify,
   uploadArticleImage,
   useAdminArticles,
+  useAdminNewsAuthors,
   useDeleteArticle,
+  useDeleteNewsAuthor,
   usePublishArticle,
   useReorderArticles,
   useSaveArticle,
+  useSaveNewsAuthor,
 } from "@/hooks/useAdminArticles";
 import { useTranslateContent, toastTranslateResult } from "@/hooks/useTranslateContent";
-import { AUDIENCE_LABELS, TOPICS, topicColor, type Article, type ArticleAudience } from "@/types/article";
+import { AUDIENCE_LABELS, TOPICS, topicColor, type Article, type ArticleAudience, type NewsAuthor } from "@/types/article";
 
 const ARTICLE_TRANSLATE_FIELDS = ["title", "excerpt", "body_html", "title_highlight", "lead"];
 
@@ -79,6 +83,7 @@ interface ArticleForm {
   featured_rank: number;
   reading_minutes: number;
   location_id: string;
+  author_id: string;
   cta_title: string;
   cta_subtitle: string;
   cta_label: string;
@@ -111,6 +116,7 @@ const emptyForm: ArticleForm = {
   featured_rank: 0,
   reading_minutes: 3,
   location_id: "",
+  author_id: "",
   cta_title: "",
   cta_subtitle: "",
   cta_label: "",
@@ -120,6 +126,143 @@ const emptyForm: ArticleForm = {
   is_published: false,
   sort_order: 0,
 };
+
+/** Autoren-Verwaltung: Name, Rolle (DE/EN) und Foto — erscheint als „Geschrieben von". */
+function AuthorManager() {
+  const { data: authors = [] } = useAdminNewsAuthors();
+  const saveMutation = useSaveNewsAuthor();
+  const deleteMutation = useDeleteNewsAuthor();
+  const [newName, setNewName] = useState("");
+  const [newRole, setNewRole] = useState("");
+
+  const save = (a: NewsAuthor, patch: Partial<NewsAuthor>) =>
+    saveMutation.mutate({
+      id: a.id,
+      name: patch.name ?? a.name,
+      role: (patch.role ?? a.role) ?? "",
+      role_en: (patch.role_en ?? a.role_en) ?? "",
+      avatar_url: (patch.avatar_url ?? a.avatar_url) ?? "",
+    });
+
+  const uploadAvatar = async (a: NewsAuthor, file: File) => {
+    try {
+      const url = await uploadArticleImage(file);
+      save(a, { avatar_url: url });
+    } catch {
+      toast.error("Foto-Upload fehlgeschlagen");
+    }
+  };
+
+  const addAuthor = () => {
+    if (!newName.trim()) return;
+    saveMutation.mutate(
+      { name: newName.trim(), role: newRole.trim(), role_en: "", avatar_url: "" },
+      {
+        onSuccess: () => {
+          setNewName("");
+          setNewRole("");
+          toast.success("Autor angelegt");
+        },
+      },
+    );
+  };
+
+  return (
+    <Card className="p-5">
+      <div className="mb-4 flex items-start gap-3">
+        <UserRound className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+        <div>
+          <h2 className="font-bold">Autoren</h2>
+          <p className="text-sm text-muted-foreground">
+            Erscheinen als „Geschrieben von" auf der Artikelseite — Foto anklicken zum Hochladen.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {authors.map((a) => (
+          <div key={a.id} className="flex items-center gap-2 rounded-lg border border-border p-2">
+            <label className="cursor-pointer" title="Foto hochladen">
+              {a.avatar_url ? (
+                <img src={a.avatar_url} alt={a.name} className="h-10 w-10 rounded-full object-cover" />
+              ) : (
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-display text-sm font-extrabold text-primary-foreground">
+                  {a.name.slice(0, 2).toUpperCase()}
+                </span>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (file) uploadAvatar(a, file);
+                }}
+              />
+            </label>
+            <Input
+              defaultValue={a.name}
+              className="h-8 flex-1"
+              onBlur={(e) => {
+                const v = e.target.value.trim();
+                if (v && v !== a.name) save(a, { name: v });
+              }}
+            />
+            <Input
+              defaultValue={a.role ?? ""}
+              placeholder="Rolle, z. B. Founder"
+              className="h-8 w-44"
+              onBlur={(e) => {
+                const v = e.target.value.trim();
+                if (v !== (a.role ?? "")) save(a, { role: v });
+              }}
+            />
+            <Input
+              defaultValue={a.role_en ?? ""}
+              placeholder="Rolle EN"
+              className="h-8 w-36"
+              onBlur={(e) => {
+                const v = e.target.value.trim();
+                if (v !== (a.role_en ?? "")) save(a, { role_en: v });
+              }}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive"
+              onClick={() => {
+                if (confirm(`Autor „${a.name}" löschen? Artikel behalten dann keinen Autor.`)) deleteMutation.mutate(a.id);
+              }}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 flex gap-2">
+        <Input
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder="Name"
+          className="h-9 flex-1"
+          onKeyDown={(e) => e.key === "Enter" && addAuthor()}
+        />
+        <Input
+          value={newRole}
+          onChange={(e) => setNewRole(e.target.value)}
+          placeholder="Rolle (optional)"
+          className="h-9 w-44"
+          onKeyDown={(e) => e.key === "Enter" && addAuthor()}
+        />
+        <Button onClick={addAuthor} disabled={!newName.trim() || saveMutation.isPending}>
+          <Plus className="mr-1 h-4 w-4" /> Anlegen
+        </Button>
+      </div>
+    </Card>
+  );
+}
 
 const EN_FIELDS = ["title_en", "title_highlight_en", "excerpt_en", "lead_en", "body_html_en"] as const;
 
@@ -217,6 +360,8 @@ export default function AdminNews() {
   const [genUrls, setGenUrls] = useState<string[]>(["", "", ""]);
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+
+  const { data: authors = [] } = useAdminNewsAuthors();
 
   const { data: locations = [] } = useQuery({
     queryKey: ["admin-locations-lite"],
@@ -387,6 +532,7 @@ export default function AdminNews() {
       featured_rank: a.featured_rank ?? 0,
       reading_minutes: a.reading_minutes ?? 3,
       location_id: a.location_id ?? "",
+      author_id: a.author_id ?? "",
       cta_title: a.cta_title ?? "",
       cta_subtitle: a.cta_subtitle ?? "",
       cta_label: a.cta_label ?? "",
@@ -516,6 +662,8 @@ export default function AdminNews() {
             )}
           </Button>
         </Card>
+
+        <AuthorManager />
 
         {isLoading ? (
           <p className="text-muted-foreground">Laden…</p>
@@ -865,6 +1013,26 @@ export default function AdminNews() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Autor</Label>
+                <Select
+                  value={form.author_id || "none"}
+                  onValueChange={(v) => setForm((f) => ({ ...f, author_id: v === "none" ? "" : v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Kein Autor</SelectItem>
+                    {authors.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">Erscheint als „Geschrieben von".</p>
+              </div>
               <div>
                 <Label>Lesezeit (Minuten)</Label>
                 <Input

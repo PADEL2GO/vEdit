@@ -37,6 +37,14 @@ export function accentVars(color: string): CSSProperties {
   } as CSSProperties;
 }
 
+export interface NewsAuthor {
+  id: string;
+  name: string;
+  role: string | null;
+  role_en: string | null;
+  avatar_url: string | null;
+}
+
 export interface Article {
   id: string;
   slug: string;
@@ -63,6 +71,8 @@ export interface Article {
   published_at: string | null;
   sort_order: number;
   location_id: string | null;
+  author_id: string | null;
+  author?: NewsAuthor | null;
   cta_title: string | null;
   cta_subtitle: string | null;
   cta_label: string | null;

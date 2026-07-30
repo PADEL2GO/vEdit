@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { Article } from "@/types/article";
 
-const ARTICLE_SELECT = "*";
+const ARTICLE_SELECT = "*, author:news_authors(id, name, role, role_en, avatar_url)";
 
 /**
  * Public read hook for the news feed.

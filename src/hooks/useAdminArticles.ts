@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { Article, ArticleAudience } from "@/types/article";
+import type { Article, ArticleAudience, NewsAuthor } from "@/types/article";
 
 /** URL-Slug aus einem Titel (Umlaute transliteriert, Rest zu Bindestrichen). */
 export function slugify(input: string): string {
@@ -48,6 +48,7 @@ export interface ArticleInput {
   featured_rank: number;
   reading_minutes: number;
   location_id: string;
+  author_id: string;
   cta_title: string;
   cta_subtitle: string;
   cta_label: string;
@@ -108,6 +109,7 @@ export function useSaveArticle() {
         featured_rank: data.featured_rank,
         reading_minutes: data.reading_minutes || 3,
         location_id: data.location_id || null,
+        author_id: data.author_id || null,
         cta_title: data.cta_title || null,
         cta_subtitle: data.cta_subtitle || null,
         cta_label: data.cta_label || null,
@@ -217,3 +219,66 @@ export function useReorderArticles() {
   });
 }
 
+
+// ── Autoren ──────────────────────────────────────────────────────────────────
+
+export function useAdminNewsAuthors() {
+  return useQuery({
+    queryKey: ["news-authors"],
+    queryFn: async (): Promise<NewsAuthor[]> => {
+      const { data, error } = await (supabase as any).from("news_authors").select("*").order("name");
+      if (error) throw error;
+      return (data ?? []) as NewsAuthor[];
+    },
+  });
+}
+
+export interface AuthorInput {
+  id?: string;
+  name: string;
+  role: string;
+  role_en: string;
+  avatar_url: string;
+}
+
+export function useSaveNewsAuthor() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: AuthorInput) => {
+      const payload = {
+        name: data.name,
+        role: data.role || null,
+        role_en: data.role_en || null,
+        avatar_url: data.avatar_url || null,
+      };
+      if (data.id) {
+        const { error } = await (supabase as any).from("news_authors").update(payload).eq("id", data.id);
+        if (error) throw error;
+      } else {
+        const { error } = await (supabase as any).from("news_authors").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["news-authors"] });
+      invalidateAll(qc);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteNewsAuthor() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase as any).from("news_authors").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["news-authors"] });
+      invalidateAll(qc);
+      toast.success("Autor gelöscht");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}

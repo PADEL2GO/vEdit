@@ -273,15 +273,28 @@ export default function NewsArticle() {
                     {t("writtenBy")}
                   </span>
                   <div className="flex items-center gap-3">
-                    <span
-                      className="flex h-11 w-11 flex-none items-center justify-center rounded-full font-display text-base font-extrabold"
-                      style={{ background: "var(--acc)", color: "#0A0A0A" }}
-                    >
-                      {(authorName ?? "P2G").slice(0, 2).toUpperCase()}
-                    </span>
+                    {article.author?.avatar_url ? (
+                      <img
+                        src={article.author.avatar_url}
+                        alt={article.author.name}
+                        className="h-11 w-11 flex-none rounded-full border object-cover"
+                        style={{ borderColor: "var(--acc-brd)" }}
+                      />
+                    ) : (
+                      <span
+                        className="flex h-11 w-11 flex-none items-center justify-center rounded-full font-display text-base font-extrabold"
+                        style={{ background: "var(--acc)", color: "#0A0A0A" }}
+                      >
+                        {(article.author?.name ?? authorName ?? "P2G").slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
                     <div className="flex flex-col">
-                      <span className="text-[15px] font-semibold text-foreground">{authorName ?? "PADEL2GO"}</span>
-                      <span className="text-[13px] text-muted-foreground">{t("editorial")}</span>
+                      <span className="text-[15px] font-semibold text-foreground">
+                        {article.author?.name ?? authorName ?? "PADEL2GO"}
+                      </span>
+                      <span className="text-[13px] text-muted-foreground">
+                        {(article.author && localized(article.author, "role", i18n.language)) || t("editorial")}
+                      </span>
                     </div>
                   </div>
                   <div className="h-px bg-border" />
