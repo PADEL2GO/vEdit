@@ -52,7 +52,6 @@ const Account = () => {
   const multiplier = Number(dbLevel.multiplier ?? 1);
   const libLevel = EXPERT_LEVELS.find((l) => l.name === dbLevel.name) ?? EXPERT_LEVELS[0];
   const levelGradient = dbLevel.gradient ?? libLevel.gradient;
-  const levelBgGradient = libLevel.bgGradient;
   const levelEmoji = dbLevel.emoji ?? getExpertLevelEmoji(dbLevel.name);
   const levelRemaining = nextLevel ? Math.max(0, nextLevel.min_points - levelPoints) : 0;
 
@@ -232,9 +231,8 @@ const Account = () => {
       <main className="relative min-h-screen bg-background" style={sectionThemeVars(sectionColor)}>
         <SectionShaderBackdrop color={sectionColor} />
         <div className="relative z-[1]">
-        {/* Hero Header with Expert Level Gradient */}
-        <div className={`relative pt-24 pb-8 bg-gradient-to-br ${levelBgGradient}`}>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent" />
+        {/* Hero Header — liegt direkt auf dem Section-Shader (kein Level-Farbstreifen mehr) */}
+        <div className="relative pt-24 pb-8">
           
           <div className="container mx-auto px-4 max-w-2xl relative">
             <motion.div
