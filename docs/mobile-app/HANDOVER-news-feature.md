@@ -200,3 +200,26 @@ Betroffen: `title`, `title_highlight`, `excerpt`, `lead`, `body_html`. **Topic n
 5. View-Zähler erhöht sich beim Öffnen (1× pro Session).
 6. EN-Gerät zeigt `_en`-Inhalte mit DE-Fallback.
 7. KI-Badge + Quellenlink erscheinen, wo gesetzt.
+
+---
+
+## 10. Artikel per URL generieren (KI, Admin-only)
+
+Edge Function `generate-news-from-urls` (deployed). Nur für Admins — der JWT des
+eingeloggten Users muss die Rolle `admin` haben, sonst 403.
+
+```ts
+const { data, error } = await supabase.functions.invoke("generate-news-from-urls", {
+  body: { urls: ["https://…"] },   // 1–3 http(s)-URLs aus der Padel-Presse
+});
+// data.results: [{ url, ok, id?, title?, translated?, error? }]
+```
+
+- Erzeugt pro URL einen **Entwurf** (`is_published = false`) mit allen Textfeldern:
+  title, title_highlight, excerpt, lead, topic (eines der 5), body_html,
+  reading_minutes, seo_title/seo_description, slug, `ai_generated = true`, `source_url`.
+  EN-Übersetzung läuft automatisch hinterher.
+- **Nicht** generiert: Cover (4:5, Urheberrecht), CTA, Standort, Featured, Publish.
+- Laufzeit: ~20–60 s je nach URL-Anzahl (sequenzielle Claude-Calls) — Timeout großzügig
+  setzen, Spinner zeigen, Fehler pro URL isoliert behandeln (`ok: false` + `error`).
+- Danach Admin-Flow: Cover hochladen → prüfen → `is_published` setzen (oder im Web-Admin).
