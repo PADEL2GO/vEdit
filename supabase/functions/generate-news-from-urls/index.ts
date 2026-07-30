@@ -17,6 +17,8 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[generate-news-from-urls] ${step}`, details ? JSON.stringify(details) : "");
 };
 
+const TOPICS = ["Inside P2G", "Events", "Marketplace", "Community", "Business"] as const;
+
 const SYSTEM_PROMPT = `Du bist Redakteur:in für das PADEL2GO News-Portal — eine Plattform für die deutsche Padel-Community.
 Du erhältst den extrahierten Inhalt eines fremden Branchenartikels. Schreibe daraus einen EIGENSTÄNDIGEN,
 komplett neu formulierten News-Artikel für unsere Leser und übergib das Ergebnis über das Tool draft_article.
@@ -26,10 +28,21 @@ Regeln:
   länger als ein kurzes, als Zitat gekennzeichnetes Fragment. Der Text muss eine eigene journalistische Leistung sein.
 - Erfinde keine Fakten, Zahlen, Namen oder Zitate. Wenn die Quelle etwas nicht hergibt, lass es weg.
 - Ordne die Nachricht für die deutsche Padel-Community ein (Warum ist das relevant?).
-- title: prägnant, max. 80 Zeichen, kein Punkt am Ende
-- excerpt: 1–2 Sätze als Anreißer für die Artikelkarte
-- body_html: 300–500 Wörter, einfaches semantisches HTML — erlaubt sind <p>, <h3>, <ul>, <li>, <strong>, <em>;
-  KEIN <script>, KEIN inline-Style, KEINE Class-Attribute, KEINE Links (die Quelle wird separat verlinkt)
+- title: prägnante Schlagzeile, max. 60 Zeichen, kein Punkt am Ende
+- title_highlight: OPTIONAL ein pointierter Schluss-Teilsatz (max. 30 Zeichen), der farbig-kursiv
+  an die Schlagzeile angehängt wird (title + title_highlight = komplette H1). Nur setzen, wenn es
+  die Headline stärker macht — sonst leer lassen. Nicht den title wiederholen.
+- excerpt: max. 120 Zeichen, Anreißer für die Artikelkarte
+- lead: 1–2 Sätze Einstieg für den Artikel-Hero (max. 280 Zeichen), fasst die Kernnachricht zusammen
+- topic: GENAU eines von ${TOPICS.map((t) => `"${t}"`).join(", ")}.
+  Inside P2G = eigene PADEL2GO-News (Standorte, Produkt, Team) · Events = Turniere & Veranstaltungen ·
+  Marketplace = Equipment, Produkte, Deals · Community = Vereine, Spieler-Stories, Breitensport ·
+  Business = Markt, Investments, Industrie-News
+- seo_title: max. 60 Zeichen (darf vom title abweichen, suchorientiert)
+- seo_description: max. 155 Zeichen, beschreibt den Artikel für Google
+- body_html: 300–500 Wörter, einfaches semantisches HTML — erlaubt sind <p>, <h3>, <ul>, <li>, <strong>, <em>,
+  <blockquote> für gekennzeichnete Zitate; KEIN <script>, KEIN inline-Style, KEINE Class-Attribute,
+  KEINE Links (die Quelle wird separat verlinkt)
 - Ton: sachlich, freundlich, deutsch (Du-Form ist okay)`;
 
 const TOOL_DEFINITION = {
@@ -38,16 +51,34 @@ const TOOL_DEFINITION = {
   input_schema: {
     type: "object",
     properties: {
-      title: { type: "string", description: "Prägnante Schlagzeile, max. 80 Zeichen" },
-      excerpt: { type: "string", description: "1–2 Sätze als Anreißer für die Artikelkarte" },
+      title: { type: "string", description: "Prägnante Schlagzeile, max. 60 Zeichen" },
+      title_highlight: {
+        type: "string",
+        description: "Optionaler farbig-kursiver Schluss-Teilsatz der H1, max. 30 Zeichen — leer lassen wenn nicht sinnvoll",
+      },
+      excerpt: { type: "string", description: "Anreißer für die Artikelkarte, max. 120 Zeichen" },
+      lead: { type: "string", description: "Einstiegsabsatz für den Artikel-Hero, max. 280 Zeichen" },
+      topic: { type: "string", enum: [...TOPICS], description: "Genau ein Topic für Filter + Farbcode" },
+      seo_title: { type: "string", description: "SEO-Titel, max. 60 Zeichen" },
+      seo_description: { type: "string", description: "SEO-Beschreibung, max. 155 Zeichen" },
       body_html: {
         type: "string",
-        description: "Artikelinhalt als einfaches semantisches HTML (<p>, <h3>, <ul>, <li>, <strong>, <em>)",
+        description: "Artikelinhalt als einfaches semantisches HTML (<p>, <h3>, <ul>, <li>, <strong>, <em>, <blockquote>)",
       },
     },
-    required: ["title", "excerpt", "body_html"],
+    required: ["title", "excerpt", "lead", "topic", "body_html"],
   },
 };
+
+/** URL-Slug aus dem Titel — identisch zur Frontend-Logik, plus Zufalls-Suffix für Eindeutigkeit. */
+function slugify(input: string): string {
+  const base = input
+    .toLowerCase()
+    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `${base}-${crypto.randomUUID().slice(0, 6)}`;
+}
 
 /** Fetch a source page and reduce it to plain text the model can work with. */
 async function extractSource(url: string): Promise<{ pageTitle: string; text: string }> {
@@ -190,20 +221,34 @@ Deno.serve(async (req) => {
         const claudeData = await claudeResponse.json();
         const toolUse = (Array.isArray(claudeData?.content) ? claudeData.content : []).find(
           (b: { type?: string; name?: string }) => b?.type === "tool_use" && b?.name === "draft_article",
-        ) as { input?: { title?: unknown; excerpt?: unknown; body_html?: unknown } } | undefined;
+        ) as { input?: Record<string, unknown> } | undefined;
 
-        const title = typeof toolUse?.input?.title === "string" ? toolUse.input.title.trim() : "";
-        const excerpt = typeof toolUse?.input?.excerpt === "string" ? toolUse.input.excerpt.trim() : "";
-        const bodyHtml = typeof toolUse?.input?.body_html === "string" ? toolUse.input.body_html.trim() : "";
+        const str = (key: string) =>
+          typeof toolUse?.input?.[key] === "string" ? (toolUse.input[key] as string).trim() : "";
+        const title = str("title");
+        const excerpt = str("excerpt");
+        const bodyHtml = str("body_html");
         if (!title || !bodyHtml) throw new Error("Generierter Artikel ist unvollständig");
+
+        const topicRaw = str("topic");
+        const topic = (TOPICS as readonly string[]).includes(topicRaw) ? topicRaw : "Inside P2G";
+        const words = bodyHtml.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
+        const readingMinutes = Math.max(1, Math.round(words / 200));
 
         // Draft insert — the admin adds the cover image and publishes manually.
         const { data: inserted, error: insertError } = await supabaseAdmin
           .from("articles")
           .insert({
             title,
+            title_highlight: str("title_highlight") || null,
+            slug: slugify(title),
             excerpt,
+            lead: str("lead") || null,
             body_html: bodyHtml,
+            topic,
+            reading_minutes: readingMinutes,
+            seo_title: str("seo_title") || null,
+            seo_description: str("seo_description") || null,
             is_published: false,
             ai_generated: true,
             source_url: url,
@@ -220,7 +265,11 @@ Deno.serve(async (req) => {
           const tRes = await fetch(`${supabaseUrl}/functions/v1/translate-content`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": authHeader },
-            body: JSON.stringify({ table: "articles", id: inserted.id, fields: ["title", "excerpt", "body_html"] }),
+            body: JSON.stringify({
+              table: "articles",
+              id: inserted.id,
+              fields: ["title", "excerpt", "body_html", "title_highlight", "lead"],
+            }),
           });
           translated = tRes.ok;
           if (!tRes.ok) logStep("Translation failed", { id: inserted.id, status: tRes.status });

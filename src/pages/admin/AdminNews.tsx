@@ -35,6 +35,7 @@ import {
   ThumbsUp,
   Trash2,
 } from "lucide-react";
+import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -107,6 +108,72 @@ const emptyForm: ArticleForm = {
   is_published: false,
   sort_order: 0,
 };
+
+/** Live-Vorschau: 4:5-Card + Artikel-Kopf, exakt in der Topic-Farbe des Formulars. */
+function ArticlePreview({ form }: { form: ArticleForm }) {
+  const acc = topicColor(form.topic);
+  const dateLabel = format(new Date(), "dd.MM.yyyy");
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Live-Vorschau</p>
+
+      <div className="w-full max-w-[260px]">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] border border-border bg-black">
+          {form.cover_image_url ? (
+            <img src={form.cover_image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground/50">
+              Kein Cover (4:5)
+            </div>
+          )}
+          <div
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(190deg, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.85) 92%)" }}
+          />
+          <span
+            className="absolute left-3 top-3 rounded-full border bg-black/60 px-2.5 py-1 font-stat text-[9px] uppercase tracking-[0.16em] backdrop-blur-md"
+            style={{ color: acc, borderColor: `${acc}59` }}
+          >
+            {form.topic}
+          </span>
+          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-3.5">
+            <span className="font-stat text-[10px] tracking-[0.1em] text-white/60">
+              {dateLabel} · {form.reading_minutes || 3} Min
+            </span>
+            <h3 className="m-0 font-display text-base font-bold leading-[1.18] text-white">
+              {form.title || "Titel…"}
+            </h3>
+          </div>
+        </div>
+        {form.excerpt && <p className="mt-2 px-0.5 text-xs leading-normal text-muted-foreground">{form.excerpt}</p>}
+      </div>
+
+      <div className="rounded-2xl border border-border bg-black p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className="rounded-full border bg-black/60 px-2.5 py-1 font-stat text-[9px] uppercase tracking-[0.16em]"
+            style={{ color: acc, borderColor: `${acc}59` }}
+          >
+            {form.topic}
+          </span>
+          <span className="font-stat text-[10px] text-white/50">{dateLabel} · {form.reading_minutes || 3} Min</span>
+        </div>
+        <h4 className="mb-0 mt-2.5 font-display text-lg font-extrabold leading-tight text-white">
+          {form.title || "Titel…"}
+          {form.title_highlight && (
+            <>
+              {" "}
+              <span className="italic" style={{ color: acc }}>
+                {form.title_highlight}
+              </span>
+            </>
+          )}
+        </h4>
+        {form.lead && <p className="mb-0 mt-2 text-xs leading-relaxed text-white/70">{form.lead}</p>}
+      </div>
+    </div>
+  );
+}
 
 /** Zeichenzähler, der ab Überschreitung des Limits rot wird. */
 function CharCount({ value, limit }: { value: string; limit: number }) {
@@ -374,8 +441,9 @@ export default function AdminNews() {
               <h2 className="font-bold">Wochen-News-Generator (KI)</h2>
               <p className="text-sm text-muted-foreground">
                 Bis zu 3 URLs aus der Padel-Presse einfügen — pro URL entsteht ein eigenständig
-                formulierter Artikel als <strong>Entwurf</strong> (DE + automatische EN-Übersetzung,
-                mit KI-Kennzeichnung und Quellenlink). Danach: Titelbild hinterlegen und veröffentlichen.
+                formulierter Artikel als <strong>Entwurf</strong> — inkl. Topic, Titel-Highlight, Lead,
+                Lesezeit und SEO-Feldern (DE + automatische EN-Übersetzung, mit KI-Kennzeichnung und
+                Quellenlink). Danach: Titelbild (4:5) hinterlegen, prüfen und veröffentlichen.
               </p>
             </div>
           </div>
@@ -485,11 +553,13 @@ export default function AdminNews() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editId ? "Artikel bearbeiten" : "Neuer Artikel"}</DialogTitle>
           </DialogHeader>
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <div className="space-y-4">
             <VoiceInArticle
               onGenerated={({ title, excerpt, body_html }) => {
                 setForm((f) => ({ ...f, title, excerpt, body_html }));
@@ -762,8 +832,14 @@ export default function AdminNews() {
               />
               <Label>Veröffentlicht (für Nutzer sichtbar)</Label>
             </div>
+            </div>
 
-            <Button type="submit" className="w-full" disabled={saveMutation.isPending || uploadingCover}>
+            <div className="lg:sticky lg:top-2 self-start">
+              <ArticlePreview form={form} />
+            </div>
+            </div>
+
+            <Button type="submit" className="mt-4 w-full" disabled={saveMutation.isPending || uploadingCover}>
               {saveMutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Speichern…
