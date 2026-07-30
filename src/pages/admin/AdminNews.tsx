@@ -182,7 +182,10 @@ function AuthorManager() {
       <div className="space-y-2">
         {authors.map((a) => (
           <div key={a.id} className="flex items-center gap-2 rounded-lg border border-border p-2">
-            <label className="cursor-pointer" title="Foto hochladen">
+            <label
+              className={a.user_id ? "cursor-default" : "cursor-pointer"}
+              title={a.user_id ? "Profilbild kommt aus dem verknüpften Account und bleibt automatisch synchron" : "Foto hochladen"}
+            >
               {a.avatar_url ? (
                 <img src={a.avatar_url} alt={a.name} className="h-10 w-10 rounded-full object-cover" />
               ) : (
@@ -190,16 +193,18 @@ function AuthorManager() {
                   {a.name.slice(0, 2).toUpperCase()}
                 </span>
               )}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  e.target.value = "";
-                  if (file) uploadAvatar(a, file);
-                }}
-              />
+              {!a.user_id && (
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (file) uploadAvatar(a, file);
+                  }}
+                />
+              )}
             </label>
             <Input
               defaultValue={a.name}
@@ -359,6 +364,8 @@ export default function AdminNews() {
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
   const [genUrls, setGenUrls] = useState<string[]>(["", "", ""]);
   const [translatingId, setTranslatingId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"all" | "live" | "draft">("all");
+  const [topicFilter, setTopicFilter] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
   const { data: authors = [] } = useAdminNewsAuthors();
@@ -382,6 +389,17 @@ export default function AdminNews() {
     const byId = new Map(articles.map((a) => [a.id, a]));
     return order.map((id) => byId.get(id)).filter(Boolean) as Article[];
   }, [articles, order]);
+
+  const isFiltered = statusFilter !== "all" || topicFilter !== null;
+  const visibleList = useMemo(
+    () =>
+      list.filter(
+        (a) =>
+          (statusFilter === "all" || (statusFilter === "live") === a.is_published) &&
+          (topicFilter === null || a.topic === topicFilter),
+      ),
+    [list, statusFilter, topicFilter],
+  );
 
   const onDragStart = (index: number) => {
     dragIndex.current = index;
@@ -667,29 +685,76 @@ export default function AdminNews() {
 
         {isLoading ? (
           <p className="text-muted-foreground">Laden…</p>
-        ) : !list.length ? (
+        ) : !visibleList.length ? (
           <Card className="p-8 text-center text-muted-foreground">
             <Newspaper className="h-8 w-8 mx-auto mb-2 opacity-40" />
             Noch keine Artikel vorhanden.
           </Card>
         ) : (
           <div className="grid gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {([["all", "Alle"], ["live", "Live"], ["draft", "Entwurf"]] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setStatusFilter(key)}
+                  className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                    statusFilter === key
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-white/[0.04] text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+              <span className="mx-1 h-4 w-px bg-border" />
+              <button
+                type="button"
+                onClick={() => setTopicFilter(null)}
+                className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                  topicFilter === null
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-white/[0.04] text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Alle Topics
+              </button>
+              {TOPICS.map((topic) => (
+                <button
+                  key={topic}
+                  type="button"
+                  onClick={() => setTopicFilter(topicFilter === topic ? null : topic)}
+                  className="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors"
+                  style={
+                    topicFilter === topic
+                      ? { background: topicColor(topic), borderColor: topicColor(topic), color: "#0A0A0A" }
+                      : { borderColor: "hsl(var(--border))", background: "rgba(255,255,255,0.04)", color: `${topicColor(topic)}D9` }
+                  }
+                >
+                  <span className="h-2 w-2 rounded-full" style={{ background: topicFilter === topic ? "#0A0A0A" : topicColor(topic) }} />
+                  {topic}
+                </button>
+              ))}
+              {isFiltered && (
+                <span className="text-xs text-muted-foreground">Sortieren per Drag &amp; Drop nur ohne aktive Filter</span>
+              )}
+            </div>
             {reorderMutation.isPending && (
               <p className="text-xs text-muted-foreground">
                 <Loader2 className="mr-1 inline h-3 w-3 animate-spin" /> Reihenfolge wird gespeichert…
               </p>
             )}
-            {list.map((a, index) => (
+            {visibleList.map((a, index) => (
               <Card
                 key={a.id}
-                draggable
-                onDragStart={() => onDragStart(index)}
-                onDragOver={(e) => onDragOver(e, index)}
+                draggable={!isFiltered}
+                onDragStart={() => !isFiltered && onDragStart(index)}
+                onDragOver={(e) => !isFiltered && onDragOver(e, index)}
                 onDragEnd={onDragEnd}
                 onDrop={(e) => e.preventDefault()}
-                className="p-4 flex items-center gap-3 cursor-grab active:cursor-grabbing"
+                className={`p-4 flex items-center gap-3 ${isFiltered ? "" : "cursor-grab active:cursor-grabbing"}`}
               >
-                <GripVertical className="h-5 w-5 flex-shrink-0 text-muted-foreground/50" />
+                <GripVertical className={`h-5 w-5 flex-shrink-0 ${isFiltered ? "text-muted-foreground/15" : "text-muted-foreground/50"}`} />
                 <div className="h-20 w-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                   {a.cover_image_url ? (
                     <img src={a.cover_image_url} alt={a.title} className="w-full h-full object-cover" />

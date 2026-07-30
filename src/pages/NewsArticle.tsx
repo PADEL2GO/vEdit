@@ -72,7 +72,7 @@ export default function NewsArticle() {
       const { data } = await (supabase as any)
         .from("profiles")
         .select("display_name")
-        .eq("id", article!.created_by!)
+        .eq("user_id", article!.created_by!)
         .maybeSingle();
       return (data?.display_name as string | undefined) ?? null;
     },

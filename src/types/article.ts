@@ -40,6 +40,8 @@ export function accentVars(color: string): CSSProperties {
 export interface NewsAuthor {
   id: string;
   name: string;
+  /** verknüpfter Account — Profilbild wird automatisch synchron gehalten */
+  user_id?: string | null;
   role: string | null;
   role_en: string | null;
   avatar_url: string | null;
