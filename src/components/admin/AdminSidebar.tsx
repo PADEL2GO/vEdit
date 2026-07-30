@@ -58,6 +58,7 @@ const menuItems = [
   { title: "Touchpoint Slides", url: "/admin/touchpoint-slides", icon: ImagePlus },
   { title: "QR-Panel", url: "/admin/qr-panel", icon: QrCode },
   { title: "News / Artikel", url: "/admin/news", icon: Newspaper },
+  { title: "Farben (App & Web)", url: "/admin/farben", icon: Palette },
   { title: "Benutzer", url: "/admin/users", icon: Users },
   { title: "Mitteilungen", url: "/admin/notifications", icon: Bell },
   { title: "Newsletter", url: "/admin/newsletter", icon: Send },

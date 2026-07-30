@@ -21,7 +21,9 @@ export default function AdminVisuals() {
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Group visuals by category
-  const groupedVisuals = visuals?.reduce((acc, visual) => {
+  // app.theme.*-Zeilen sind Farbwerte (Admin -> Farben), keine Bilder
+  const imageVisuals = visuals?.filter((v) => !v.key.startsWith("app.theme."));
+  const groupedVisuals = imageVisuals?.reduce((acc, visual) => {
     if (!acc[visual.category]) {
       acc[visual.category] = [];
     }

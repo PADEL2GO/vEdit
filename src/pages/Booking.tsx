@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import Footer from "@/components/Footer";
 import { EyeOff, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +23,8 @@ interface LocationWithAvailability extends DbLocation {
 }
 
 const Booking = () => {
+  const { user: sectionUser } = useAuth();
+  const sectionColor = useSectionTheme("booking");
   const { t } = useTranslation("booking");
   const { user } = useAuth();
   const { canSeeCourts, publicEnabled, isAdmin, loading: visibilityLoading } = useCourtsVisibility();
@@ -151,7 +155,12 @@ const Booking = () => {
 
       <Navigation />
 
-      <main className="min-h-screen bg-background pt-16 md:pt-20">
+      <main
+        className="relative min-h-screen bg-background pt-16 md:pt-20"
+        style={sectionUser ? sectionThemeVars(sectionColor) : undefined}
+      >
+        {sectionUser && <SectionShaderBackdrop color={sectionColor} />}
+        <div className="relative z-[1]">
         <BookingStepper currentStep={0} />
 
         <section className="px-5 pt-8 md:pt-10 pb-24">
@@ -237,6 +246,7 @@ const Booking = () => {
             </div>
           </div>
         </section>
+      </div>
       </main>
 
       <Footer />

@@ -3,6 +3,8 @@ import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import { Button } from "@/components/ui/button";
 import {
   Calendar, Clock, MapPin, Ticket, QrCode, X, Check, Zap, ExternalLink,
@@ -112,6 +114,8 @@ const DashboardEvents = () => {
     if (confirm("Anmeldung wirklich stornieren?")) cancel.mutate(eventId);
   };
 
+  const sectionColor = useSectionTheme("events");
+
   // Kein Feature-Flag-Gate: veröffentlichte Events sind für alle eingeloggten User sichtbar
   // (wie auf der öffentlichen /events-Seite).
 
@@ -121,7 +125,9 @@ const DashboardEvents = () => {
         <title>{t("meta.events.title")}</title>
       </Helmet>
 
-      <div className="mx-auto max-w-[1200px] px-4 sm:px-5 py-6 md:py-8 flex flex-col gap-6">
+      <div className="relative min-h-screen bg-background" style={sectionThemeVars(sectionColor)}>
+      <SectionShaderBackdrop color={sectionColor} />
+      <div className="relative z-[1] mx-auto max-w-[1200px] px-4 sm:px-5 py-6 md:py-8 flex flex-col gap-6">
         {/* Header */}
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div className="flex flex-col items-start gap-3">
@@ -282,6 +288,7 @@ const DashboardEvents = () => {
           onClose={() => setTicketView(null)}
         />
       )}
+      </div>
     </DashboardLayout>
   );
 };

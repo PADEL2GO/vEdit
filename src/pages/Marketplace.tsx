@@ -4,6 +4,8 @@ import { Helmet } from "react-helmet-async";
 import { useTranslation, Trans } from "react-i18next";
 import { motion } from "framer-motion";
 import Navigation from "@/components/Navigation";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,6 +33,8 @@ type SortKey = "pop" | "asc" | "desc";
 type PriceKey = "all" | "low" | "mid" | "high";
 
 const Marketplace = () => {
+  const { user: sectionUser } = useAuth();
+  const sectionColor = useSectionTheme("market");
   const { t, i18n } = useTranslation("marketplace");
   const navigate = useNavigate();
   const { data: items, isLoading } = useMarketplaceItems();
@@ -128,10 +132,11 @@ const Marketplace = () => {
       <Navigation />
 
       <main
-        className="min-h-screen pt-[92px] pb-24"
-        style={{ background: "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(199,240,17,0.06), transparent), #000" }}
+        className="relative min-h-screen bg-background pt-[92px] pb-24"
+        style={sectionUser ? sectionThemeVars(sectionColor) : { background: "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(199,240,17,0.06), transparent), #000" }}
       >
-        <div className="mx-auto max-w-[1200px] px-5 flex flex-col gap-8">
+        {sectionUser && <SectionShaderBackdrop color={sectionColor} />}
+        <div className="relative z-[1] mx-auto max-w-[1200px] px-5 flex flex-col gap-8">
           {/* Hero */}
           <motion.div
             initial={{ opacity: 0, y: 22 }}

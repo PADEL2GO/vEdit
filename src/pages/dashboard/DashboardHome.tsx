@@ -21,6 +21,8 @@ import { useMarketplaceItems } from "@/hooks/useMarketplaceItems";
 import { useDashboardEvents, useMyEventRegistrations } from "@/hooks/useEventRegistrations";
 import { eur as eurFmt, ptsFmt, maxRedeemablePoints } from "@/lib/marketplace";
 import { useArticles } from "@/hooks/useArticles";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import { NewsCard } from "@/components/news/NewsCard";
 import courtHero from "@/assets/courts/skypadel-outdoor.jpg";
 
@@ -36,6 +38,7 @@ const DashboardHome = () => {
   const { data: allEvents } = useDashboardEvents();
   const { data: myRegs } = useMyEventRegistrations();
   const { data: articles } = useArticles("logged_in");
+  const sectionColor = useSectionTheme("home");
 
   // Live P2G points = the single spendable balance (play + reward), same as "Mein P2G",
   // the nav and Account. (DashboardHome previously showed only play_credits → the 1.200 vs
@@ -128,11 +131,9 @@ const DashboardHome = () => {
     <DashboardLayout>
       <Helmet><title>Mein P2G | PADEL2GO</title></Helmet>
 
-      <main
-        className="min-h-screen pb-16"
-        style={{ background: "radial-gradient(ellipse 70% 40% at 50% 0%, rgba(199,240,17,0.07), transparent), #000" }}
-      >
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-5 pt-6 md:pt-8 flex flex-col gap-6">
+      <main className="relative min-h-screen bg-background pb-16" style={sectionThemeVars(sectionColor)}>
+        <SectionShaderBackdrop color={sectionColor} />
+        <div className="relative z-[1] mx-auto max-w-[1200px] px-4 sm:px-5 pt-6 md:pt-8 flex flex-col gap-6">
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             className="flex items-end justify-between gap-4 flex-wrap">

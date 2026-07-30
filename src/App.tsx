@@ -86,6 +86,7 @@ const AdminTouchpointSlides = lazy(() => import("./pages/admin/AdminTouchpointSl
 const AdminQrPanel = lazy(() => import("./pages/admin/AdminQrPanel"));
 const QrLanding = lazy(() => import("./pages/QrLanding"));
 const AdminNews = lazy(() => import("./pages/admin/AdminNews"));
+const AdminColors = lazy(() => import("./pages/admin/AdminColors"));
 const AdminIntegrations = lazy(() => import("./pages/admin/AdminIntegrations"));
 const AdminNewsletter = lazy(() => import("./pages/admin/AdminNewsletter"));
 const AGB = lazy(() => import("./pages/AGB"));
@@ -213,6 +214,7 @@ const App = () => (
                 <Route path="/admin/touchpoint-slides" element={<AdminTouchpointSlides />} />
                 <Route path="/admin/qr-panel" element={<AdminQrPanel />} />
                 <Route path="/admin/news" element={<AdminNews />} />
+                <Route path="/admin/farben" element={<AdminColors />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/integrations" element={<AdminIntegrations />} />
                 <Route path="/admin/newsletter" element={<AdminNewsletter />} />
