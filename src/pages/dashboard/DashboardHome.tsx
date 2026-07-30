@@ -21,7 +21,7 @@ import { useMarketplaceItems } from "@/hooks/useMarketplaceItems";
 import { useDashboardEvents, useMyEventRegistrations } from "@/hooks/useEventRegistrations";
 import { eur as eurFmt, ptsFmt, maxRedeemablePoints } from "@/lib/marketplace";
 import { useArticles } from "@/hooks/useArticles";
-import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { sectionThemeVars, useSectionTheme, useSectionThemes, type SectionKey } from "@/hooks/useSectionThemes";
 import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import { NewsCard } from "@/components/news/NewsCard";
 import courtHero from "@/assets/courts/skypadel-outdoor.jpg";
@@ -39,6 +39,7 @@ const DashboardHome = () => {
   const { data: myRegs } = useMyEventRegistrations();
   const { data: articles } = useArticles("logged_in");
   const sectionColor = useSectionTheme("home");
+  const sectionThemes = useSectionThemes();
 
   // Live P2G points = the single spendable balance (play + reward), same as "Mein P2G",
   // the nav and Account. (DashboardHome previously showed only play_credits → the 1.200 vs
@@ -120,11 +121,11 @@ const DashboardHome = () => {
   const memberSince = user?.created_at ? `Mitglied seit ${MON[new Date(user.created_at).getMonth()]} ${new Date(user.created_at).getFullYear()}` : "";
 
   const regCount = (myRegs ?? []).length;
-  const quick = [
-    { icon: CalendarCheck, label: "Meine Buchungen", sub: `${upcoming.length} anstehend`, to: "/account?tab=bookings" },
-    { icon: Trophy, label: "Events", sub: `${bookableEvents.length} Events · ${regCount} Anmeldung${regCount === 1 ? "" : "en"}`, to: "/dashboard/events" },
-    { icon: ShoppingBag, label: "Marketplace", sub: `${shopItems.length} Artikel im Shop`, to: "/marketplace" },
-    { icon: UserIcon, label: "Mein Profil", sub: "Konto & Einstellungen", to: "/account" },
+  const quick: Array<{ icon: typeof CalendarCheck; label: string; sub: string; to: string; section: SectionKey }> = [
+    { icon: CalendarCheck, label: "Meine Buchungen", sub: `${upcoming.length} anstehend`, to: "/account?tab=bookings", section: "booking" },
+    { icon: Trophy, label: "Events", sub: `${bookableEvents.length} Events · ${regCount} Anmeldung${regCount === 1 ? "" : "en"}`, to: "/dashboard/events", section: "events" },
+    { icon: ShoppingBag, label: "Marketplace", sub: `${shopItems.length} Artikel im Shop`, to: "/marketplace", section: "market" },
+    { icon: UserIcon, label: "Mein Profil", sub: "Konto & Einstellungen", to: "/account", section: "profile" },
   ];
 
   return (
@@ -226,10 +227,22 @@ const DashboardHome = () => {
 
           {/* Quick access */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-            {quick.map((q) => (
+            {quick.map((q) => {
+              const qColor = sectionThemes[q.section];
+              return (
               <Link key={q.label} to={q.to}
-                className="flex items-center gap-3.5 rounded-2xl border border-border/70 bg-gradient-card px-4 py-4 transition-all hover:border-primary/40 hover:shadow-[0_0_24px_rgba(199,240,17,0.12)]">
-                <span className="w-11 h-11 flex-none rounded-[13px] bg-gradient-to-br from-primary/[0.18] to-primary/[0.04] border border-primary/35 flex items-center justify-center text-primary">
+                className="group flex items-center gap-3.5 rounded-2xl border border-border/70 bg-gradient-card px-4 py-4 transition-all"
+                style={{ "--q": qColor } as React.CSSProperties}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${qColor}66`; e.currentTarget.style.boxShadow = `0 0 24px ${qColor}1F`; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = ""; e.currentTarget.style.boxShadow = ""; }}>
+                <span
+                  className="w-11 h-11 flex-none rounded-[13px] border flex items-center justify-center"
+                  style={{
+                    color: qColor,
+                    borderColor: `${qColor}59`,
+                    background: `linear-gradient(135deg, ${qColor}2E, ${qColor}0A)`,
+                  }}
+                >
                   <q.icon className="w-5 h-5" />
                 </span>
                 <span className="flex flex-col gap-0.5 min-w-0">
@@ -237,7 +250,8 @@ const DashboardHome = () => {
                   <span className="font-stat text-[11.5px] text-muted-foreground truncate">{q.sub}</span>
                 </span>
               </Link>
-            ))}
+              );
+            })}
           </div>
 
           {/* Bookings + Event teaser */}
