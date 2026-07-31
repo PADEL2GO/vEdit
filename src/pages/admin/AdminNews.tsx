@@ -36,6 +36,7 @@ import {
   ThumbsUp,
   UserRound,
   Trash2,
+  X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -363,6 +364,7 @@ export default function AdminNews() {
   const { t } = useTranslation("common");
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
   const [genUrls, setGenUrls] = useState<string[]>(["", "", ""]);
+  const [genFiles, setGenFiles] = useState<File[]>([]);
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "live" | "draft">("all");
   const [topicFilter, setTopicFilter] = useState<string | null>(null);
@@ -431,12 +433,57 @@ export default function AdminNews() {
     }
   };
 
+  // Quell-Dateien (PDF/HTML) für den Generator sammeln — max. 3 Quellen gesamt (URLs + Dateien).
+  const addGenFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (!picked.length) return;
+    const urlCount = genUrls.filter((u) => u.trim()).length;
+    setGenFiles((prev) => {
+      let next = [...prev];
+      for (const f of picked) {
+        const lower = f.name.toLowerCase();
+        const isPdf = lower.endsWith(".pdf") || f.type === "application/pdf";
+        const isHtml = lower.endsWith(".html") || lower.endsWith(".htm") || f.type === "text/html";
+        if (!isPdf && !isHtml) {
+          toast.error(`${f.name}: Bitte nur PDF- oder HTML-Dateien`);
+          continue;
+        }
+        if (f.size > 15 * 1024 * 1024) {
+          toast.error(`${f.name}: Datei zu groß (max. 15 MB)`);
+          continue;
+        }
+        if (urlCount + next.length >= 3) {
+          toast.error("Maximal 3 Quellen (URLs + Dateien) pro Durchlauf");
+          break;
+        }
+        next = [...next, f];
+      }
+      return next;
+    });
+  };
+
+  const readFileBase64 = (f: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
+      reader.onerror = () => reject(new Error(`${f.name} konnte nicht gelesen werden`));
+      reader.readAsDataURL(f);
+    });
+
   const runGenerator = async () => {
     const urls = genUrls.map((u) => u.trim()).filter(Boolean);
-    if (!urls.length) return;
+    if (!urls.length && !genFiles.length) return;
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-news-from-urls", { body: { urls } });
+      const files = await Promise.all(
+        genFiles.map(async (f) => ({
+          name: f.name,
+          kind: f.name.toLowerCase().endsWith(".pdf") || f.type === "application/pdf" ? "pdf" : "html",
+          data: await readFileBase64(f),
+        })),
+      );
+      const { data, error } = await supabase.functions.invoke("generate-news-from-urls", { body: { urls, files } });
       if (error || (data as { error?: string } | null)?.error) {
         throw new Error((data as { error?: string } | null)?.error ?? error?.message);
       }
@@ -453,6 +500,7 @@ export default function AdminNews() {
       }
       if (okCount > 0) {
         setGenUrls(["", "", ""]);
+        setGenFiles([]);
         invalidateArticles();
       }
     } catch (err) {
@@ -650,10 +698,11 @@ export default function AdminNews() {
             <div>
               <h2 className="font-bold">Wochen-News-Generator (KI)</h2>
               <p className="text-sm text-muted-foreground">
-                Bis zu 3 URLs aus der Padel-Presse einfügen — pro URL entsteht ein eigenständig
-                formulierter Artikel als <strong>Entwurf</strong> — inkl. Topic, Titel-Highlight, Lead,
-                Lesezeit und SEO-Feldern (DE + automatische EN-Übersetzung, mit KI-Kennzeichnung und
-                Quellenlink). Danach: Titelbild (4:5) hinterlegen, prüfen und veröffentlichen.
+                Bis zu 3 Quellen — URLs aus der Padel-Presse und/oder hochgeladene Dateien (PDF, z.B.
+                Pressemitteilungen, oder HTML) — pro Quelle entsteht ein eigenständig formulierter
+                Artikel als <strong>Entwurf</strong> — inkl. Topic, Titel-Highlight, Lead, Lesezeit
+                und SEO-Feldern (DE + automatische EN-Übersetzung, mit KI-Kennzeichnung und bei URLs
+                mit Quellenlink). Danach: Titelbild (4:5) hinterlegen, prüfen und veröffentlichen.
               </p>
             </div>
           </div>
@@ -667,8 +716,34 @@ export default function AdminNews() {
                 disabled={generating}
               />
             ))}
+            {genFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {genFiles.map((f, i) => (
+                  <span
+                    key={`${f.name}-${i}`}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-xs"
+                  >
+                    {f.name}
+                    <button
+                      type="button"
+                      onClick={() => setGenFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                      disabled={generating}
+                      title="Entfernen"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">Oder Quell-Dateien hochladen (PDF / HTML):</p>
+            <Input type="file" accept=".pdf,.html,.htm" multiple onChange={addGenFiles} disabled={generating} />
           </div>
-          <Button className="mt-3" onClick={runGenerator} disabled={generating || !genUrls.some((u) => u.trim())}>
+          <Button
+            className="mt-3"
+            onClick={runGenerator}
+            disabled={generating || (!genUrls.some((u) => u.trim()) && !genFiles.length)}
+          >
             {generating ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Artikel werden generiert…

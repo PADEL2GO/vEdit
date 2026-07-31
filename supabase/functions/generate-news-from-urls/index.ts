@@ -1,9 +1,11 @@
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
-// Weekly AI news generator: takes 1–3 source URLs from the padel press, writes an
-// ORIGINAL German article per URL (no copy/translation of the source), inserts each
-// as an UNPUBLISHED draft (ai_generated = true, source_url set) and triggers the
-// DeepL EN translation. The admin adds a cover image and publishes manually.
+// Weekly AI news generator: takes 1–3 sources from the padel press — URLs and/or
+// uploaded files (PDF datasheets go to Claude natively, HTML files through the same
+// extractor as fetched pages) — writes an ORIGINAL German article per source (no
+// copy/translation), inserts each as an UNPUBLISHED draft (ai_generated = true,
+// source_url set for URLs) and triggers the DeepL EN translation. The admin adds
+// a cover image and publishes manually.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,8 +22,9 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 const TOPICS = ["Inside P2G", "Events", "Marketplace", "Community", "Business"] as const;
 
 const SYSTEM_PROMPT = `Du bist Redakteur:in für das PADEL2GO News-Portal — eine Plattform für die deutsche Padel-Community.
-Du erhältst den extrahierten Inhalt eines fremden Branchenartikels. Schreibe daraus einen EIGENSTÄNDIGEN,
-komplett neu formulierten News-Artikel für unsere Leser und übergib das Ergebnis über das Tool draft_article.
+Du erhältst den Inhalt eines fremden Branchenartikels — als extrahierten Webseiten-Text oder als hochgeladenes
+Dokument (z.B. PDF-Pressemitteilung). Schreibe daraus einen EIGENSTÄNDIGEN, komplett neu formulierten
+News-Artikel für unsere Leser und übergib das Ergebnis über das Tool draft_article.
 
 Regeln:
 - KEIN Plagiat: Übernimm ausschließlich Fakten, niemals Formulierungen, Satzstrukturen oder wörtliche Zitate
@@ -82,21 +85,8 @@ function slugify(input: string): string {
   return `${base}-${crypto.randomUUID().slice(0, 6)}`;
 }
 
-/** Fetch a source page and reduce it to plain text the model can work with. */
-async function extractSource(url: string): Promise<{ pageTitle: string; text: string }> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-  try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; PADEL2GO-NewsBot/1.0; +https://www.padel2go-official.de)",
-        "Accept": "text/html,application/xhtml+xml",
-      },
-    });
-    if (!res.ok) throw new Error(`Quelle antwortet mit HTTP ${res.status}`);
-    const html = await res.text();
-
+/** Reduce raw HTML to plain text the model can work with (shared by URL fetch and file upload). */
+function htmlToText(html: string, fallbackTitle: string): { pageTitle: string; text: string } {
     const meta = (name: string) => {
       const m = html.match(
         new RegExp(`<meta[^>]+(?:property|name)=["']${name}["'][^>]+content=["']([^"']+)["']`, "i"),
@@ -105,7 +95,7 @@ async function extractSource(url: string): Promise<{ pageTitle: string; text: st
       );
       return m?.[1]?.trim() ?? "";
     };
-    const pageTitle = meta("og:title") || html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() || url;
+    const pageTitle = meta("og:title") || html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() || fallbackTitle;
 
     let text = html
       .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -124,8 +114,24 @@ async function extractSource(url: string): Promise<{ pageTitle: string; text: st
 
     const description = meta("og:description");
     if (description) text = `${description}\n\n${text}`;
-    if (text.length < 300) throw new Error("Zu wenig Textinhalt auf der Quellseite gefunden");
+    if (text.length < 300) throw new Error("Zu wenig Textinhalt in der Quelle gefunden");
     return { pageTitle, text: text.slice(0, 9000) };
+}
+
+/** Fetch a source page and reduce it to plain text the model can work with. */
+async function extractSource(url: string): Promise<{ pageTitle: string; text: string }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; PADEL2GO-NewsBot/1.0; +https://www.padel2go-official.de)",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+    if (!res.ok) throw new Error(`Quelle antwortet mit HTTP ${res.status}`);
+    return htmlToText(await res.text(), url);
   } finally {
     clearTimeout(timeout);
   }
@@ -164,15 +170,35 @@ Deno.serve(async (req) => {
       return json({ error: "Keine Admin-Berechtigung" }, 403);
     }
 
-    // ── Input: 1–3 http(s) URLs ────────────────────────────────────────────────
-    const body = await req.json().catch(() => ({}));
-    const rawUrls = Array.isArray((body as { urls?: unknown }).urls) ? (body as { urls: unknown[] }).urls : [];
+    // ── Input: 1–3 sources — http(s) URLs and/or uploaded files (PDF / HTML) ───
+    const body = await req.json().catch(() => ({})) as { urls?: unknown; files?: unknown };
+    const rawUrls = Array.isArray(body.urls) ? body.urls : [];
     const urls = rawUrls
       .filter((u): u is string => typeof u === "string" && /^https?:\/\/\S+$/i.test(u.trim()))
-      .map((u) => u.trim())
-      .slice(0, 3);
-    if (urls.length === 0) {
-      return json({ error: "Bitte mindestens eine gültige http(s)-URL angeben" }, 400);
+      .map((u) => u.trim());
+
+    type FileSource = { name: string; kind: "pdf" | "html"; data: string };
+    const rawFiles = Array.isArray(body.files) ? body.files : [];
+    const files: FileSource[] = rawFiles
+      .filter((f): f is Record<string, unknown> => !!f && typeof f === "object")
+      .map((f) => ({
+        name: typeof f.name === "string" && f.name.trim() ? f.name.trim() : "Dokument",
+        kind: f.kind === "pdf" || f.kind === "html" ? (f.kind as "pdf" | "html") : null,
+        data: typeof f.data === "string" ? f.data.replace(/\s+/g, "") : "",
+      }))
+      .filter((f): f is FileSource => !!f.kind && !!f.data);
+
+    type Source = { type: "url"; url: string } | ({ type: "file" } & FileSource);
+    const sources: Source[] = [
+      ...urls.map((url) => ({ type: "url" as const, url })),
+      ...files.map((f) => ({ type: "file" as const, ...f })),
+    ].slice(0, 3);
+    if (sources.length === 0) {
+      return json({ error: "Bitte mindestens eine gültige http(s)-URL oder eine PDF/HTML-Datei angeben" }, 400);
+    }
+    // ~15 MB decoded combined — Claude's request limit is 32 MB, base64 adds ~1/3 overhead
+    if (files.reduce((sum, f) => sum + f.data.length, 0) > 20_000_000) {
+      return json({ error: "Dateien zu groß (max. 15 MB gesamt)" }, 400);
     }
 
     // ── Anthropic key: env first, DB fallback ──────────────────────────────────
@@ -189,13 +215,38 @@ Deno.serve(async (req) => {
       return json({ error: "Anthropic API-Key nicht konfiguriert (Admin → Integrationen)" }, 500);
     }
 
-    // ── One article per URL; a failing URL never kills the batch ──────────────
+    // ── One article per source; a failing source never kills the batch ────────
     const results: Array<Record<string, unknown>> = [];
 
-    for (const url of urls) {
+    for (const src of sources) {
+      const label = src.type === "url" ? src.url : src.name;
       try {
-        logStep("Fetching source", { url });
-        const source = await extractSource(url);
+        let messageContent: unknown;
+        if (src.type === "url") {
+          logStep("Fetching source", { url: src.url });
+          const source = await extractSource(src.url);
+          messageContent =
+            `Quelle: ${src.url}\nTitel der Quelle: ${source.pageTitle}\n\nExtrahierter Inhalt:\n${source.text}`;
+        } else if (src.kind === "html") {
+          logStep("Analyzing HTML file", { name: src.name });
+          const html = new TextDecoder().decode(Uint8Array.from(atob(src.data), (c) => c.charCodeAt(0)));
+          const source = htmlToText(html, src.name);
+          messageContent =
+            `Quelle: Hochgeladene Datei "${src.name}"\nTitel der Quelle: ${source.pageTitle}\n\nExtrahierter Inhalt:\n${source.text}`;
+        } else {
+          // PDFs go to Claude natively as a base64 document block — no local parsing.
+          logStep("Analyzing PDF", { name: src.name, base64Length: src.data.length });
+          messageContent = [
+            {
+              type: "document",
+              source: { type: "base64", media_type: "application/pdf", data: src.data },
+            },
+            {
+              type: "text",
+              text: `Quelle: Hochgeladenes Dokument "${src.name}". Schreibe daraus den eigenständigen News-Artikel und übergib ihn über draft_article.`,
+            },
+          ];
+        }
 
         const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
@@ -210,10 +261,7 @@ Deno.serve(async (req) => {
             system: SYSTEM_PROMPT,
             tools: [TOOL_DEFINITION],
             tool_choice: { type: "tool", name: "draft_article" },
-            messages: [{
-              role: "user",
-              content: `Quelle: ${url}\nTitel der Quelle: ${source.pageTitle}\n\nExtrahierter Inhalt:\n${source.text}`,
-            }],
+            messages: [{ role: "user", content: messageContent }],
           }),
         });
         if (!claudeResponse.ok) {
@@ -253,7 +301,7 @@ Deno.serve(async (req) => {
             seo_description: str("seo_description") || null,
             is_published: false,
             ai_generated: true,
-            source_url: url,
+            source_url: src.type === "url" ? src.url : null,
             audience: "everyone",
             created_by: user.id,
           })
@@ -279,11 +327,11 @@ Deno.serve(async (req) => {
           logStep("Translation error", { id: inserted.id, error: (tErr as Error).message });
         }
 
-        logStep("Article drafted", { id: inserted.id, url, translated });
-        results.push({ url, ok: true, id: inserted.id, title, translated });
+        logStep("Article drafted", { id: inserted.id, source: label, translated });
+        results.push({ url: label, ok: true, id: inserted.id, title, translated });
       } catch (err) {
-        logStep("URL failed", { url, error: (err as Error).message });
-        results.push({ url, ok: false, error: (err as Error).message });
+        logStep("Source failed", { source: label, error: (err as Error).message });
+        results.push({ url: label, ok: false, error: (err as Error).message });
       }
     }
 
