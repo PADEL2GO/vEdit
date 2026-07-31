@@ -1,8 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 // AI product importer for the marketplace admin: takes one product URL (manufacturer
-// or shop page), extracts the page content incl. JSON-LD/OG data and returns a
-// pre-filled product draft (name, descriptions, specs, price, brand, images).
+// or shop page) OR an uploaded product file (PDF datasheet / saved HTML page),
+// extracts the content incl. JSON-LD/OG data (PDFs go to Claude natively) and returns
+// a pre-filled product draft (name, descriptions, specs, price, brand, images).
 // Nothing is written to the DB — the admin reviews the pre-filled form and saves.
 
 const corsHeaders = {
@@ -18,8 +19,9 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
 };
 
 const buildSystemPrompt = (categories: string[], brands: string[]) => `Du bist Produktdaten-Redakteur:in für den PADEL2GO Marketplace — einen deutschen Padel-Equipment-Shop.
-Du erhältst den extrahierten Inhalt einer Produktseite (Hersteller- oder Shop-Seite). Extrahiere daraus die
-Produktdaten für unseren Shop und übergib das Ergebnis über das Tool draft_product.
+Du erhältst den Inhalt einer Produktseite (Hersteller- oder Shop-Seite) oder ein Produktdokument
+(z.B. PDF-Datenblatt, Katalogauszug). Extrahiere daraus die Produktdaten für unseren Shop und übergib
+das Ergebnis über das Tool draft_product.
 
 Regeln:
 - Erfinde NICHTS: Übernimm nur Fakten, die auf der Seite stehen. Fehlt eine Angabe, lass das Feld leer bzw. 0.
@@ -87,10 +89,10 @@ const TOOL_DEFINITION = (categories: string[], brands: string[]) => ({
   },
 });
 
-/** Resolve a possibly relative image URL against the page URL; https only. */
-function absolutize(src: string, pageUrl: string): string | null {
+/** Resolve a possibly relative image URL; without a base URL only absolute https URLs pass. */
+function absolutize(src: string, pageUrl: string | null): string | null {
   try {
-    const abs = new URL(src, pageUrl).toString();
+    const abs = pageUrl ? new URL(src, pageUrl).toString() : new URL(src).toString();
     return /^https?:\/\//i.test(abs) ? abs : null;
   } catch {
     return null;
@@ -104,21 +106,8 @@ interface ExtractedPage {
   images: string[];
 }
 
-/** Fetch the product page and reduce it to text + JSON-LD product data + image URLs. */
-async function extractSource(url: string): Promise<ExtractedPage> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-  try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; PADEL2GO-ProductBot/1.0; +https://www.padel2go-official.de)",
-        "Accept": "text/html,application/xhtml+xml",
-      },
-    });
-    if (!res.ok) throw new Error(`Produktseite antwortet mit HTTP ${res.status}`);
-    const html = await res.text();
-
+/** Reduce raw HTML to text + JSON-LD product data + image URLs (shared by URL fetch and file upload). */
+function extractFromHtml(html: string, baseUrl: string | null, fallbackTitle: string): ExtractedPage {
     const meta = (name: string) => {
       const m = html.match(
         new RegExp(`<meta[^>]+(?:property|name)=["']${name}["'][^>]+content=["']([^"']+)["']`, "i"),
@@ -127,7 +116,7 @@ async function extractSource(url: string): Promise<ExtractedPage> {
       );
       return m?.[1]?.trim() ?? "";
     };
-    const pageTitle = meta("og:title") || html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() || url;
+    const pageTitle = meta("og:title") || html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() || fallbackTitle;
 
     // JSON-LD: collect Product objects — most shops expose name/brand/price/images here.
     const ldBlocks: unknown[] = [];
@@ -153,7 +142,7 @@ async function extractSource(url: string): Promise<ExtractedPage> {
     const images: string[] = [];
     const pushImage = (raw: unknown) => {
       if (typeof raw === "string") {
-        const abs = absolutize(raw, url);
+        const abs = absolutize(raw, baseUrl);
         if (abs && !images.includes(abs)) images.push(abs);
       } else if (Array.isArray(raw)) {
         raw.forEach(pushImage);
@@ -180,8 +169,24 @@ async function extractSource(url: string): Promise<ExtractedPage> {
 
     const description = meta("og:description");
     if (description) text = `${description}\n\n${text}`;
-    if (text.length < 200 && !jsonLd) throw new Error("Zu wenig Inhalt auf der Produktseite gefunden");
+    if (text.length < 200 && !jsonLd) throw new Error("Zu wenig Inhalt im Produktdokument gefunden");
     return { pageTitle, text: text.slice(0, 9000), jsonLd, images: images.slice(0, 6) };
+}
+
+/** Fetch the product page and reduce it to text + JSON-LD product data + image URLs. */
+async function extractSource(url: string): Promise<ExtractedPage> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; PADEL2GO-ProductBot/1.0; +https://www.padel2go-official.de)",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+    });
+    if (!res.ok) throw new Error(`Produktseite antwortet mit HTTP ${res.status}`);
+    return extractFromHtml(await res.text(), url, url);
   } finally {
     clearTimeout(timeout);
   }
@@ -220,16 +225,25 @@ Deno.serve(async (req) => {
       return json({ error: "Keine Admin-Berechtigung" }, 403);
     }
 
-    // ── Input ──────────────────────────────────────────────────────────────────
+    // ── Input: a product URL, or an uploaded product file (PDF / HTML) ─────────
     const body = await req.json().catch(() => ({})) as {
       url?: unknown;
+      file?: { name?: unknown; kind?: unknown; data?: unknown } | null;
       categories?: unknown;
       brands?: unknown;
     };
     const url = typeof body.url === "string" ? body.url.trim() : "";
-    if (!/^https?:\/\/\S+$/i.test(url)) {
-      return json({ error: "Bitte eine gültige http(s)-Produkt-URL angeben" }, 400);
+    const file = body.file && typeof body.file === "object" ? body.file : null;
+    const fileKind = file && (file.kind === "pdf" || file.kind === "html") ? file.kind as "pdf" | "html" : null;
+    const fileData = fileKind && typeof file?.data === "string" ? file.data.replace(/\s+/g, "") : "";
+    const fileName = fileKind && typeof file?.name === "string" ? file.name : "";
+
+    if (!fileKind && !/^https?:\/\/\S+$/i.test(url)) {
+      return json({ error: "Bitte eine gültige http(s)-Produkt-URL oder eine PDF/HTML-Datei angeben" }, 400);
     }
+    if (fileKind && !fileData) return json({ error: "Datei-Inhalt fehlt" }, 400);
+    // ~15 MB decoded — Claude's request limit is 32 MB, base64 adds ~1/3 overhead
+    if (fileData.length > 20_000_000) return json({ error: "Datei zu groß (max. 15 MB)" }, 400);
     const strList = (v: unknown) =>
       (Array.isArray(v) ? v : []).filter((s): s is string => typeof s === "string" && !!s.trim()).slice(0, 50);
     const categories = strList(body.categories);
@@ -249,10 +263,39 @@ Deno.serve(async (req) => {
       return json({ error: "Anthropic API-Key nicht konfiguriert (Admin → Integrationen)" }, 500);
     }
 
-    // ── Extract page + draft product; errors go back as ok:false with message ──
+    // ── Extract content + draft product; errors go back as ok:false with message ──
     try {
-      logStep("Fetching product page", { url });
-      const source = await extractSource(url);
+      let source: ExtractedPage | null = null;
+      let userContent: unknown;
+
+      if (fileKind === "pdf") {
+        // PDFs go to Claude natively as a base64 document block — no local parsing.
+        logStep("Analyzing PDF", { name: fileName, base64Length: fileData.length });
+        userContent = [
+          {
+            type: "document",
+            source: { type: "base64", media_type: "application/pdf", data: fileData },
+          },
+          {
+            type: "text",
+            text: `Produktdokument (PDF-Upload${fileName ? `: ${fileName}` : ""}). Extrahiere daraus die Produktdaten für den Shop.`,
+          },
+        ];
+      } else if (fileKind === "html") {
+        logStep("Analyzing HTML file", { name: fileName });
+        const html = new TextDecoder().decode(Uint8Array.from(atob(fileData), (c) => c.charCodeAt(0)));
+        source = extractFromHtml(html, null, fileName || "HTML-Upload");
+      } else {
+        logStep("Fetching product page", { url });
+        source = await extractSource(url);
+      }
+
+      if (source) {
+        userContent =
+          `${fileKind ? `Produktdokument (Datei-Upload: ${fileName})` : `Produktseite: ${url}`}\nSeitentitel: ${source.pageTitle}\n\n` +
+          (source.jsonLd ? `Strukturierte Produktdaten (JSON-LD):\n${source.jsonLd}\n\n` : "") +
+          `Extrahierter Seiteninhalt:\n${source.text}`;
+      }
 
       const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -267,13 +310,7 @@ Deno.serve(async (req) => {
           system: buildSystemPrompt(categories, brands),
           tools: [TOOL_DEFINITION(categories, brands)],
           tool_choice: { type: "tool", name: "draft_product" },
-          messages: [{
-            role: "user",
-            content:
-              `Produktseite: ${url}\nSeitentitel: ${source.pageTitle}\n\n` +
-              (source.jsonLd ? `Strukturierte Produktdaten (JSON-LD):\n${source.jsonLd}\n\n` : "") +
-              `Extrahierter Seiteninhalt:\n${source.text}`,
-          }],
+          messages: [{ role: "user", content: userContent }],
         }),
       });
       if (!claudeResponse.ok) {
@@ -287,13 +324,14 @@ Deno.serve(async (req) => {
 
       const product = toolUse?.input;
       if (!product || typeof product.name !== "string" || !product.name.trim()) {
-        throw new Error("Keine verwertbaren Produktdaten auf der Seite erkannt");
+        throw new Error("Keine verwertbaren Produktdaten erkannt");
       }
 
-      logStep("Product drafted", { url, name: product.name, images: source.images.length });
-      return json({ ok: true, product, images: source.images }, 200);
+      const images = source?.images ?? [];
+      logStep("Product drafted", { url, file: fileName, name: product.name, images: images.length });
+      return json({ ok: true, product, images }, 200);
     } catch (err) {
-      logStep("Import failed", { url, error: (err as Error).message });
+      logStep("Import failed", { url, file: fileName, error: (err as Error).message });
       return json({ ok: false, error: (err as Error).message }, 200);
     }
   } catch (error) {

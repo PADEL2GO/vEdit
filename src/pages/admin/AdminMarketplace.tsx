@@ -241,19 +241,15 @@ const AdminMarketplace = () => {
     setAiUrl("");
   };
 
-  // AI-Import: eine Produkt-URL reicht — die Edge Function extrahiert die Seite und
-  // füllt das Formular vor. Alles bleibt danach manuell anpassbar, nichts wird gespeichert.
-  const importFromUrl = async () => {
-    const url = aiUrl.trim();
-    if (!/^https?:\/\/\S+$/i.test(url)) {
-      toast.error("Bitte eine gültige Produkt-URL eingeben (https://…)");
-      return;
-    }
+  // AI-Import: eine Produkt-URL oder eine hochgeladene PDF/HTML-Datei reicht — die Edge
+  // Function extrahiert den Inhalt und füllt das Formular vor. Alles bleibt danach manuell
+  // anpassbar, nichts wird gespeichert.
+  const runAiImport = async (payload: Record<string, unknown>) => {
     setAiLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-product-from-url", {
         body: {
-          url,
+          ...payload,
           categories: (categories ?? []).map((c) => c.name),
           brands: (brands ?? []).map((b) => b.name),
         },
@@ -311,6 +307,48 @@ const AdminMarketplace = () => {
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const importFromUrl = () => {
+    const url = aiUrl.trim();
+    if (!/^https?:\/\/\S+$/i.test(url)) {
+      toast.error("Bitte eine gültige Produkt-URL eingeben (https://…)");
+      return;
+    }
+    runAiImport({ url });
+  };
+
+  const importFromFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f) return;
+    const lower = f.name.toLowerCase();
+    const kind = lower.endsWith(".pdf") || f.type === "application/pdf"
+      ? "pdf"
+      : lower.endsWith(".html") || lower.endsWith(".htm") || f.type === "text/html"
+        ? "html"
+        : null;
+    if (!kind) {
+      toast.error("Bitte eine PDF- oder HTML-Datei auswählen");
+      return;
+    }
+    if (f.size > 15 * 1024 * 1024) {
+      toast.error("Datei zu groß (max. 15 MB)");
+      return;
+    }
+    let data: string;
+    try {
+      data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
+        reader.onerror = () => reject(new Error("Datei konnte nicht gelesen werden"));
+        reader.readAsDataURL(f);
+      });
+    } catch (err: unknown) {
+      toast.error((err as Error).message);
+      return;
+    }
+    runAiImport({ file: { name: f.name, kind, data } });
   };
 
   const openCreateDialog = () => {
@@ -874,7 +912,7 @@ const AdminMarketplace = () => {
               <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-4">
                 <Label className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-primary" />
-                  Per URL ausfüllen (AI)
+                  Per URL oder Datei ausfüllen (AI)
                 </Label>
                 <div className="flex gap-2">
                   <Input
@@ -900,9 +938,11 @@ const AdminMarketplace = () => {
                     )}
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground">Oder Produkt-Datei hochladen (PDF-Datenblatt / HTML-Seite):</p>
+                <Input type="file" accept=".pdf,.html,.htm" onChange={importFromFile} disabled={aiLoading} />
                 <p className="text-xs text-muted-foreground">
-                  Zieht Name, Beschreibung, Specs, Preis, Marke & Bilder automatisch von der Produktseite.
-                  Alle Felder bleiben danach manuell anpassbar.
+                  Zieht Name, Beschreibung, Specs, Preis, Marke & Bilder automatisch aus der Produktseite
+                  bzw. dem Dokument. Alle Felder bleiben danach manuell anpassbar.
                 </p>
               </div>
             )}
