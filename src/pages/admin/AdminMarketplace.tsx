@@ -1433,6 +1433,8 @@ const AdminMarketplace = () => {
             <AlertDialogTitle>Produkt löschen?</AlertDialogTitle>
             <AlertDialogDescription>
               Möchtest du "{itemToDelete?.name}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+              Hat das Produkt bereits Bestellungen, wird es stattdessen nur deaktiviert – Bestellhistorie und
+              Belege bleiben erhalten.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -378,18 +378,43 @@ export const useDeleteMarketplaceItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: string): Promise<"deleted" | "deactivated"> => {
+      // Bestellungen (marketplace_redemptions) sind aufbewahrungspflichtige Belege und
+      // referenzieren das Produkt — ein Produkt mit Bestellungen wird deshalb nur
+      // deaktiviert (aus dem Shop genommen), nicht gelöscht.
+      const { count, error: countError } = await supabase
+        .from("marketplace_redemptions")
+        .select("id", { count: "exact", head: true })
+        .eq("item_id", id);
+      if (countError) throw countError;
+
+      if ((count ?? 0) > 0) {
+        const { error } = await supabase
+          .from("marketplace_items")
+          .update({ is_active: false })
+          .eq("id", id);
+        if (error) throw error;
+        return "deactivated";
+      }
+
       const { error } = await supabase
         .from("marketplace_items")
         .delete()
         .eq("id", id);
-
       if (error) throw error;
+      return "deleted";
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["admin-marketplace-items"] });
       queryClient.invalidateQueries({ queryKey: ["marketplace-items"] });
-      toast.success("Produkt erfolgreich gelöscht");
+      if (result === "deactivated") {
+        toast.info("Produkt hat Bestellungen – es wurde deaktiviert statt gelöscht", {
+          description:
+            "Bestellhistorie und Belege bleiben erhalten. Das Produkt ist im Shop nicht mehr sichtbar (Filter: Inaktiv).",
+        });
+      } else {
+        toast.success("Produkt erfolgreich gelöscht");
+      }
     },
     onError: (error) => {
       toast.error("Fehler beim Löschen: " + error.message);
