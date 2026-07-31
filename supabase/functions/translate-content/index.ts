@@ -24,6 +24,7 @@
 
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { stripUnsafeHtml } from "../_shared/stripUnsafeHtml.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -239,10 +240,12 @@ serve(async (req) => {
       });
     }
     // HTML fields — one call each (DeepL applies a single tag_handling mode per request).
+    // DeepL erhält Tags/Attribute unverändert (tag_handling=html) → vor dem DB-Write
+    // gefährliche Konstrukte entfernen (Sicherheitsaudit 2026-07-31, Fund 2).
     for (const w of work) {
       if (w.kind !== "html") continue;
       const [out] = await translateBatch([w.text], apiKey, true);
-      updatePayload[`${w.field}_en`] = out ?? null;
+      updatePayload[`${w.field}_en`] = out ? stripUnsafeHtml(out) : null;
     }
     // Array fields (text[]) — translate each element, persist back as an array.
     for (const w of work) {

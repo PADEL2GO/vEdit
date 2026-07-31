@@ -1,4 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { safeFetch } from "../_shared/safeFetch.ts";
+import { stripUnsafeHtml } from "../_shared/stripUnsafeHtml.ts";
 
 // Weekly AI news generator: takes 1–3 sources from the padel press — URLs and/or
 // uploaded files (PDF datasheets go to Claude natively, HTML files through the same
@@ -120,21 +122,15 @@ function htmlToText(html: string, fallbackTitle: string): { pageTitle: string; t
 
 /** Fetch a source page and reduce it to plain text the model can work with. */
 async function extractSource(url: string): Promise<{ pageTitle: string; text: string }> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-  try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; PADEL2GO-NewsBot/1.0; +https://www.padel2go-official.de)",
-        "Accept": "text/html,application/xhtml+xml",
-      },
-    });
-    if (!res.ok) throw new Error(`Quelle antwortet mit HTTP ${res.status}`);
-    return htmlToText(await res.text(), url);
-  } finally {
-    clearTimeout(timeout);
-  }
+  // safeFetch blockt interne/Metadata-Ziele (SSRF, Fund 10) und validiert Redirects.
+  const res = await safeFetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; PADEL2GO-NewsBot/1.0; +https://www.padel2go-official.de)",
+      "Accept": "text/html,application/xhtml+xml",
+    },
+  });
+  if (!res.ok) throw new Error("Quelle konnte nicht geladen werden");
+  return htmlToText(await res.text(), url);
 }
 
 Deno.serve(async (req) => {
@@ -277,7 +273,7 @@ Deno.serve(async (req) => {
           typeof toolUse?.input?.[key] === "string" ? (toolUse.input[key] as string).trim() : "";
         const title = str("title");
         const excerpt = str("excerpt");
-        const bodyHtml = str("body_html");
+        const bodyHtml = stripUnsafeHtml(str("body_html")); // Fund 2: XSS-Schutz vor DB-Write
         if (!title || !bodyHtml) throw new Error("Generierter Artikel ist unvollständig");
 
         const topicRaw = str("topic");

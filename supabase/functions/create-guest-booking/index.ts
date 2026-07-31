@@ -49,6 +49,32 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
+    // ── Rate limit (Sicherheitsaudit 2026-07-31, Fund 11) ─────────────────────
+    // Unauthentifizierter Endpunkt, der Court-Slots 15 Min blockiert. Ohne Limit
+    // ließen sich alle Slots dauerhaft blockieren (DoS). Max. 8 Holds / IP / Stunde.
+    // Cloudflare setzt cf-connecting-ip serverseitig (nicht vom Client fälschbar);
+    // Fallback auf x-forwarded-for nur, wenn der vertrauenswürdige Header fehlt.
+    const clientIP =
+      req.headers.get("cf-connecting-ip") ||
+      req.headers.get("x-real-ip") ||
+      req.headers.get("x-forwarded-for")?.split(",").pop()?.trim() ||
+      "unknown";
+    const GUEST_BOOKING_LIMIT = 8;
+    const windowStart = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: rlCount } = await supabaseAdmin
+      .from("rate_limit_log")
+      .select("*", { count: "exact", head: true })
+      .eq("ip_address", clientIP)
+      .eq("action", "guest_booking")
+      .gte("created_at", windowStart);
+    if (rlCount !== null && rlCount >= GUEST_BOOKING_LIMIT) {
+      log("Rate limit exceeded", { clientIP, rlCount });
+      return new Response(
+        JSON.stringify({ error: "Zu viele Buchungsversuche. Bitte versuche es später erneut." }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } },
+      );
+    }
+
     const {
       court_id,
       location_id,
@@ -219,6 +245,12 @@ serve(async (req) => {
     }
 
     log("Guest booking created", { bookingId: newBooking.id, priceCents });
+
+    // Rate-Limit-Zähler protokollieren (Fund 11) — best effort, blockiert die Buchung nicht.
+    await supabaseAdmin
+      .from("rate_limit_log")
+      .insert({ ip_address: clientIP, action: "guest_booking" })
+      .then(({ error }) => error && log("rate_limit_log insert failed", { error: error.message }));
 
     return new Response(
       JSON.stringify({ booking_id: newBooking.id, price_cents: newBooking.price_cents }),

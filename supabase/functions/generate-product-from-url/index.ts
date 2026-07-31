@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { safeFetch } from "../_shared/safeFetch.ts";
 
 // AI product importer for the marketplace admin: takes one product URL (manufacturer
 // or shop page) OR an uploaded product file (PDF datasheet / saved HTML page),
@@ -175,21 +176,15 @@ function extractFromHtml(html: string, baseUrl: string | null, fallbackTitle: st
 
 /** Fetch the product page and reduce it to text + JSON-LD product data + image URLs. */
 async function extractSource(url: string): Promise<ExtractedPage> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-  try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; PADEL2GO-ProductBot/1.0; +https://www.padel2go-official.de)",
-        "Accept": "text/html,application/xhtml+xml",
-      },
-    });
-    if (!res.ok) throw new Error(`Produktseite antwortet mit HTTP ${res.status}`);
-    return extractFromHtml(await res.text(), url, url);
-  } finally {
-    clearTimeout(timeout);
-  }
+  // safeFetch blockt interne/Metadata-Ziele (SSRF, Fund 10) und validiert Redirects.
+  const res = await safeFetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; PADEL2GO-ProductBot/1.0; +https://www.padel2go-official.de)",
+      "Accept": "text/html,application/xhtml+xml",
+    },
+  });
+  if (!res.ok) throw new Error("Produktseite konnte nicht geladen werden");
+  return extractFromHtml(await res.text(), url, url);
 }
 
 Deno.serve(async (req) => {

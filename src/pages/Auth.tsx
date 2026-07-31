@@ -48,12 +48,23 @@ const Auth = () => {
   const emailSchema = z.string().email(t("validation.invalidEmail"));
   const passwordSchema = z.string().min(6, t("validation.passwordTooShort"));
 
-  // Safe internal redirect target from ?redirect=<path> (set by RequireAuth)
+  // Safe internal redirect target from ?redirect=<path> (set by RequireAuth).
+  // Sicherheitsaudit 2026-07-31, Fund 12: gegen Open-Redirect härten — ein reiner
+  // String-Präfix-Check ließ Backslash-Varianten (z.B. "/\\evil.com", die Browser
+  // wie "//evil.com" behandeln) durch. Über new URL() gegen die eigene Origin
+  // auflösen und nur akzeptieren, wenn die Origin identisch bleibt.
   const redirectParam = searchParams.get("redirect");
-  const safeRedirect =
-    redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//")
-      ? redirectParam
-      : null;
+  const safeRedirect = (() => {
+    if (!redirectParam || !redirectParam.startsWith("/") || redirectParam.startsWith("//")) return null;
+    if (redirectParam.includes("\\")) return null;
+    try {
+      const url = new URL(redirectParam, window.location.origin);
+      if (url.origin !== window.location.origin) return null;
+      return url.pathname + url.search + url.hash;
+    } catch {
+      return null;
+    }
+  })();
 
   // Role-based redirect helper (honors ?redirect= when it's a safe internal path)
   const redirectBasedOnRole = async (userId: string) => {

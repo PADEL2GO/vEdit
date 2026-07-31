@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { stripUnsafeHtml } from "../_shared/stripUnsafeHtml.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -137,7 +138,7 @@ serve(async (req) => {
     const input = toolUse.input;
     const title = typeof input.title === "string" ? input.title.trim() : "";
     const excerpt = typeof input.excerpt === "string" ? input.excerpt.trim() : "";
-    const body_html = typeof input.body_html === "string" ? input.body_html.trim() : "";
+    const body_html = typeof input.body_html === "string" ? stripUnsafeHtml(input.body_html.trim()) : "";
 
     if (!title || !body_html) {
       throw new Error("Generierter Artikel ist unvollständig (Titel oder Inhalt fehlen)");
