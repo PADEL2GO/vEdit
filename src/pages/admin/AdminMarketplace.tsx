@@ -59,6 +59,7 @@ import {
   Star,
   Languages,
   Download,
+  Sparkles,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -228,6 +229,8 @@ const AdminMarketplace = () => {
   const [formData, setFormData] = useState<Partial<MarketplaceItemInput>>(emptyForm());
   const [specs, setSpecs] = useState<SpecRow[]>([]);
   const [gallery, setGallery] = useState<GalleryImage[]>([]);
+  const [aiUrl, setAiUrl] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
 
   const resetForm = () => {
     setFormData(emptyForm());
@@ -235,6 +238,79 @@ const AdminMarketplace = () => {
     setGallery([]);
     setSlugTouched(false);
     setEditingItem(null);
+    setAiUrl("");
+  };
+
+  // AI-Import: eine Produkt-URL reicht — die Edge Function extrahiert die Seite und
+  // füllt das Formular vor. Alles bleibt danach manuell anpassbar, nichts wird gespeichert.
+  const importFromUrl = async () => {
+    const url = aiUrl.trim();
+    if (!/^https?:\/\/\S+$/i.test(url)) {
+      toast.error("Bitte eine gültige Produkt-URL eingeben (https://…)");
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-product-from-url", {
+        body: {
+          url,
+          categories: (categories ?? []).map((c) => c.name),
+          brands: (brands ?? []).map((b) => b.name),
+        },
+      });
+      if (error) throw error;
+      const res = data as { ok?: boolean; error?: string; product?: Record<string, unknown>; images?: string[] };
+      if (!res?.ok || !res.product) throw new Error(res?.error || "Import fehlgeschlagen");
+
+      const p = res.product;
+      const images = Array.isArray(res.images) ? res.images : [];
+      const norm = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+      const eurToCents = (v: unknown) =>
+        typeof v === "number" && isFinite(v) && v > 0 ? Math.round(v * 100) : null;
+
+      const brandId =
+        brands?.find((b) => b.name.toLowerCase() === norm(p.brand_name).toLowerCase())?.id ?? null;
+      const categoryId =
+        categories?.find((c) => c.name.toLowerCase() === norm(p.category_name).toLowerCase())?.id ?? null;
+
+      const name = norm(p.name);
+      const titleImage = formData.image_url || images[0] || "";
+      setFormData((f) => ({
+        ...f,
+        name: name || f.name,
+        slug: slugTouched ? f.slug : slugify(name || f.name || ""),
+        subtitle: norm(p.subtitle) || f.subtitle,
+        description: norm(p.description) || f.description,
+        long_description: norm(p.long_description) || f.long_description,
+        meta_title: norm(p.meta_title) || f.meta_title,
+        meta_description: norm(p.meta_description) || f.meta_description,
+        price_cents: eurToCents(p.price_eur) ?? f.price_cents,
+        compare_at_price_cents: eurToCents(p.compare_at_price_eur) ?? f.compare_at_price_cents,
+        brand_id: brandId ?? f.brand_id,
+        category_id: categoryId ?? f.category_id,
+        product_identifier: norm(p.product_identifier) || f.product_identifier,
+        manufacturer_name: norm(p.manufacturer_name) || f.manufacturer_name,
+        safety_warnings: norm(p.safety_warnings) || f.safety_warnings,
+        textile_composition: norm(p.textile_composition) || f.textile_composition,
+        image_url: titleImage,
+      }));
+
+      const specRows = (Array.isArray(p.specs) ? (p.specs as { label?: unknown; value?: unknown }[]) : [])
+        .map((s) => ({ label: norm(s?.label), value: norm(s?.value) }))
+        .filter((s) => s.label && s.value);
+      if (specRows.length) setSpecs(specRows);
+
+      if (gallery.length === 0) {
+        const rest = images.filter((u) => u !== titleImage).slice(0, 5);
+        if (rest.length) setGallery(rest.map((u) => ({ url: u, alt: name })));
+      }
+
+      toast.success("Produktdaten übernommen – bitte prüfen, Credits & Preis kontrollieren");
+    } catch (err: unknown) {
+      toast.error("AI-Import fehlgeschlagen: " + ((err as Error)?.message ?? ""));
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const openCreateDialog = () => {
@@ -793,6 +869,44 @@ const AdminMarketplace = () => {
           </DialogHeader>
 
           <div className="space-y-5 py-4">
+            {/* AI import via product URL — manual entry stays optional */}
+            {!editingItem && (
+              <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-4">
+                <Label className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Per URL ausfüllen (AI)
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://… Produktseite (Hersteller oder Shop)"
+                    value={aiUrl}
+                    onChange={(e) => setAiUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        importFromUrl();
+                      }
+                    }}
+                    disabled={aiLoading}
+                  />
+                  <Button type="button" onClick={importFromUrl} disabled={aiLoading || !aiUrl.trim()}>
+                    {aiLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Ausfüllen
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Zieht Name, Beschreibung, Specs, Preis, Marke & Bilder automatisch von der Produktseite.
+                  Alle Felder bleiben danach manuell anpassbar.
+                </p>
+              </div>
+            )}
+
             {/* Title image */}
             <div className="space-y-2">
               <Label>Titelbild *</Label>
