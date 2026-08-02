@@ -952,12 +952,15 @@ const AdminMarketplace = () => {
               <Label>Titelbild *</Label>
               <div className="flex gap-4 items-start">
                 {formData.image_url && (
-                  <div className="w-24 h-24 rounded overflow-hidden bg-muted shrink-0">
+                  <div className="w-24 aspect-[2/3] rounded overflow-hidden bg-muted shrink-0">
                     <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
                   </div>
                 )}
                 <div className="flex-1 space-y-2">
                   <Input type="file" accept="image/*" onChange={handleTitleImageUpload} disabled={uploading} />
+                  <p className="text-xs text-muted-foreground">
+                    Empfohlenes Format: Hochformat 2:3 (z. B. 1200 × 1800 px) — Bilder werden im Shop in 2:3 zugeschnitten.
+                  </p>
                   <p className="text-xs text-muted-foreground">Oder URL direkt eingeben:</p>
                   <Input
                     placeholder="https://..."
@@ -974,7 +977,7 @@ const AdminMarketplace = () => {
               {gallery.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {gallery.map((img, i) => (
-                    <div key={i} className="relative w-20 h-20 rounded overflow-hidden bg-muted group border border-border/60">
+                    <div key={i} className="relative w-20 aspect-[2/3] rounded overflow-hidden bg-muted group border border-border/60">
                       <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
                       <button
                         type="button"
@@ -1009,6 +1012,7 @@ const AdminMarketplace = () => {
               <Input type="file" accept="image/*" multiple onChange={handleGalleryUpload} disabled={uploading} />
               <p className="text-xs text-muted-foreground">
                 Mehrere Bilder möglich. Reihenfolge steuert die Galerie auf der Produktseite (Titelbild zuerst).
+                Empfohlenes Format: Hochformat 2:3.
               </p>
             </div>
 

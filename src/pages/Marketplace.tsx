@@ -275,7 +275,10 @@ const Marketplace = () => {
           {isLoading ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-[18px]">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="rounded-2xl border border-border/60 bg-gradient-card h-[360px] animate-pulse" />
+                <div key={i} className="rounded-2xl border border-border/60 bg-gradient-card overflow-hidden animate-pulse">
+                  <div className="aspect-[2/3] bg-white/[0.04]" />
+                  <div className="h-[120px]" />
+                </div>
               ))}
             </div>
           ) : list.length === 0 ? (
@@ -345,7 +348,7 @@ function ProductCard({
       className="group cursor-pointer rounded-2xl border border-border/60 bg-gradient-card overflow-hidden flex flex-col transition-colors hover:border-primary/50"
     >
       <div className="relative overflow-hidden">
-        <div className={`h-[190px] ${soldOut ? "opacity-45 grayscale" : ""}`}>
+        <div className={`aspect-[2/3] ${soldOut ? "opacity-45 grayscale" : ""}`}>
           <img
             src={p.image_url || "/placeholder.svg"}
             alt={localized(p, "name", i18n.language)}

@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +24,7 @@ import { localized } from "@/lib/localized";
 import type { MarketplaceItem } from "@/hooks/useMarketplaceItems";
 
 const MarketplaceProduct = () => {
+  const sectionColor = useSectionTheme("market");
   const { t, i18n } = useTranslation("marketplace");
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -61,7 +64,10 @@ const MarketplaceProduct = () => {
     return (
       <>
         <Navigation />
-        <main className="min-h-screen bg-black flex items-center justify-center pt-20">
+        <main
+          className="min-h-screen bg-background flex items-center justify-center pt-20"
+          style={sectionThemeVars(sectionColor)}
+        >
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </main>
         <Footer />
@@ -73,7 +79,10 @@ const MarketplaceProduct = () => {
     return (
       <>
         <Navigation />
-        <main className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 pt-20 px-5 text-center">
+        <main
+          className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 pt-20 px-5 text-center"
+          style={sectionThemeVars(sectionColor)}
+        >
           <span className="w-16 h-16 rounded-full bg-white/5 border border-border flex items-center justify-center text-muted-foreground">
             <PackageX className="w-8 h-8" />
           </span>
@@ -127,12 +136,16 @@ const MarketplaceProduct = () => {
 
       <Navigation />
 
-      <main className="min-h-screen bg-black pt-[92px] pb-24">
+      <main
+        className="relative min-h-screen bg-background pt-[92px] pb-24"
+        style={sectionThemeVars(sectionColor)}
+      >
+        <SectionShaderBackdrop color={sectionColor} />
         <motion.div
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          className="mx-auto max-w-[1200px] px-5 flex flex-col gap-6"
+          className="relative z-[1] mx-auto max-w-[1200px] px-5 flex flex-col gap-6"
         >
           {/* Breadcrumb */}
           <div className="flex items-center gap-1.5 flex-wrap text-[13.5px]">
@@ -149,7 +162,7 @@ const MarketplaceProduct = () => {
           <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] items-start">
             {/* Gallery */}
             <div className="flex flex-col gap-3">
-              <div className="relative rounded-[20px] overflow-hidden border border-border/80 bg-gradient-to-br from-white/[0.04] to-black min-h-[440px]">
+              <div className="relative rounded-[20px] overflow-hidden border border-border/80 bg-gradient-to-br from-white/[0.04] to-black aspect-[2/3]">
                 <img src={images[mainIdx]} alt={localized(product, "name", i18n.language)} className="w-full h-full object-cover absolute inset-0" />
                 {soldOut && (
                   <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex rounded-full border border-border bg-black/80 px-5 py-2 text-sm font-bold backdrop-blur">
@@ -163,7 +176,7 @@ const MarketplaceProduct = () => {
                     <button
                       key={i}
                       onClick={() => setMainIdx(i)}
-                      className={`h-[92px] rounded-2xl overflow-hidden border bg-gradient-to-br from-white/[0.04] to-black ${
+                      className={`aspect-[2/3] rounded-2xl overflow-hidden border bg-gradient-to-br from-white/[0.04] to-black ${
                         i === mainIdx ? "border-primary" : "border-border/80"
                       }`}
                     >
@@ -421,7 +434,7 @@ function RelatedCard({ p, brand, onOpen }: { p: MarketplaceItem; brand: string; 
       className="group cursor-pointer rounded-2xl border border-border/60 bg-gradient-card overflow-hidden flex flex-col transition-colors hover:border-primary/50"
     >
       <div className="relative overflow-hidden">
-        <div className={`h-[170px] ${soldOut ? "opacity-45 grayscale" : ""}`}>
+        <div className={`aspect-[2/3] ${soldOut ? "opacity-45 grayscale" : ""}`}>
           <img src={p.image_url || "/placeholder.svg"} alt={localized(p, "name", i18n.language)} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
         </div>
         {off > 0 && (
