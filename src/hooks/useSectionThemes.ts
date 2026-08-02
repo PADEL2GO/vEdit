@@ -58,7 +58,7 @@ export function useSectionTheme(section: SectionKey): string {
   return useSectionThemes()[section];
 }
 
-function hexToHslString(hex: string): string {
+function hexToHsl(hex: string): { h: number; s: number; l: number } {
   const n = parseInt(hex.slice(1), 16);
   const r = ((n >> 16) & 255) / 255;
   const g = ((n >> 8) & 255) / 255;
@@ -75,7 +75,7 @@ function hexToHslString(hex: string): string {
     else if (max === g) h = ((b - r) / d + 2) / 6;
     else h = ((r - g) / d + 4) / 6;
   }
-  return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+  return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
 }
 
 /**
@@ -84,11 +84,15 @@ function hexToHslString(hex: string): string {
  * bg-primary, Borders, Badges, Buttons), automatisch in der Section-Farbe rendert.
  */
 export function sectionThemeVars(color: string): CSSProperties {
+  const { h, s, l } = hexToHsl(color);
   return {
     "--acc": color,
     "--acc-bg": `${color}1F`,
     "--acc-brd": `${color}66`,
     "--acc-glow": `${color}26`,
-    "--primary": hexToHslString(color),
+    "--primary": `${h} ${s}% ${l}%`,
+    // --lime-glow ist global Lime; innerhalb einer Section stattdessen die
+    // hellere Stufe der Section-Farbe (z. B. Hero-Button-Verlauf from-primary to-lime-glow).
+    "--lime-glow": `${h} ${s}% ${Math.min(l + 10, 95)}%`,
   } as CSSProperties;
 }

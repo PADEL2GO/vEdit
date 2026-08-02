@@ -34,9 +34,9 @@ export function BookingStepper({ currentStep, detailPath }: { currentStep: numbe
                 <span
                   className={`flex-none w-[30px] h-[30px] rounded-full flex items-center justify-center transition-all duration-300 ${
                     done
-                      ? "bg-primary text-black border border-transparent shadow-[0_0_18px_hsl(71_91%_51%/0.3)]"
+                      ? "bg-primary text-black border border-transparent shadow-[0_0_18px_hsl(var(--primary)/0.3)]"
                       : active
-                        ? "bg-primary/[0.12] text-primary border border-primary/60 shadow-[0_0_18px_hsl(71_91%_51%/0.3)]"
+                        ? "bg-primary/[0.12] text-primary border border-primary/60 shadow-[0_0_18px_hsl(var(--primary)/0.3)]"
                         : "bg-[hsl(0_0%_7%)] text-[hsl(0_0%_45%)] border border-[hsl(0_0%_18%)]"
                   }`}
                 >

@@ -12,6 +12,7 @@ import { NavLink } from "react-router-dom";
 import { Loader2, User, Mail, Phone, Check, ArrowRight, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
 
 interface GuestCheckoutModalProps {
   open: boolean;
@@ -28,6 +29,8 @@ export function GuestCheckoutModal({
   isSubmitting,
   locationSlug,
 }: GuestCheckoutModalProps) {
+  // Dialog rendert per Portal außerhalb des <main> — Section-Farbe hier erneut setzen.
+  const sectionColor = useSectionTheme("booking");
   const { t } = useTranslation("booking");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -52,10 +55,13 @@ export function GuestCheckoutModal({
 
   return (
     <Dialog open={open} onOpenChange={isSubmitting ? undefined : onOpenChange}>
-      <DialogContent className="max-w-[440px] gap-[18px] rounded-[22px] border border-border/60 bg-gradient-card p-[26px]">
+      <DialogContent
+        className="max-w-[440px] gap-[18px] rounded-[22px] border border-border/60 bg-gradient-card p-[26px]"
+        style={sectionThemeVars(sectionColor)}
+      >
         <DialogHeader className="text-left">
           <div className="flex items-center gap-3">
-            <span className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[13px] border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))] text-primary">
+            <span className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[13px] border border-primary/35 bg-[linear-gradient(135deg,hsl(var(--primary)/0.18),hsl(var(--primary)/0.04))] text-primary">
               <User className="h-5 w-5" />
             </span>
             <div className="flex flex-col gap-0.5">

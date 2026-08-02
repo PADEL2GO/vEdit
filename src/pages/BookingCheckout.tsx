@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { NavLink, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +38,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const BookingCheckout = () => {
+  const sectionColor = useSectionTheme("booking");
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("booking");
   const dateLocale = i18n.language === "en" ? enUS : de;
@@ -62,7 +65,10 @@ const BookingCheckout = () => {
     return (
       <>
         <Navigation />
-        <main className="min-h-screen bg-background pt-16 md:pt-20">
+        <main
+          className="min-h-screen bg-background pt-16 md:pt-20"
+          style={sectionThemeVars(sectionColor)}
+        >
           <BookingStepper currentStep={2} />
           <div className="flex items-center justify-center py-40">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -76,7 +82,12 @@ const BookingCheckout = () => {
     return (
       <>
         <Navigation />
-        <main className="min-h-screen bg-background pt-16 md:pt-20">
+        <main
+          className="relative min-h-screen bg-background pt-16 md:pt-20"
+          style={sectionThemeVars(sectionColor)}
+        >
+          <SectionShaderBackdrop color={sectionColor} />
+          <div className="relative z-[1]">
           <BookingStepper currentStep={2} />
           <section className="pt-8 md:pt-10 pb-24 px-5">
             <div className="mx-auto max-w-lg rounded-2xl border border-border/60 bg-gradient-card p-8">
@@ -92,6 +103,7 @@ const BookingCheckout = () => {
               </div>
             </div>
           </section>
+          </div>
         </main>
         <Footer />
       </>
@@ -121,7 +133,12 @@ const BookingCheckout = () => {
 
       <Navigation />
 
-      <main className="min-h-screen bg-background pt-16 md:pt-20">
+      <main
+        className="relative min-h-screen bg-background pt-16 md:pt-20"
+        style={sectionThemeVars(sectionColor)}
+      >
+        <SectionShaderBackdrop color={sectionColor} />
+        <div className="relative z-[1]">
         <BookingStepper currentStep={2} detailPath={detailPath} />
 
         <section className="pt-8 md:pt-10 pb-24 px-5">
@@ -153,7 +170,7 @@ const BookingCheckout = () => {
             {timeLeft !== null && timeLeft > 0 && (
               <div className="rounded-[18px] border border-primary/30 bg-gradient-card p-[16px_18px]">
                 <div className="flex items-center gap-[13px]">
-                  <span className="flex-none w-10 h-10 rounded-xl flex items-center justify-center text-primary border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))]">
+                  <span className="flex-none w-10 h-10 rounded-xl flex items-center justify-center text-primary border border-primary/35 bg-[linear-gradient(135deg,hsl(var(--primary)/0.18),hsl(var(--primary)/0.04))]">
                     <Timer className="w-[19px] h-[19px]" />
                   </span>
                   <div className="flex flex-col gap-0.5 flex-1 min-w-0">
@@ -191,7 +208,7 @@ const BookingCheckout = () => {
                       </button>
                     </div>
                     <div className="flex gap-[14px] items-center">
-                      <span className="flex-none w-[76px] h-[76px] rounded-xl flex items-center justify-center text-primary border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))]">
+                      <span className="flex-none w-[76px] h-[76px] rounded-xl flex items-center justify-center text-primary border border-primary/35 bg-[linear-gradient(135deg,hsl(var(--primary)/0.18),hsl(var(--primary)/0.04))]">
                         <MapPin className="w-6 h-6" />
                       </span>
                       <div className="flex flex-col gap-[3px] min-w-0">
@@ -239,7 +256,7 @@ const BookingCheckout = () => {
                         className="flex items-center gap-3 w-full text-left disabled:cursor-default"
                         disabled={isVoucherApplied}
                       >
-                        <span className="flex-none w-[38px] h-[38px] rounded-[11px] flex items-center justify-center text-primary border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))]">
+                        <span className="flex-none w-[38px] h-[38px] rounded-[11px] flex items-center justify-center text-primary border border-primary/35 bg-[linear-gradient(135deg,hsl(var(--primary)/0.18),hsl(var(--primary)/0.04))]">
                           <Ticket className="w-[17px] h-[17px]" />
                         </span>
                         <span className="flex-1 text-[14.5px] font-bold text-foreground">
@@ -512,6 +529,7 @@ const BookingCheckout = () => {
             </div>
           </motion.div>
         </section>
+        </div>
       </main>
 
       <Footer />

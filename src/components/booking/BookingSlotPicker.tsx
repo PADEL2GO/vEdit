@@ -26,14 +26,14 @@ interface BookingSlotPickerProps {
 
 const CARD = "rounded-2xl border border-border/60 bg-gradient-card p-[22px]";
 const ICON_TILE =
-  "flex-none w-[42px] h-[42px] rounded-xl border border-primary/35 flex items-center justify-center text-primary bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))]";
+  "flex-none w-[42px] h-[42px] rounded-xl border border-primary/35 flex items-center justify-center text-primary bg-[linear-gradient(135deg,hsl(var(--primary)/0.18),hsl(var(--primary)/0.04))]";
 
 function CheckBadge({ done }: { done: boolean }) {
   return (
     <span
       className={`flex-none w-6 h-6 rounded-full flex items-center justify-center transition-all ${
         done
-          ? "bg-primary text-black shadow-[0_0_16px_hsl(71_91%_51%/0.4)]"
+          ? "bg-primary text-black shadow-[0_0_16px_hsl(var(--primary)/0.4)]"
           : "bg-[hsl(0_0%_10%)] text-[hsl(0_0%_35%)] border border-[hsl(0_0%_20%)]"
       }`}
     >
@@ -118,12 +118,12 @@ export function BookingSlotPicker({
                     }}
                     className={`relative flex flex-col items-start gap-1 rounded-[14px] px-4 py-3.5 text-left min-h-[44px] transition-all ${
                       on
-                        ? "border border-primary bg-primary/[0.08] shadow-[0_0_22px_hsl(71_91%_51%/0.22)]"
+                        ? "border border-primary bg-primary/[0.08] shadow-[0_0_22px_hsl(var(--primary)/0.22)]"
                         : "border border-[hsl(0_0%_15%)] bg-white/[0.03] hover:border-primary/55"
                     }`}
                   >
                     {on && (
-                      <span className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-primary text-black flex items-center justify-center shadow-[0_0_14px_hsl(71_91%_51%/0.5)]">
+                      <span className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-primary text-black flex items-center justify-center shadow-[0_0_14px_hsl(var(--primary)/0.5)]">
                         <Check className="w-3 h-3" strokeWidth={3} />
                       </span>
                     )}
@@ -160,7 +160,7 @@ export function BookingSlotPicker({
                   }}
                   className={`flex-none flex flex-col items-center gap-0.5 w-16 py-2.5 px-1 rounded-[13px] transition-all ${
                     on
-                      ? "bg-primary text-black border border-transparent shadow-[0_0_22px_hsl(71_91%_51%/0.35)]"
+                      ? "bg-primary text-black border border-transparent shadow-[0_0_22px_hsl(var(--primary)/0.35)]"
                       : "bg-white/[0.03] text-foreground border border-[hsl(0_0%_15%)] hover:border-primary/40"
                   }`}
                 >
@@ -202,7 +202,7 @@ export function BookingSlotPicker({
                   }}
                   className={`flex flex-col items-center justify-center gap-0.5 py-3 px-2 rounded-[14px] min-h-[44px] transition-all ${
                     on
-                      ? "bg-primary text-black border border-transparent shadow-[0_0_22px_hsl(71_91%_51%/0.35)]"
+                      ? "bg-primary text-black border border-transparent shadow-[0_0_22px_hsl(var(--primary)/0.35)]"
                       : "bg-white/[0.03] text-foreground border border-[hsl(0_0%_15%)] hover:border-primary/55"
                   }`}
                 >
@@ -270,7 +270,7 @@ export function BookingSlotPicker({
                       onClick={() => setSelectedSlot(slot)}
                       className={`h-12 rounded-xl font-stat text-[13.5px] font-semibold transition-all ${
                         on
-                          ? "bg-primary text-black border border-transparent shadow-[0_0_20px_hsl(71_91%_51%/0.4)]"
+                          ? "bg-primary text-black border border-transparent shadow-[0_0_20px_hsl(var(--primary)/0.4)]"
                           : !slot.available
                             ? "bg-white/[0.02] text-[hsl(0_0%_40%)] border border-[hsl(0_0%_12%)] line-through opacity-40 cursor-not-allowed"
                             : "bg-white/[0.03] text-foreground border border-[hsl(0_0%_16%)] hover:border-primary/55"

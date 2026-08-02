@@ -3,12 +3,15 @@ import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { X, ArrowLeft, RotateCcw, ShieldCheck } from "lucide-react";
 import { BookingStepper } from "@/components/booking/BookingStepper";
 
 const BookingCancel = () => {
+  const sectionColor = useSectionTheme("booking");
   const { t } = useTranslation("booking");
   const [searchParams] = useSearchParams();
   const bookingId = searchParams.get("booking_id");
@@ -22,7 +25,12 @@ const BookingCancel = () => {
 
       <Navigation />
 
-      <main className="min-h-screen bg-background pt-16 md:pt-20">
+      <main
+        className="relative min-h-screen bg-background pt-16 md:pt-20"
+        style={sectionThemeVars(sectionColor)}
+      >
+        <SectionShaderBackdrop color={sectionColor} />
+        <div className="relative z-[1]">
         <BookingStepper currentStep={2} />
 
         <section className="pt-12 md:pt-16 pb-24 px-5">
@@ -81,6 +89,7 @@ const BookingCancel = () => {
             </span>
           </motion.div>
         </section>
+        </div>
       </main>
 
       <Footer />

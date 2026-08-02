@@ -35,9 +35,9 @@ export function LocationCard({ location, todayFreeSlots, occupancyPercent, index
   const mid = occupancyPercent >= 55 && !busy;
   const status = {
     label: busy ? "Fast ausgebucht" : mid ? "Gut gebucht" : "Verfügbar",
-    textColor: busy ? "hsl(0 72% 70%)" : mid ? "hsl(45 90% 65%)" : "#C7F011",
-    accentColor: busy ? "hsl(0 72% 55%)" : mid ? "hsl(45 90% 55%)" : "#C7F011",
-    borderColor: busy ? "hsl(0 72% 55% / 0.4)" : mid ? "hsl(45 90% 55% / 0.4)" : "hsl(71 91% 51% / 0.4)",
+    textColor: busy ? "hsl(0 72% 70%)" : mid ? "hsl(45 90% 65%)" : "hsl(var(--primary))",
+    accentColor: busy ? "hsl(0 72% 55%)" : mid ? "hsl(45 90% 55%)" : "hsl(var(--primary))",
+    borderColor: busy ? "hsl(0 72% 55% / 0.4)" : mid ? "hsl(45 90% 55% / 0.4)" : "hsl(var(--primary) / 0.4)",
   };
 
   return (

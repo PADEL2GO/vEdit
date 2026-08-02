@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, EyeOff } from "lucide-react";
@@ -16,6 +18,7 @@ import { useCourtsVisibility } from "@/hooks/useCourtsVisibility";
 import { useFeatureToggles } from "@/hooks/useFeatureToggles";
 
 const BookingLocation = () => {
+  const sectionColor = useSectionTheme("booking");
   const { t } = useTranslation("booking");
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -57,7 +60,10 @@ const BookingLocation = () => {
     return (
       <>
         <Navigation />
-        <main className="min-h-screen bg-background pt-24 flex items-center justify-center">
+        <main
+          className="min-h-screen bg-background pt-24 flex items-center justify-center"
+          style={sectionThemeVars(sectionColor)}
+        >
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </main>
       </>
@@ -68,8 +74,12 @@ const BookingLocation = () => {
     return (
       <>
         <Navigation />
-        <main className="min-h-screen bg-background pt-24 pb-12">
-          <div className="container mx-auto px-4 max-w-md text-center py-20">
+        <main
+          className="relative min-h-screen bg-background pt-24 pb-12"
+          style={sectionThemeVars(sectionColor)}
+        >
+          <SectionShaderBackdrop color={sectionColor} />
+          <div className="relative z-[1] container mx-auto px-4 max-w-md text-center py-20">
             <div className="inline-flex p-4 rounded-2xl bg-primary/10 mb-4">
               <EyeOff className="w-10 h-10 text-primary" />
             </div>
@@ -98,7 +108,12 @@ const BookingLocation = () => {
 
       <Navigation />
 
-      <main className="min-h-screen bg-background pt-16 md:pt-20">
+      <main
+        className="relative min-h-screen bg-background pt-16 md:pt-20"
+        style={sectionThemeVars(sectionColor)}
+      >
+        <SectionShaderBackdrop color={sectionColor} />
+        <div className="relative z-[1]">
         <BookingStepper currentStep={1} detailPath={`/booking/locations/${slug}`} />
 
         <section className="pt-8 md:pt-10 pb-24 px-5">
@@ -170,6 +185,7 @@ const BookingLocation = () => {
             </div>
           </motion.div>
         </section>
+        </div>
       </main>
 
       <Footer />

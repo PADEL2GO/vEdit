@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import Navigation from "@/components/Navigation";
+import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Check, CalendarDays, ArrowRight, Loader2, Coins, Gift, Sparkles, Users } from "lucide-react";
@@ -19,6 +21,7 @@ interface EarnedReward {
 }
 
 const BookingSuccess = () => {
+  const sectionColor = useSectionTheme("booking");
   const { t } = useTranslation("booking");
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -103,7 +106,10 @@ const BookingSuccess = () => {
     return (
       <>
         <Navigation />
-        <main className="min-h-screen bg-background pt-24 flex items-center justify-center">
+        <main
+          className="min-h-screen bg-background pt-24 flex items-center justify-center"
+          style={sectionThemeVars(sectionColor)}
+        >
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
             <p className="text-muted-foreground">{t("success.processing")}</p>
@@ -122,12 +128,17 @@ const BookingSuccess = () => {
 
       <Navigation />
 
-      <main className="min-h-screen bg-background pt-16 md:pt-20">
+      <main
+        className="relative min-h-screen bg-background pt-16 md:pt-20"
+        style={sectionThemeVars(sectionColor)}
+      >
+        <SectionShaderBackdrop color={sectionColor} />
+        <div className="relative z-[1]">
         <BookingStepper currentStep={3} />
 
         <section
           className="pt-10 md:pt-14 pb-24 px-5"
-          style={{ background: "radial-gradient(ellipse 60% 40% at 50% 0%, hsl(71 91% 51% / 0.09), transparent)" }}
+          style={{ background: "radial-gradient(ellipse 60% 40% at 50% 0%, hsl(var(--primary) / 0.09), transparent)" }}
         >
           <div className="mx-auto max-w-[560px] flex flex-col items-center gap-[22px] text-center">
             {/* Check-Kreis */}
@@ -135,7 +146,7 @@ const BookingSuccess = () => {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.15, type: "spring", stiffness: 200, damping: 14 }}
-              className="w-24 h-24 rounded-full bg-primary/10 border border-primary/45 flex items-center justify-center text-primary shadow-[0_0_60px_hsl(71_91%_51%/0.3)]"
+              className="w-24 h-24 rounded-full bg-primary/10 border border-primary/45 flex items-center justify-center text-primary shadow-[0_0_60px_hsl(var(--primary)/0.3)]"
             >
               <Check className="w-11 h-11" strokeWidth={2.5} />
             </motion.span>
@@ -196,7 +207,7 @@ const BookingSuccess = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
                 className="w-full rounded-[18px] border border-primary/35 p-5 text-left"
-                style={{ background: "linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.03))" }}
+                style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.12), hsl(var(--primary) / 0.03))" }}
               >
                 <div className="flex items-center gap-3.5 mb-3">
                   <span className="flex-none w-[46px] h-[46px] rounded-[13px] bg-primary/[0.12] border border-primary/35 flex items-center justify-center text-primary">
@@ -254,7 +265,7 @@ const BookingSuccess = () => {
             {isGuest && (
               <div
                 className="w-full rounded-[18px] border border-primary/35 p-5 text-left"
-                style={{ background: "linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.03))" }}
+                style={{ background: "linear-gradient(135deg, hsl(var(--primary) / 0.12), hsl(var(--primary) / 0.03))" }}
               >
                 <div className="flex items-center gap-3.5">
                   <span className="flex-none w-[46px] h-[46px] rounded-[13px] bg-primary/[0.12] border border-primary/35 flex items-center justify-center text-primary">
@@ -309,6 +320,7 @@ const BookingSuccess = () => {
             </div>
           </div>
         </section>
+        </div>
       </main>
 
       <Footer />
