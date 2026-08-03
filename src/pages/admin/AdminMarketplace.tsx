@@ -462,8 +462,8 @@ const AdminMarketplace = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.description || !formData.credit_cost || !formData.image_url) {
-      toast.error("Bitte fülle alle Pflichtfelder aus (Name, Beschreibung, Credits, Titelbild)");
+    if (!formData.name || !formData.description || !formData.image_url) {
+      toast.error("Bitte fülle alle Pflichtfelder aus (Name, Beschreibung, Titelbild)");
       return;
     }
     if (!formData.price_cents || formData.price_cents <= 0) {
@@ -1128,13 +1128,18 @@ const AdminMarketplace = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Punkte-Rabatt (max.) *</Label>
+                <Label>Punkte-Rabatt (max. Points)</Label>
                 <Input
                   type="number"
-                  min={1}
-                  value={formData.credit_cost}
+                  min={0}
+                  value={formData.credit_cost ?? 0}
                   onChange={(e) => setFormData({ ...formData, credit_cost: parseInt(e.target.value) || 0 })}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Fixer Betrag an Points, den jeder Käufer bei diesem Produkt als Rabatt einlösen kann
+                  {(formData.credit_cost ?? 0) > 0 && ` (= ${formatEuro(Math.floor((formData.credit_cost ?? 0)))} bei 100 Points/€ — genauer Wert laut P2G-Einstellung)`}
+                  . 0 = kein Punkterabatt.
+                </p>
               </div>
             </div>
 

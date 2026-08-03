@@ -33,7 +33,7 @@ const MarketplaceProduct = () => {
   const { data: brands } = useCatalogBrands();
   const { user } = useAuth();
   const { summary } = useP2GPoints();
-  const { centsPerPoint, maxPercent, enabled: pointsEnabled } = usePointsValue();
+  const { centsPerPoint, enabled: pointsEnabled } = usePointsValue();
 
   const [qty, setQty] = useState(1);
   const [mainIdx, setMainIdx] = useState(0);
@@ -108,7 +108,8 @@ const MarketplaceProduct = () => {
   const qtyMax = Math.min(product.stock_quantity ?? 5, 5);
 
   const balance = summary?.play_credits ?? 0;
-  const maxRedeem = maxRedeemablePoints(price * qty, balance, centsPerPoint, maxPercent);
+  const productPointsCap = product.credit_cost ?? 0;
+  const maxRedeem = maxRedeemablePoints(price * qty, balance, centsPerPoint, productPointsCap);
   const maxSaveCents = Math.floor(maxRedeem * centsPerPoint);
 
   // New DB columns not yet in generated types.ts
@@ -251,7 +252,7 @@ const MarketplaceProduct = () => {
                   <span className="text-[12.5px] leading-snug text-muted-foreground">
                     <Trans
                       i18nKey="marketplace:product.pointsGuest"
-                      values={{ maxPercent }}
+                      values={{ points: ptsFmt(productPointsCap) }}
                       components={{
                         1: <span className="font-stat font-bold text-primary" />,
                         2: <button onClick={() => navigate("/auth")} className="font-bold text-primary underline" />,

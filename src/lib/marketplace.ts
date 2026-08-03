@@ -10,17 +10,18 @@ export const discountPct = (priceCents: number, uvpCents?: number | null): numbe
 
 /**
  * Highest number of points that may be applied to a subtotal, mirroring the
- * server-side cap in the marketplace-checkout edge function:
- *   capped at `maxPercent` of the subtotal AND the user's balance, rounded to 10.
+ * server-side cap in the marketplace-checkout edge function: the per-product
+ * fixed cap (Admin "Punkte-Rabatt (max.)" = marketplace_items.credit_cost,
+ * per order), never more than the subtotal or the user's balance, rounded to 10.
  */
 export function maxRedeemablePoints(
   subtotalCents: number,
   balance: number,
   centsPerPoint: number,
-  maxPercent: number,
+  productCapPoints: number,
 ): number {
   if (!balance || balance <= 0 || centsPerPoint <= 0) return 0;
-  const capCents = Math.floor((subtotalCents * maxPercent) / 100);
-  const maxByCap = Math.floor(capCents / centsPerPoint);
-  return Math.max(0, Math.floor(Math.min(balance, maxByCap) / 10) * 10);
+  const capByPrice = Math.floor(subtotalCents / centsPerPoint);
+  const cap = Math.min(balance, Math.max(0, productCapPoints || 0), capByPrice);
+  return Math.max(0, Math.floor(cap / 10) * 10);
 }

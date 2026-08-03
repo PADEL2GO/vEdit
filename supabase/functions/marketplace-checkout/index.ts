@@ -166,12 +166,11 @@ serve(async (req) => {
     if (user && pointsToUse > 0) {
       const { data: siteSettings } = await supabaseAdmin
         .from("site_settings")
-        .select("feature_credits_payment_enabled, credits_payment_max_percent, credits_per_euro")
+        .select("feature_credits_payment_enabled, credits_per_euro")
         .eq("id", "global")
         .single();
 
       const creditsEnabled = (siteSettings as any)?.feature_credits_payment_enabled ?? false;
-      const maxPercent: number = (siteSettings as any)?.credits_payment_max_percent ?? 50;
       const creditsPerEuro: number = (siteSettings as any)?.credits_per_euro ?? 100;
 
       if (!creditsEnabled) {
@@ -186,11 +185,15 @@ serve(async (req) => {
 
       const availablePoints = (wallet?.play_credits ?? 0) + (wallet?.reward_credits ?? 0);
       const centsPerPoint = 100 / creditsPerEuro;
-      const maxDiscountCents = Math.floor(priceCents * maxPercent / 100);
+      // Fixer Punkte-Deckel PRO PRODUKT (Admin-Feld "Punkte-Rabatt (max.)" =
+      // marketplace_items.credit_cost, pro Bestellung, unabhängig von der Menge).
+      // 0 = kein Punkterabatt bei diesem Produkt. Ersetzt den früheren Prozent-Cap.
+      const productPointsCap = Math.max(0, Math.floor(Number(item.credit_cost ?? 0)) || 0);
       const requestedDiscountCents = Math.floor(pointsToUse * centsPerPoint);
       actualDiscountCents = Math.min(
         requestedDiscountCents,
-        maxDiscountCents,
+        Math.floor(productPointsCap * centsPerPoint),
+        priceCents,
         Math.floor(availablePoints * centsPerPoint),
       );
       // Never leave a remainder Stripe can't charge (the 0<x<50c band): trim the discount

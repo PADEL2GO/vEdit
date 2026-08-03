@@ -41,7 +41,7 @@ const Marketplace = () => {
   const { data: brands } = useCatalogBrands();
   const { user } = useAuth();
   const { summary } = useP2GPoints();
-  const { maxPercent, enabled: pointsEnabled } = usePointsValue();
+  const { enabled: pointsEnabled } = usePointsValue();
 
   const loggedIn = !!user;
   const balance = summary?.play_credits ?? 0;
@@ -156,7 +156,7 @@ const Marketplace = () => {
             {loggedIn && pointsEnabled ? (
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-4 py-1.5 text-[13.5px] font-semibold text-primary">
                 <Coins className="w-3.5 h-3.5" />
-                {t("hero.pointsBanner", { points: ptsFmt(balance), maxPercent })}
+                {t("hero.pointsBanner", { points: ptsFmt(balance) })}
               </span>
             ) : (
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-4 py-1.5 text-[13.5px] font-semibold text-primary">

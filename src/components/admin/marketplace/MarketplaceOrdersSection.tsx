@@ -186,7 +186,12 @@ export function MarketplaceOrdersSection() {
                         {pointsSpent > 0 && (
                           <div className="text-xs text-primary inline-flex items-center gap-1 justify-end">
                             <Coins className="w-3 h-3" />
-                            {pointsSpent.toLocaleString("de-DE")} P.
+                            {pointsSpent.toLocaleString("de-DE")} P. eingelöst
+                          </div>
+                        )}
+                        {o.points_balance_before !== null && o.points_balance_after !== null && (
+                          <div className="text-[11px] text-muted-foreground whitespace-nowrap">
+                            Stand: {o.points_balance_before.toLocaleString("de-DE")} → {o.points_balance_after.toLocaleString("de-DE")} P.
                           </div>
                         )}
                       </TableCell>

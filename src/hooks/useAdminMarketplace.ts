@@ -146,6 +146,8 @@ export interface MarketplaceOrder {
   amount_cents: number | null;
   play_spent: number | null;
   reward_spent: number | null;
+  points_balance_before: number | null;
+  points_balance_after: number | null;
   guest_email: string | null;
   guest_name: string | null;
   user_id: string | null;
@@ -167,7 +169,8 @@ export const useAdminMarketplaceOrders = () => {
         .from("marketplace_redemptions")
         .select(`
           id, status, fulfillment_status, reference_code, created_at, quantity,
-          amount_cents, play_spent, reward_spent, guest_email, guest_name, user_id,
+          amount_cents, play_spent, reward_spent, points_balance_before, points_balance_after,
+          guest_email, guest_name, user_id,
           shipping_address_line1, shipping_postal_code, shipping_city, shipping_country,
           tracking_number, carrier, shipped_at,
           item:marketplace_items(name, image_url)
