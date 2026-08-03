@@ -73,15 +73,16 @@ serve(async (req) => {
       durationMin = Math.round((new Date(endTime).getTime() - new Date(startTime).getTime()) / 60000);
     }
 
-    // ── Admin-configurable fixed payback per booking length (60 vs 120 min) ──
+    // ── Admin-configurable fixed payback per booking length (60 / 90 / 120 min) ──
     const { data: settings } = await supabaseAdmin
       .from("site_settings")
-      .select("payback_points_60min, payback_points_120min")
+      .select("payback_points_60min, payback_points_90min, payback_points_120min")
       .eq("id", "global")
       .maybeSingle();
     const rate60 = Number((settings as any)?.payback_points_60min ?? 100) || 0;
+    const rate90 = Number((settings as any)?.payback_points_90min ?? 150) || 0;
     const rate120 = Number((settings as any)?.payback_points_120min ?? 200) || 0;
-    const base = durationMin >= 120 ? rate120 : rate60;
+    const base = durationMin >= 120 ? rate120 : durationMin >= 90 ? rate90 : rate60;
 
     // ── Expert-level multiplier (based on user's lifetime credits) ────────
     const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
@@ -113,7 +114,7 @@ serve(async (req) => {
         key: "BOOKING_PAYBACK",
         title: "Buchungs-Payback",
         points: base,
-        description: `${durationMin >= 120 ? "120" : "60"} Min Buchung`,
+        description: `${durationMin >= 120 ? "120" : durationMin >= 90 ? "90" : "60"} Min Buchung`,
       },
     ];
     if (multiplier !== 1 && total_points - base !== 0) {

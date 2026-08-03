@@ -677,6 +677,28 @@ serve(async (req) => {
         }
         const pct = refundPercentage || 100;
         await reverseBookingRewards(bookingId, pct);
+
+        // Buchungs-Payback zurücknehmen — eigener Mechanismus neben den reward_instances
+        // (bookings.play_credits_awarded via increment_play_and_lifetime). Die RPC ist
+        // idempotent (Single-Winner über die Spalte), doppelte Webhooks buchen nie doppelt ab.
+        const { data: clawed, error: clawError } = await supabaseAdmin.rpc("clawback_booking_payback", {
+          p_booking_id: bookingId,
+          p_refund_pct: pct,
+        });
+        if (clawError) {
+          logStep("Payback clawback failed", { bookingId, error: clawError.message });
+        } else if (Number(clawed ?? 0) > 0) {
+          logStep("Payback clawed back", { bookingId, points: Number(clawed) });
+          if (userId) {
+            await supabaseAdmin.from("notifications").insert({
+              user_id: userId,
+              type: "REWARD_REVERSED",
+              title: "Punkte zurückgebucht",
+              message: `Stornierung: ${Number(clawed)} Payback-Punkte deiner Buchung wurden zurückgebucht.`,
+              cta_url: "/dashboard/p2g-points",
+            });
+          }
+        }
         break;
       }
 

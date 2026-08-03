@@ -198,6 +198,7 @@ function P2GExchangeRateCard() {
 
 function P2GPaybackRatesCard() {
   const [rate60, setRate60] = useState(100);
+  const [rate90, setRate90] = useState(150);
   const [rate120, setRate120] = useState(200);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -206,12 +207,13 @@ function P2GPaybackRatesCard() {
     (async () => {
       const { data } = await supabase
         .from("site_settings")
-        .select("payback_points_60min, payback_points_120min")
+        .select("payback_points_60min, payback_points_90min, payback_points_120min")
         .eq("id", "global")
         .maybeSingle();
       const d = data as any;
       if (d) {
         setRate60(Number(d.payback_points_60min ?? 100));
+        setRate90(Number(d.payback_points_90min ?? 150));
         setRate120(Number(d.payback_points_120min ?? 200));
       }
       setIsLoading(false);
@@ -225,6 +227,7 @@ function P2GPaybackRatesCard() {
         .from("site_settings")
         .update({
           payback_points_60min: Math.max(0, Math.round(rate60)),
+          payback_points_90min: Math.max(0, Math.round(rate90)),
           payback_points_120min: Math.max(0, Math.round(rate120)),
         })
         .eq("id", "global");
@@ -251,10 +254,14 @@ function P2GPaybackRatesCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label>Payback für 60 Min (Punkte)</Label>
             <Input type="number" min={0} value={rate60} onChange={(e) => setRate60(parseInt(e.target.value) || 0)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Payback für 90 Min (Punkte)</Label>
+            <Input type="number" min={0} value={rate90} onChange={(e) => setRate90(parseInt(e.target.value) || 0)} />
           </div>
           <div className="space-y-2">
             <Label>Payback für 120 Min (Punkte)</Label>
@@ -263,7 +270,8 @@ function P2GPaybackRatesCard() {
         </div>
         <p className="text-xs text-muted-foreground">
           Beispiel bei Level-Multiplikator ×1,5: 60-Min-Buchung ergibt {Math.round(rate60 * 1.5)} Punkte,
-          120-Min-Buchung {Math.round(rate120 * 1.5)} Punkte.
+          90-Min-Buchung {Math.round(rate90 * 1.5)} Punkte, 120-Min-Buchung {Math.round(rate120 * 1.5)} Punkte.
+          Bei Stornierung wird das gutgeschriebene Payback automatisch zurückgebucht.
         </p>
         <Button onClick={save} disabled={isSaving} className="gap-2">
           {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}

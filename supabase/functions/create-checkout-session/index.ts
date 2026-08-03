@@ -660,12 +660,13 @@ serve(async (req) => {
           );
           const { data: settings } = await supabaseAdmin
             .from("site_settings")
-            .select("payback_points_60min, payback_points_120min")
+            .select("payback_points_60min, payback_points_90min, payback_points_120min")
             .eq("id", "global")
             .maybeSingle();
           const rate60 = Number((settings as any)?.payback_points_60min ?? 100) || 0;
+          const rate90 = Number((settings as any)?.payback_points_90min ?? 150) || 0;
           const rate120 = Number((settings as any)?.payback_points_120min ?? 200) || 0;
-          const base = durationMin >= 120 ? rate120 : rate60;
+          const base = durationMin >= 120 ? rate120 : durationMin >= 90 ? rate90 : rate60;
 
           const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
             p_user_id: bk.user_id,

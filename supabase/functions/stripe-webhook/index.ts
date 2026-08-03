@@ -773,7 +773,7 @@ serve(async (req) => {
             if (!isGuestWebhook) try {
               const { data: bk } = await supabaseAdmin
                 .from("bookings")
-                .select("start_time, end_time, user_id, play_credits_awarded, payment_mode, reserved_voucher_id")
+                .select("start_time, end_time, user_id, status, play_credits_awarded, payment_mode, reserved_voucher_id")
                 .eq("id", bookingId)
                 .single();
 
@@ -783,7 +783,10 @@ serve(async (req) => {
                 !!(bk as any)?.reserved_voucher_id ||
                 (bk as any)?.payment_mode === "voucher";
 
-              if (bk && bk.play_credits_awarded === 0 && bk.user_id && !usedVoucher) {
+              // Nie auf einer stornierten Buchung vergeben — nach dem Storno-Clawback steht
+              // play_credits_awarded wieder auf 0, ein verspäteter Webhook-Retry darf das
+              // Payback dann nicht erneut gutschreiben.
+              if (bk && bk.play_credits_awarded === 0 && bk.user_id && !usedVoucher && (bk as any).status !== "cancelled") {
                 // ── P2G Payback = round(fixedRate(duration) * expert-level multiplier) ──
                 // Fixed points per booking length (60 vs 120 min), admin-configurable in
                 // site_settings; the multiplier comes from the user's expert level.
@@ -793,12 +796,13 @@ serve(async (req) => {
 
                 const { data: settings } = await supabaseAdmin
                   .from("site_settings")
-                  .select("payback_points_60min, payback_points_120min")
+                  .select("payback_points_60min, payback_points_90min, payback_points_120min")
                   .eq("id", "global")
                   .maybeSingle();
                 const rate60 = Number((settings as any)?.payback_points_60min ?? 100) || 0;
+                const rate90 = Number((settings as any)?.payback_points_90min ?? 150) || 0;
                 const rate120 = Number((settings as any)?.payback_points_120min ?? 200) || 0;
-                const base = durationMin >= 120 ? rate120 : rate60;
+                const base = durationMin >= 120 ? rate120 : durationMin >= 90 ? rate90 : rate60;
 
                 const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
                   p_user_id: bk.user_id,
