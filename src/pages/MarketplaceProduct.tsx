@@ -149,15 +149,23 @@ const MarketplaceProduct = () => {
       ),
     });
   }
-  if (descParas.length > 0) {
+  if (images.length > 1) {
     infoBoxes.push({
-      key: "description",
+      key: "gallery",
       content: (
         <>
-          <h3 className="font-display font-bold text-[17px] mb-3">{t("product.descriptionHeading")}</h3>
-          <div className="flex flex-col gap-3">
-            {descParas.map((text, i) => (
-              <p key={i} className="text-[14.5px] leading-relaxed text-foreground/70">{text}</p>
+          <h3 className="font-display font-bold text-[17px] mb-3">{t("product.galleryHeading")}</h3>
+          <div className="grid grid-cols-3 gap-3">
+            {images.map((src, i) => (
+              <button
+                key={i}
+                onClick={() => setMainIdx(i)}
+                className={`aspect-[2/3] rounded-xl overflow-hidden border bg-gradient-to-br from-white/[0.04] to-black transition-colors ${
+                  i === mainIdx ? "border-primary" : "border-border/60 hover:border-primary/50"
+                }`}
+              >
+                <img src={src} alt="" className="w-full h-full object-cover" />
+              </button>
             ))}
           </div>
         </>
@@ -245,35 +253,19 @@ const MarketplaceProduct = () => {
 
           {/* Detail grid — schmalere Bildspalte, Buy-Box streckt sich auf Galeriehöhe */}
           <div className="grid gap-6 lg:gap-8 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]">
-            {/* Gallery */}
-            <div className="flex flex-col gap-3">
-              <div className="relative rounded-[20px] overflow-hidden border border-border/80 bg-gradient-to-br from-white/[0.04] to-black aspect-[2/3]">
-                <img src={images[mainIdx]} alt={localized(product, "name", i18n.language)} className="w-full h-full object-cover absolute inset-0" />
-                {soldOut && (
-                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex rounded-full border border-border bg-black/80 px-5 py-2 text-sm font-bold backdrop-blur">
-                    {t("stock.soldOut")}
-                  </span>
-                )}
-              </div>
-              {images.length > 1 && (
-                <div className="grid grid-cols-4 gap-3">
-                  {images.map((src, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setMainIdx(i)}
-                      className={`aspect-[2/3] rounded-2xl overflow-hidden border bg-gradient-to-br from-white/[0.04] to-black ${
-                        i === mainIdx ? "border-primary" : "border-border/80"
-                      }`}
-                    >
-                      <img src={src} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
+            {/* Hauptbild */}
+            <div className="relative rounded-[20px] overflow-hidden border border-border/80 bg-gradient-to-br from-white/[0.04] to-black aspect-[2/3]">
+              <img src={images[mainIdx]} alt={localized(product, "name", i18n.language)} className="w-full h-full object-cover absolute inset-0" />
+              {soldOut && (
+                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex rounded-full border border-border bg-black/80 px-5 py-2 text-sm font-bold backdrop-blur">
+                  {t("stock.soldOut")}
+                </span>
               )}
             </div>
 
-            {/* Buy box */}
-            <div className="rounded-2xl border border-border/60 bg-gradient-card p-[26px] flex flex-col gap-4">
+            {/* Buy-Box + Beschreibung untereinander; die untere Karte füllt die Spalte auf Bildhöhe */}
+            <div className="flex flex-col gap-6">
+            <div className={`rounded-2xl border border-border/60 bg-gradient-card p-[26px] flex flex-col gap-4 ${descParas.length === 0 ? "flex-1" : ""}`}>
               <div className="flex items-center gap-2.5 flex-wrap">
                 <span className="font-stat text-[11px] tracking-[0.14em] uppercase text-primary bg-primary/[0.08] border border-primary/25 rounded-full px-3 py-1">
                   {brandName}
@@ -403,6 +395,18 @@ const MarketplaceProduct = () => {
                   {t("product.trustPayment")}
                 </span>
               </div>
+            </div>
+
+            {descParas.length > 0 && (
+              <div className="rounded-2xl border border-border/60 bg-gradient-card p-6 flex-1">
+                <h3 className="font-display font-bold text-[17px] mb-3">{t("product.descriptionHeading")}</h3>
+                <div className="flex flex-col gap-3">
+                  {descParas.map((text, i) => (
+                    <p key={i} className="text-[14.5px] leading-relaxed text-foreground/70">{text}</p>
+                  ))}
+                </div>
+              </div>
+            )}
             </div>
           </div>
 

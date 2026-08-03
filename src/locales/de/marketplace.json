@@ -75,7 +75,8 @@
     "euResponsibleHeading": "Verantwortliche Person in der EU",
     "productIdentifier": "Produktkennzeichnung: {{value}}",
     "safetyWarningsHeading": "Warnhinweise",
-    "textileComposition": "Materialzusammensetzung: {{value}}"
+    "textileComposition": "Materialzusammensetzung: {{value}}",
+    "galleryHeading": "Weitere Bilder"
   },
   "checkout": {
     "metaTitle": "Checkout | PADEL2GO Marketplace",
