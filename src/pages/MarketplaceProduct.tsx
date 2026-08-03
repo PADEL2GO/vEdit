@@ -98,6 +98,7 @@ const MarketplaceProduct = () => {
   }
 
   const brandName = brands?.find((b) => b.id === product.brand_id)?.name ?? product.partner_name ?? "P2G";
+  const brandLogoUrl = brands?.find((b) => b.id === product.brand_id)?.logo_url ?? null;
   const categoryRow = categories?.find((c) => c.id === product.category_id);
   const categoryName = categoryRow ? localized(categoryRow, "name", i18n.language) : t("product.categoryFallback");
   const price = product.price_cents ?? 0;
@@ -165,6 +166,11 @@ const MarketplaceProduct = () => {
             <div className="flex flex-col gap-3">
               <div className="relative rounded-[20px] overflow-hidden border border-border/80 bg-gradient-to-br from-white/[0.04] to-black aspect-[2/3]">
                 <img src={images[mainIdx]} alt={localized(product, "name", i18n.language)} className="w-full h-full object-cover absolute inset-0" />
+                {brandLogoUrl && (
+                  <span className="absolute top-4 left-4 w-12 h-12 rounded-full overflow-hidden border border-white/20 bg-black/70 backdrop-blur shadow-lg">
+                    <img src={brandLogoUrl} alt={brandName} className="w-full h-full object-cover" />
+                  </span>
+                )}
                 {soldOut && (
                   <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex rounded-full border border-border bg-black/80 px-5 py-2 text-sm font-bold backdrop-blur">
                     {t("stock.soldOut")}
@@ -405,6 +411,7 @@ const MarketplaceProduct = () => {
                     key={r.id}
                     p={r}
                     brand={brands?.find((b) => b.id === r.brand_id)?.name ?? r.partner_name ?? "P2G"}
+                    logo={brands?.find((b) => b.id === r.brand_id)?.logo_url ?? null}
                     onOpen={() => {
                       setQty(1);
                       setMainIdx(0);
@@ -423,7 +430,7 @@ const MarketplaceProduct = () => {
   );
 };
 
-function RelatedCard({ p, brand, onOpen }: { p: MarketplaceItem; brand: string; onOpen: () => void }) {
+function RelatedCard({ p, brand, logo, onOpen }: { p: MarketplaceItem; brand: string; logo?: string | null; onOpen: () => void }) {
   const { t, i18n } = useTranslation("marketplace");
   const price = p.price_cents ?? 0;
   const uvp = p.compare_at_price_cents ?? null;
@@ -439,6 +446,11 @@ function RelatedCard({ p, brand, onOpen }: { p: MarketplaceItem; brand: string; 
         <div className={`aspect-[2/3] ${soldOut ? "opacity-45 grayscale" : ""}`}>
           <img src={p.image_url || "/placeholder.svg"} alt={localized(p, "name", i18n.language)} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
         </div>
+        {logo && (
+          <span className="absolute top-3 left-3 w-8 h-8 rounded-full overflow-hidden border border-white/20 bg-black/70 backdrop-blur shadow-md">
+            <img src={logo} alt={brand} className="w-full h-full object-cover" />
+          </span>
+        )}
         {off > 0 && (
           <span className="absolute top-3 right-3 inline-flex items-center rounded-full border border-white/15 bg-black/70 px-2.5 py-1 font-stat text-[11.5px] font-bold backdrop-blur">−{off}%</span>
         )}

@@ -54,6 +54,7 @@ const Marketplace = () => {
   const [sort, setSort] = useState<SortKey>("pop");
 
   const brandName = (id?: string | null) => brands?.find((b) => b.id === id)?.name;
+  const brandLogo = (id?: string | null) => brands?.find((b) => b.id === id)?.logo_url ?? null;
   const catName = (id?: string | null) => {
     const c = categories?.find((c) => c.id === id);
     return c ? localized(c, "name", i18n.language) : undefined;
@@ -305,6 +306,7 @@ const Marketplace = () => {
                   p={p}
                   index={i}
                   brand={brandName(p.brand_id) ?? p.partner_name ?? "P2G"}
+                  logo={brandLogo(p.brand_id)}
                   onOpen={() => navigate(`/marketplace/${p.slug}`)}
                 />
               ))}
@@ -322,11 +324,13 @@ function ProductCard({
   p,
   index,
   brand,
+  logo,
   onOpen,
 }: {
   p: MarketplaceItem;
   index: number;
   brand: string;
+  logo?: string | null;
   onOpen: () => void;
 }) {
   const { t, i18n } = useTranslation("marketplace");
@@ -355,11 +359,20 @@ function ProductCard({
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
-        {p.is_featured && (
-          <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-black/70 px-2.5 py-1 text-[11.5px] font-bold text-primary backdrop-blur">
-            <Flame className="w-3 h-3" />
-            {t("card.bestseller")}
-          </span>
+        {(logo || p.is_featured) && (
+          <div className="absolute top-3 left-3 flex items-center gap-2">
+            {logo && (
+              <span className="w-9 h-9 rounded-full overflow-hidden border border-white/20 bg-black/70 backdrop-blur shadow-md shrink-0">
+                <img src={logo} alt={brand} className="w-full h-full object-cover" />
+              </span>
+            )}
+            {p.is_featured && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-black/70 px-2.5 py-1 text-[11.5px] font-bold text-primary backdrop-blur">
+                <Flame className="w-3 h-3" />
+                {t("card.bestseller")}
+              </span>
+            )}
+          </div>
         )}
         {off > 0 && (
           <span className="absolute top-3 right-3 inline-flex items-center rounded-full border border-white/15 bg-black/70 px-2.5 py-1 font-stat text-[11.5px] font-bold text-foreground backdrop-blur">

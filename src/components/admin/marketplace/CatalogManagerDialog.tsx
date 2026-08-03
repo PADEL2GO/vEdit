@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Plus, Trash2, Check, X, Pencil } from "lucide-react";
+import { Loader2, Plus, Trash2, Check, X, Pencil, ImagePlus, ImageOff } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   useAdminCatalogCategories,
   useAdminCatalogBrands,
@@ -44,6 +46,46 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [logoUploadId, setLogoUploadId] = useState<string | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const pickLogo = (rowId: string) => {
+    setLogoUploadId(rowId);
+    logoInputRef.current?.click();
+  };
+
+  const saveLogo = (row: Row, logoUrl: string | null) =>
+    upsert.mutate({
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      sort_order: row.sort_order,
+      is_active: row.is_active,
+      logo_url: logoUrl,
+    });
+
+  const handleLogoFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    const row = rows.find((r) => r.id === logoUploadId);
+    setLogoUploadId(null);
+    if (!file || !row) return;
+    setLogoUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const fileName = `marketplace/brand-logos/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("media").upload(fileName, file);
+      if (error) {
+        toast.error("Fehler beim Hochladen: " + error.message);
+        return;
+      }
+      const { data } = supabase.storage.from("media").getPublicUrl(fileName);
+      saveLogo(row, data.publicUrl);
+    } finally {
+      setLogoUploading(false);
+    }
+  };
 
   // Category names are shown to the public (filter chips, breadcrumbs) → auto-translate to EN.
   // Brand names are proper nouns and stay untouched.
@@ -96,9 +138,13 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
           <DialogDescription>
             {isCategory
               ? "Produktkategorien für den Shop (z.B. Schläger, Bälle, Bekleidung)."
-              : "Marken für die Produkte (z.B. Adidas, Babolat, Bullpadel)."}
+              : "Marken für die Produkte (z.B. Adidas, Babolat, Bullpadel). Klick auf den Kreis lädt ein Logo hoch — es erscheint auf den Produktkarten und der Produktseite."}
           </DialogDescription>
         </DialogHeader>
+
+        {!isCategory && (
+          <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoFile} />
+        )}
 
         {/* Add new */}
         <div className="flex items-end gap-2">
@@ -154,10 +200,36 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
                   </>
                 ) : (
                   <>
+                    {!isCategory && (
+                      <button
+                        type="button"
+                        onClick={() => pickLogo(row.id)}
+                        disabled={logoUploading}
+                        title="Logo hochladen/ändern"
+                        className="w-9 h-9 rounded-full overflow-hidden border border-border/70 bg-muted shrink-0 flex items-center justify-center hover:border-primary/60 transition-colors"
+                      >
+                        {(row as MarketplaceBrandRow).logo_url ? (
+                          <img src={(row as MarketplaceBrandRow).logo_url!} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <ImagePlus className="w-4 h-4 text-muted-foreground" />
+                        )}
+                      </button>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{row.name}</div>
                       <div className="text-xs text-muted-foreground font-mono truncate">{row.slug}</div>
                     </div>
+                    {!isCategory && (row as MarketplaceBrandRow).logo_url && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        title="Logo entfernen"
+                        onClick={() => saveLogo(row, null)}
+                      >
+                        <ImageOff className="w-4 h-4" />
+                      </Button>
+                    )}
                     <Switch
                       checked={row.is_active}
                       onCheckedChange={(checked) =>
