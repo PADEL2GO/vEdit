@@ -359,6 +359,7 @@ const AdminMarketplace = () => {
   const openEditDialog = async (item: MarketplaceItem) => {
     setEditingItem(item);
     setSlugTouched(true);
+    setAiUrl("");
     setFormData({
       name: item.name,
       category: item.category,
@@ -907,12 +908,12 @@ const AdminMarketplace = () => {
           </DialogHeader>
 
           <div className="space-y-5 py-4">
-            {/* AI import via product URL — manual entry stays optional */}
-            {!editingItem && (
+            {/* AI import via product URL — beim Bearbeiten als Neu-Generierung nutzbar */}
+            {(
               <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-4">
                 <Label className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-primary" />
-                  Per URL oder Datei ausfüllen (AI)
+                  {editingItem ? "Per URL oder Datei neu generieren (AI)" : "Per URL oder Datei ausfüllen (AI)"}
                 </Label>
                 <div className="flex gap-2">
                   <Input
@@ -941,8 +942,9 @@ const AdminMarketplace = () => {
                 <p className="text-xs text-muted-foreground">Oder Produkt-Datei hochladen (PDF-Datenblatt / HTML-Seite):</p>
                 <Input type="file" accept=".pdf,.html,.htm" onChange={importFromFile} disabled={aiLoading} />
                 <p className="text-xs text-muted-foreground">
-                  Zieht Name, Beschreibung, Specs, Preis, Marke & Bilder automatisch aus der Produktseite
-                  bzw. dem Dokument. Alle Felder bleiben danach manuell anpassbar.
+                  {editingItem
+                    ? "Überschreibt die Felder mit den neuen Daten aus der Quelle (Slug, Titelbild und vorhandene Galerie bleiben erhalten — Galerie wird nur gefüllt, wenn sie leer ist). Nichts wird gespeichert, bis du unten speicherst."
+                    : "Zieht Name, Beschreibung, Specs, Preis, Marke & Bilder automatisch aus der Produktseite bzw. dem Dokument. Alle Felder bleiben danach manuell anpassbar."}
                 </p>
               </div>
             )}

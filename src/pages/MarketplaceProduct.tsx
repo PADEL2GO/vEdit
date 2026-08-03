@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useTranslation, Trans } from "react-i18next";
@@ -125,6 +125,91 @@ const MarketplaceProduct = () => {
   const stockCol = soldOut ? "text-red-400" : low ? "text-amber-400" : "text-primary";
   const stockDot = soldOut ? "bg-red-400" : low ? "bg-amber-400" : "bg-primary";
 
+  // Detail-Boxen dynamisch sammeln: 2er-Raster mit gleich hohen Karten; bei ungerader
+  // Anzahl nimmt die letzte Box die volle Breite ein — so entstehen nie Leerflächen.
+  const infoBoxes: { key: string; content: ReactNode }[] = [];
+  if (specs.length > 0) {
+    infoBoxes.push({
+      key: "specs",
+      content: (
+        <>
+          <h3 className="font-display font-bold text-[17px] mb-2">{t("product.specsHeading")}</h3>
+          <div className="flex flex-col">
+            {specs.map((sp, i) => (
+              <div
+                key={i}
+                className={`flex justify-between items-baseline gap-4 py-2.5 ${i > 0 ? "border-t border-border/60" : ""}`}
+              >
+                <span className="text-[13.5px] text-muted-foreground">{sp.label}</span>
+                <span className="text-[13.5px] font-semibold text-right">{sp.value}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      ),
+    });
+  }
+  if (descParas.length > 0) {
+    infoBoxes.push({
+      key: "description",
+      content: (
+        <>
+          <h3 className="font-display font-bold text-[17px] mb-3">{t("product.descriptionHeading")}</h3>
+          <div className="flex flex-col gap-3">
+            {descParas.map((text, i) => (
+              <p key={i} className="text-[14.5px] leading-relaxed text-foreground/70">{text}</p>
+            ))}
+          </div>
+        </>
+      ),
+    });
+  }
+  if (ext.manufacturer_name) {
+    infoBoxes.push({
+      key: "manufacturer",
+      content: (
+        <>
+          <h3 className="font-display font-bold text-[17px] mb-3">{t("product.manufacturerHeading")}</h3>
+          <div className="flex flex-col gap-3 text-[13.5px]">
+            <div className="flex flex-col gap-0.5">
+              <span className="font-semibold">{ext.manufacturer_name}</span>
+              {ext.manufacturer_address && (
+                <span className="whitespace-pre-line text-muted-foreground">{ext.manufacturer_address}</span>
+              )}
+              {ext.manufacturer_email && (
+                <span className="text-muted-foreground">{ext.manufacturer_email}</span>
+              )}
+            </div>
+            {ext.eu_responsible_name && (
+              <div className="flex flex-col gap-0.5 pt-2.5 border-t border-border/60">
+                <span className="font-semibold">{t("product.euResponsibleHeading")}</span>
+                <span className="text-muted-foreground">{ext.eu_responsible_name}</span>
+                {ext.eu_responsible_address && (
+                  <span className="whitespace-pre-line text-muted-foreground">{ext.eu_responsible_address}</span>
+                )}
+                {ext.eu_responsible_email && (
+                  <span className="text-muted-foreground">{ext.eu_responsible_email}</span>
+                )}
+              </div>
+            )}
+            {ext.product_identifier && (
+              <span className="text-muted-foreground">{t("product.productIdentifier", { value: ext.product_identifier })}</span>
+            )}
+            {ext.safety_warnings && (
+              <div className="flex flex-col gap-0.5 pt-2.5 border-t border-border/60">
+                <span className="font-semibold">{t("product.safetyWarningsHeading")}</span>
+                <span className="whitespace-pre-line text-muted-foreground">{ext.safety_warnings}</span>
+              </div>
+            )}
+            {ext.textile_composition && (
+              <span className="text-muted-foreground">{t("product.textileComposition", { value: ext.textile_composition })}</span>
+            )}
+          </div>
+        </>
+      ),
+    });
+  }
+
   const buyNow = () => navigate(`/marketplace/${product.slug}/checkout?qty=${qty}`);
 
   return (
@@ -158,8 +243,8 @@ const MarketplaceProduct = () => {
             <span className="font-semibold text-foreground">{localized(product, "name", i18n.language)}</span>
           </div>
 
-          {/* Detail grid */}
-          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr] items-start">
+          {/* Detail grid — schmalere Bildspalte, Buy-Box streckt sich auf Galeriehöhe */}
+          <div className="grid gap-6 lg:gap-8 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)]">
             {/* Gallery */}
             <div className="flex flex-col gap-3">
               <div className="relative rounded-[20px] overflow-hidden border border-border/80 bg-gradient-to-br from-white/[0.04] to-black aspect-[2/3]">
@@ -304,7 +389,7 @@ const MarketplaceProduct = () => {
                 </div>
               )}
 
-              <div className="flex flex-col gap-2.5 pt-0.5">
+              <div className="flex flex-col gap-2.5 pt-0.5 mt-auto">
                 <span className="inline-flex items-center gap-2.5 text-[13px] text-muted-foreground">
                   <Truck className="w-[15px] h-[15px] text-primary" />
                   {t("product.trustShipping")}
@@ -321,75 +406,19 @@ const MarketplaceProduct = () => {
             </div>
           </div>
 
-          {/* Specs + description */}
-          <div className="grid gap-6 md:grid-cols-[1.05fr_0.95fr] items-start">
-            {specs.length > 0 && (
-              <div className="rounded-2xl border border-border/60 bg-gradient-card p-6">
-                <h3 className="font-display font-bold text-[17px] mb-2">{t("product.specsHeading")}</h3>
-                <div className="flex flex-col">
-                  {specs.map((sp, i) => (
-                    <div
-                      key={i}
-                      className={`flex justify-between items-baseline gap-4 py-2.5 ${i > 0 ? "border-t border-border/60" : ""}`}
-                    >
-                      <span className="text-[13.5px] text-muted-foreground">{sp.label}</span>
-                      <span className="text-[13.5px] font-semibold text-right">{sp.value}</span>
-                    </div>
-                  ))}
+          {/* Detail-Boxen — dynamisches, symmetrisches Raster ohne Leerflächen */}
+          {infoBoxes.length > 0 && (
+            <div className="grid gap-6 md:grid-cols-2">
+              {infoBoxes.map((box, i) => (
+                <div
+                  key={box.key}
+                  className={`rounded-2xl border border-border/60 bg-gradient-card p-6 ${
+                    infoBoxes.length % 2 === 1 && i === infoBoxes.length - 1 ? "md:col-span-2" : ""
+                  }`}
+                >
+                  {box.content}
                 </div>
-              </div>
-            )}
-            {descParas.length > 0 && (
-              <div className="rounded-2xl border border-border/60 bg-gradient-card p-6">
-                <h3 className="font-display font-bold text-[17px] mb-3">{t("product.descriptionHeading")}</h3>
-                <div className="flex flex-col gap-3">
-                  {descParas.map((text, i) => (
-                    <p key={i} className="text-[14.5px] leading-relaxed text-foreground/70">{text}</p>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Manufacturer information (GPSR) */}
-          {ext.manufacturer_name && (
-            <div className="rounded-2xl border border-border/60 bg-gradient-card p-6">
-              <h3 className="font-display font-bold text-[17px] mb-3">{t("product.manufacturerHeading")}</h3>
-              <div className="flex flex-col gap-3 text-[13.5px]">
-                <div className="flex flex-col gap-0.5">
-                  <span className="font-semibold">{ext.manufacturer_name}</span>
-                  {ext.manufacturer_address && (
-                    <span className="whitespace-pre-line text-muted-foreground">{ext.manufacturer_address}</span>
-                  )}
-                  {ext.manufacturer_email && (
-                    <span className="text-muted-foreground">{ext.manufacturer_email}</span>
-                  )}
-                </div>
-                {ext.eu_responsible_name && (
-                  <div className="flex flex-col gap-0.5 pt-2.5 border-t border-border/60">
-                    <span className="font-semibold">{t("product.euResponsibleHeading")}</span>
-                    <span className="text-muted-foreground">{ext.eu_responsible_name}</span>
-                    {ext.eu_responsible_address && (
-                      <span className="whitespace-pre-line text-muted-foreground">{ext.eu_responsible_address}</span>
-                    )}
-                    {ext.eu_responsible_email && (
-                      <span className="text-muted-foreground">{ext.eu_responsible_email}</span>
-                    )}
-                  </div>
-                )}
-                {ext.product_identifier && (
-                  <span className="text-muted-foreground">{t("product.productIdentifier", { value: ext.product_identifier })}</span>
-                )}
-                {ext.safety_warnings && (
-                  <div className="flex flex-col gap-0.5 pt-2.5 border-t border-border/60">
-                    <span className="font-semibold">{t("product.safetyWarningsHeading")}</span>
-                    <span className="whitespace-pre-line text-muted-foreground">{ext.safety_warnings}</span>
-                  </div>
-                )}
-                {ext.textile_composition && (
-                  <span className="text-muted-foreground">{t("product.textileComposition", { value: ext.textile_composition })}</span>
-                )}
-              </div>
+              ))}
             </div>
           )}
 
