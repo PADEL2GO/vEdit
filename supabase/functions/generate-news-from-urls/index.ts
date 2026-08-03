@@ -4,10 +4,11 @@ import { stripUnsafeHtml } from "../_shared/stripUnsafeHtml.ts";
 
 // Weekly AI news generator: takes 1–3 sources from the padel press — URLs and/or
 // uploaded files (PDF datasheets go to Claude natively, HTML files through the same
-// extractor as fetched pages) — writes an ORIGINAL German article per source (no
-// copy/translation), inserts each as an UNPUBLISHED draft (ai_generated = true,
-// source_url set for URLs) and triggers the DeepL EN translation. The admin adds
-// a cover image and publishes manually.
+// extractor as fetched pages, TXT files as plain text) — writes an ORIGINAL German
+// article per source (no copy/translation), inserts each as an UNPUBLISHED draft
+// (ai_generated = true, source_url set for URLs) and triggers the DeepL EN
+// translation. The admin adds a cover image and publishes manually. Optionally a
+// stored writing style (news_writing_styles) steers tone/structure of the output.
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -166,20 +167,21 @@ Deno.serve(async (req) => {
       return json({ error: "Keine Admin-Berechtigung" }, 403);
     }
 
-    // ── Input: 1–3 sources — http(s) URLs and/or uploaded files (PDF / HTML) ───
-    const body = await req.json().catch(() => ({})) as { urls?: unknown; files?: unknown };
+    // ── Input: 1–3 sources — http(s) URLs and/or uploaded files (PDF / HTML / TXT)
+    const body = await req.json().catch(() => ({})) as { urls?: unknown; files?: unknown; style_id?: unknown };
     const rawUrls = Array.isArray(body.urls) ? body.urls : [];
     const urls = rawUrls
       .filter((u): u is string => typeof u === "string" && /^https?:\/\/\S+$/i.test(u.trim()))
       .map((u) => u.trim());
 
-    type FileSource = { name: string; kind: "pdf" | "html"; data: string };
+    type FileKind = "pdf" | "html" | "txt";
+    type FileSource = { name: string; kind: FileKind; data: string };
     const rawFiles = Array.isArray(body.files) ? body.files : [];
     const files: FileSource[] = rawFiles
       .filter((f): f is Record<string, unknown> => !!f && typeof f === "object")
       .map((f) => ({
         name: typeof f.name === "string" && f.name.trim() ? f.name.trim() : "Dokument",
-        kind: f.kind === "pdf" || f.kind === "html" ? (f.kind as "pdf" | "html") : null,
+        kind: f.kind === "pdf" || f.kind === "html" || f.kind === "txt" ? (f.kind as FileKind) : null,
         data: typeof f.data === "string" ? f.data.replace(/\s+/g, "") : "",
       }))
       .filter((f): f is FileSource => !!f.kind && !!f.data);
@@ -190,7 +192,7 @@ Deno.serve(async (req) => {
       ...files.map((f) => ({ type: "file" as const, ...f })),
     ].slice(0, 3);
     if (sources.length === 0) {
-      return json({ error: "Bitte mindestens eine gültige http(s)-URL oder eine PDF/HTML-Datei angeben" }, 400);
+      return json({ error: "Bitte mindestens eine gültige http(s)-URL oder eine PDF/HTML/TXT-Datei angeben" }, 400);
     }
     // ~15 MB decoded combined — Claude's request limit is 32 MB, base64 adds ~1/3 overhead
     if (files.reduce((sum, f) => sum + f.data.length, 0) > 20_000_000) {
@@ -211,6 +213,32 @@ Deno.serve(async (req) => {
       return json({ error: "Anthropic API-Key nicht konfiguriert (Admin → Integrationen)" }, 500);
     }
 
+    // ── Optional writing style: sample text steers tone/structure, never content ─
+    let systemPrompt = SYSTEM_PROMPT;
+    const styleId = typeof body.style_id === "string" ? body.style_id.trim() : "";
+    if (styleId) {
+      const { data: style } = await supabaseAdmin
+        .from("news_writing_styles")
+        .select("name, sample_text")
+        .eq("id", styleId)
+        .maybeSingle();
+      const sample = (style?.sample_text ?? "").trim();
+      if (sample) {
+        logStep("Using writing style", { styleId, name: style?.name, sampleChars: sample.length });
+        systemPrompt += `
+
+Schreibstil-Vorgabe ("${style?.name ?? "Eigener Stil"}"):
+Orientiere dich in Tonalität, Satzbau, Wortwahl, Absatzlänge und Struktur an den folgenden
+Beispieltexten des Herausgebers. Übernimm AUSSCHLIESSLICH den Stil — niemals Inhalte, Fakten,
+Namen oder Formulierungen aus den Beispielen. Die Fakten kommen allein aus der Quelle.
+--- BEISPIELTEXTE ANFANG ---
+${sample.slice(0, 8000)}
+--- BEISPIELTEXTE ENDE ---`;
+      } else {
+        logStep("Writing style not found or empty", { styleId });
+      }
+    }
+
     // ── One article per source; a failing source never kills the batch ────────
     const results: Array<Record<string, unknown>> = [];
 
@@ -229,6 +257,14 @@ Deno.serve(async (req) => {
           const source = htmlToText(html, src.name);
           messageContent =
             `Quelle: Hochgeladene Datei "${src.name}"\nTitel der Quelle: ${source.pageTitle}\n\nExtrahierter Inhalt:\n${source.text}`;
+        } else if (src.kind === "txt") {
+          logStep("Analyzing TXT file", { name: src.name });
+          const text = new TextDecoder().decode(Uint8Array.from(atob(src.data), (c) => c.charCodeAt(0)))
+            .replace(/\r\n/g, "\n")
+            .trim();
+          if (text.length < 50) throw new Error("Zu wenig Textinhalt in der Datei gefunden");
+          messageContent =
+            `Quelle: Hochgeladene Textdatei "${src.name}"\n\nInhalt:\n${text.slice(0, 9000)}`;
         } else {
           // PDFs go to Claude natively as a base64 document block — no local parsing.
           logStep("Analyzing PDF", { name: src.name, base64Length: src.data.length });
@@ -254,7 +290,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             model: "claude-sonnet-5",
             max_tokens: 3000,
-            system: SYSTEM_PROMPT,
+            system: systemPrompt,
             tools: [TOOL_DEFINITION],
             tool_choice: { type: "tool", name: "draft_article" },
             messages: [{ role: "user", content: messageContent }],

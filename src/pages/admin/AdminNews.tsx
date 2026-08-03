@@ -45,6 +45,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { ArticleEditor } from "@/components/admin/news/ArticleEditor";
 import { VoiceInArticle } from "@/components/admin/news/VoiceInArticle";
+import { WritingStyleManager, useWritingStyles } from "@/components/admin/news/WritingStyleManager";
 import {
   slugify,
   uploadArticleImage,
@@ -365,6 +366,9 @@ export default function AdminNews() {
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
   const [genUrls, setGenUrls] = useState<string[]>(["", "", ""]);
   const [genFiles, setGenFiles] = useState<File[]>([]);
+  const [genStyleId, setGenStyleId] = useState<string>("none");
+  const [styleManagerOpen, setStyleManagerOpen] = useState(false);
+  const { data: writingStyles = [] } = useWritingStyles();
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "live" | "draft">("all");
   const [topicFilter, setTopicFilter] = useState<string | null>(null);
@@ -433,7 +437,7 @@ export default function AdminNews() {
     }
   };
 
-  // Quell-Dateien (PDF/HTML) für den Generator sammeln — max. 3 Quellen gesamt (URLs + Dateien).
+  // Quell-Dateien (PDF/HTML/TXT) für den Generator sammeln — max. 3 Quellen gesamt (URLs + Dateien).
   const addGenFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files ?? []);
     e.target.value = "";
@@ -445,8 +449,9 @@ export default function AdminNews() {
         const lower = f.name.toLowerCase();
         const isPdf = lower.endsWith(".pdf") || f.type === "application/pdf";
         const isHtml = lower.endsWith(".html") || lower.endsWith(".htm") || f.type === "text/html";
-        if (!isPdf && !isHtml) {
-          toast.error(`${f.name}: Bitte nur PDF- oder HTML-Dateien`);
+        const isTxt = lower.endsWith(".txt") || f.type === "text/plain";
+        if (!isPdf && !isHtml && !isTxt) {
+          toast.error(`${f.name}: Bitte nur PDF-, HTML- oder TXT-Dateien`);
           continue;
         }
         if (f.size > 15 * 1024 * 1024) {
@@ -476,14 +481,22 @@ export default function AdminNews() {
     if (!urls.length && !genFiles.length) return;
     setGenerating(true);
     try {
+      const fileKind = (f: File) => {
+        const lower = f.name.toLowerCase();
+        if (lower.endsWith(".pdf") || f.type === "application/pdf") return "pdf";
+        if (lower.endsWith(".txt") || f.type === "text/plain") return "txt";
+        return "html";
+      };
       const files = await Promise.all(
         genFiles.map(async (f) => ({
           name: f.name,
-          kind: f.name.toLowerCase().endsWith(".pdf") || f.type === "application/pdf" ? "pdf" : "html",
+          kind: fileKind(f),
           data: await readFileBase64(f),
         })),
       );
-      const { data, error } = await supabase.functions.invoke("generate-news-from-urls", { body: { urls, files } });
+      const { data, error } = await supabase.functions.invoke("generate-news-from-urls", {
+        body: { urls, files, style_id: genStyleId !== "none" ? genStyleId : undefined },
+      });
       if (error || (data as { error?: string } | null)?.error) {
         throw new Error((data as { error?: string } | null)?.error ?? error?.message);
       }
@@ -699,10 +712,11 @@ export default function AdminNews() {
               <h2 className="font-bold">Wochen-News-Generator (KI)</h2>
               <p className="text-sm text-muted-foreground">
                 Bis zu 3 Quellen — URLs aus der Padel-Presse und/oder hochgeladene Dateien (PDF, z.B.
-                Pressemitteilungen, oder HTML) — pro Quelle entsteht ein eigenständig formulierter
-                Artikel als <strong>Entwurf</strong> — inkl. Topic, Titel-Highlight, Lead, Lesezeit
-                und SEO-Feldern (DE + automatische EN-Übersetzung, mit KI-Kennzeichnung und bei URLs
-                mit Quellenlink). Danach: Titelbild (4:5) hinterlegen, prüfen und veröffentlichen.
+                Pressemitteilungen, HTML oder TXT-Notizen) — pro Quelle entsteht ein eigenständig
+                formulierter Artikel als <strong>Entwurf</strong> — inkl. Topic, Titel-Highlight, Lead,
+                Lesezeit und SEO-Feldern (DE + automatische EN-Übersetzung, mit KI-Kennzeichnung und bei
+                URLs mit Quellenlink). Optional orientiert sich die KI an einem gespeicherten
+                Schreibstil. Danach: Titelbild (4:5) hinterlegen, prüfen und veröffentlichen.
               </p>
             </div>
           </div>
@@ -736,8 +750,26 @@ export default function AdminNews() {
                 ))}
               </div>
             )}
-            <p className="text-xs text-muted-foreground">Oder Quell-Dateien hochladen (PDF / HTML):</p>
-            <Input type="file" accept=".pdf,.html,.htm" multiple onChange={addGenFiles} disabled={generating} />
+            <p className="text-xs text-muted-foreground">Oder Quell-Dateien hochladen (PDF / HTML / TXT):</p>
+            <Input type="file" accept=".pdf,.html,.htm,.txt" multiple onChange={addGenFiles} disabled={generating} />
+            <div className="flex items-center gap-2 flex-wrap pt-1">
+              <span className="text-xs text-muted-foreground">Schreibstil:</span>
+              <Select value={genStyleId} onValueChange={setGenStyleId} disabled={generating}>
+                <SelectTrigger className="w-[240px]">
+                  <SelectValue placeholder="Schreibstil wählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Standard (kein eigener Stil)</SelectItem>
+                  {writingStyles.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm" onClick={() => setStyleManagerOpen(true)} disabled={generating}>
+                <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                Schreibstile verwalten
+              </Button>
+            </div>
           </div>
           <Button
             className="mt-3"
@@ -755,6 +787,8 @@ export default function AdminNews() {
             )}
           </Button>
         </Card>
+
+        <WritingStyleManager open={styleManagerOpen} onOpenChange={setStyleManagerOpen} />
 
         <AuthorManager />
 
