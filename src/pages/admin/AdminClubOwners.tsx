@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Plus, Trash2, Search, AlertTriangle } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfMonth } from "date-fns";
 import { de } from "date-fns/locale";
 
 interface ClubOwnerAssignment {
@@ -130,6 +130,30 @@ export default function AdminClubOwners() {
           profile: profiles?.find(p => p.user_id === assignment.user_id),
         },
       })) as ClubOwnerAssignment[];
+    },
+  });
+
+  // Verbrauchte Freiminuten im laufenden Monat, pro Zuweisung. Gleiche Quelle und
+  // gleiche Aggregation wie die Kontingent-Prüfung der club-booking-api (Legacy-Pfad):
+  // club_quota_ledger, Schlüssel club_owner_id + court_id + month_start_date,
+  // genutzt = Σ minutes_used − Σ minutes_refunded. Eine Query für alle Zuweisungen.
+  const monthStartStr = format(startOfMonth(new Date()), "yyyy-MM-dd");
+  const { data: quotaUsage, isLoading: quotaLoading } = useQuery({
+    queryKey: ["admin-club-owner-quota-usage", monthStartStr],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("club_quota_ledger")
+        .select("club_owner_id, court_id, minutes_used, minutes_refunded")
+        .eq("month_start_date", monthStartStr);
+
+      if (error) throw error;
+
+      const usage: Record<string, number> = {};
+      for (const entry of data ?? []) {
+        const key = `${entry.club_owner_id}:${entry.court_id}`;
+        usage[key] = (usage[key] ?? 0) + entry.minutes_used - entry.minutes_refunded;
+      }
+      return usage;
     },
   });
 
@@ -414,6 +438,14 @@ export default function AdminClubOwners() {
                         assignment.user?.profile?.display_name ||
                         assignment.user?.profile?.username ||
                         assignment.user_id.slice(0, 8);
+                      const usedMinutes = Math.max(
+                        0,
+                        quotaUsage?.[`${assignment.user_id}:${assignment.court_id}`] ?? 0,
+                      );
+                      const usedPct =
+                        assignment.monthly_free_minutes > 0
+                          ? Math.round((usedMinutes / assignment.monthly_free_minutes) * 100)
+                          : 0;
                       return (
                         <TableRow
                           key={assignment.id}
@@ -452,12 +484,27 @@ export default function AdminClubOwners() {
                             {assignment.court?.location?.name}
                           </TableCell>
                           <TableCell className="px-0 py-[13px] pr-3.5">
-                            <div className="flex items-baseline gap-1.5">
-                              <span className="font-mono text-sm font-bold text-primary">
-                                {(assignment.monthly_free_minutes / 60).toLocaleString("de-DE")}
-                              </span>
-                              <span className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
-                                h / Monat
+                            <div className="flex min-w-[130px] flex-col gap-1.5">
+                              <div className="flex items-baseline gap-1.5">
+                                <span className="font-mono text-sm font-bold text-primary">
+                                  {(assignment.monthly_free_minutes / 60).toLocaleString("de-DE")}
+                                </span>
+                                <span className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
+                                  h / Monat
+                                </span>
+                              </div>
+                              <div className="h-[5px] overflow-hidden rounded-full bg-[hsl(0_0%_12%)]">
+                                <div
+                                  className="h-full rounded-full bg-gradient-lime transition-[width] duration-300"
+                                  style={{ width: `${Math.min(100, usedPct)}%` }}
+                                />
+                              </div>
+                              <span className="whitespace-nowrap font-mono text-[10.5px] text-[hsl(0_0%_58%)]">
+                                {quotaLoading
+                                  ? "…"
+                                  : `${(usedMinutes / 60).toLocaleString("de-DE", {
+                                      maximumFractionDigits: 1,
+                                    })} h genutzt · ${usedPct.toLocaleString("de-DE")} %`}
                               </span>
                             </div>
                           </TableCell>

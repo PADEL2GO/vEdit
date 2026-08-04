@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -89,6 +89,12 @@ export default function AdminNotifications() {
   const [expiresAt, setExpiresAt] = useState("");
   const [userSearchOpen, setUserSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Edit dialog state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -105,17 +111,22 @@ export default function AdminNotifications() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingBroadcast, setDeletingBroadcast] = useState<Broadcast | null>(null);
 
-  // Fetch all profiles for user selection
-  const { data: profiles = [] } = useQuery({
-    queryKey: ["admin-profiles"],
+  // Server-side user search (ilike on display_name/username, max 20 hits)
+  const profileSearchTerm = debouncedQuery.replace(/[%_,()]/g, "");
+  const { data: searchResults = [], isFetching: searchLoading } = useQuery({
+    queryKey: ["admin-profile-search", profileSearchTerm],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
         .select("user_id, display_name, username")
-        .order("display_name", { ascending: true });
+        .or(`display_name.ilike.%${profileSearchTerm}%,username.ilike.%${profileSearchTerm}%`)
+        .order("display_name", { ascending: true })
+        .limit(20);
       if (error) throw error;
       return data as Profile[];
     },
+    enabled: profileSearchTerm.length >= 2,
+    placeholderData: (prev) => prev,
   });
 
   // Fetch broadcast history
@@ -269,13 +280,6 @@ export default function AdminNotifications() {
     setDeleteDialogOpen(true);
   };
 
-  const filteredProfiles = profiles.filter((p) => {
-    const search = searchQuery.toLowerCase();
-    const name = (p.display_name || "").toLowerCase();
-    const username = (p.username || "").toLowerCase();
-    return name.includes(search) || username.includes(search);
-  });
-
   const toggleUser = (profile: Profile) => {
     const isSelected = selectedUsers.some((u) => u.user_id === profile.user_id);
     if (isSelected) {
@@ -414,43 +418,55 @@ export default function AdminNotifications() {
                         className="w-full rounded-xl border-[hsl(0_0%_15%)] p-0"
                         align="start"
                       >
-                        <Command>
+                        <Command shouldFilter={false}>
                           <CommandInput
                             placeholder="Suche nach Name oder Username..."
                             value={searchQuery}
                             onValueChange={setSearchQuery}
                           />
                           <CommandList>
-                            <CommandEmpty>Keine Benutzer gefunden.</CommandEmpty>
-                            <CommandGroup>
-                              {filteredProfiles.slice(0, 20).map((profile) => {
-                                const isSelected = selectedUsers.some(
-                                  (u) => u.user_id === profile.user_id
-                                );
-                                return (
-                                  <CommandItem
-                                    key={profile.user_id}
-                                    onSelect={() => toggleUser(profile)}
-                                    className="text-[13px]"
-                                  >
-                                    <Check
-                                      className={cn(
-                                        "mr-2 h-4 w-4 text-primary",
-                                        isSelected ? "opacity-100" : "opacity-0"
-                                      )}
-                                    />
-                                    <span>
-                                      {profile.display_name || profile.username || "Unbekannt"}
-                                    </span>
-                                    {profile.username && (
-                                      <span className="ml-2 text-muted-foreground">
-                                        @{profile.username}
-                                      </span>
-                                    )}
-                                  </CommandItem>
-                                );
-                              })}
-                            </CommandGroup>
+                            {profileSearchTerm.length < 2 ? (
+                              <div className="py-6 text-center text-[13px] text-muted-foreground">
+                                Mindestens 2 Zeichen eingeben…
+                              </div>
+                            ) : searchLoading && searchResults.length === 0 ? (
+                              <div className="py-6 text-center text-[13px] text-muted-foreground">
+                                Suchen…
+                              </div>
+                            ) : (
+                              <>
+                                <CommandEmpty>Keine Benutzer gefunden.</CommandEmpty>
+                                <CommandGroup>
+                                  {searchResults.map((profile) => {
+                                    const isSelected = selectedUsers.some(
+                                      (u) => u.user_id === profile.user_id
+                                    );
+                                    return (
+                                      <CommandItem
+                                        key={profile.user_id}
+                                        onSelect={() => toggleUser(profile)}
+                                        className="text-[13px]"
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "mr-2 h-4 w-4 text-primary",
+                                            isSelected ? "opacity-100" : "opacity-0"
+                                          )}
+                                        />
+                                        <span>
+                                          {profile.display_name || profile.username || "Unbekannt"}
+                                        </span>
+                                        {profile.username && (
+                                          <span className="ml-2 text-muted-foreground">
+                                            @{profile.username}
+                                          </span>
+                                        )}
+                                      </CommandItem>
+                                    );
+                                  })}
+                                </CommandGroup>
+                              </>
+                            )}
                           </CommandList>
                         </Command>
                       </PopoverContent>
@@ -733,6 +749,20 @@ export default function AdminNotifications() {
                 className="rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] leading-[1.55]"
               />
             </div>
+
+            {editingBroadcast && (
+              <div className="flex items-center gap-[11px] rounded-xl border border-[hsl(0_0%_12%)] bg-white/[0.028] px-3.5 py-3">
+                <Users className="h-[15px] w-[15px] flex-none text-[hsl(0_0%_58%)]" />
+                <span className="text-[12.5px] text-[hsl(0_0%_72%)]">
+                  Empfängerkreis nicht änderbar —{" "}
+                  <span className="font-semibold text-foreground">
+                    {editingBroadcast.target_type === "all"
+                      ? `Alle (${editingBroadcast.recipients_count.toLocaleString("de-DE")})`
+                      : `Ausgewählte Benutzer (${editingBroadcast.recipients_count.toLocaleString("de-DE")})`}
+                  </span>
+                </span>
+              </div>
+            )}
 
             <div className="flex flex-col gap-[11px] border-t border-[hsl(0_0%_12%)] pt-3.5">
               <div className="flex items-center gap-2.5">

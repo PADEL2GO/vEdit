@@ -40,7 +40,7 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 16. **AdminQrPanel:** ✅ **BEHOBEN 2026-08-04** — `accept` auf `application/pdf,image/png,image/jpeg,image/webp` eingegrenzt (deckungsgleich mit `validateFile`).
 
 17. **AdminColors:** ✅ **BEHOBEN 2026-08-04** — Update prüft jetzt die betroffenen Zeilen und legt fehlende `app.theme.*`-Zeilen an (Insert-Fallback statt stillem 0-rows-Update; bestehende Labels bleiben unangetastet).
-18. **AdminNotifications:** Benutzersuche lädt ALLE Profile ungefiltert in den Client — bei wachsender Nutzerbasis serverseitig suchen (`ilike` + Limit). Kein Detail-View für gesendete Mitteilungen (Text/CTA nur über Edit-Dialog einsehbar). `updated_at` existiert, wird nirgends angezeigt.
+18. **AdminNotifications:** ✅ Benutzersuche serverseitig verdrahtet (2026-08-05, `ilike` + limit 20, debounced). Kein Detail-View für gesendete Mitteilungen (Text/CTA nur über Edit-Dialog einsehbar). `updated_at` existiert, wird nirgends angezeigt.
 19. **AdminNewsletter:** ✅ Behoben (2026-08-04): `resetCampaign()` fragt jetzt mit Doppelversand-Warnung nach; `editCampaign()` meldet Ladefehler per Toast. Offen: Edge-Function-Dedupe beim erneuten Senden prüfen; Send-Bestätigung nennt die Empfängerzahl nicht; Vorschau-Abmeldelink `href="#"` (echte Mails haben den echten Link). Idee: gesendete Kampagnen als Vorlage duplizieren.
 20. **AdminUsers:** Nebenbei behoben: nested-`<p>` im Lösch-Dialog + mobile-gebrochenes KPI-Grid. Offen: Detail-Dialog ohne `DialogDescription` (Radix-a11y-Warnung).
 
@@ -51,18 +51,33 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 
 25. **AdminIntegrations:** Secret-Hints inkonsistent — Stripe warnt „…sonst wird er entfernt", die anderen Keys nicht, obwohl dieselbe Lösch-Semantik gilt. Plain-Felder lassen sich nicht absichtlich leeren (Leerstring = „nicht ändern", fällt aus dem Payload). PayPal: Secret-Inputs editierbar, Speichern aber disabled — Eingaben gehen ins Leere. „Verbunden" heißt nur „Key hinterlegt" — „Verbindung testen"-Button wäre wertvoll. Resend-Absender-Feld vermutlich wirkungslos (Sender zentral in `_shared/email.ts`).
 
-## Backend-Wiring offen (Design zeigt es, Seite hat kein Gegenstück)
+## Backend-Wiring — Stand 2026-08-05
 
-- **Sidebar:** Live-Counts an „Buchungen" und „Marketplace" (Design-Dummies weggelassen)
-- **Overview:** Zeitraum-Umschalter (Heute/Woche/Monat), Umsatz-KPI, Trend-Badges, Spieler-/Betrag-Spalten in „Letzte Buchungen", „Alle →"-Links, „Neuer Standort"-CTA
-- **Bookings:** Court-Filter, Spalten Dauer/Betrag/Zahlung/Lobby-Herkunft, „LÖSCHEN"-Tipp-Bestätigung im Reset-Dialog (sinnvolles Sicherheits-Upgrade), Teilnehmer-Sektion im Detail-Drawer
-- **Club Owners:** Kontingent-Nutzungsanzeige (Progressbar „X h genutzt" + Prozent) — braucht Aggregation der genutzten Freiminuten pro Owner/Monat
-- **Marketplace:** KPI-Trend-Badges, Tab-Counts „X offen" für Bestellungen/Retouren
-- **Vouchers:** KPI-Zeile (Aktive Codes / Einlösungen / Rabattwert € / Abgelaufen), Code-Suche mit Live-Filter
-- **SkyPadel:** Drag&Drop-Sortierung (Design zeigt Grip-Cursor), „Live-Seite öffnen"-Link
-- **Mitteilungen:** Empfängerkreis-Infobox im Edit-Dialog (Daten via `target_type`/`recipients_count` vorhanden)
-- **Newsletter:** Send-Bestätigung als AlertDialog mit echter `counts.confirmed`-Empfängerzahl
-- **Integrationen:** maskierte Secret-Vorschau als Input-Placeholder (liegt schon client-seitig in `originalConfigs`)
+**✅ Verdrahtet (2026-08-05, alles echte Daten):**
+- **Sidebar:** Live-Counts — Buchungen (bestätigt, heute) + Marketplace (bezahlte, unversendete Bestellungen), 2-min-Refresh
+- **Overview:** Zeitraum-Umschalter Heute/Woche/Monat; Umsatz-KPI (`price_cents`, nur bezahlte Buchungen, ohne Kontingent-/Gratisbuchungen) + Ø pro Buchung; Trend-Badges Buchungen/Umsatz vs. Vorperiode; Spieler- + Betrag-Spalten; „Alle →"/„Verwalten →"/„Neuer Standort"-Links
+- **Bookings:** Court-Filter; Spalten Dauer/Betrag/Zahlung (Modus: Kontingent/Credits/Gutschein/Split/Voll); „LÖSCHEN"-Tipp-Bestätigung im Reset-Dialog
+- **Club Owners:** Kontingent-Nutzung pro Zuweisung (Progressbar, `club_quota_ledger`, identische Aggregation wie die Buchungs-API)
+- **Marketplace:** Tab-Count offene Bestellungen + Retouren (status=requested)
+- **Vouchers:** KPI-Zeile (Aktive/Einlösungen/Abgelaufen) + Code-Suche mit Live-Filter
+- **Mitteilungen:** Empfängerkreis-Infobox im Edit-Dialog; Benutzersuche serverseitig (`ilike` + limit 20, debounced) statt Alle-Profile-Download
+- **Newsletter:** Send-Bestätigung als AlertDialog mit echter Abonnentenzahl
+- **Integrationen:** maskierte Secret-Vorschau (`••••…c21a`) als Input-Placeholder
+- **SkyPadel:** „Live-Seite öffnen"-Link
+
+**Noch offen:**
+- **Vouchers „Rabattwert €":** braucht Einlösungs-Ledger — Vorschlag: Migration `voucher_redemptions` (voucher_id, booking_id, discount_applied_cents), befüllt beim Checkout
+- **Bookings Zahlungs-STATUS** (bezahlt/offen/erstattet): `payments (status)`-Embed in die Buchungs-Query (kein Schema-Change nötig)
+- **Bookings:** Teilnehmer-Sektion im Detail-Drawer (Kind-Komponente), Lobby-Herkunft
+- **Marketplace KPI-Trends:** keine Trenddaten im Analytics-Response
+- **SkyPadel:** Drag&Drop-Sortierung (Design zeigt Grip-Cursor)
+
+**Wichtige Semantik-Hinweise (von den Wiring-Agenten):**
+- Overview-Umsatz = berechneter Buchungswert; wenn Punkte-als-Rabatt live geht, wäre Cash-Umsatz über `payments.amount_total_cents` sauberer. Clientseitige Summierung deckelt theoretisch bei >1.000 Zeilen/Zeitraum → langfristig SQL-Aggregat-RPC.
+- Bookings „Zahlung" zeigt den Modus, nicht den Zahlungseingang.
+- Retouren-Pill zählt nur `requested` (Konvention der Bestellungen-Sektion); `received` mitzählen wäre eine Ein-Zeilen-Änderung.
+- Mitteilungen-Suche: Treffer erst ab 2 Zeichen; Sonderzeichen `% _ , ( )` werden aus dem Suchbegriff entfernt.
+- Buchungen-Reset erfordert jetzt zwingend das Tippen von „LÖSCHEN"; Standortwechsel resettet den Court-Filter.
 
 ## Folge-Pass: Kind-Komponenten (Design da, Komponente noch alt)
 

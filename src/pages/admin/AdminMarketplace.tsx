@@ -240,6 +240,36 @@ const AdminMarketplace = () => {
     },
   });
 
+  // Offene Vorgänge für die Tab-Pille: bezahlte, noch nicht versendete Bestellungen
+  // plus angemeldete Retouren. Leichte head:true-Counts; die Query-Keys teilen das
+  // Präfix der Listen-Queries, damit die bestehenden Invalidierungen der Mutations
+  // (Versand, Storno, Retouren-Update) die Pille automatisch mit aktualisieren.
+  const { data: openOrderCount } = useQuery({
+    queryKey: ["admin-marketplace-redemptions", "open-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("marketplace_redemptions")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "success")
+        .eq("fulfillment_status", "pending");
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+  const { data: openReturnCount } = useQuery({
+    queryKey: ["admin-marketplace-returns", "open-count"],
+    queryFn: async () => {
+      // marketplace_returns is not yet in generated types.ts
+      const { count, error } = await (supabase as any)
+        .from("marketplace_returns")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "requested");
+      if (error) throw error;
+      return (count as number | null) ?? 0;
+    },
+  });
+  const openOrdersTabCount = (openOrderCount ?? 0) + (openReturnCount ?? 0);
+
   const [activeTab, setActiveTab] = useState<"products" | "orders">("products");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -717,6 +747,9 @@ const AdminMarketplace = () => {
               <Truck className="h-4 w-4" />
               <span className="hidden sm:inline">Bestellungen &amp; Retouren</span>
               <span className="sm:hidden">Bestellungen</span>
+              {openOrdersTabCount > 0 && (
+                <span className={TAB_COUNT_CLASSES}>{openOrdersTabCount}</span>
+              )}
             </TabsTrigger>
           </TabsList>
         </Tabs>

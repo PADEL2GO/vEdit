@@ -54,6 +54,7 @@ import {
   addWeeks,
   subWeeks,
   eachDayOfInterval,
+  differenceInMinutes,
 } from "date-fns";
 import { de } from "date-fns/locale";
 import { toast } from "sonner";
@@ -67,10 +68,35 @@ const CALENDAR_LEGEND = [
   { label: "Storniert", dot: "bg-destructive" },
 ];
 
+// price_cents/payment_mode stehen in types.ts, credits_used noch nicht (Migration 20260412190000)
+type BookingListRow = Booking & {
+  price_cents: number | null;
+  payment_mode: string | null;
+  credits_used: number | null;
+};
+
+const formatEuro = (cents: number) =>
+  (cents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" });
+
+const getPaymentLabel = (booking: BookingListRow): string | null => {
+  if (
+    booking.booking_origin === "club" &&
+    (booking.allocation_minutes || booking.is_free_allocation)
+  ) {
+    return "Kontingent";
+  }
+  if ((booking.credits_used ?? 0) > 0) return "Credits";
+  if (booking.payment_mode === "voucher") return "Gutschein";
+  if (booking.payment_mode === "split") return "Split";
+  if (booking.payment_mode === "full") return "Voll";
+  return null;
+};
+
 export default function AdminBookings() {
   const [view, setView] = useState<"calendar" | "list">("calendar");
   const [selectedWeek, setSelectedWeek] = useState(new Date());
   const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
+  const [courtFilter, setCourtFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("confirmed");
   const [clubFilter, setClubFilter] = useState<string>("all");
   const [onlyClubBookings, setOnlyClubBookings] = useState(false);
@@ -79,6 +105,7 @@ export default function AdminBookings() {
   const [cancelBookingId, setCancelBookingId] = useState<string | null>(null);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [onlyExpiredAndCancelled, setOnlyExpiredAndCancelled] = useState(true);
+  const [resetConfirmText, setResetConfirmText] = useState("");
   const queryClient = useQueryClient();
 
   // Get week boundaries (Monday to Friday for work week)
@@ -94,6 +121,20 @@ export default function AdminBookings() {
         .from("locations")
         .select("id, name")
         .order("name");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  // Fetch courts for filter (scoped to selected location)
+  const { data: courts } = useQuery({
+    queryKey: ["admin-courts-filter", selectedLocationId],
+    queryFn: async () => {
+      let query = supabase.from("courts").select("id, name").order("name");
+      if (selectedLocationId !== "all") {
+        query = query.eq("location_id", selectedLocationId);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
@@ -115,7 +156,7 @@ export default function AdminBookings() {
 
   // Fetch bookings for the selected week
   const { data: bookings, isLoading } = useQuery({
-    queryKey: ["admin-week-bookings", weekStart.toISOString(), selectedLocationId, statusFilter, clubFilter, onlyClubBookings],
+    queryKey: ["admin-week-bookings", weekStart.toISOString(), selectedLocationId, courtFilter, statusFilter, clubFilter, onlyClubBookings],
     queryFn: async () => {
       let query = supabase
         .from("bookings")
@@ -135,6 +176,9 @@ export default function AdminBookings() {
           guest_phone,
           allocation_minutes,
           is_free_allocation,
+          price_cents,
+          payment_mode,
+          credits_used,
           courts (id, name),
           locations (id, name),
           club:clubs (id, name)
@@ -145,6 +189,10 @@ export default function AdminBookings() {
 
       if (selectedLocationId !== "all") {
         query = query.eq("location_id", selectedLocationId);
+      }
+
+      if (courtFilter !== "all") {
+        query = query.eq("court_id", courtFilter);
       }
 
       if (statusFilter !== "all") {
@@ -162,9 +210,12 @@ export default function AdminBookings() {
       const { data, error } = await query;
       if (error) throw error;
 
+      // credits_used fehlt noch in den generierten Typen (types.ts) → Cast
+      const rows = (data || []) as unknown as BookingListRow[];
+
       // Fetch profiles for each booking (user who owns it)
-      const userIds = [...new Set((data || []).map((b) => b.user_id))];
-      const clubBookedByIds = [...new Set((data || []).filter(b => b.club_booked_by_user_id).map((b) => b.club_booked_by_user_id!))];
+      const userIds = [...new Set(rows.map((b) => b.user_id))];
+      const clubBookedByIds = [...new Set(rows.filter(b => b.club_booked_by_user_id).map((b) => b.club_booked_by_user_id!))];
       const allUserIds = [...new Set([...userIds, ...clubBookedByIds])];
 
       const { data: profiles } = await supabase
@@ -174,13 +225,13 @@ export default function AdminBookings() {
 
       const profilesMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
 
-      return (data || []).map((booking) => ({
+      return rows.map((booking) => ({
         ...booking,
         profiles: profilesMap.get(booking.user_id) || null,
         club_booked_by: booking.club_booked_by_user_id
           ? profilesMap.get(booking.club_booked_by_user_id) || null
           : null,
-      })) as Booking[];
+      })) as BookingListRow[];
     },
   });
 
@@ -217,6 +268,7 @@ export default function AdminBookings() {
       toast.success(data.message || "Buchungen wurden zurückgesetzt");
       queryClient.invalidateQueries({ queryKey: ["admin-week-bookings"] });
       setShowResetDialog(false);
+      setResetConfirmText("");
     },
     onError: (error) => {
       toast.error(`Fehler: ${error.message}`);
@@ -245,6 +297,11 @@ export default function AdminBookings() {
   const clubBookingsCount = useMemo(() => {
     return bookings?.filter(b => b.booking_origin === "club").length || 0;
   }, [bookings]);
+
+  const handleLocationChange = (value: string) => {
+    setSelectedLocationId(value);
+    setCourtFilter("all");
+  };
 
   const handlePrevWeek = () => setSelectedWeek((w) => subWeeks(w, 1));
   const handleNextWeek = () => setSelectedWeek((w) => addWeeks(w, 1));
@@ -346,7 +403,7 @@ export default function AdminBookings() {
                 <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                   Standort
                 </Label>
-                <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
+                <Select value={selectedLocationId} onValueChange={handleLocationChange}>
                   <SelectTrigger className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
                     <SelectValue placeholder="Standort wählen" />
                   </SelectTrigger>
@@ -355,6 +412,25 @@ export default function AdminBookings() {
                     {locations?.map((loc) => (
                       <SelectItem key={loc.id} value={loc.id}>
                         {loc.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-[7px]">
+                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Court
+                </Label>
+                <Select value={courtFilter} onValueChange={setCourtFilter}>
+                  <SelectTrigger className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
+                    <SelectValue placeholder="Court wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Courts</SelectItem>
+                    {courts?.map((court) => (
+                      <SelectItem key={court.id} value={court.id}>
+                        {court.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -499,6 +575,9 @@ export default function AdminBookings() {
                         <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Gebucht von</TableHead>
                         <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Für Mitglied</TableHead>
                         <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Kontingent</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Dauer</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Betrag</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Zahlung</TableHead>
                         <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Status</TableHead>
                         <TableHead className="whitespace-nowrap text-right font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Aktionen</TableHead>
                       </TableRow>
@@ -626,6 +705,32 @@ export default function AdminBookings() {
                               <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
+                          {/* Duration */}
+                          <TableCell>
+                            <span className="whitespace-nowrap font-mono text-[12.5px] text-[hsl(0_0%_78%)]">
+                              {differenceInMinutes(
+                                new Date(booking.end_time),
+                                new Date(booking.start_time)
+                              )}{" "}
+                              Min
+                            </span>
+                          </TableCell>
+                          {/* Amount */}
+                          <TableCell>
+                            {booking.price_cents != null ? (
+                              <span className="whitespace-nowrap font-mono text-[12.5px] text-foreground">
+                                {formatEuro(booking.price_cents)}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          {/* Payment */}
+                          <TableCell className="whitespace-nowrap text-[13px] text-[hsl(0_0%_78%)]">
+                            {getPaymentLabel(booking) || (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
                           {/* Status */}
                           <TableCell>
                             <span
@@ -717,7 +822,13 @@ export default function AdminBookings() {
       </AlertDialog>
 
       {/* Reset Bookings Dialog */}
-      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+      <AlertDialog
+        open={showResetDialog}
+        onOpenChange={(open) => {
+          setShowResetDialog(open);
+          if (!open) setResetConfirmText("");
+        }}
+      >
         <AlertDialogContent className="rounded-[20px] border-[hsl(0_100%_71%/0.25)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:rounded-[20px]">
           <AlertDialogHeader className="gap-1.5">
             <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#FF6B6B]">
@@ -761,14 +872,26 @@ export default function AdminBookings() {
             </Label>
           </div>
 
+          <label className="flex flex-col gap-[7px]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Zur Bestätigung „LÖSCHEN" eingeben<span className="text-[#FF6B6B]"> *</span>
+            </span>
+            <Input
+              value={resetConfirmText}
+              onChange={(e) => setResetConfirmText(e.target.value)}
+              placeholder="LÖSCHEN"
+              className="h-[42px] rounded-[11px] border-[hsl(0_0%_16%)] bg-white/[0.04] font-mono text-sm font-bold tracking-[0.12em] focus-visible:border-[#FF6B6B] focus-visible:ring-0"
+            />
+          </label>
+
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
               Abbrechen
             </AlertDialogCancel>
             <AlertDialogAction
-              className="rounded-[11px] bg-[#FF6B6B] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+              className="rounded-[11px] bg-[#FF6B6B] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585] disabled:bg-[hsl(0_0%_14%)] disabled:text-[hsl(0_0%_45%)] disabled:opacity-100"
               onClick={() => resetBookingsMutation.mutate(onlyExpiredAndCancelled)}
-              disabled={resetBookingsMutation.isPending}
+              disabled={resetConfirmText !== "LÖSCHEN" || resetBookingsMutation.isPending}
             >
               {resetBookingsMutation.isPending ? "Lösche..." : "Endgültig löschen"}
             </AlertDialogAction>

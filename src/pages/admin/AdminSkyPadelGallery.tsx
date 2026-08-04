@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { TranslatableField } from "@/components/admin/TranslatableField";
 import { toast } from "sonner";
-import { Upload, Trash2, GripVertical, ImageIcon } from "lucide-react";
+import { Upload, Trash2, GripVertical, ImageIcon, ExternalLink } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -75,7 +75,16 @@ const AdminSkyPadelGallery = () => {
               </>
             ) : null}
           </p>
-          <div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <a
+              href="/fuer-vereine"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-[10px] border border-[hsl(0_0%_16%)] bg-white/5 px-[13px] text-[12.5px] font-bold text-[hsl(0_0%_85%)] transition-colors hover:border-primary/40 hover:text-primary"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Live-Seite öffnen
+            </a>
             <input
               ref={fileInputRef}
               type="file"

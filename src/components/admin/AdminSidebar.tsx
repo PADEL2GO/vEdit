@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
@@ -89,6 +91,11 @@ const NAV_GROUPS = [
 
 export const menuItems = NAV_GROUPS.flatMap((group) => group.items);
 
+const COUNT_HINTS: Record<string, string> = {
+  "/admin/bookings": "Bestätigte Buchungen heute",
+  "/admin/marketplace": "Offene Bestellungen",
+};
+
 export function AdminSidebar() {
   const location = useLocation();
   const { signOut } = useAuth();
@@ -100,6 +107,35 @@ export function AdminSidebar() {
     }
     return location.pathname.startsWith(url);
   };
+
+  const { data: navCounts } = useQuery({
+    queryKey: ["admin-sidebar-counts"],
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+    queryFn: async () => {
+      const dayStart = new Date();
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      const [bookingsRes, ordersRes] = await Promise.all([
+        supabase
+          .from("bookings")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "confirmed")
+          .gte("start_time", dayStart.toISOString())
+          .lt("start_time", dayEnd.toISOString()),
+        (supabase as any)
+          .from("marketplace_redemptions")
+          .select("*", { count: "exact", head: true })
+          .eq("status", "success")
+          .eq("fulfillment_status", "pending"),
+      ]);
+      return {
+        "/admin/bookings": bookingsRes.count ?? 0,
+        "/admin/marketplace": ordersRes.count ?? 0,
+      } as Record<string, number>;
+    },
+  });
 
   const q = query.trim().toLowerCase();
   const groups = q
@@ -153,6 +189,14 @@ export function AdminSidebar() {
                 >
                   <item.icon className="h-4 w-4 flex-none" />
                   <span className="min-w-0 flex-1 truncate">{item.title}</span>
+                  {(navCounts?.[item.url] ?? 0) > 0 && (
+                    <span
+                      title={COUNT_HINTS[item.url]}
+                      className="flex-none rounded-full bg-primary/10 px-[7px] py-[2px] font-mono text-[10.5px] text-primary"
+                    >
+                      {navCounts![item.url]}
+                    </span>
+                  )}
                 </Link>
               );
             })}

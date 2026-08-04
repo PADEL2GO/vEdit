@@ -36,7 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Trash2, Pencil, Copy, Percent, Euro, Gift, Dices, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, Pencil, Copy, Percent, Euro, Gift, Dices, AlertTriangle, Search, Ticket, CheckCheck, ClockAlert } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -107,6 +107,7 @@ export default function AdminVouchers() {
   const { user } = useAuth();
   const [editVoucher, setEditVoucher] = useState<VoucherCode | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   // Form state
   const [formCode, setFormCode] = useState("");
@@ -300,6 +301,26 @@ export default function AdminVouchers() {
 
   const isUsedUp = (v: VoucherCode) =>
     v.max_uses !== null && v.current_uses >= v.max_uses;
+
+  // Derived from the already-loaded voucher list — no extra query
+  const searchTerm = search.trim().toLowerCase();
+  const filteredVouchers = searchTerm
+    ? vouchers.filter(
+        (v) =>
+          v.code.toLowerCase().includes(searchTerm) ||
+          (v.description || "").toLowerCase().includes(searchTerm)
+      )
+    : vouchers;
+
+  const activeCount = vouchers.filter((v) => v.is_active && !isExpired(v) && !isUsedUp(v)).length;
+  const totalRedemptions = vouchers.reduce((sum, v) => sum + (v.current_uses || 0), 0);
+  const expiredOrUsedUpCount = vouchers.filter((v) => isExpired(v) || isUsedUp(v)).length;
+
+  const kpis = [
+    { label: "Aktive Codes", value: activeCount.toLocaleString("de-DE"), icon: Ticket, color: "text-primary" },
+    { label: "Einlösungen gesamt", value: totalRedemptions.toLocaleString("de-DE"), icon: CheckCheck, color: "text-foreground" },
+    { label: "Abgelaufen / aufgebraucht", value: expiredOrUsedUpCount.toLocaleString("de-DE"), icon: ClockAlert, color: "text-[#FFC44D]" },
+  ];
 
   const getStatusBadge = (v: VoucherCode) => {
     if (!v.is_active)
@@ -556,14 +577,44 @@ export default function AdminVouchers() {
           </Dialog>
         </div>
 
+        {/* KPI row — derived from the loaded voucher list */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(190px,100%),1fr))] gap-3.5">
+          {kpis.map((k) => (
+            <Card key={k.label} className="rounded-2xl border-border bg-gradient-card p-5">
+              <div className="flex flex-col gap-[9px]">
+                <div className="flex items-center justify-between gap-2.5">
+                  <span className="text-[12.5px] font-semibold text-[hsl(0_0%_72%)]">{k.label}</span>
+                  <span className="flex text-[hsl(0_0%_58%)]">
+                    <k.icon className="h-[15px] w-[15px]" />
+                  </span>
+                </div>
+                <span className={`font-mono text-[26px] font-bold leading-none ${k.color}`}>
+                  {isLoading ? "–" : k.value}
+                </span>
+              </div>
+            </Card>
+          ))}
+        </div>
+
         <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
           <div className="flex flex-col gap-4">
-            <h2 className="font-display text-base font-bold tracking-tight text-foreground">
-              Alle Voucher{" "}
-              <span className="font-mono text-sm font-normal text-muted-foreground">
-                ({vouchers.length})
-              </span>
-            </h2>
+            <div className="flex flex-wrap items-center justify-between gap-3.5">
+              <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                Alle Voucher{" "}
+                <span className="font-mono text-sm font-normal text-muted-foreground">
+                  {searchTerm ? `(${filteredVouchers.length}/${vouchers.length})` : `(${vouchers.length})`}
+                </span>
+              </h2>
+              <label className="relative flex min-w-[min(260px,100%)] items-center">
+                <Search className="pointer-events-none absolute left-[11px] h-[15px] w-[15px] text-[hsl(0_0%_58%)]" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Code oder Beschreibung…"
+                  className="h-[38px] w-full rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] pl-9 text-[13.5px]"
+                />
+              </label>
+            </div>
 
             <Table className="min-w-[880px]">
               <TableHeader>
@@ -590,8 +641,14 @@ export default function AdminVouchers() {
                       Noch keine Voucher erstellt
                     </TableCell>
                   </TableRow>
+                ) : filteredVouchers.length === 0 ? (
+                  <TableRow className="border-[hsl(0_0%_12%)] hover:bg-transparent">
+                    <TableCell colSpan={7} className="px-0 py-8 text-center text-[13.5px] text-muted-foreground">
+                      Keine Treffer
+                    </TableCell>
+                  </TableRow>
                 ) : (
-                  vouchers.map((v) => {
+                  filteredVouchers.map((v) => {
                     const usagePct = v.max_uses
                       ? Math.min(100, Math.round((v.current_uses / v.max_uses) * 100))
                       : 0;

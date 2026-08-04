@@ -150,6 +150,16 @@ export default function AdminIntegrations() {
     has_client_id: false, has_client_secret: false,
   });
 
+  // Masked preview ("••••" + letzte 4 Zeichen aus der RPC) als Input-Placeholder,
+  // damit sichtbar ist, DASS und WELCHER Key hinterlegt ist. Reine Anzeige —
+  // Speicher-/Maskierungs-Logik bleibt unberührt.
+  const maskedPlaceholder = (service: string, key: string): string | undefined => {
+    const v = originalConfigs[service]?.[key];
+    if (!isMasked(v)) return undefined;
+    const last4 = (v as string).slice(MASK_PREFIX.length);
+    return last4 ? `${MASK_PREFIX}…${last4}` : MASK_PREFIX;
+  };
+
   // ── Load ──────────────────────────────────────────────────────────────────
   useEffect(() => { loadConfigs(); }, []);
 
@@ -321,6 +331,7 @@ export default function AdminIntegrations() {
                   label="Secret Key"
                   value={stripe.secret_key}
                   onChange={(v) => setStripe(p => ({ ...p, secret_key: v }))}
+                  placeholder={maskedPlaceholder("stripe", "secret_key")}
                   hint={stripe.has_secret_key ? "Schlüssel hinterlegt — beim Speichern neu eingeben, sonst wird er entfernt" : "sk_live_... oder sk_test_..."}
                   warnHint={stripe.has_secret_key}
                 />
@@ -328,6 +339,7 @@ export default function AdminIntegrations() {
                   label="Webhook Secret"
                   value={stripe.webhook_secret}
                   onChange={(v) => setStripe(p => ({ ...p, webhook_secret: v }))}
+                  placeholder={maskedPlaceholder("stripe", "webhook_secret")}
                   hint={stripe.has_webhook_secret ? "Secret hinterlegt — beim Speichern neu eingeben, sonst wird es entfernt" : "whsec_..."}
                   warnHint={stripe.has_webhook_secret}
                 />
@@ -391,6 +403,7 @@ export default function AdminIntegrations() {
                   label="API Key"
                   value={resendState.api_key}
                   onChange={(v) => setResendState(p => ({ ...p, api_key: v }))}
+                  placeholder={maskedPlaceholder("resend", "api_key")}
                   hint={resendState.has_api_key ? "••• API-Key hinterlegt" : "re_..."}
                 />
                 <div className="flex flex-col gap-[7px]">
@@ -442,6 +455,7 @@ export default function AdminIntegrations() {
                   label="API Key"
                   value={anthropicState.api_key}
                   onChange={(v) => setAnthropicState((p) => ({ ...p, api_key: v }))}
+                  placeholder={maskedPlaceholder("anthropic", "api_key")}
                   hint={anthropicState.has_api_key ? "••• API-Key hinterlegt" : "sk-ant-..."}
                 />
               </div>
@@ -476,6 +490,7 @@ export default function AdminIntegrations() {
                   label="API Key"
                   value={deeplState.api_key}
                   onChange={(v) => setDeeplState((p) => ({ ...p, api_key: v }))}
+                  placeholder={maskedPlaceholder("deepl", "api_key")}
                   hint={deeplState.has_api_key ? "••• API-Key hinterlegt" : "z.B. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx (Free) oder ohne :fx (Pro)"}
                 />
                 <p className={fieldHintClass}>

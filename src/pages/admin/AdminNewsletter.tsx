@@ -28,6 +28,16 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // ─── Block model ────────────────────────────────────────────────────────────
 
@@ -320,15 +330,60 @@ export default function AdminNewsletter() {
     }
   };
 
+  // Send confirmation runs as styled AlertDialog instead of window.confirm.
+  // The busy guard is held across the whole flow — exactly like the old
+  // synchronous window.confirm inside the try block: launch() acquires it,
+  // persist()s, then opens the dialog WITHOUT releasing. Released either on
+  // cancel/esc (cancelLaunch) or after the send finished (confirmLaunch).
+  // confirmedRef marks the action-close so onOpenChange(false) doesn't treat
+  // the confirm click as a cancel.
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const pendingLaunchIdRef = useRef<string | null>(null);
+  const confirmedRef = useRef(false);
+
+  const releaseLaunchGuard = () => {
+    setSending(false);
+    busyRef.current = false;
+    setBusy(false);
+  };
+
   const launch = async () => {
     if (busyRef.current) return;
     busyRef.current = true;
     setBusy(true);
     setSending(true);
     try {
-      const id = await persist();
-      if (!id) return;
-      if (!window.confirm("Newsletter jetzt an ALLE bestätigten Abonnenten senden?")) return;
+      // loadCounts parallel dazu, damit der Dialog die aktuelle Empfängerzahl zeigt
+      const [id] = await Promise.all([persist(), loadCounts()]);
+      if (!id) {
+        releaseLaunchGuard();
+        return;
+      }
+      pendingLaunchIdRef.current = id;
+      confirmedRef.current = false;
+      setConfirmOpen(true);
+    } catch (err) {
+      toast.error((err as Error).message || "Versand fehlgeschlagen");
+      releaseLaunchGuard();
+    }
+  };
+
+  const cancelLaunch = () => {
+    pendingLaunchIdRef.current = null;
+    setConfirmOpen(false);
+    releaseLaunchGuard();
+  };
+
+  const confirmLaunch = async () => {
+    confirmedRef.current = true;
+    setConfirmOpen(false);
+    const id = pendingLaunchIdRef.current;
+    pendingLaunchIdRef.current = null;
+    if (!id) {
+      releaseLaunchGuard();
+      return;
+    }
+    try {
       const { error } = await supabase.functions.invoke("newsletter-send", {
         body: { campaign_id: id },
       });
@@ -337,9 +392,7 @@ export default function AdminNewsletter() {
     } catch (err) {
       toast.error((err as Error).message || "Versand fehlgeschlagen");
     } finally {
-      setSending(false);
-      busyRef.current = false;
-      setBusy(false);
+      releaseLaunchGuard();
     }
   };
 
@@ -664,6 +717,45 @@ export default function AdminNewsletter() {
                 </Button>
               </div>
             </Card>
+
+            {/* Send-Bestätigung (gestyltes AlertDialog, ersetzt window.confirm) */}
+            <AlertDialog
+              open={confirmOpen}
+              onOpenChange={(open) => {
+                if (!open && !confirmedRef.current) cancelLaunch();
+              }}
+            >
+              <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+                <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-primary/30 bg-primary/10 text-primary">
+                  <Send className="h-5 w-5" />
+                </span>
+                <AlertDialogHeader className="space-y-[7px] text-left">
+                  <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+                    Newsletter an alle senden?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+                    Der Versand geht an{" "}
+                    <strong className="font-mono font-bold text-primary">
+                      {counts.confirmed.toLocaleString("de-DE")}
+                    </strong>{" "}
+                    bestätigte{counts.confirmed === 1 ? "n" : ""} Abonnenten, startet sofort und kann
+                    nicht rückgängig gemacht werden.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="gap-2.5">
+                  <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+                    Abbrechen
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={confirmLaunch}
+                    className="h-10 gap-2 rounded-[11px] bg-gradient-lime px-[18px] text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition hover:brightness-110"
+                  >
+                    <Send className="h-[15px] w-[15px]" />
+                    Jetzt senden
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
 
           {/* Vorschau + Verlauf */}
