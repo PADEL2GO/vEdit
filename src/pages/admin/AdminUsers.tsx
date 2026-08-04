@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,10 +17,9 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -33,7 +32,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Users,
   Search,
   Eye,
   Shield,
@@ -41,20 +39,17 @@ import {
   Trash2,
   Coins,
   Calendar,
-  Gamepad2,
   Wallet,
-  MapPin,
-  Mail,
-  Phone,
+  LayoutDashboard,
+  Swords,
   CheckCircle,
   XCircle,
-  Clock,
-  Trophy,
   TrendingUp,
   TrendingDown,
-  CircleDot,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  AlertTriangle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -97,6 +92,41 @@ interface UserWithDetails {
     lifetime_credits: number;
   };
 }
+
+const fmt = (n: number) => n.toLocaleString("de-DE");
+
+const ROLE_PILL =
+  "rounded-full border px-[9px] py-[3px] text-[10.5px] font-bold uppercase tracking-[0.05em] whitespace-nowrap";
+
+const ACTION_BTN =
+  "h-[30px] w-[30px] rounded-lg border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_82%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary";
+
+const TAB_TRIGGER =
+  "inline-flex items-center gap-[7px] whitespace-nowrap rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-2.5 pt-0 text-[13.5px] font-bold text-[hsl(0_0%_60%)] shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none";
+
+const KPI_TILE = "flex flex-col gap-[7px] rounded-[14px] border p-[15px]";
+const KPI_LABEL = "font-mono text-[9.5px] uppercase tracking-[0.14em] text-[hsl(0_0%_65%)]";
+const KPI_VALUE = "font-mono text-[22px] font-bold leading-none";
+const KPI_LIME =
+  "border-[hsl(71_91%_51%/0.26)] bg-[linear-gradient(135deg,hsl(71_91%_51%/0.09),hsl(71_91%_51%/0.02))]";
+const KPI_BLUE = "border-[hsl(200_100%_75%/0.22)] bg-[hsl(200_100%_75%/0.05)]";
+const KPI_NEUTRAL = "border-[hsl(0_0%_13%)] bg-white/[0.03]";
+
+const SUB_BOX =
+  "flex flex-col gap-3 rounded-[15px] border border-[hsl(0_0%_12%)] bg-white/[0.025] p-[17px]";
+const SUB_BOX_TITLE = "font-display text-sm font-bold tracking-tight text-foreground";
+
+const LIST_ROW =
+  "flex flex-wrap items-center gap-[13px] rounded-xl border border-[hsl(0_0%_12%)] bg-white/[0.028] px-3.5 py-3";
+
+const DELETE_ITEMS = [
+  "Profil- und Kontodaten",
+  "Wallet + Credits",
+  "Buchungen + Zahlungen",
+  "Matches + Analysen",
+  "Rewards + Transaktionen",
+  "Benachrichtigungen + Streaks",
+];
 
 export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -264,273 +294,332 @@ export default function AdminUsers() {
   };
 
   const getStatusBadge = (status: string) => {
+    const base = "rounded-full border px-2.5 py-1 text-[11px] font-bold whitespace-nowrap";
     switch (status) {
       case "confirmed":
       case "completed":
-        return <Badge className="bg-green-500/20 text-green-500">Bestätigt</Badge>;
+        return (
+          <Badge variant="outline" className={`${base} border-primary/30 bg-primary/10 text-primary`}>
+            Bestätigt
+          </Badge>
+        );
       case "cancelled":
-        return <Badge className="bg-destructive/20 text-destructive">Storniert</Badge>;
+        return (
+          <Badge
+            variant="outline"
+            className={`${base} border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]`}
+          >
+            Storniert
+          </Badge>
+        );
       case "pending":
       case "pending_payment":
-        return <Badge className="bg-yellow-500/20 text-yellow-500">Ausstehend</Badge>;
+        return (
+          <Badge
+            variant="outline"
+            className={`${base} border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] text-[#FFC44D]`}
+          >
+            Ausstehend
+          </Badge>
+        );
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return (
+          <Badge variant="outline" className={`${base} border-[hsl(0_0%_18%)] bg-white/5 text-muted-foreground`}>
+            {status}
+          </Badge>
+        );
     }
   };
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Benutzer</h1>
-            <p className="text-muted-foreground">Vollständige Benutzerverwaltung</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            <span className="text-lg font-semibold text-foreground">{total}</span>
-          </div>
-        </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <p className="text-sm text-muted-foreground">
+          Vollständige Benutzerverwaltung — Suche über E-Mail, Name, Username und User-ID.
+        </p>
 
-        {/* Search */}
-        <Card className="bg-card border-border">
-          <CardContent className="pt-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Suchen nach Name, Username oder ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background border-border"
-              />
+        {/* Benutzerliste */}
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3.5">
+              <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                Benutzerliste{" "}
+                <span className="font-mono text-sm font-normal text-[hsl(0_0%_65%)]">({fmt(total)})</span>
+              </h2>
+              <label className="relative flex min-w-[min(300px,100%)] items-center">
+                <Search className="pointer-events-none absolute left-[11px] h-[15px] w-[15px] text-[hsl(0_0%_58%)]" />
+                <Input
+                  placeholder="Name, Username, E-Mail oder ID…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] pl-9 text-[13.5px] focus-visible:border-primary focus-visible:ring-0"
+                />
+              </label>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Users Table */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="text-foreground">
-              Benutzerliste ({total})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
             {isLoading ? (
-              <p className="text-muted-foreground">Laden...</p>
+              <p className="text-sm text-muted-foreground">Laden...</p>
             ) : users && users.length > 0 ? (
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[920px]">
                   <TableHeader>
-                    <TableRow className="border-border">
-                      <TableHead className="text-muted-foreground">Benutzer</TableHead>
-                      <TableHead className="text-muted-foreground">Username</TableHead>
-                      <TableHead className="text-muted-foreground">Credits</TableHead>
-                      <TableHead className="text-muted-foreground">Rollen</TableHead>
-                      <TableHead className="text-muted-foreground">Registriert</TableHead>
-                      <TableHead className="text-muted-foreground text-right">Aktionen</TableHead>
+                    <TableRow className="border-transparent hover:bg-transparent">
+                      <TableHead className="h-auto px-0 pb-3 pr-3.5 text-left font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                        Benutzer
+                      </TableHead>
+                      <TableHead className="h-auto px-0 pb-3 pr-3.5 text-left font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                        Username
+                      </TableHead>
+                      <TableHead className="h-auto px-0 pb-3 pr-3.5 text-left font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                        Credits
+                      </TableHead>
+                      <TableHead className="h-auto px-0 pb-3 pr-3.5 text-left font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                        Rollen
+                      </TableHead>
+                      <TableHead className="h-auto px-0 pb-3 pr-3.5 text-left font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                        Registriert
+                      </TableHead>
+                      <TableHead className="h-auto px-0 pb-3 text-right font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                        Aktionen
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.user_id} className="border-border">
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={user.avatar_url || undefined} />
-                              <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                                {user.display_name?.slice(0, 2).toUpperCase() || "??"}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="min-w-0">
-                              <p className="text-foreground font-medium truncate">
-                                {user.display_name || "Unbekannt"}
-                              </p>
-                              {user.email && (
-                                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {user.username ? `@${user.username}` : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Coins className="h-3.5 w-3.5 text-amber-500" />
-                            <span className="text-foreground font-medium">
-                              {(user.wallet?.reward_credits || 0) + (user.wallet?.play_credits || 0)}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1 flex-wrap">
-                            {user.roles.includes("admin") && (
-                              <Badge variant="default" className="bg-primary text-primary-foreground">
-                                Admin
-                              </Badge>
-                            )}
-                            {user.roles.includes("moderator") && (
-                              <Badge variant="secondary">Mod</Badge>
-                            )}
-                            {user.roles.includes("club_owner") && (
-                              <Badge className="bg-green-600/20 text-green-600 border-green-600/30">
-                                🎾 Club
-                              </Badge>
-                            )}
-                            {user.roles.length === 0 && (
-                              <Badge variant="outline" className="text-muted-foreground border-border">
-                                User
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">
-                          {format(new Date(user.created_at), "dd.MM.yyyy")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setActiveTab("overview");
-                              }}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            
-                            {/* Role Dropdown */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className={`h-8 w-8 ${
-                                    user.roles.length > 0
-                                      ? "text-primary"
-                                      : "text-muted-foreground"
+                    {users.map((user) => {
+                      const isAdmin = user.roles.includes("admin");
+                      return (
+                        <TableRow
+                          key={user.user_id}
+                          className="border-[hsl(0_0%_12%)] hover:bg-white/[0.02]"
+                        >
+                          <TableCell className="px-0 py-3 pr-3.5">
+                            <div className="flex items-center gap-[11px]">
+                              <Avatar
+                                className={`h-[34px] w-[34px] flex-none border ${
+                                  isAdmin ? "border-primary" : "border-[hsl(0_0%_18%)]"
+                                }`}
+                              >
+                                <AvatarImage src={user.avatar_url || undefined} />
+                                <AvatarFallback
+                                  className={`font-display text-[11.5px] font-extrabold ${
+                                    isAdmin
+                                      ? "bg-gradient-lime text-[#0A0A0A]"
+                                      : "bg-white/[0.06] text-[hsl(0_0%_82%)]"
                                   }`}
                                 >
-                                  {user.roles.includes("admin") ? (
-                                    <ShieldCheck className="h-4 w-4" />
-                                  ) : user.roles.includes("club_owner") ? (
-                                    <CircleDot className="h-4 w-4 text-green-600" />
-                                  ) : (
-                                    <Shield className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    toggleRoleMutation.mutate({
-                                      userId: user.user_id,
-                                      role: "admin",
-                                      hasRole: user.roles.includes("admin"),
-                                    })
-                                  }
+                                  {user.display_name?.slice(0, 2).toUpperCase() || "??"}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex min-w-0 flex-col gap-[1px]">
+                                <p className="truncate text-[13.5px] font-semibold text-foreground">
+                                  {user.display_name || "Unbekannt"}
+                                </p>
+                                {user.email && (
+                                  <p className="truncate font-mono text-[11px] text-[hsl(0_0%_65%)]">
+                                    {user.email}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-0 py-3 pr-3.5 font-mono text-[12.5px] text-[hsl(0_0%_78%)]">
+                            {user.username ? `@${user.username}` : "-"}
+                          </TableCell>
+                          <TableCell className="px-0 py-3 pr-3.5">
+                            <span className="inline-flex items-center gap-[7px] whitespace-nowrap font-mono text-[13px] font-bold text-primary">
+                              <Coins className="h-[13px] w-[13px]" />
+                              {fmt((user.wallet?.reward_credits || 0) + (user.wallet?.play_credits || 0))}
+                            </span>
+                          </TableCell>
+                          <TableCell className="px-0 py-3 pr-3.5">
+                            <div className="flex flex-wrap gap-1.5">
+                              {user.roles.includes("admin") && (
+                                <Badge
+                                  variant="outline"
+                                  className={`${ROLE_PILL} border-[hsl(347_89%_58%/0.35)] bg-[hsl(347_89%_58%/0.12)] text-[#F43F5E]`}
                                 >
-                                  <ShieldCheck className="h-4 w-4 mr-2" />
-                                  {user.roles.includes("admin") ? "Admin entfernen" : "Admin machen"}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    toggleRoleMutation.mutate({
-                                      userId: user.user_id,
-                                      role: "moderator",
-                                      hasRole: user.roles.includes("moderator"),
-                                    })
-                                  }
+                                  Admin
+                                </Badge>
+                              )}
+                              {user.roles.includes("moderator") && (
+                                <Badge
+                                  variant="outline"
+                                  className={`${ROLE_PILL} border-[hsl(200_100%_75%/0.3)] bg-[hsl(200_100%_75%/0.1)] text-[#7FD4FF]`}
                                 >
-                                  <Shield className="h-4 w-4 mr-2" />
-                                  {user.roles.includes("moderator") ? "Moderator entfernen" : "Moderator machen"}
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    toggleRoleMutation.mutate({
-                                      userId: user.user_id,
-                                      role: "club_owner",
-                                      hasRole: user.roles.includes("club_owner"),
-                                    })
-                                  }
-                                  className="text-green-600"
+                                  Mod
+                                </Badge>
+                              )}
+                              {user.roles.includes("club_owner") && (
+                                <Badge
+                                  variant="outline"
+                                  className={`${ROLE_PILL} border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] text-[#FFC44D]`}
                                 >
-                                  <span className="mr-2">🎾</span>
-                                  {user.roles.includes("club_owner") ? "Club Owner entfernen" : "Club Owner machen"}
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                            
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-destructive hover:text-destructive"
-                              onClick={() => openDeleteDialog(user)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                                  🎾 Club
+                                </Badge>
+                              )}
+                              {user.roles.length === 0 && (
+                                <Badge
+                                  variant="outline"
+                                  className={`${ROLE_PILL} border-[hsl(0_0%_18%)] bg-white/5 text-[hsl(0_0%_72%)]`}
+                                >
+                                  User
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap px-0 py-3 pr-3.5 font-mono text-[12.5px] text-[hsl(0_0%_78%)]">
+                            {format(new Date(user.created_at), "dd.MM.yyyy")}
+                          </TableCell>
+                          <TableCell className="px-0 py-3 text-right">
+                            <div className="flex items-center justify-end gap-[7px]">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Details"
+                                className={ACTION_BTN}
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setActiveTab("overview");
+                                }}
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                              </Button>
+
+                              {/* Role Dropdown */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className={`h-[30px] gap-1.5 rounded-lg border border-[hsl(0_0%_16%)] bg-white/5 px-2.5 text-[11.5px] font-semibold hover:bg-white/10 hover:text-foreground ${
+                                      user.roles.length > 0 ? "text-primary" : "text-[hsl(0_0%_82%)]"
+                                    }`}
+                                  >
+                                    Rollen
+                                    <ChevronDown className="h-3 w-3 text-[hsl(0_0%_58%)]" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="rounded-xl border-[hsl(0_0%_16%)] bg-[hsl(0_0%_7%)]"
+                                >
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      toggleRoleMutation.mutate({
+                                        userId: user.user_id,
+                                        role: "admin",
+                                        hasRole: user.roles.includes("admin"),
+                                      })
+                                    }
+                                  >
+                                    <ShieldCheck className="h-4 w-4 mr-2" />
+                                    {user.roles.includes("admin") ? "Admin entfernen" : "Admin machen"}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      toggleRoleMutation.mutate({
+                                        userId: user.user_id,
+                                        role: "moderator",
+                                        hasRole: user.roles.includes("moderator"),
+                                      })
+                                    }
+                                  >
+                                    <Shield className="h-4 w-4 mr-2" />
+                                    {user.roles.includes("moderator") ? "Moderator entfernen" : "Moderator machen"}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      toggleRoleMutation.mutate({
+                                        userId: user.user_id,
+                                        role: "club_owner",
+                                        hasRole: user.roles.includes("club_owner"),
+                                      })
+                                    }
+                                    className="text-[#FFC44D]"
+                                  >
+                                    <span className="mr-2">🎾</span>
+                                    {user.roles.includes("club_owner") ? "Club Owner entfernen" : "Club Owner machen"}
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-[30px] w-[30px] rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+                                onClick={() => openDeleteDialog(user)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-8">
+              <p className="py-8 text-center text-muted-foreground">
                 Keine Benutzer gefunden
               </p>
             )}
 
             {(page > 1 || hasMore) && (
-              <div className="flex items-center justify-between gap-2 flex-wrap pt-4">
-                <p className="text-sm text-muted-foreground">Seite {page}</p>
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-3.5 border-t border-[hsl(0_0%_12%)] pt-3.5">
+                <span className="text-[12.5px] text-[hsl(0_0%_65%)]">
+                  25 pro Seite · serverseitig paginiert
+                </span>
+                <div className="flex items-center gap-2.5">
                   <Button
                     variant="outline"
                     size="sm"
                     disabled={page <= 1 || isLoading}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    className="h-[34px] gap-1.5 rounded-[9px] border-[hsl(0_0%_16%)] bg-white/[0.05] px-[13px] text-[12.5px] font-bold text-[hsl(0_0%_85%)] hover:border-primary/40 hover:bg-white/[0.05] hover:text-primary disabled:text-[hsl(0_0%_45%)]"
                   >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    <ChevronLeft className="h-3.5 w-3.5" />
                     Zurück
                   </Button>
+                  <span className="whitespace-nowrap font-mono text-[12.5px] font-bold text-foreground">
+                    Seite {page}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
                     disabled={!hasMore || isLoading}
                     onClick={() => setPage((p) => p + 1)}
+                    className="h-[34px] gap-1.5 rounded-[9px] border-[hsl(0_0%_16%)] bg-white/[0.05] px-[13px] text-[12.5px] font-bold text-[hsl(0_0%_85%)] hover:border-primary/40 hover:bg-white/[0.05] hover:text-primary disabled:text-[hsl(0_0%_45%)]"
                   >
                     Weiter
-                    <ChevronRight className="h-4 w-4 ml-1" />
+                    <ChevronRight className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
             )}
-          </CardContent>
+          </div>
         </Card>
       </div>
 
       {/* User Detail Dialog */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="bg-card border-border max-w-4xl max-h-[90vh] overflow-hidden grid grid-rows-[auto,1fr,auto]">
-          <DialogHeader>
-            <DialogTitle className="text-foreground flex items-center gap-3">
+        <DialogContent className="grid max-h-[90vh] max-w-[860px] grid-rows-[auto,1fr,auto] gap-0 overflow-hidden rounded-[22px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))] p-0">
+          <DialogHeader className="border-b border-[hsl(0_0%_14%)] px-5 pb-4 pt-5 text-left sm:px-6">
+            <DialogTitle className="flex items-center gap-[13px] text-foreground">
               {selectedUser && (
                 <>
-                  <Avatar className="h-10 w-10">
+                  <Avatar className="h-[46px] w-[46px] flex-none">
                     <AvatarImage src={selectedUser.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary/20 text-primary">
+                    <AvatarFallback className="bg-gradient-lime font-display text-[15px] font-extrabold text-[#0A0A0A]">
                       {selectedUser.display_name?.slice(0, 2).toUpperCase() || "??"}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <span>{selectedUser.display_name || "Unbekannt"}</span>
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="truncate font-display text-[19px] font-extrabold tracking-tight text-foreground">
+                      {selectedUser.display_name || "Unbekannt"}
+                    </span>
                     {selectedUser.username && (
-                      <span className="text-muted-foreground font-normal ml-2">
+                      <span className="truncate font-mono text-[11.5px] font-normal text-[hsl(0_0%_65%)]">
                         @{selectedUser.username}
                       </span>
                     )}
@@ -541,330 +630,329 @@ export default function AdminUsers() {
           </DialogHeader>
 
           {selectedUser && (
-            <div className="min-h-0 overflow-y-auto pr-2">
+            <div className="min-h-0 overflow-y-auto px-5 py-5 sm:px-6">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-4 mb-4">
-                  <TabsTrigger value="overview">Übersicht</TabsTrigger>
-                  <TabsTrigger value="matches">Matches</TabsTrigger>
-                  <TabsTrigger value="bookings">Buchungen</TabsTrigger>
-                  <TabsTrigger value="wallet">Wallet</TabsTrigger>
+                <TabsList className="mb-4 flex h-auto w-full justify-start gap-[22px] overflow-x-auto rounded-none border-b border-[hsl(0_0%_14%)] bg-transparent p-0">
+                  <TabsTrigger value="overview" className={TAB_TRIGGER}>
+                    <LayoutDashboard className="h-[15px] w-[15px]" />
+                    Übersicht
+                  </TabsTrigger>
+                  <TabsTrigger value="matches" className={TAB_TRIGGER}>
+                    <Swords className="h-[15px] w-[15px]" />
+                    Matches
+                  </TabsTrigger>
+                  <TabsTrigger value="bookings" className={TAB_TRIGGER}>
+                    <Calendar className="h-[15px] w-[15px]" />
+                    Buchungen
+                  </TabsTrigger>
+                  <TabsTrigger value="wallet" className={TAB_TRIGGER}>
+                    <Wallet className="h-[15px] w-[15px]" />
+                    Wallet
+                  </TabsTrigger>
                 </TabsList>
 
                 {/* Overview Tab */}
-                <TabsContent value="overview" className="space-y-4">
+                <TabsContent value="overview" className="mt-0 space-y-4">
                   {/* Stats Cards */}
-                  <div className="grid grid-cols-4 gap-3">
-                    <div className="p-3 bg-secondary/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground">Reward Credits</p>
-                      <p className="text-xl font-bold text-amber-500">
-                        {selectedUser.wallet?.reward_credits || 0}
-                      </p>
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(min(140px,100%),1fr))] gap-[11px]">
+                    <div className={`${KPI_TILE} ${KPI_LIME}`}>
+                      <span className={KPI_LABEL}>Reward Credits</span>
+                      <span className={`${KPI_VALUE} text-primary`}>
+                        {fmt(selectedUser.wallet?.reward_credits || 0)}
+                      </span>
                     </div>
-                    <div className="p-3 bg-secondary/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground">Play Credits</p>
-                      <p className="text-xl font-bold text-primary">
-                        {selectedUser.wallet?.play_credits || 0}
-                      </p>
+                    <div className={`${KPI_TILE} ${KPI_BLUE}`}>
+                      <span className={KPI_LABEL}>Play Credits</span>
+                      <span className={`${KPI_VALUE} text-[#7FD4FF]`}>
+                        {fmt(selectedUser.wallet?.play_credits || 0)}
+                      </span>
                     </div>
-                    <div className="p-3 bg-secondary/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground">Matches</p>
-                      <p className="text-xl font-bold text-foreground">{userDetails?.matchCount ?? 0}</p>
+                    <div className={`${KPI_TILE} ${KPI_NEUTRAL}`}>
+                      <span className={KPI_LABEL}>Matches</span>
+                      <span className={`${KPI_VALUE} text-foreground`}>{fmt(userDetails?.matchCount ?? 0)}</span>
                     </div>
-                    <div className="p-3 bg-secondary/50 rounded-lg">
-                      <p className="text-xs text-muted-foreground">Buchungen</p>
-                      <p className="text-xl font-bold text-foreground">{userDetails?.bookingCount ?? 0}</p>
+                    <div className={`${KPI_TILE} ${KPI_NEUTRAL}`}>
+                      <span className={KPI_LABEL}>Buchungen</span>
+                      <span className={`${KPI_VALUE} text-foreground`}>{fmt(userDetails?.bookingCount ?? 0)}</span>
                     </div>
                   </div>
 
                   {/* Profile Info */}
-                  <Card>
-                    <CardHeader className="py-3">
-                      <CardTitle className="text-sm">Profil-Informationen</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">User ID:</span>
-                          <code className="text-xs bg-muted px-2 py-0.5 rounded">{selectedUser.user_id.slice(0, 8)}...</code>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Registriert:</span>
-                          <span>{format(new Date(selectedUser.created_at), "dd.MM.yyyy HH:mm", { locale: de })}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Skill Level:</span>
-                          <span>{selectedUser.skill_self_rating || 0}/10</span>
-                          {userDetails?.skillStats?.skill_level && (
-                            <Badge variant="outline" className="ml-1">
-                              AI: {userDetails.skillStats.skill_level}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Alter:</span>
-                          <span>{selectedUser.age || "-"}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Referral Code:</span>
-                          <code className="text-xs bg-muted px-2 py-0.5 rounded">{selectedUser.referral_code || "-"}</code>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Lifetime Credits:</span>
-                          <span className="font-medium">{selectedUser.wallet?.lifetime_credits || 0}</span>
-                        </div>
+                  <div className={SUB_BOX}>
+                    <span className={SUB_BOX_TITLE}>Profil-Informationen</span>
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(min(190px,100%),1fr))] gap-[11px]">
+                      <div className="flex flex-col gap-[3px]">
+                        <span className={KPI_LABEL}>User ID</span>
+                        <span className="font-mono text-[12.5px] font-semibold text-foreground">
+                          {selectedUser.user_id.slice(0, 8)}...
+                        </span>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="flex flex-col gap-[3px]">
+                        <span className={KPI_LABEL}>Registriert</span>
+                        <span className="font-mono text-[12.5px] font-semibold text-foreground">
+                          {format(new Date(selectedUser.created_at), "dd.MM.yyyy HH:mm", { locale: de })}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-[3px]">
+                        <span className={KPI_LABEL}>Skill Level</span>
+                        <span className="font-mono text-[12.5px] font-semibold text-foreground">
+                          {selectedUser.skill_self_rating || 0}/10
+                          {userDetails?.skillStats?.skill_level
+                            ? ` · AI: ${userDetails.skillStats.skill_level}`
+                            : ""}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-[3px]">
+                        <span className={KPI_LABEL}>Alter</span>
+                        <span className="font-mono text-[12.5px] font-semibold text-foreground">
+                          {selectedUser.age || "-"}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-[3px]">
+                        <span className={KPI_LABEL}>Referral Code</span>
+                        <span className="font-mono text-[12.5px] font-semibold text-foreground">
+                          {selectedUser.referral_code || "-"}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-[3px]">
+                        <span className={KPI_LABEL}>Lifetime Credits</span>
+                        <span className="font-mono text-[12.5px] font-semibold text-foreground">
+                          {fmt(selectedUser.wallet?.lifetime_credits || 0)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-                  {/* Verification Status */}
-                  <Card>
-                    <CardHeader className="py-3">
-                      <CardTitle className="text-sm">Verifizierungsstatus</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex gap-4">
-                        <div className="flex items-center gap-2">
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(min(250px,100%),1fr))] items-start gap-3">
+                    {/* Verification Status */}
+                    <div className={SUB_BOX}>
+                      <span className={SUB_BOX_TITLE}>Verifizierungsstatus</span>
+                      <div className="flex flex-col gap-[11px]">
+                        <div className="flex items-center gap-2.5">
                           {selectedUser.email_verified_at ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-[15px] w-[15px] flex-none text-primary" />
                           ) : (
-                            <XCircle className="h-4 w-4 text-muted-foreground" />
+                            <XCircle className="h-[15px] w-[15px] flex-none text-[hsl(0_0%_45%)]" />
                           )}
-                          <span className="text-sm">E-Mail</span>
+                          <span className="text-[13px] text-[hsl(0_0%_78%)]">E-Mail verifiziert</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2.5">
                           {selectedUser.phone_verified_at ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-[15px] w-[15px] flex-none text-primary" />
                           ) : (
-                            <XCircle className="h-4 w-4 text-muted-foreground" />
+                            <XCircle className="h-[15px] w-[15px] flex-none text-[hsl(0_0%_45%)]" />
                           )}
-                          <span className="text-sm">Telefon</span>
+                          <span className="text-[13px] text-[hsl(0_0%_78%)]">Telefon verifiziert</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2.5">
                           {selectedUser.profile_completed_at ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-[15px] w-[15px] flex-none text-primary" />
                           ) : (
-                            <XCircle className="h-4 w-4 text-muted-foreground" />
+                            <XCircle className="h-[15px] w-[15px] flex-none text-[hsl(0_0%_45%)]" />
                           )}
-                          <span className="text-sm">Profil vollständig</span>
+                          <span className="text-[13px] text-[hsl(0_0%_78%)]">Profil vollständig</span>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
 
-                  {/* Shipping Address */}
-                  {selectedUser.shipping_address_line1 && (
-                    <Card>
-                      <CardHeader className="py-3">
-                        <CardTitle className="text-sm flex items-center gap-2">
-                          <MapPin className="h-4 w-4" /> Lieferadresse
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="text-sm">
-                        <p>{selectedUser.shipping_address_line1}</p>
-                        <p>{selectedUser.shipping_postal_code} {selectedUser.shipping_city}</p>
-                        <p>{selectedUser.shipping_country}</p>
-                      </CardContent>
-                    </Card>
-                  )}
+                    {/* Shipping Address */}
+                    {selectedUser.shipping_address_line1 && (
+                      <div className={SUB_BOX}>
+                        <span className={SUB_BOX_TITLE}>Lieferadresse</span>
+                        <div className="flex flex-col gap-[3px]">
+                          <span className="text-[13px] text-[hsl(0_0%_82%)]">
+                            {selectedUser.shipping_address_line1}
+                          </span>
+                          <span className="text-[13px] text-[hsl(0_0%_82%)]">
+                            {selectedUser.shipping_postal_code} {selectedUser.shipping_city}
+                          </span>
+                          <span className="text-[13px] text-[hsl(0_0%_65%)]">
+                            {selectedUser.shipping_country}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </TabsContent>
 
                 {/* Matches Tab */}
-                <TabsContent value="matches" className="space-y-4">
+                <TabsContent value="matches" className="mt-0">
                   {isLoadingDetails ? (
-                    <p className="text-muted-foreground text-center py-8">Laden...</p>
+                    <p className="py-8 text-center text-muted-foreground">Laden...</p>
                   ) : userDetails?.matches && userDetails.matches.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-[9px]">
                       {userDetails.matches.map((match) => (
-                        <div
-                          key={match.id}
-                          className="flex items-center justify-between p-3 bg-background rounded-lg border border-border"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Gamepad2 className="h-4 w-4 text-primary" />
-                            <div>
-                              <p className="text-sm font-medium text-foreground">
-                                Match #{match.match_id.slice(0, 8)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {format(new Date(match.created_at), "dd.MM.yyyy HH:mm", { locale: de })}
-                              </p>
-                            </div>
+                        <div key={match.id} className={LIST_ROW}>
+                          <div className="flex min-w-[150px] flex-1 flex-col gap-0.5">
+                            <span className="whitespace-nowrap font-mono text-[12.5px] font-bold text-foreground">
+                              Match #{match.match_id.slice(0, 8)}
+                            </span>
+                            <span className="whitespace-nowrap font-mono text-[11px] text-[hsl(0_0%_65%)]">
+                              {format(new Date(match.created_at), "dd.MM.yyyy HH:mm", { locale: de })}
+                            </span>
                           </div>
-                          <div className="flex items-center gap-3">
-                            {match.result && (
-                              <Badge
-                                className={
-                                  match.result === "WIN"
-                                    ? "bg-green-500/20 text-green-500"
-                                    : match.result === "LOSS"
-                                    ? "bg-destructive/20 text-destructive"
-                                    : "bg-muted text-muted-foreground"
-                                }
-                              >
-                                {match.result}
-                              </Badge>
-                            )}
-                            {match.ai_score !== null && (
-                              <span className="text-xs text-muted-foreground">
-                                AI: {match.ai_score}
-                              </span>
-                            )}
-                            <div className="flex items-center gap-1 text-amber-500">
-                              <Coins className="h-3.5 w-3.5" />
-                              <span className="text-sm font-medium">+{match.credits_awarded}</span>
-                            </div>
-                          </div>
+                          {match.result && (
+                            <Badge
+                              variant="outline"
+                              className={`flex-none rounded-full border px-2.5 py-1 text-[11px] font-bold tracking-[0.06em] ${
+                                match.result === "WIN"
+                                  ? "border-[hsl(71_91%_51%/0.3)] bg-primary/10 text-primary"
+                                  : match.result === "LOSS"
+                                  ? "border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]"
+                                  : "border-[hsl(0_0%_18%)] bg-white/5 text-muted-foreground"
+                              }`}
+                            >
+                              {match.result}
+                            </Badge>
+                          )}
+                          {match.ai_score !== null && (
+                            <span className="flex-none whitespace-nowrap font-mono text-xs text-[hsl(0_0%_72%)]">
+                              AI: {match.ai_score}
+                            </span>
+                          )}
+                          <span className="flex-none whitespace-nowrap font-mono text-[12.5px] font-bold text-primary">
+                            +{match.credits_awarded}
+                          </span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground text-center py-8">Keine Matches</p>
+                    <p className="py-8 text-center text-muted-foreground">Keine Matches</p>
                   )}
                 </TabsContent>
 
                 {/* Bookings Tab */}
-                <TabsContent value="bookings" className="space-y-4">
+                <TabsContent value="bookings" className="mt-0">
                   {isLoadingDetails ? (
-                    <p className="text-muted-foreground text-center py-8">Laden...</p>
+                    <p className="py-8 text-center text-muted-foreground">Laden...</p>
                   ) : userDetails?.bookings && userDetails.bookings.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-[9px]">
                       {userDetails.bookings.map((booking: any) => (
-                        <div
-                          key={booking.id}
-                          className="flex items-center justify-between p-3 bg-background rounded-lg border border-border"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm font-medium text-foreground">
-                                {booking.courts?.name} @ {booking.locations?.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {format(new Date(booking.start_time), "dd.MM.yyyy HH:mm", { locale: de })}
-                                {" - "}
-                                {format(new Date(booking.end_time), "HH:mm", { locale: de })}
-                              </p>
-                            </div>
+                        <div key={booking.id} className={LIST_ROW}>
+                          <div className="flex min-w-[180px] flex-1 flex-col gap-0.5">
+                            <span className="whitespace-nowrap text-[13px] font-semibold text-foreground">
+                              {booking.courts?.name} @ {booking.locations?.name}
+                            </span>
+                            <span className="whitespace-nowrap font-mono text-[11px] text-[hsl(0_0%_65%)]">
+                              {format(new Date(booking.start_time), "dd.MM.yyyy HH:mm", { locale: de })}
+                              {" – "}
+                              {format(new Date(booking.end_time), "HH:mm", { locale: de })}
+                            </span>
                           </div>
-                          <div className="flex items-center gap-3">
-                            {booking.price_cents && (
-                              <span className="text-sm font-medium">
-                                {(booking.price_cents / 100).toFixed(2)} €
-                              </span>
-                            )}
-                            {getStatusBadge(booking.status)}
-                          </div>
+                          {booking.price_cents && (
+                            <span className="flex-none whitespace-nowrap font-mono text-[12.5px] font-bold text-foreground">
+                              {(booking.price_cents / 100).toFixed(2).replace(".", ",")} €
+                            </span>
+                          )}
+                          <span className="flex-none">{getStatusBadge(booking.status)}</span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground text-center py-8">Keine Buchungen</p>
+                    <p className="py-8 text-center text-muted-foreground">Keine Buchungen</p>
                   )}
                 </TabsContent>
 
                 {/* Wallet Tab */}
-                <TabsContent value="wallet" className="space-y-4">
+                <TabsContent value="wallet" className="mt-0 space-y-4">
                   {/* Wallet Summary */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="p-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Trophy className="h-4 w-4 text-amber-500" />
-                        <span className="text-xs text-muted-foreground">Reward Credits</span>
-                      </div>
-                      <p className="text-2xl font-bold text-amber-500">
-                        {selectedUser.wallet?.reward_credits || 0}
-                      </p>
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(min(140px,100%),1fr))] gap-[11px]">
+                    <div className={`${KPI_TILE} ${KPI_LIME}`}>
+                      <span className={KPI_LABEL}>Reward Credits</span>
+                      <span className={`${KPI_VALUE} text-primary`}>
+                        {fmt(selectedUser.wallet?.reward_credits || 0)}
+                      </span>
                     </div>
-                    <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Gamepad2 className="h-4 w-4 text-primary" />
-                        <span className="text-xs text-muted-foreground">Play Credits</span>
-                      </div>
-                      <p className="text-2xl font-bold text-primary">
-                        {selectedUser.wallet?.play_credits || 0}
-                      </p>
+                    <div className={`${KPI_TILE} ${KPI_BLUE}`}>
+                      <span className={KPI_LABEL}>Play Credits</span>
+                      <span className={`${KPI_VALUE} text-[#7FD4FF]`}>
+                        {fmt(selectedUser.wallet?.play_credits || 0)}
+                      </span>
                     </div>
-                    <div className="p-4 bg-secondary/50 rounded-lg">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Wallet className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Lifetime</span>
-                      </div>
-                      <p className="text-2xl font-bold text-foreground">
-                        {selectedUser.wallet?.lifetime_credits || 0}
-                      </p>
+                    <div className={`${KPI_TILE} ${KPI_NEUTRAL}`}>
+                      <span className={KPI_LABEL}>Lifetime</span>
+                      <span className={`${KPI_VALUE} text-foreground`}>
+                        {fmt(selectedUser.wallet?.lifetime_credits || 0)}
+                      </span>
                     </div>
                   </div>
 
                   {/* Ledger */}
-                  <Card>
-                    <CardHeader className="py-3">
-                      <CardTitle className="text-sm">Transaktionshistorie</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {isLoadingDetails ? (
-                        <p className="text-muted-foreground text-center py-4">Laden...</p>
-                      ) : userDetails?.ledger && userDetails.ledger.length > 0 ? (
-                        <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                          {userDetails.ledger.map((entry) => (
-                            <div
-                              key={entry.id}
-                              className="flex items-center justify-between p-2 bg-background rounded border border-border"
-                            >
-                              <div className="flex items-center gap-3">
-                                {entry.delta_points > 0 ? (
-                                  <TrendingUp className="h-4 w-4 text-green-500" />
-                                ) : (
-                                  <TrendingDown className="h-4 w-4 text-destructive" />
-                                )}
-                                <div>
-                                  <p className="text-sm text-foreground">
-                                    {entry.description || entry.entry_type}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {format(new Date(entry.created_at), "dd.MM.yyyy HH:mm", { locale: de })}
-                                    {" · "}
-                                    <Badge variant="outline" className="text-[10px] px-1">
-                                      {entry.credit_type}
-                                    </Badge>
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p
-                                  className={`text-sm font-medium ${
-                                    entry.delta_points > 0 ? "text-green-500" : "text-destructive"
+                  <div className={SUB_BOX}>
+                    <span className={SUB_BOX_TITLE}>Transaktionshistorie</span>
+                    {isLoadingDetails ? (
+                      <p className="py-4 text-center text-muted-foreground">Laden...</p>
+                    ) : userDetails?.ledger && userDetails.ledger.length > 0 ? (
+                      <div className="flex max-h-[300px] flex-col gap-[9px] overflow-y-auto">
+                        {userDetails.ledger.map((entry) => (
+                          <div
+                            key={entry.id}
+                            className="flex flex-wrap items-center gap-3 rounded-[11px] border border-[hsl(0_0%_12%)] bg-white/[0.03] px-3 py-[11px]"
+                          >
+                            {entry.delta_points > 0 ? (
+                              <TrendingUp className="h-[15px] w-[15px] flex-none text-primary" />
+                            ) : (
+                              <TrendingDown className="h-[15px] w-[15px] flex-none text-[#FF6B6B]" />
+                            )}
+                            <div className="flex min-w-[150px] flex-1 flex-col gap-0.5">
+                              <span className="text-[12.5px] text-[hsl(0_0%_82%)]">
+                                {entry.description || entry.entry_type}
+                              </span>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="whitespace-nowrap font-mono text-[10.5px] text-[hsl(0_0%_65%)]">
+                                  {format(new Date(entry.created_at), "dd.MM.yyyy HH:mm", { locale: de })}
+                                </span>
+                                <Badge
+                                  variant="outline"
+                                  className={`rounded-full border-0 px-[7px] py-0.5 font-mono text-[9.5px] uppercase tracking-[0.08em] ${
+                                    entry.credit_type === "play"
+                                      ? "bg-[hsl(200_100%_75%/0.12)] text-[#7FD4FF]"
+                                      : "bg-primary/[0.12] text-primary"
                                   }`}
                                 >
-                                  {entry.delta_points > 0 ? "+" : ""}
-                                  {entry.delta_points}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  → {entry.balance_after}
-                                </p>
+                                  {entry.credit_type}
+                                </Badge>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground text-center py-4">Keine Transaktionen</p>
-                      )}
-                    </CardContent>
-                  </Card>
+                            <div className="flex flex-none flex-col items-end gap-[1px]">
+                              <span
+                                className={`whitespace-nowrap font-mono text-[13px] font-bold ${
+                                  entry.delta_points > 0 ? "text-primary" : "text-[#FF6B6B]"
+                                }`}
+                              >
+                                {entry.delta_points > 0 ? "+" : ""}
+                                {fmt(entry.delta_points)}
+                              </span>
+                              <span className="whitespace-nowrap font-mono text-[10.5px] text-[hsl(0_0%_58%)]">
+                                → {fmt(entry.balance_after)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="py-4 text-center text-muted-foreground">Keine Transaktionen</p>
+                    )}
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>
           )}
 
-          <DialogFooter className="pt-4 border-t">
+          <DialogFooter className="flex-row flex-wrap gap-2.5 border-t border-[hsl(0_0%_12%)] px-5 py-4 sm:px-6">
             <Button
-              variant="destructive"
+              variant="outline"
               onClick={() => selectedUser && openDeleteDialog(selectedUser)}
-              className="mr-auto"
+              className="mr-auto h-[42px] gap-2 rounded-[11px] border-[hsl(0_100%_71%/0.32)] bg-[hsl(0_100%_71%/0.08)] px-[17px] text-[13.5px] font-bold text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.18)] hover:text-[#FF6B6B]"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-[15px] w-[15px]" />
               Benutzer löschen
             </Button>
-            <Button variant="outline" onClick={() => setSelectedUser(null)}>
+            <Button
+              variant="outline"
+              onClick={() => setSelectedUser(null)}
+              className="h-[42px] rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-[18px] text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground"
+            >
               Schließen
             </Button>
           </DialogFooter>
@@ -873,50 +961,61 @@ export default function AdminUsers() {
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-card border-border">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-destructive flex items-center gap-2">
-              <Trash2 className="h-5 w-5" />
+        <AlertDialogContent className="max-h-[88vh] max-w-[480px] gap-[17px] overflow-y-auto rounded-[20px] border-[hsl(0_100%_71%/0.25)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))] p-6">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-xl font-extrabold tracking-tight text-foreground">
               Benutzer endgültig löschen?
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4">
-              <p>
-                Du bist dabei, den Benutzer{" "}
-                <strong className="text-foreground">
-                  {userToDelete?.display_name || userToDelete?.username || "Unbekannt"}
-                </strong>{" "}
-                zu löschen.
-              </p>
-              <p className="text-destructive">
-                Diese Aktion ist unwiderruflich! Folgende Daten werden gelöscht:
-              </p>
-              <ul className="list-disc list-inside text-sm space-y-1">
-                <li>Profil und Kontodaten</li>
-                <li>Wallet und alle Credits</li>
-                <li>Alle Buchungen und Zahlungen</li>
-                <li>Alle Matches und Analysen</li>
-                <li>Alle Rewards und Transaktionen</li>
-                <li>Benachrichtigungen und Streaks</li>
-              </ul>
-              <div className="pt-4">
-                <p className="text-sm mb-2">
-                  Gib <strong className="text-destructive">DELETE</strong> ein, um zu bestätigen:
-                </p>
-                <Input
-                  value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value)}
-                  placeholder="DELETE"
-                  className="bg-background border-border"
-                />
-              </div>
+            <AlertDialogDescription className="text-[13.5px] leading-[1.55] text-[hsl(0_0%_68%)]">
+              Du bist dabei, den Benutzer{" "}
+              <strong className="font-bold text-foreground">
+                {userToDelete?.display_name || userToDelete?.username || "Unbekannt"}
+              </strong>{" "}
+              zu löschen.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteConfirmText("")}>Abbrechen</AlertDialogCancel>
+
+          <div className="flex flex-col gap-[9px] rounded-[13px] border border-[hsl(0_100%_71%/0.18)] bg-[hsl(0_100%_71%/0.05)] p-[15px]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#FF6B6B]">
+              Unwiderruflich — folgende Daten werden gelöscht
+            </span>
+            {DELETE_ITEMS.map((item) => (
+              <span
+                key={item}
+                className="flex items-center gap-[9px] text-[12.5px] text-[hsl(0_0%_74%)]"
+              >
+                <span className="h-1 w-1 flex-none rounded-full bg-[#FF6B6B]" />
+                {item}
+              </span>
+            ))}
+          </div>
+
+          <label className="flex flex-col gap-[7px]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Gib DELETE ein, um zu bestätigen<span className="text-[#FF6B6B]"> *</span>
+            </span>
+            <Input
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="DELETE"
+              className="h-[42px] rounded-[11px] border-[hsl(0_0%_16%)] bg-white/[0.04] font-mono text-sm font-bold tracking-[0.12em] focus-visible:border-[#FF6B6B] focus-visible:ring-0"
+            />
+          </label>
+
+          <AlertDialogFooter className="gap-2.5 sm:gap-2.5">
+            <AlertDialogCancel
+              onClick={() => setDeleteConfirmText("")}
+              className="mt-0 h-[42px] rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-[17px] text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground"
+            >
+              Abbrechen
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleteConfirmText !== "DELETE" || deleteUserMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="h-[42px] rounded-[11px] bg-[#FF6B6B] px-[19px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585] disabled:bg-[hsl(0_0%_14%)] disabled:text-[hsl(0_0%_45%)] disabled:opacity-100"
             >
               {deleteUserMutation.isPending ? "Lösche..." : "Endgültig löschen"}
             </AlertDialogAction>

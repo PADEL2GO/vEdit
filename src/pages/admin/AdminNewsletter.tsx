@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,18 +11,20 @@ import {
   Save,
   Loader2,
   Trash2,
-  ArrowUp,
-  ArrowDown,
-  Heading as HeadingIcon,
-  Type,
+  ChevronUp,
+  ChevronDown,
+  Heading2,
+  AlignLeft,
   Image as ImageIcon,
   MousePointerClick,
-  CheckCircle2,
+  MailCheck,
   Clock,
   MailX,
   RotateCcw,
   Pencil,
   FilePlus2,
+  Upload,
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,11 +100,38 @@ const renderNewsletterHtml = (subject: string, preheader: string, blocks: Block[
 };
 
 const STATUS_BADGE: Record<string, string> = {
-  draft: "bg-muted text-muted-foreground border-border",
-  sending: "bg-amber-500/15 text-amber-600 border-amber-500/30",
-  sent: "bg-green-500/15 text-green-600 border-green-500/30",
-  failed: "bg-red-500/15 text-red-500 border-red-500/30",
+  draft: "border-[hsl(0_0%_18%)] bg-white/5 text-[hsl(0_0%_72%)]",
+  sending: "border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] text-[#FFC44D]",
+  sent: "border-primary/30 bg-primary/10 text-primary",
+  failed: "border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]",
 };
+
+const STATUS_LABEL: Record<string, string> = {
+  draft: "Entwurf",
+  sending: "Versand läuft",
+  sent: "Gesendet",
+  failed: "Fehlgeschlagen",
+};
+
+const BLOCK_META: Record<Block["type"], { label: string; icon: LucideIcon; badge: string }> = {
+  heading: { label: "Überschrift", icon: Heading2, badge: "border-primary/30 bg-primary/10 text-primary" },
+  text: { label: "Text", icon: AlignLeft, badge: "border-[hsl(0_0%_18%)] bg-white/5 text-[hsl(0_0%_82%)]" },
+  image: {
+    label: "Bild",
+    icon: ImageIcon,
+    badge: "border-[hsl(200_100%_75%/0.3)] bg-[hsl(200_100%_75%/0.1)] text-[#7FD4FF]",
+  },
+  button: {
+    label: "Button",
+    icon: MousePointerClick,
+    badge: "border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] text-[#FFC44D]",
+  },
+};
+
+const FIELD_INPUT = "h-[38px] rounded-[10px] border-[hsl(0_0%_16%)] bg-white/5 text-[13px]";
+
+const MOVE_BTN =
+  "h-[26px] w-[26px] rounded-[7px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground disabled:text-[hsl(0_0%_30%)]";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -326,298 +355,386 @@ export default function AdminNewsletter() {
   );
 
   // ── Block editor ──────────────────────────────────────────────────────────
-  const blockLabel = (b: Block) =>
-    b.type === "heading" ? "Überschrift" : b.type === "text" ? "Text" : b.type === "image" ? "Bild" : "Button";
-
-  const renderEditor = (b: Block, i: number) => (
-    <div key={i} className="rounded-xl border border-border bg-secondary/30 p-3 space-y-3">
-      <div className="flex items-center justify-between">
-        <Badge variant="outline" className="text-xs">
-          {blockLabel(b)}
-        </Badge>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => moveBlock(i, -1)} disabled={i === 0}>
-            <ArrowUp className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={() => moveBlock(i, 1)}
-            disabled={i === blocks.length - 1}
+  const renderEditor = (b: Block, i: number) => {
+    const meta = BLOCK_META[b.type];
+    const MetaIcon = meta.icon;
+    return (
+      <div
+        key={i}
+        className="flex flex-col gap-2.5 rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.03] p-3.5"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <Badge
+            variant="outline"
+            className={`gap-[7px] whitespace-nowrap rounded-full px-2.5 py-1 font-mono text-[10px] font-normal uppercase tracking-[0.1em] ${meta.badge}`}
           >
-            <ArrowDown className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-destructive hover:text-destructive"
-            onClick={() => removeBlock(i)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+            <MetaIcon className="h-[11px] w-[11px]" />
+            {meta.label}
+          </Badge>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={MOVE_BTN}
+              onClick={() => moveBlock(i, -1)}
+              disabled={i === 0}
+              title="Nach oben"
+            >
+              <ChevronUp className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={MOVE_BTN}
+              onClick={() => moveBlock(i, 1)}
+              disabled={i === blocks.length - 1}
+              title="Nach unten"
+            >
+              <ChevronDown className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-[26px] w-[26px] rounded-[7px] border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+              onClick={() => removeBlock(i)}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {b.type === "heading" && (
-        <Input
-          value={b.text}
-          onChange={(e) => updateBlock(i, { text: e.target.value })}
-          placeholder="Überschrift"
-        />
-      )}
+        {b.type === "heading" && (
+          <Input
+            value={b.text}
+            onChange={(e) => updateBlock(i, { text: e.target.value })}
+            placeholder="Überschrift"
+            className={FIELD_INPUT}
+          />
+        )}
 
-      {b.type === "text" && (
-        <Textarea
-          value={b.text}
-          onChange={(e) => updateBlock(i, { text: e.target.value })}
-          placeholder="Textabsatz… (Zeilenumbrüche bleiben erhalten)"
-          className="min-h-[100px]"
-        />
-      )}
+        {b.type === "text" && (
+          <Textarea
+            value={b.text}
+            onChange={(e) => updateBlock(i, { text: e.target.value })}
+            placeholder="Textabsatz… (Zeilenumbrüche bleiben erhalten)"
+            className="min-h-[100px] rounded-[10px] border-[hsl(0_0%_16%)] bg-white/5 text-[13px] leading-relaxed"
+          />
+        )}
 
-      {b.type === "image" && (
-        <div className="space-y-2">
-          {b.url ? (
-            <img src={b.url} alt={b.alt ?? ""} className="w-full rounded-lg object-cover max-h-48" />
-          ) : null}
-          <label className="flex items-center justify-center w-full h-11 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors text-sm text-muted-foreground">
-            {uploadingIndex === i ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : b.url ? (
-              "Bild ersetzen"
-            ) : (
-              "Bild hochladen"
-            )}
-            <input
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={(e) => handleBlockImage(i, e)}
-              disabled={uploadingIndex === i}
+        {b.type === "image" && (
+          <div className="flex flex-col gap-[9px]">
+            {b.url ? (
+              <img
+                src={b.url}
+                alt={b.alt ?? ""}
+                className="h-[120px] w-full rounded-[11px] border border-[hsl(0_0%_15%)] object-cover"
+              />
+            ) : null}
+            <div className="flex flex-wrap items-center gap-[9px]">
+              <label className="inline-flex h-8 flex-none cursor-pointer items-center gap-1.5 rounded-lg border border-[hsl(0_0%_16%)] bg-white/5 px-3 text-xs font-bold text-[hsl(0_0%_82%)] transition-colors hover:border-primary/40 hover:text-primary">
+                {uploadingIndex === i ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <>
+                    <Upload className="h-3 w-3" />
+                    {b.url ? "Bild ersetzen" : "Bild hochladen"}
+                  </>
+                )}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => handleBlockImage(i, e)}
+                  disabled={uploadingIndex === i}
+                />
+              </label>
+              <Input
+                value={b.alt ?? ""}
+                onChange={(e) => updateBlock(i, { alt: e.target.value })}
+                placeholder="Alt-Text (optional)"
+                className="h-8 min-w-[130px] flex-1 rounded-lg border-[hsl(0_0%_16%)] bg-white/5 text-xs"
+              />
+            </div>
+          </div>
+        )}
+
+        {b.type === "button" && (
+          <div className="flex flex-wrap gap-[9px]">
+            <Input
+              value={b.label}
+              onChange={(e) => updateBlock(i, { label: e.target.value })}
+              placeholder="Button-Text"
+              className={`min-w-[130px] flex-1 ${FIELD_INPUT}`}
             />
-          </label>
-          <Input
-            value={b.alt ?? ""}
-            onChange={(e) => updateBlock(i, { alt: e.target.value })}
-            placeholder="Alt-Text (optional)"
-          />
-        </div>
-      )}
+            <Input
+              value={b.url}
+              onChange={(e) => updateBlock(i, { url: e.target.value })}
+              placeholder="https://…"
+              className="h-[38px] min-w-[150px] flex-1 rounded-[10px] border-[hsl(0_0%_16%)] bg-white/5 font-mono text-xs"
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
 
-      {b.type === "button" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <Input
-            value={b.label}
-            onChange={(e) => updateBlock(i, { label: e.target.value })}
-            placeholder="Button-Text"
-          />
-          <Input
-            value={b.url}
-            onChange={(e) => updateBlock(i, { url: e.target.value })}
-            placeholder="https://…"
-          />
-        </div>
-      )}
-    </div>
-  );
+  const kpis = [
+    { label: "Bestätigte Abonnenten", value: counts.confirmed, icon: MailCheck, color: "text-primary" },
+    { label: "Ausstehende Bestätigung", value: counts.pending, icon: Clock, color: "text-[#FFC44D]" },
+    { label: "Abgemeldet", value: counts.unsubscribed, icon: MailX, color: "text-[#FF6B6B]" },
+  ];
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-start justify-between flex-wrap gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Send className="h-6 w-6 text-primary" />
-              Newsletter
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Komponiere den PADEL2GO-Newsletter und versende ihn an bestätigte Abonnenten.
-            </p>
-          </div>
-          <Button variant="outline" onClick={resetEditor}>
-            <FilePlus2 className="h-4 w-4 mr-2" />
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        {/* Kopfzeile */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Komponiere den PADEL2GO-Newsletter und versende ihn an bestätigte Abonnenten.
+          </p>
+          <Button
+            variant="outline"
+            onClick={resetEditor}
+            className="h-9 gap-[7px] rounded-[10px] border-[hsl(0_0%_16%)] bg-white/5 px-3.5 text-[12.5px] font-bold text-[hsl(0_0%_85%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
+          >
+            <FilePlus2 className="h-3.5 w-3.5" />
             Neuer Entwurf
           </Button>
         </div>
 
-        {/* Subscriber counts */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Card className="border-border">
-            <CardContent className="flex items-center gap-3 pt-5 pb-4">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+        {/* Abonnenten-KPIs */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(200px,100%),1fr))] gap-3.5">
+          {kpis.map((k) => (
+            <Card key={k.label} className="rounded-2xl border-border bg-gradient-card p-5">
+              <div className="flex flex-col gap-2.5">
+                <div className="flex items-center justify-between gap-2.5">
+                  <span className="text-[12.5px] font-semibold text-[hsl(0_0%_72%)]">{k.label}</span>
+                  <k.icon className={`h-[15px] w-[15px] flex-none ${k.color}`} />
+                </div>
+                <span className={`font-mono text-[27px] font-bold leading-none ${k.color}`}>
+                  {k.value.toLocaleString("de-DE")}
+                </span>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-foreground">{counts.confirmed}</div>
-                <div className="text-xs text-muted-foreground">Bestätigte Abonnenten</div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border">
-            <CardContent className="flex items-center gap-3 pt-5 pb-4">
-              <div className="p-2 rounded-lg bg-amber-500/10">
-                <Clock className="h-5 w-5 text-amber-600" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-foreground">{counts.pending}</div>
-                <div className="text-xs text-muted-foreground">Ausstehende Bestätigung</div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border">
-            <CardContent className="flex items-center gap-3 pt-5 pb-4">
-              <div className="p-2 rounded-lg bg-red-500/10">
-                <MailX className="h-5 w-5 text-red-500" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-foreground">{counts.unsubscribed}</div>
-                <div className="text-xs text-muted-foreground">Abgemeldet</div>
-              </div>
-            </CardContent>
-          </Card>
+            </Card>
+          ))}
         </div>
 
-        {/* Composer + Preview */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Composer */}
-          <Card className="border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Inhalt</CardTitle>
-              <CardDescription>
-                {campaignId ? "Bestehenden Entwurf bearbeiten" : "Neuen Entwurf komponieren"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 border-t border-border/50 pt-4">
-              <div className="space-y-1">
-                <Label className="text-sm">Betreff</Label>
-                <Input
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Betreff der E-Mail"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-sm">Vorschautext (Preheader)</Label>
-                <Input
-                  value={preheader}
-                  onChange={(e) => setPreheader(e.target.value)}
-                  placeholder="Kurzer Text, der in der Inbox-Vorschau erscheint"
-                />
-              </div>
+        {/* Editor + Vorschau/Verlauf */}
+        <div className="grid grid-cols-1 items-start gap-[18px] xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+          {/* Editor + Aktionen */}
+          <div className="flex min-w-0 flex-col gap-[18px]">
+            <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-display text-base font-bold tracking-tight text-foreground">Inhalt</span>
+                  <span className="text-[12.5px] text-muted-foreground">
+                    {campaignId ? "Bestehenden Entwurf bearbeiten" : "Neuen Entwurf komponieren"}
+                  </span>
+                </div>
 
-              <div className="space-y-3">
-                <Label className="text-sm">Blöcke</Label>
-                {blocks.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    Noch keine Blöcke — füge unten Inhalte hinzu.
-                  </p>
-                )}
-                {blocks.map((b, i) => renderEditor(b, i))}
-              </div>
+                <div className="flex flex-col gap-[7px]">
+                  <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Betreff<span className="text-primary"> *</span>
+                  </Label>
+                  <Input
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    placeholder="Betreff der E-Mail"
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]"
+                  />
+                </div>
+                <div className="flex flex-col gap-[7px]">
+                  <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Vorschautext (Preheader)
+                  </Label>
+                  <Input
+                    value={preheader}
+                    onChange={(e) => setPreheader(e.target.value)}
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]"
+                  />
+                  <span className="text-[11.5px] text-muted-foreground">
+                    Kurzer Text, der in der Inbox-Vorschau erscheint.
+                  </span>
+                </div>
 
-              <div className="flex flex-wrap gap-2 pt-1">
-                <Button variant="outline" size="sm" onClick={() => addBlock({ type: "heading", text: "" })}>
-                  <HeadingIcon className="h-4 w-4 mr-1.5" /> Überschrift
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => addBlock({ type: "text", text: "" })}>
-                  <Type className="h-4 w-4 mr-1.5" /> Text
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => addBlock({ type: "image", url: "", alt: "" })}>
-                  <ImageIcon className="h-4 w-4 mr-1.5" /> Bild
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => addBlock({ type: "button", label: "", url: "" })}
-                >
-                  <MousePointerClick className="h-4 w-4 mr-1.5" /> Button
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Preview */}
-          <Card className="border-border">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Live-Vorschau</CardTitle>
-              <CardDescription>So sieht der Newsletter im Postfach aus</CardDescription>
-            </CardHeader>
-            <CardContent className="border-t border-border/50 pt-4">
-              <iframe
-                title="Vorschau"
-                srcDoc={previewHtml}
-                sandbox=""
-                className="w-full h-[600px] rounded-xl border border-border bg-black"
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Actions */}
-        <Card className="border-border">
-          <CardContent className="flex flex-wrap gap-3 pt-5 pb-5">
-            <Button onClick={saveDraft} disabled={busy} variant="outline">
-              {savingDraft ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-              Entwurf speichern
-            </Button>
-            <Button onClick={sendTest} disabled={busy} variant="secondary">
-              {testing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
-              Test an mich
-            </Button>
-            <Button onClick={launch} disabled={busy}>
-              {sending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
-              An alle senden
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Campaign history */}
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Verlauf</CardTitle>
-            <CardDescription>Zuletzt erstellte Kampagnen</CardDescription>
-          </CardHeader>
-          <CardContent className="border-t border-border/50 pt-4">
-            {campaigns.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Noch keine Kampagnen.</p>
-            ) : (
-              <div className="space-y-2">
-                {campaigns.map((c) => (
-                  <div
-                    key={c.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-secondary/20 px-3 py-2.5 flex-wrap"
-                  >
-                    <div className="min-w-0">
-                      <div className="font-medium text-foreground truncate">{c.subject || "(kein Betreff)"}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {c.sent_count}/{c.recipient_count} gesendet
-                        {c.failed_count > 0 && ` · ${c.failed_count} fehlgeschlagen`}
-                        {c.sent_at && ` · ${new Date(c.sent_at).toLocaleString("de-DE")}`}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={STATUS_BADGE[c.status] ?? STATUS_BADGE.draft}>
-                        {c.status}
-                      </Badge>
-                      {c.status === "sending" && (
-                        <Button variant="ghost" size="sm" onClick={() => resetCampaign(c.id)}>
-                          <RotateCcw className="h-4 w-4 mr-1.5" /> Zurücksetzen
-                        </Button>
-                      )}
-                      {c.status === "draft" && (
-                        <Button variant="ghost" size="sm" onClick={() => editCampaign(c)}>
-                          <Pencil className="h-4 w-4 mr-1.5" /> Bearbeiten
-                        </Button>
-                      )}
+                <div className="flex flex-col gap-[11px] border-t border-[hsl(0_0%_12%)] pt-3.5">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Blöcke
+                    </span>
+                    <div className="flex flex-wrap gap-[7px]">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addBlock({ type: "heading", text: "" })}
+                        className="h-[30px] gap-1.5 rounded-lg border-primary/30 bg-primary/[0.09] px-[11px] text-[11.5px] font-bold text-primary hover:bg-primary/[0.18] hover:text-primary"
+                      >
+                        <Heading2 className="h-3 w-3" /> Überschrift
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addBlock({ type: "text", text: "" })}
+                        className="h-[30px] gap-1.5 rounded-lg border-primary/30 bg-primary/[0.09] px-[11px] text-[11.5px] font-bold text-primary hover:bg-primary/[0.18] hover:text-primary"
+                      >
+                        <AlignLeft className="h-3 w-3" /> Text
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addBlock({ type: "image", url: "", alt: "" })}
+                        className="h-[30px] gap-1.5 rounded-lg border-primary/30 bg-primary/[0.09] px-[11px] text-[11.5px] font-bold text-primary hover:bg-primary/[0.18] hover:text-primary"
+                      >
+                        <ImageIcon className="h-3 w-3" /> Bild
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addBlock({ type: "button", label: "", url: "" })}
+                        className="h-[30px] gap-1.5 rounded-lg border-primary/30 bg-primary/[0.09] px-[11px] text-[11.5px] font-bold text-primary hover:bg-primary/[0.18] hover:text-primary"
+                      >
+                        <MousePointerClick className="h-3 w-3" /> Button
+                      </Button>
                     </div>
                   </div>
-                ))}
+
+                  {blocks.length === 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Noch keine Blöcke — füge oben Inhalte hinzu.
+                    </p>
+                  )}
+                  {blocks.length > 0 && (
+                    <div className="flex flex-col gap-2.5">{blocks.map((b, i) => renderEditor(b, i))}</div>
+                  )}
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </Card>
+
+            {/* Aktionen */}
+            <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+              <div className="flex flex-wrap gap-2.5">
+                <Button
+                  onClick={saveDraft}
+                  disabled={busy}
+                  variant="outline"
+                  className="h-11 min-w-[150px] flex-1 gap-2 rounded-xl border-[hsl(0_0%_16%)] bg-white/5 text-[13.5px] font-bold text-[hsl(0_0%_85%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
+                >
+                  {savingDraft ? (
+                    <Loader2 className="h-[15px] w-[15px] animate-spin" />
+                  ) : (
+                    <Save className="h-[15px] w-[15px]" />
+                  )}
+                  Entwurf speichern
+                </Button>
+                <Button
+                  onClick={sendTest}
+                  disabled={busy}
+                  variant="secondary"
+                  className="h-11 min-w-[150px] flex-1 gap-2 rounded-xl border border-[hsl(200_100%_75%/0.3)] bg-[hsl(200_100%_75%/0.08)] text-[13.5px] font-bold text-[#7FD4FF] hover:bg-[hsl(200_100%_75%/0.16)]"
+                >
+                  {testing ? (
+                    <Loader2 className="h-[15px] w-[15px] animate-spin" />
+                  ) : (
+                    <MailCheck className="h-[15px] w-[15px]" />
+                  )}
+                  Test an mich
+                </Button>
+                <Button
+                  onClick={launch}
+                  disabled={busy}
+                  className="h-11 min-w-[150px] flex-1 gap-2 rounded-xl bg-gradient-lime text-[13.5px] font-bold text-primary-foreground shadow-[0_0_24px_hsl(71_91%_51%/0.28)] transition-opacity hover:opacity-90"
+                >
+                  {sending ? (
+                    <Loader2 className="h-[15px] w-[15px] animate-spin" />
+                  ) : (
+                    <Send className="h-[15px] w-[15px]" />
+                  )}
+                  An alle senden
+                </Button>
+              </div>
+            </Card>
+          </div>
+
+          {/* Vorschau + Verlauf */}
+          <div className="flex min-w-0 flex-col gap-[18px]">
+            <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+              <div className="flex flex-col gap-3.5">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-display text-base font-bold tracking-tight text-foreground">
+                    Live-Vorschau
+                  </span>
+                  <span className="text-[12.5px] text-muted-foreground">
+                    So sieht der Newsletter im Postfach aus
+                  </span>
+                </div>
+                <iframe
+                  title="Vorschau"
+                  srcDoc={previewHtml}
+                  sandbox=""
+                  className="h-[600px] w-full rounded-[15px] border border-[hsl(0_0%_15%)] bg-black"
+                />
+              </div>
+            </Card>
+
+            <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+              <div className="flex flex-col gap-3.5">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-display text-base font-bold tracking-tight text-foreground">Verlauf</span>
+                  <span className="text-[12.5px] text-muted-foreground">Zuletzt erstellte Kampagnen</span>
+                </div>
+                {campaigns.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Noch keine Kampagnen.</p>
+                ) : (
+                  <div className="flex flex-col gap-[9px]">
+                    {campaigns.map((c) => (
+                      <div
+                        key={c.id}
+                        className="flex flex-wrap items-center gap-3 rounded-xl border border-[hsl(0_0%_12%)] bg-white/[0.03] px-[13px] py-3"
+                      >
+                        <div className="flex min-w-[160px] flex-1 flex-col gap-[3px]">
+                          <span className="truncate text-[13px] font-semibold text-foreground">
+                            {c.subject || "(kein Betreff)"}
+                          </span>
+                          <span className="font-mono text-[10.5px] text-muted-foreground">
+                            {c.sent_count}/{c.recipient_count} gesendet
+                            {c.failed_count > 0 && ` · ${c.failed_count} fehlgeschlagen`}
+                            {c.sent_at && ` · ${new Date(c.sent_at).toLocaleString("de-DE")}`}
+                          </span>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={`flex-none gap-[7px] whitespace-nowrap rounded-full px-2.5 py-1 font-mono text-[10px] font-normal uppercase tracking-[0.1em] ${STATUS_BADGE[c.status] ?? STATUS_BADGE.draft}`}
+                        >
+                          {STATUS_LABEL[c.status] ?? c.status}
+                        </Badge>
+                        {c.status === "sending" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => resetCampaign(c.id)}
+                            className="h-7 flex-none gap-1.5 rounded-lg border border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.09)] px-[11px] text-[11.5px] font-bold text-[#FFC44D] hover:bg-[hsl(41_100%_65%/0.18)] hover:text-[#FFC44D]"
+                          >
+                            <RotateCcw className="h-3 w-3" /> Zurücksetzen
+                          </Button>
+                        )}
+                        {c.status === "draft" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => editCampaign(c)}
+                            className="h-7 flex-none gap-1.5 rounded-lg border border-[hsl(0_0%_16%)] bg-white/5 px-[11px] text-[11.5px] font-bold text-[hsl(0_0%_82%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
+                          >
+                            <Pencil className="h-3 w-3" /> Bearbeiten
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );

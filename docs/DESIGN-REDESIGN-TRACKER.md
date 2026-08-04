@@ -603,25 +603,51 @@ Masken:
 
 > **Umgesetzt 2026-08-04** aus `Admin 09 P2G Points.dc.html` (Seiten-Datei: Tabs, Punktewert- + Payback-Karten).
 
-### ⬜ AdminUsers — `/admin/users`
+### ✅ AdminColors — `/admin/farben`
+`src/pages/admin/AdminColors.tsx` · Section-Akzentfarben für App & Web pflegen _(nachträglich ergänzt — fehlte im ursprünglichen Scan)_
+
+Masken:
+- [x] Kopf mit Sofort-live-Badge
+- [x] 7 Section-Farbkarten (Farbkreis, Swatches, Hex-Input, Standard-Reset)
+- [x] News-Topics-Karte (festes Farbsystem, echte TOPIC_COLORS)
+
+> **Umgesetzt 2026-08-04** aus `Admin 17 Farben.dc.html`. Backend-Hinweis: Speichern nutzt `update` ohne Upsert — fehlt die `site_visuals`-Zeile für einen Key, geht das Speichern still verloren.
+
+### ✅ AdminUsers — `/admin/users`
 `src/pages/admin/AdminUsers.tsx` · Vollständige Benutzerverwaltung mit Detailansicht und Löschung
 
 Masken:
-- [ ] Kopfzeile mit Suche und Benutzerliste-Tabelle
-- [ ] Paginierung und Empty-/Loading-State der Liste
-- [ ] Benutzer-Detail-Dialog mit Tabs (Übersicht, Matches, Buchungen, Wallet)
-- [ ] Rollen-Dropdown-Menü
-- [ ] Lösch-Bestätigungsdialog mit DELETE-Eingabe
+- [x] Kopfzeile mit Suche und Benutzerliste-Tabelle
+- [x] Paginierung und Empty-/Loading-State der Liste
+- [x] Benutzer-Detail-Dialog mit Tabs (Übersicht, Matches, Buchungen, Wallet)
+- [x] Rollen-Dropdown-Menü
+- [x] Lösch-Bestätigungsdialog mit DELETE-Eingabe
 
-### ⬜ AdminNotifications — `/admin/notifications`
+> **Umgesetzt 2026-08-04** aus `Admin 18 Benutzer.dc.html` (Liste, Detail-Dialog mit 4 Tabs, DELETE-Bestätigungs-Dialog). Nebenbei behoben: invalides nested-`<p>` im Lösch-Dialog; Übersicht-KPIs waren auf Mobile gebrochen (fix grid-cols-4 → auto-fit).
+
+### ✅ AdminNotifications — `/admin/notifications`
 `src/pages/admin/AdminNotifications.tsx` · Broadcast-Mitteilungen erstellen, versenden und verwalten
 
 Masken:
-- [ ] Formular Neue Mitteilung erstellen
-- [ ] Empfänger-Auswahl (RadioGroup + Benutzer-Popover-Suche)
-- [ ] Verlaufstabelle gesendeter Mitteilungen
-- [ ] Mitteilung-Bearbeiten-Dialog
-- [ ] Lösch-Bestätigungsdialog
+- [x] Formular Neue Mitteilung erstellen
+- [x] Empfänger-Auswahl (RadioGroup + Benutzer-Popover-Suche)
+- [x] Verlaufstabelle gesendeter Mitteilungen
+- [x] Mitteilung-Bearbeiten-Dialog
+- [x] Lösch-Bestätigungsdialog
+
+> **Umgesetzt 2026-08-04** aus `Admin 19 Mitteilungen.dc.html`. Backend-Wiring offen: Empfängerkreis-Infobox im Edit-Dialog. Perf-Hinweis: Benutzersuche lädt ALLE Profile in den Client (besser serverseitig `ilike` + Limit).
+
+### ✅ AdminNewsletter — `/admin/newsletter`
+`src/pages/admin/AdminNewsletter.tsx` · Newsletter-Editor mit Blöcken, Vorschau und Versand _(nachträglich ergänzt — fehlte im ursprünglichen Scan)_
+
+Masken:
+- [x] KPI-Karten (Bestätigt/Ausstehend/Abgemeldet)
+- [x] Block-Editor (Überschrift/Text/Bild/Button)
+- [x] Aktionen (Entwurf/Test/Senden)
+- [x] Live-Vorschau (iframe)
+- [x] Kampagnen-Verlauf mit Status-Pills
+
+> **Umgesetzt 2026-08-04** aus `Admin 20 Newsletter.dc.html`. Offen: Send-Bestätigung ist `window.confirm` ohne Empfängerzahl → gestyltes AlertDialog mit `counts.confirmed`. Hinweis: Vorschau-Abmeldelink ist `href="#"` — echte Mails haben den echten Link (nur Vorschau-Ungenauigkeit).
 
 ### ⬜ AdminAnalytics — `/admin/analytics`
 `src/pages/admin/AdminAnalytics.tsx` · Statistik-Dashboard mit vier Diagrammen

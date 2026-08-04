@@ -39,6 +39,11 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 15. **AdminNews:** DnD-Index basiert auf `visibleList`, Reihenfolge auf `list` — nur korrekt, weil DnD bei aktivem Filter gesperrt ist (fragil). Doppelte Cover-Vorschau im Dialog. Nebenbei behoben: Filter-Chips verschwanden bei 0 Treffern — Filter war nicht mehr zurücksetzbar.
 16. **AdminQrPanel:** `accept="application/pdf,image/*"` erlaubt browserseitig GIF/SVG, die Validierung lehnt erst nach Auswahl ab → `accept` enger fassen.
 
+17. **AdminColors:** Speichern nutzt `update` ohne Upsert — fehlt die `site_visuals`-Zeile für einen `app.theme.*`-Key, meldet die UI Erfolg, gespeichert wird nichts (0 rows affected). → Upsert.
+18. **AdminNotifications:** Benutzersuche lädt ALLE Profile ungefiltert in den Client — bei wachsender Nutzerbasis serverseitig suchen (`ilike` + Limit). Kein Detail-View für gesendete Mitteilungen (Text/CTA nur über Edit-Dialog einsehbar). `updated_at` existiert, wird nirgends angezeigt.
+19. **AdminNewsletter:** `resetCampaign()` ohne Bestätigung/Guard — Zurücksetzen + erneutes Senden könnte Doppelversand auslösen (Edge-Function-Dedupe prüfen). `editCampaign()` ohne catch (Ladefehler still). Send-Bestätigung nennt die Empfängerzahl nicht. Vorschau-Abmeldelink `href="#"` (echte Mails haben den echten Link — nur Vorschau ungenau). Idee: gesendete Kampagnen als Vorlage duplizieren.
+20. **AdminUsers:** Nebenbei behoben: nested-`<p>` im Lösch-Dialog + mobile-gebrochenes KPI-Grid. Offen: Detail-Dialog ohne `DialogDescription` (Radix-a11y-Warnung).
+
 ## Backend-Wiring offen (Design zeigt es, Seite hat kein Gegenstück)
 
 - **Sidebar:** Live-Counts an „Buchungen" und „Marketplace" (Design-Dummies weggelassen)
