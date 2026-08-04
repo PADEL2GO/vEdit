@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, CheckCircle2, XCircle, Eye, EyeOff, Save, Plug } from "lucide-react";
+import {
+  Loader2, Eye, EyeOff, Save, CreditCard, Mail, Sparkles, Languages, Globe, Wallet, ShieldCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -64,46 +65,56 @@ const isMasked = (v: unknown): boolean =>
 
 function StatusBadge({ configured }: { configured: boolean }) {
   return configured ? (
-    <Badge className="bg-green-500/15 text-green-600 border-green-500/30 gap-1">
-      <CheckCircle2 className="w-3 h-3" /> Verbunden
-    </Badge>
+    <span className="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[10.5px] font-bold text-primary">
+      <span className="h-[5px] w-[5px] rounded-full bg-primary" />
+      Verbunden
+    </span>
   ) : (
-    <Badge className="bg-red-500/15 text-red-500 border-red-500/30 gap-1">
-      <XCircle className="w-3 h-3" /> Nicht konfiguriert
-    </Badge>
+    <span className="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-full border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] px-2.5 py-1 text-[10.5px] font-bold text-[#FF6B6B]">
+      <span className="h-[5px] w-[5px] rounded-full bg-[#FF6B6B]" />
+      Nicht konfiguriert
+    </span>
   );
 }
 
 function SecretInput({
-  label, value, onChange, placeholder, hint,
+  label, value, onChange, placeholder, hint, warnHint,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   hint?: string;
+  warnHint?: boolean;
 }) {
   const [show, setShow] = useState(false);
   return (
-    <div className="space-y-1">
-      <Label className="text-sm">{label}</Label>
-      <div className="relative">
+    <div className="flex flex-col gap-[7px]">
+      <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+        {label}
+        <span className="tracking-[0.06em] text-muted-foreground/60"> · geheim</span>
+      </Label>
+      <div className="relative flex items-center">
         <Input
           type={show ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder ?? "Beim Speichern neu eingeben"}
-          className="pr-10 font-mono text-sm"
+          className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] pr-11 font-mono text-[13px]"
         />
         <button
           type="button"
           onClick={() => setShow(!show)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          className="absolute right-2 flex h-[26px] w-[26px] items-center justify-center rounded-[7px] text-muted-foreground transition-colors hover:text-primary"
         >
-          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          {show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
         </button>
       </div>
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {hint && (
+        <p className={`text-[11px] leading-[1.45] ${warnHint ? "text-[#FFC44D]" : "text-muted-foreground"}`}>
+          {hint}
+        </p>
+      )}
     </div>
   );
 }
@@ -274,74 +285,76 @@ export default function AdminIntegrations() {
     );
   }
 
+  const saveButtonClass =
+    "h-10 self-start rounded-[11px] bg-gradient-lime px-[18px] text-[13px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition hover:brightness-110";
+  const fieldLabelClass = "font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground";
+  const fieldInputClass = "h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]";
+  const fieldHintClass = "text-[11px] leading-[1.45] text-muted-foreground";
+  const selectTriggerClass = "h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold";
+
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Plug className="h-6 w-6 text-primary" />
-            Integrationen
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Verwalte alle externen Dienste und API-Verbindungen. Geheime Schlüssel werden serverseitig gespeichert
-            und sind nach dem Speichern im Browser nicht mehr lesbar.
-          </p>
-        </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <p className="max-w-[720px] text-sm text-muted-foreground">
+          API-Schlüssel und Konfiguration aller externen Dienste. Geheime Schlüssel werden serverseitig
+          gespeichert und sind nach dem Speichern im Browser nicht mehr lesbar.
+        </p>
 
-        {/* ── Stripe ─────────────────────────────────────────────────────── */}
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#635bff]/10 flex items-center justify-center text-lg font-bold text-[#635bff]">S</div>
-                <div>
-                  <CardTitle className="text-lg">Stripe</CardTitle>
-                  <CardDescription>Zahlungsabwicklung für Courtbuchungen</CardDescription>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(400px,100%),1fr))] items-start gap-[18px]">
+          {/* ── Stripe ─────────────────────────────────────────────────────── */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3.5">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[11px] border border-[hsl(200_100%_75%/0.3)] bg-[hsl(200_100%_75%/0.1)] text-[#7FD4FF]">
+                    <CreditCard className="h-[17px] w-[17px]" />
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="font-display text-base font-bold tracking-tight text-foreground">Stripe</span>
+                    <span className="text-xs leading-snug text-muted-foreground">Zahlungsabwicklung für Courtbuchungen</span>
+                  </div>
+                </div>
+                <StatusBadge configured={stripe.has_secret_key && stripe.has_webhook_secret} />
+              </div>
+              <div className="flex flex-col gap-[13px]">
+                <SecretInput
+                  label="Secret Key"
+                  value={stripe.secret_key}
+                  onChange={(v) => setStripe(p => ({ ...p, secret_key: v }))}
+                  hint={stripe.has_secret_key ? "Schlüssel hinterlegt — beim Speichern neu eingeben, sonst wird er entfernt" : "sk_live_... oder sk_test_..."}
+                  warnHint={stripe.has_secret_key}
+                />
+                <SecretInput
+                  label="Webhook Secret"
+                  value={stripe.webhook_secret}
+                  onChange={(v) => setStripe(p => ({ ...p, webhook_secret: v }))}
+                  hint={stripe.has_webhook_secret ? "Secret hinterlegt — beim Speichern neu eingeben, sonst wird es entfernt" : "whsec_..."}
+                  warnHint={stripe.has_webhook_secret}
+                />
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>
+                    Publishable Key <span className="tracking-[0.06em] text-muted-foreground/60">(öffentlich)</span>
+                  </Label>
+                  <Input
+                    value={stripe.publishable_key}
+                    onChange={(e) => setStripe(p => ({ ...p, publishable_key: e.target.value }))}
+                    placeholder="pk_live_... oder pk_test_..."
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-[13px]"
+                  />
+                </div>
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>Modus</Label>
+                  <Select value={stripe.mode} onValueChange={(v) => setStripe(p => ({ ...p, mode: v }))}>
+                    <SelectTrigger className={selectTriggerClass}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="test">Test (Testmodus)</SelectItem>
+                      <SelectItem value="live">Live (Echtbetrieb)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <StatusBadge configured={stripe.has_secret_key && stripe.has_webhook_secret} />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-2 border-t border-border/50">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <SecretInput
-                label="Secret Key"
-                value={stripe.secret_key}
-                onChange={(v) => setStripe(p => ({ ...p, secret_key: v }))}
-                hint={stripe.has_secret_key ? "Schlüssel hinterlegt — beim Speichern neu eingeben, sonst wird er entfernt" : "sk_live_... oder sk_test_..."}
-              />
-              <SecretInput
-                label="Webhook Secret"
-                value={stripe.webhook_secret}
-                onChange={(v) => setStripe(p => ({ ...p, webhook_secret: v }))}
-                hint={stripe.has_webhook_secret ? "Secret hinterlegt — beim Speichern neu eingeben, sonst wird es entfernt" : "whsec_..."}
-              />
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label className="text-sm">Publishable Key <span className="text-muted-foreground">(öffentlich)</span></Label>
-                <Input
-                  value={stripe.publishable_key}
-                  onChange={(e) => setStripe(p => ({ ...p, publishable_key: e.target.value }))}
-                  placeholder="pk_live_... oder pk_test_..."
-                  className="font-mono text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-sm">Modus</Label>
-                <Select value={stripe.mode} onValueChange={(v) => setStripe(p => ({ ...p, mode: v }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="test">Test (Testmodus)</SelectItem>
-                    <SelectItem value="live">Live (Echtbetrieb)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex justify-end pt-1">
               <Button
                 onClick={() => save("stripe", {
                   secret_key: stripe.secret_key,
@@ -350,249 +363,254 @@ export default function AdminIntegrations() {
                   mode: stripe.mode,
                 })}
                 disabled={saving === "stripe"}
-                size="sm"
+                className={saveButtonClass}
               >
                 {saving === "stripe" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                 Speichern
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </Card>
 
-        {/* ── Resend ─────────────────────────────────────────────────────── */}
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-lg font-bold text-blue-500">R</div>
-                <div>
-                  <CardTitle className="text-lg">Resend</CardTitle>
-                  <CardDescription>Buchungsbestätigungen, Einladungen und Kontaktmails</CardDescription>
+          {/* ── Resend ─────────────────────────────────────────────────────── */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3.5">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[11px] border border-primary/30 bg-primary/10 text-primary">
+                    <Mail className="h-[17px] w-[17px]" />
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="font-display text-base font-bold tracking-tight text-foreground">Resend</span>
+                    <span className="text-xs leading-snug text-muted-foreground">Buchungsbestätigungen, Einladungen und Kontaktmails</span>
+                  </div>
+                </div>
+                <StatusBadge configured={resendState.has_api_key} />
+              </div>
+              <div className="flex flex-col gap-[13px]">
+                <SecretInput
+                  label="API Key"
+                  value={resendState.api_key}
+                  onChange={(v) => setResendState(p => ({ ...p, api_key: v }))}
+                  hint={resendState.has_api_key ? "••• API-Key hinterlegt" : "re_..."}
+                />
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>Absender-E-Mail</Label>
+                  <Input
+                    value={resendState.from_email}
+                    onChange={(e) => setResendState(p => ({ ...p, from_email: e.target.value }))}
+                    placeholder="info@padel2go-official.de"
+                    type="email"
+                    className={fieldInputClass}
+                  />
+                  <p className={fieldHintClass}>
+                    Versand läuft zentral über <strong className="font-semibold text-foreground">info@padel2go-official.de</strong>{" "}
+                    (in Resend verifizierte Domain, Kunden können direkt antworten). Nur den API-Key eintragen genügt.
+                  </p>
                 </div>
               </div>
-              <StatusBadge configured={resendState.has_api_key} />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-2 border-t border-border/50">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <SecretInput
-                label="API Key"
-                value={resendState.api_key}
-                onChange={(v) => setResendState(p => ({ ...p, api_key: v }))}
-                hint={resendState.has_api_key ? "••• API-Key hinterlegt" : "re_..."}
-              />
-              <div className="space-y-1">
-                <Label className="text-sm">Absender-E-Mail</Label>
-                <Input
-                  value={resendState.from_email}
-                  onChange={(e) => setResendState(p => ({ ...p, from_email: e.target.value }))}
-                  placeholder="info@padel2go-official.de"
-                  type="email"
-                  className="text-sm"
-                />
-                <p className="text-xs text-muted-foreground">Versand läuft zentral über <strong>info@padel2go-official.de</strong> (in Resend verifizierte Domain, Kunden können direkt antworten). Nur den API-Key eintragen genügt.</p>
-              </div>
-            </div>
-            <div className="flex justify-end pt-1">
               <Button
                 onClick={() => save("resend", {
                   api_key: resendState.api_key,
                   from_email: resendState.from_email,
                 })}
                 disabled={saving === "resend"}
-                size="sm"
+                className={saveButtonClass}
               >
                 {saving === "resend" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                 Speichern
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </Card>
 
-        {/* ── App-Konfiguration ───────────────────────────────────────────── */}
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-lg font-bold text-primary">P</div>
-                <div>
-                  <CardTitle className="text-lg">App-Konfiguration</CardTitle>
-                  <CardDescription>Basis-URL und allgemeine Einstellungen</CardDescription>
+          {/* ── Anthropic (KI) ─────────────────────────────────────────────── */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3.5">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[11px] border border-[hsl(263_100%_82%/0.3)] bg-[hsl(263_100%_82%/0.1)] text-[#C7A6FF]">
+                    <Sparkles className="h-[17px] w-[17px]" />
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="font-display text-base font-bold tracking-tight text-foreground">Anthropic (KI)</span>
+                    <span className="text-xs leading-snug text-muted-foreground">KI-Texterstellung für News-Artikel (Voice-In im News-Editor)</span>
+                  </div>
                 </div>
+                <StatusBadge configured={anthropicState.has_api_key} />
               </div>
-              <StatusBadge configured={!!appState.url} />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-2 border-t border-border/50">
-            <div className="space-y-1">
-              <Label className="text-sm">App URL</Label>
-              <Input
-                value={appState.url}
-                onChange={(e) => setAppState({ url: e.target.value })}
-                placeholder="https://padel2go.de"
-                type="url"
-                className="text-sm"
-              />
-              <p className="text-xs text-muted-foreground">Wird für Weiterleitungen nach der Zahlung und in E-Mails verwendet.</p>
-            </div>
-            <div className="flex justify-end pt-1">
-              <Button
-                onClick={() => save("app", { url: appState.url })}
-                disabled={saving === "app"}
-                size="sm"
-              >
-                {saving === "app" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                Speichern
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* ── Anthropic (KI) ─────────────────────────────────────────────── */}
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-lg font-bold text-orange-500">A</div>
-                <div>
-                  <CardTitle className="text-lg">Anthropic (KI)</CardTitle>
-                  <CardDescription>KI-Texterstellung für News-Artikel (Voice-In im News-Editor)</CardDescription>
-                </div>
+              <div className="flex flex-col gap-[13px]">
+                <SecretInput
+                  label="API Key"
+                  value={anthropicState.api_key}
+                  onChange={(v) => setAnthropicState((p) => ({ ...p, api_key: v }))}
+                  hint={anthropicState.has_api_key ? "••• API-Key hinterlegt" : "sk-ant-..."}
+                />
               </div>
-              <StatusBadge configured={anthropicState.has_api_key} />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-2 border-t border-border/50">
-            <SecretInput
-              label="API Key"
-              value={anthropicState.api_key}
-              onChange={(v) => setAnthropicState((p) => ({ ...p, api_key: v }))}
-              hint={anthropicState.has_api_key ? "••• API-Key hinterlegt" : "sk-ant-..."}
-            />
-            <div className="flex justify-end pt-1">
               <Button
                 onClick={() => save("anthropic", { api_key: anthropicState.api_key })}
                 disabled={saving === "anthropic"}
-                size="sm"
+                className={saveButtonClass}
               >
                 {saving === "anthropic" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                 Speichern
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </Card>
 
-        {/* ── DeepL (Auto-Translation) ───────────────────────────────────── */}
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#0F2B46]/10 flex items-center justify-center text-lg font-bold text-[#0F2B46] dark:text-white dark:bg-white/10">D</div>
-                <div>
-                  <CardTitle className="text-lg">DeepL</CardTitle>
-                  <CardDescription>Automatische DE→EN Übersetzung von Admin-Inhalten (Partner-Tiles, Vereine, Galerie, Touchpoints)</CardDescription>
+          {/* ── DeepL (Auto-Translation) ───────────────────────────────────── */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3.5">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[11px] border border-[hsl(200_100%_75%/0.3)] bg-[hsl(200_100%_75%/0.1)] text-[#7FD4FF]">
+                    <Languages className="h-[17px] w-[17px]" />
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="font-display text-base font-bold tracking-tight text-foreground">DeepL</span>
+                    <span className="text-xs leading-snug text-muted-foreground">Automatische DE→EN Übersetzung von Admin-Inhalten (Partner-Tiles, Vereine, Galerie, Touchpoints)</span>
+                  </div>
                 </div>
+                <StatusBadge configured={deeplState.has_api_key} />
               </div>
-              <StatusBadge configured={deeplState.has_api_key} />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-2 border-t border-border/50">
-            <SecretInput
-              label="API Key"
-              value={deeplState.api_key}
-              onChange={(v) => setDeeplState((p) => ({ ...p, api_key: v }))}
-              hint={deeplState.has_api_key ? "••• API-Key hinterlegt" : "z.B. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx (Free) oder ohne :fx (Pro)"}
-            />
-            <p className="text-xs text-muted-foreground">
-              Beim Speichern eines Inhalts im Admin (z.B. Partner-Tile, Verein, Touchpoint) wird der deutsche Text automatisch an DeepL geschickt und das Ergebnis in die EN-Felder geschrieben — solange die Felder nicht manuell gesperrt sind.
-            </p>
-            <div className="flex justify-end pt-1">
+              <div className="flex flex-col gap-[13px]">
+                <SecretInput
+                  label="API Key"
+                  value={deeplState.api_key}
+                  onChange={(v) => setDeeplState((p) => ({ ...p, api_key: v }))}
+                  hint={deeplState.has_api_key ? "••• API-Key hinterlegt" : "z.B. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:fx (Free) oder ohne :fx (Pro)"}
+                />
+                <p className={fieldHintClass}>
+                  Beim Speichern eines Inhalts im Admin (z.B. Partner-Tile, Verein, Touchpoint) wird der deutsche Text
+                  automatisch an DeepL geschickt und das Ergebnis in die EN-Felder geschrieben — solange die Felder nicht
+                  manuell gesperrt sind.
+                </p>
+              </div>
               <Button
                 onClick={() => save("deepl", { api_key: deeplState.api_key })}
                 disabled={saving === "deepl"}
-                size="sm"
+                className={saveButtonClass}
               >
                 {saving === "deepl" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                 Speichern
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </Card>
 
-        {/* ── PayPal (Coming Soon) ────────────────────────────────────────── */}
-        <Card className="border-border opacity-60">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#003087]/10 flex items-center justify-center text-lg font-bold text-[#003087]">P</div>
-                <div>
-                  <CardTitle className="text-lg">PayPal</CardTitle>
-                  <CardDescription>Alternative Zahlungsmethode</CardDescription>
+          {/* ── App-Konfiguration ───────────────────────────────────────────── */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3.5">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[11px] border border-[hsl(0_0%_18%)] bg-white/5 text-[hsl(0_0%_82%)]">
+                    <Globe className="h-[17px] w-[17px]" />
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <span className="font-display text-base font-bold tracking-tight text-foreground">App-Konfiguration</span>
+                    <span className="text-xs leading-snug text-muted-foreground">Basis-URL und allgemeine Einstellungen</span>
+                  </div>
+                </div>
+                <StatusBadge configured={!!appState.url} />
+              </div>
+              <div className="flex flex-col gap-[13px]">
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>App URL</Label>
+                  <Input
+                    value={appState.url}
+                    onChange={(e) => setAppState({ url: e.target.value })}
+                    placeholder="https://padel2go.de"
+                    type="url"
+                    className={fieldInputClass}
+                  />
+                  <p className={fieldHintClass}>Wird für Weiterleitungen nach der Zahlung und in E-Mails verwendet.</p>
                 </div>
               </div>
-              <Badge variant="outline" className="text-muted-foreground">Demnächst verfügbar</Badge>
+              <Button
+                onClick={() => save("app", { url: appState.url })}
+                disabled={saving === "app"}
+                className={saveButtonClass}
+              >
+                {saving === "app" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                Speichern
+              </Button>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-2 border-t border-border/50">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <SecretInput
-                label="Client ID"
-                value={paypal.client_id}
-                onChange={(v) => setPaypal(p => ({ ...p, client_id: v }))}
-                placeholder="Noch nicht verfügbar"
-              />
-              <SecretInput
-                label="Client Secret"
-                value={paypal.client_secret}
-                onChange={(v) => setPaypal(p => ({ ...p, client_secret: v }))}
-                placeholder="Noch nicht verfügbar"
-              />
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label className="text-sm">Modus</Label>
-                <Select value={paypal.mode} onValueChange={(v) => setPaypal(p => ({ ...p, mode: v }))} disabled>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sandbox">Sandbox (Test)</SelectItem>
-                    <SelectItem value="live">Live (Echtbetrieb)</SelectItem>
-                  </SelectContent>
-                </Select>
+          </Card>
+
+          {/* ── PayPal (Coming Soon) ────────────────────────────────────────── */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4 opacity-60">
+              <div className="flex flex-wrap items-start justify-between gap-3.5">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[11px] border border-[hsl(0_0%_18%)] bg-white/5 text-[hsl(0_0%_72%)]">
+                    <Wallet className="h-[17px] w-[17px]" />
+                  </span>
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-display text-base font-bold tracking-tight text-foreground">PayPal</span>
+                      <span className="inline-flex flex-none items-center whitespace-nowrap rounded-full border border-[hsl(41_100%_65%/0.28)] bg-[hsl(41_100%_65%/0.1)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-[#FFC44D]">
+                        Demnächst verfügbar
+                      </span>
+                    </div>
+                    <span className="text-xs leading-snug text-muted-foreground">Alternative Zahlungsmethode</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex justify-end pt-1">
-              <Button size="sm" disabled>
+              <div className="flex flex-col gap-[13px]">
+                <SecretInput
+                  label="Client ID"
+                  value={paypal.client_id}
+                  onChange={(v) => setPaypal(p => ({ ...p, client_id: v }))}
+                  placeholder="Noch nicht verfügbar"
+                />
+                <SecretInput
+                  label="Client Secret"
+                  value={paypal.client_secret}
+                  onChange={(v) => setPaypal(p => ({ ...p, client_secret: v }))}
+                  placeholder="Noch nicht verfügbar"
+                />
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>Modus</Label>
+                  <Select value={paypal.mode} onValueChange={(v) => setPaypal(p => ({ ...p, mode: v }))} disabled>
+                    <SelectTrigger className={selectTriggerClass}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sandbox">Sandbox (Test)</SelectItem>
+                      <SelectItem value="live">Live (Echtbetrieb)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button
+                disabled
+                className="h-10 self-start rounded-[11px] bg-[hsl(0_0%_14%)] px-[18px] text-[13px] font-bold text-[hsl(0_0%_45%)] disabled:opacity-100"
+              >
                 <Save className="w-4 h-4 mr-2" />
                 Speichern
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </Card>
+        </div>
 
         {/* Info */}
-        <Card className="bg-muted/30 border-border/50">
-          <CardContent className="pt-5 pb-4">
-            <div className="flex gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 h-fit">
-                <Plug className="h-4 w-4 text-primary" />
-              </div>
-              <div className="text-sm text-muted-foreground space-y-1">
-                <p className="font-medium text-foreground">Sicherheitshinweis</p>
-                <p>
-                  Geheime Schlüssel (Secret Keys) werden serverseitig gespeichert. Nach dem Speichern sind sie im
-                  Browser nicht mehr lesbar — es wird nur eine maskierte Vorschau angezeigt. Beim erneuten Speichern
-                  eines Dienstes müssen geheime Felder <strong>neu eingegeben</strong> werden, sonst werden sie entfernt
-                  (du erhältst dann einen Warnhinweis).
-                </p>
-                <p>
-                  Alternativ kannst du Schlüssel direkt als{" "}
-                  <strong>Supabase Edge Function Secrets</strong> hinterlegen — diese haben Vorrang vor der hier gespeicherten Konfiguration.
-                </p>
-              </div>
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-[11px]">
+              <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] text-[#FFC44D]">
+                <ShieldCheck className="h-[15px] w-[15px]" />
+              </span>
+              <span className="font-display text-[15px] font-bold tracking-tight text-foreground">Sicherheitshinweis</span>
             </div>
-          </CardContent>
+            <p className="max-w-[760px] text-[13px] leading-relaxed text-[hsl(0_0%_68%)]">
+              Geheime Schlüssel (Secret Keys) werden serverseitig gespeichert. Nach dem Speichern sind sie im
+              Browser nicht mehr lesbar — es wird nur eine maskierte Vorschau angezeigt. Beim erneuten Speichern
+              eines Dienstes müssen geheime Felder <strong className="font-semibold text-foreground">neu eingegeben</strong>{" "}
+              werden, sonst werden sie entfernt (du erhältst dann einen Warnhinweis).
+            </p>
+            <p className="max-w-[760px] text-[13px] leading-relaxed text-[hsl(0_0%_68%)]">
+              Alternativ kannst du Schlüssel direkt als{" "}
+              <strong className="font-mono text-xs font-medium text-primary">Supabase Edge Function Secrets</strong>{" "}
+              hinterlegen — diese haben Vorrang vor der hier gespeicherten Konfiguration.
+            </p>
+          </div>
         </Card>
       </div>
     </AdminLayout>

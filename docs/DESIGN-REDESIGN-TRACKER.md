@@ -649,15 +649,17 @@ Masken:
 
 > **Umgesetzt 2026-08-04** aus `Admin 20 Newsletter.dc.html`. Offen: Send-Bestätigung ist `window.confirm` ohne Empfängerzahl → gestyltes AlertDialog mit `counts.confirmed`. Hinweis: Vorschau-Abmeldelink ist `href="#"` — echte Mails haben den echten Link (nur Vorschau-Ungenauigkeit).
 
-### ⬜ AdminAnalytics — `/admin/analytics`
+### ✅ AdminAnalytics — `/admin/analytics`
 `src/pages/admin/AdminAnalytics.tsx` · Statistik-Dashboard mit vier Diagrammen
 
 Masken:
-- [ ] Seitenkopf mit Titel
-- [ ] Balkendiagramm Buchungen letzte 7 Tage
-- [ ] Kreisdiagramm Buchungen nach Status
-- [ ] Balkendiagramm Buchungen pro Standort
-- [ ] Liniendiagramm Neue Benutzer pro Woche
+- [x] Seitenkopf mit Titel
+- [x] Balkendiagramm Buchungen letzte 7 Tage
+- [x] Kreisdiagramm Buchungen nach Status
+- [x] Balkendiagramm Buchungen pro Standort
+- [x] Liniendiagramm Neue Benutzer pro Woche
+
+> **Umgesetzt 2026-08-04** aus `Admin 21 Analytics.dc.html` (designgemäß CSS/SVG-Charts statt Recharts — Werte direkt sichtbar, keine Hover-Tooltips; Queries byte-identisch). Perf-Hinweis: ~15 sequenzielle Count-Requests (N+1) → RPC/Aggregat-Query. Bug notiert: Wochenfenster inklusiv-überlappend (Grenzfall doppelt gezählt).
 
 ### ✅ AdminUtilization — `/admin/utilization`
 `src/pages/admin/AdminUtilization.tsx` · Court-Auslastung im Netzwerk mit Monatsauswahl
@@ -671,27 +673,31 @@ Masken:
 
 > **Umgesetzt 2026-08-04** aus `Admin 04 Auslastung.dc.html`. Hinweis: Kapazitätsfarben existieren doppelt (lib/utilization.ts vs. Design-Palette) → nach Abschluss aller Auslastungs-Ansichten konsolidieren.
 
-### ⬜ AdminVisuals — `/admin/visuals`
+### ✅ AdminVisuals — `/admin/visuals`
 `src/pages/admin/AdminVisuals.tsx` · Website-Bilder und Videos verwalten und hochladen
 
 Masken:
-- [ ] Seitenkopf mit Beschreibung
-- [ ] Kategorie-Karten mit Visual-Grid
-- [ ] Bild-/Video-Vorschaukachel mit Statusbadge
-- [ ] Bild-Upload-Aktionen
-- [ ] Video-URL-Eingabe und Upload-Aktionen
-- [ ] Loading-Spinner und Empty-State
+- [x] Seitenkopf mit Beschreibung
+- [x] Kategorie-Karten mit Visual-Grid
+- [x] Bild-/Video-Vorschaukachel mit Statusbadge
+- [x] Bild-Upload-Aktionen
+- [x] Video-URL-Eingabe und Upload-Aktionen
+- [x] Loading-Spinner und Empty-State
 
-### ⬜ AdminFeatures — `/admin/features`
+> **Umgesetzt 2026-08-04** aus `Admin 22 Visuals.dc.html` (Kategorie-Karten mit Slot-Zählern, Preview-Kacheln, Video-Tiles). Bug notiert: „OK" ohne Tippen speichert leeren String und löscht die Video-URL (siehe ADMIN-UX-NOTES).
+
+### ✅ AdminFeatures — `/admin/features`
 `src/pages/admin/AdminFeatures.tsx` · Feature-Flags und Credits-Zahlung steuern
 
 Masken:
-- [ ] Seitenkopf mit Titel
-- [ ] Courts-Sichtbarkeit-Umschaltkarte
-- [ ] Feature-Karten-Liste mit Zustandsauswahl
-- [ ] Credits-als-Zahlungsmittel-Karte mit Einstellungen
-- [ ] Info-Karte zur Zustandserklärung
-- [ ] Loading-Spinner
+- [x] Seitenkopf mit Titel
+- [x] Courts-Sichtbarkeit-Umschaltkarte
+- [x] Feature-Karten-Liste mit Zustandsauswahl
+- [x] Credits-als-Zahlungsmittel-Karte mit Einstellungen
+- [x] Info-Karte zur Zustandserklärung
+- [x] Loading-Spinner
+
+> **Umgesetzt 2026-08-04** aus `Admin 24 Features.dc.html` (Launch-Datum, Courts-Sichtbarkeit, 7 Feature-Karten mit 3-Stufen-Status, Credits-Karte, Info-Karte). Hinweis: `feature_app_launched`-Master-Switch existiert nicht mehr im Code — CLAUDE.md veraltet. Audit-Lücke: Credits-Handler schreiben kein `updated_by`.
 
 ### ✅ AdminClubOwners — `/admin/club-owners`
 `src/pages/admin/AdminClubOwners.tsx` · Verwaltung von Club-Owner-Zuweisungen und Monatskontingenten
@@ -817,18 +823,23 @@ Masken:
 
 > **Umgesetzt 2026-08-04** aus `Admin 25 Einstellungen.dc.html` (Design-Projekt 28649d89). Styling only — PIN-Lock-Logik (useSiteSettings) unverändert. Platzhalter-Cards (Allgemein/Benachrichtigungen/Sicherheit) jetzt sichtbar als „UI-Platzhalter · ohne Backend" markiert (Badge + reduzierte Deckkraft). **Zusätzlich shared:** `AdminHeader` auf neues Design (sticky Glas-Header, Route-Pfad mono + dynamischer Seitentitel aus Sidebar-Items + User-Chip) — gilt für alle Admin-Seiten; die In-Page-h1 der übrigen Seiten werden beim jeweiligen Redesign entfernt. UX-Funde gesammelt in `docs/ADMIN-UX-NOTES.md`.
 
-### ⬜ AdminIntegrations — `/admin/integrations`
+### ✅ AdminIntegrations — `/admin/integrations`
 `src/pages/admin/AdminIntegrations.tsx` · Externe Dienste und API-Schlüssel konfigurieren
 
 Masken:
-- [ ] Seitenkopf
-- [ ] Integrations-Dienst-Card (Stripe/Resend/etc.)
-- [ ] Secret-Input mit Sichtbarkeit-Toggle
-- [ ] Coming-Soon-Card (PayPal, deaktiviert)
-- [ ] Sicherheitshinweis-Info-Card
-- [ ] Ladezustand (Spinner)
+- [x] Seitenkopf
+- [x] Integrations-Dienst-Card (Stripe/Resend/etc.)
+- [x] Secret-Input mit Sichtbarkeit-Toggle
+- [x] Coming-Soon-Card (PayPal, deaktiviert)
+- [x] Sicherheitshinweis-Info-Card
+- [x] Ladezustand (Spinner)
+
+> **Umgesetzt 2026-08-04** aus `Admin 23 Integrationen.dc.html` (6 Service-Karten mit Akzent-Icons, Status-Badges, Secret-Inputs in Mono, Sicherheitshinweis-Karte). Secret-Handling zeichengleich erhalten. Backend-Wiring offen: maskierte Secret-Vorschau als Placeholder (Daten liegen schon in `originalConfigs`).
 
 ---
+
+## 🛠️ Admin — KOMPLETT ✅ (2026-08-04)
+Alle 25 Admin-Seiten + Sidebar + Header in einem Tag via Claude Design umgesetzt (Batches 1–6, styling only, Logik unverändert, jede Seite per Diff auf Handler-/Hook-Gleichheit geprüft, Build ✓, live deployed). UX-Funde + Backend-Wiring-Liste + Kind-Komponenten-Folgepass: `docs/ADMIN-UX-NOTES.md`.
 
 ## 📌 Aktueller Fokus
 - ✅ **Homepage (`/`)** — umgesetzt, Build ✓ & **live auf Vercel deployed** (Commits f991779 + 5b35407, 2026-07-04). Inkl. Fix „einheitliche Seitenabstände" (alle Sektionen `max-w-[1200px] px-5`). Florian sichtet in der Live-Version. Offen: Migration ausführen (siehe Homepage-Eintrag).

@@ -44,6 +44,13 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 19. **AdminNewsletter:** `resetCampaign()` ohne Bestätigung/Guard — Zurücksetzen + erneutes Senden könnte Doppelversand auslösen (Edge-Function-Dedupe prüfen). `editCampaign()` ohne catch (Ladefehler still). Send-Bestätigung nennt die Empfängerzahl nicht. Vorschau-Abmeldelink `href="#"` (echte Mails haben den echten Link — nur Vorschau ungenau). Idee: gesendete Kampagnen als Vorlage duplizieren.
 20. **AdminUsers:** Nebenbei behoben: nested-`<p>` im Lösch-Dialog + mobile-gebrochenes KPI-Grid. Offen: Detail-Dialog ohne `DialogDescription` (Radix-a11y-Warnung).
 
+21. **AdminVisuals (Bug-Kandidat):** `handleSaveUrl` speichert bei unberührtem Input `""` — Klick auf „OK" ohne Tippen löscht die gespeicherte Video-URL. Außerdem: `isVideoKey` matcht per `includes(".video")` (ein Key wie `x.videowall.y` würde fälschlich als Video behandelt).
+22. **AdminAnalytics:** N+1-Muster — ~15 sequenzielle Count-Requests pro Seitenaufruf (7 Tage + Status + Standorte + 4 Wochen) → RPC/Aggregat-Query. Wochenfenster sind beidseitig inklusiv — Registrierung exakt auf der Grenze wird doppelt gezählt. Kein Loading-Skeleton.
+23. **AdminFeatures:** Credits-Handler schreiben `updated_at` aber kein `updated_by` (Audit-Trail-Lücke) und loggen Fehler nicht. CLAUDE.md veraltet: `feature_app_launched`-Master-Switch existiert im Code nicht mehr (3-Stufen-Modell `feature_*_state` ist aktuell).
+24. **types.ts veraltet:** `partner_touchpoint_slides`, `qr_sections`, `skypadel_gallery` u. a. fehlen in den generierten Supabase-Typen → überall `(supabase as any)`-Casts + vorbestehende tsc-Fehler. Typgenerierung nachziehen.
+
+25. **AdminIntegrations:** Secret-Hints inkonsistent — Stripe warnt „…sonst wird er entfernt", die anderen Keys nicht, obwohl dieselbe Lösch-Semantik gilt. Plain-Felder lassen sich nicht absichtlich leeren (Leerstring = „nicht ändern", fällt aus dem Payload). PayPal: Secret-Inputs editierbar, Speichern aber disabled — Eingaben gehen ins Leere. „Verbunden" heißt nur „Key hinterlegt" — „Verbindung testen"-Button wäre wertvoll. Resend-Absender-Feld vermutlich wirkungslos (Sender zentral in `_shared/email.ts`).
+
 ## Backend-Wiring offen (Design zeigt es, Seite hat kein Gegenstück)
 
 - **Sidebar:** Live-Counts an „Buchungen" und „Marketplace" (Design-Dummies weggelassen)
@@ -53,6 +60,9 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 - **Marketplace:** KPI-Trend-Badges, Tab-Counts „X offen" für Bestellungen/Retouren
 - **Vouchers:** KPI-Zeile (Aktive Codes / Einlösungen / Rabattwert € / Abgelaufen), Code-Suche mit Live-Filter
 - **SkyPadel:** Drag&Drop-Sortierung (Design zeigt Grip-Cursor), „Live-Seite öffnen"-Link
+- **Mitteilungen:** Empfängerkreis-Infobox im Edit-Dialog (Daten via `target_type`/`recipients_count` vorhanden)
+- **Newsletter:** Send-Bestätigung als AlertDialog mit echter `counts.confirmed`-Empfängerzahl
+- **Integrationen:** maskierte Secret-Vorschau als Input-Placeholder (liegt schon client-seitig in `originalConfigs`)
 
 ## Folge-Pass: Kind-Komponenten (Design da, Komponente noch alt)
 

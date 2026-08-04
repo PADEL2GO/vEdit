@@ -1,22 +1,8 @@
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, TrendingUp, Calendar, Users } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { BarChart3, PieChart, MapPin, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -108,158 +94,247 @@ export default function AdminAnalytics() {
     },
   });
 
+  // Abgeleitete Präsentationswerte (reine Darstellung, keine neuen Daten)
+  const week = bookingsPerDay || [];
+  const maxDayBookings = Math.max(1, ...week.map((d) => d.bookings));
+
+  const statuses = bookingsByStatus || [];
+  const statusTotal = statuses.reduce((sum, s) => sum + s.value, 0);
+  let accDeg = 0;
+  const donutSegments = statuses.map((s, i) => {
+    const start = statusTotal > 0 ? (accDeg / statusTotal) * 360 : 0;
+    accDeg += s.value;
+    const end = statusTotal > 0 ? (accDeg / statusTotal) * 360 : 0;
+    return `${COLORS[i % COLORS.length]} ${start.toFixed(1)}deg ${end.toFixed(1)}deg`;
+  });
+  const donutBackground =
+    statusTotal > 0 ? `conic-gradient(${donutSegments.join(", ")})` : "hsl(0 0% 14%)";
+  const formatPct = (value: number) =>
+    statusTotal > 0
+      ? `${((value / statusTotal) * 100).toLocaleString("de-DE", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })} %`
+      : "0,0 %";
+
+  const locations = bookingsByLocation || [];
+  const maxLocationBookings = Math.max(1, ...locations.map((l) => l.bookings));
+
+  const growth = userGrowth || [];
+  const maxWeekUsers = Math.max(1, ...growth.map((w) => w.users));
+  const linePointPairs = growth.map((w, i) => {
+    const x = growth.length > 1 ? (i / (growth.length - 1)) * 380 + 10 : 200;
+    const y = 200 - (w.users / maxWeekUsers) * 165;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const linePoints = linePointPairs.join(" ");
+  const areaPoints = `10,200 ${linePoints} 390,200`;
+
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
-          <p className="text-muted-foreground">Statistiken und Auswertungen</p>
-        </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <p className="text-sm text-muted-foreground">
+          Vier feste Auswertungen zu Buchungen und Nutzerwachstum — reine Lese-Ansicht.
+        </p>
 
-        {/* Charts Grid */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Bookings per Day */}
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <Calendar className="h-5 w-5 text-primary" />
-                Buchungen (letzte 7 Tage)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={bookingsPerDay || []}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 15%)" />
-                    <XAxis
-                      dataKey="date"
-                      stroke="hsl(0, 0%, 65%)"
-                      fontSize={12}
-                    />
-                    <YAxis stroke="hsl(0, 0%, 65%)" fontSize={12} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(0, 0%, 5%)",
-                        border: "1px solid hsl(0, 0%, 15%)",
-                        borderRadius: "8px",
-                      }}
-                      labelStyle={{ color: "hsl(0, 0%, 98%)" }}
-                    />
-                    <Bar dataKey="bookings" fill="hsl(71, 91%, 51%)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+        <div className="grid grid-cols-1 items-start gap-[18px] min-[1080px]:grid-cols-2">
+          {/* Buchungen (letzte 7 Tage) */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center gap-[11px]">
+                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-primary/30 bg-primary/10 text-primary">
+                  <BarChart3 className="h-[15px] w-[15px]" />
+                </span>
+                <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                  Buchungen (letzte 7 Tage)
+                </h2>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Bookings by Status */}
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                Buchungen nach Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={bookingsByStatus || []}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${value}`}
-                      labelLine={false}
+              <div className="flex h-[200px] items-end gap-2 px-0.5 pt-5 sm:gap-[22px]">
+                {week.map((d, i) => {
+                  const isToday = i === week.length - 1;
+                  return (
+                    <div
+                      key={`${d.date}-${d.fullDate}`}
+                      className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-[9px]"
                     >
-                      {bookingsByStatus?.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(0, 0%, 5%)",
-                        border: "1px solid hsl(0, 0%, 15%)",
-                        borderRadius: "8px",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                      <span
+                        className={`font-mono text-xs font-bold ${
+                          isToday ? "text-primary" : "text-[hsl(0_0%_82%)]"
+                        }`}
+                      >
+                        {d.bookings}
+                      </span>
+                      <div
+                        className="w-full max-w-[44px] rounded-t-lg"
+                        style={{
+                          height: `${Math.round((d.bookings / maxDayBookings) * 155)}px`,
+                          background: isToday
+                            ? "linear-gradient(180deg, hsl(71 91% 51%), hsl(71 91% 51% / 0.35))"
+                            : "linear-gradient(180deg, hsl(71 91% 51% / 0.75), hsl(71 91% 51% / 0.2))",
+                        }}
+                      />
+                      <span
+                        className={`whitespace-nowrap font-mono text-[10.5px] ${
+                          isToday ? "text-primary" : "text-muted-foreground"
+                        }`}
+                      >
+                        {d.date}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-            </CardContent>
+            </div>
           </Card>
 
-          {/* Bookings by Location */}
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Buchungen pro Standort
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={bookingsByLocation || []} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 15%)" />
-                    <XAxis type="number" stroke="hsl(0, 0%, 65%)" fontSize={12} />
-                    <YAxis
-                      dataKey="name"
-                      type="category"
-                      stroke="hsl(0, 0%, 65%)"
-                      fontSize={12}
-                      width={100}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(0, 0%, 5%)",
-                        border: "1px solid hsl(0, 0%, 15%)",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Bar dataKey="bookings" fill="hsl(71, 91%, 51%)" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+          {/* Buchungen nach Status */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center gap-[11px]">
+                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-primary/30 bg-primary/10 text-primary">
+                  <PieChart className="h-[15px] w-[15px]" />
+                </span>
+                <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                  Buchungen nach Status
+                </h2>
               </div>
-            </CardContent>
+              <div className="flex flex-wrap items-center justify-center gap-[26px]">
+                <div
+                  className="relative h-[170px] w-[170px] flex-none rounded-full"
+                  style={{ background: donutBackground }}
+                >
+                  <div className="absolute inset-[30px] flex flex-col items-center justify-center gap-0.5 rounded-full bg-[hsl(0_0%_5%)]">
+                    <span className="font-mono text-2xl font-bold leading-none text-foreground">
+                      {statusTotal.toLocaleString("de-DE")}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">gesamt</span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {statuses.map((s, i) => (
+                    <div key={s.name} className="flex items-center gap-2.5">
+                      <span
+                        className="h-[11px] w-[11px] flex-none rounded-[4px]"
+                        style={{ background: COLORS[i % COLORS.length] }}
+                      />
+                      <span className="whitespace-nowrap text-[13px] text-[hsl(0_0%_78%)]">
+                        {s.name}:
+                      </span>
+                      <span className="whitespace-nowrap font-mono text-[13px] font-bold text-foreground">
+                        {s.value.toLocaleString("de-DE")}
+                      </span>
+                      <span className="whitespace-nowrap font-mono text-[11px] text-[hsl(0_0%_58%)]">
+                        {formatPct(s.value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </Card>
 
-          {/* User Growth */}
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <Users className="h-5 w-5 text-primary" />
-                Neue Benutzer pro Woche
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={userGrowth || []}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 15%)" />
-                    <XAxis dataKey="week" stroke="hsl(0, 0%, 65%)" fontSize={12} />
-                    <YAxis stroke="hsl(0, 0%, 65%)" fontSize={12} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(0, 0%, 5%)",
-                        border: "1px solid hsl(0, 0%, 15%)",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="users"
-                      stroke="hsl(71, 91%, 51%)"
-                      strokeWidth={2}
-                      dot={{ fill: "hsl(71, 91%, 51%)" }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+          {/* Buchungen pro Standort */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center gap-[11px]">
+                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-primary/30 bg-primary/10 text-primary">
+                  <MapPin className="h-[15px] w-[15px]" />
+                </span>
+                <div className="flex flex-col gap-px">
+                  <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                    Buchungen pro Standort
+                  </h2>
+                  <span className="text-[11.5px] text-muted-foreground">
+                    nur bestätigte Buchungen
+                  </span>
+                </div>
               </div>
-            </CardContent>
+              <div className="flex flex-col gap-3.5">
+                {locations.map((l) => (
+                  <div
+                    key={l.name}
+                    className="grid grid-cols-[86px_minmax(0,1fr)_44px] items-center gap-[11px] sm:grid-cols-[106px_minmax(0,1fr)_46px]"
+                  >
+                    <span className="truncate text-[12.5px] font-semibold text-[hsl(0_0%_82%)]">
+                      {l.name}
+                    </span>
+                    <div className="h-5 overflow-hidden rounded-md bg-[hsl(0_0%_10%)]">
+                      <div
+                        className="h-full rounded-md"
+                        style={{
+                          width: `${Math.max(
+                            1,
+                            Math.round((l.bookings / maxLocationBookings) * 100),
+                          )}%`,
+                          background:
+                            "linear-gradient(90deg, hsl(71 91% 51% / 0.4), hsl(71 91% 51%))",
+                        }}
+                      />
+                    </div>
+                    <span className="whitespace-nowrap text-right font-mono text-[12.5px] font-bold text-primary">
+                      {l.bookings}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          {/* Neue Benutzer pro Woche */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center gap-[11px]">
+                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-primary/30 bg-primary/10 text-primary">
+                  <TrendingUp className="h-[15px] w-[15px]" />
+                </span>
+                <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                  Neue Benutzer pro Woche
+                </h2>
+              </div>
+              <div className="relative h-[224px]">
+                <svg
+                  viewBox="0 0 400 200"
+                  preserveAspectRatio="none"
+                  className="absolute left-0 right-0 top-0 h-[200px] w-full overflow-visible"
+                >
+                  <line x1="0" y1="55" x2="400" y2="55" stroke="hsl(0 0% 14%)" strokeWidth="1" />
+                  <line x1="0" y1="103" x2="400" y2="103" stroke="hsl(0 0% 14%)" strokeWidth="1" />
+                  <line x1="0" y1="151" x2="400" y2="151" stroke="hsl(0 0% 14%)" strokeWidth="1" />
+                  <line x1="0" y1="200" x2="400" y2="200" stroke="hsl(0 0% 18%)" strokeWidth="1" />
+                  {growth.length > 1 && (
+                    <>
+                      <polyline
+                        points={linePoints}
+                        fill="none"
+                        stroke="hsl(71 91% 51%)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <polygon points={areaPoints} fill="hsl(71 91% 51% / 0.12)" />
+                    </>
+                  )}
+                </svg>
+                <div className="pointer-events-none absolute left-0 right-0 top-0 flex h-[200px] items-end justify-between">
+                  {growth.map((w) => (
+                    <div
+                      key={w.week}
+                      className="relative flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1.5"
+                    >
+                      <span
+                        className="absolute whitespace-nowrap font-mono text-[11.5px] font-bold text-primary"
+                        style={{ bottom: `${Math.round((w.users / maxWeekUsers) * 165) + 14}px` }}
+                      >
+                        +{w.users}
+                      </span>
+                      <span className="translate-y-5 whitespace-nowrap font-mono text-[10.5px] text-muted-foreground">
+                        {w.week}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </Card>
         </div>
       </div>

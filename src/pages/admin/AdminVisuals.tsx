@@ -1,10 +1,11 @@
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useSiteVisuals, useUploadVisual, useDeleteVisualImage, useSetVisualUrl } from "@/hooks/useSiteVisuals";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, Trash2, Loader2, Image as ImageIcon, CheckCircle, Maximize2, Link, Video } from "lucide-react";
+import { Upload, Trash2, Loader2, Image as ImageIcon, Check, Play, Link as LinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Keys that accept a URL (YouTube / Vimeo / direct video) instead of / in addition to file upload
@@ -53,7 +54,7 @@ export default function AdminVisuals() {
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="flex items-center justify-center h-96">
+        <div className="flex h-96 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </AdminLayout>
@@ -62,40 +63,44 @@ export default function AdminVisuals() {
 
   return (
     <AdminLayout>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold">Website Visuals</h1>
-          <p className="text-muted-foreground mt-2">
-            Verwalte alle Bilder auf der Website. Lade neue Bilder hoch oder setze sie auf den Placeholder zurück.
-          </p>
-        </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <p className="max-w-[700px] text-sm leading-normal text-muted-foreground">
+          Alle Bilder auf der Website verwalten. Lade neue Bilder hoch oder setze sie auf den
+          Placeholder zurück. Farbwelten liegen unter{" "}
+          <Link to="/admin/farben" className="text-primary transition-colors hover:text-primary/80">
+            Farben
+          </Link>
+          .
+        </p>
 
         {groupedVisuals && Object.entries(groupedVisuals).map(([category, categoryVisuals]) => (
-          <Card key={category}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ImageIcon className="h-5 w-5 text-primary" />
-                {category}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <Card key={category} className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                  {category}
+                </h2>
+                <span className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
+                  {categoryVisuals?.length ?? 0} Slots · {categoryVisuals?.filter((v) => !!v.image_url).length ?? 0} aktiv
+                </span>
+              </div>
+
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(min(220px,100%),1fr))] gap-3.5">
                 {categoryVisuals?.map((visual) => {
                   const isUploading = uploadingKey === visual.key;
                   const hasImage = !!visual.image_url;
                   const imageUrl = visual.image_url || visual.placeholder_url;
 
                   return (
-                    <div key={visual.id} className="space-y-3">
+                    <div key={visual.id} className="flex flex-col gap-2.5">
                       {/* Image / Video Preview */}
-                      <div className={cn(
-                        "relative aspect-square rounded-xl border overflow-hidden group",
-                        hasImage ? "border-primary/30 bg-primary/5" : "border-border bg-muted"
-                      )}>
+                      <div className="group relative aspect-square overflow-hidden rounded-[14px] border border-[hsl(0_0%_14%)] bg-white/[0.03]">
                         {isVideoKey(visual.key) && hasImage ? (
-                          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-black/80 p-3">
-                            <Video className="h-8 w-8 text-primary" />
-                            <p className="text-[10px] text-muted-foreground text-center break-all line-clamp-3">
+                          <div className="flex h-full w-full flex-col items-center justify-center gap-[11px] bg-[#0A0A0A] p-3.5">
+                            <span className="flex h-11 w-11 flex-none items-center justify-center rounded-[13px] border border-primary/30 bg-primary/10 text-primary">
+                              <Play className="h-[18px] w-[18px]" />
+                            </span>
+                            <p className="line-clamp-3 break-all text-center font-mono text-[10.5px] leading-[1.4] text-muted-foreground">
                               {visual.image_url}
                             </p>
                           </div>
@@ -103,84 +108,83 @@ export default function AdminVisuals() {
                           <img
                             src={imageUrl}
                             alt={visual.label}
-                            className="w-full h-full object-cover"
+                            className={cn("h-full w-full object-cover", !hasImage && "opacity-40")}
                           />
                         )}
-                        
+
                         {/* Status badge */}
-                        <div className={cn(
-                          "absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium",
-                          hasImage 
-                            ? "bg-primary/90 text-primary-foreground" 
-                            : "bg-muted-foreground/80 text-background"
-                        )}>
-                          {hasImage ? (
-                            <span className="flex items-center gap-1">
-                              <CheckCircle className="h-3 w-3" />
-                              Aktiv
-                            </span>
-                          ) : (
-                            "Placeholder"
+                        <span
+                          className={cn(
+                            "absolute right-2.5 top-2.5 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border bg-black/70 px-[9px] py-1 text-[10px] font-bold uppercase tracking-[0.05em] backdrop-blur-[10px]",
+                            hasImage
+                              ? "border-primary/40 text-primary"
+                              : "border-white/[0.18] text-[hsl(0_0%_70%)]"
                           )}
-                        </div>
+                        >
+                          {hasImage ? (
+                            <Check className="h-2.5 w-2.5" />
+                          ) : (
+                            <ImageIcon className="h-2.5 w-2.5" />
+                          )}
+                          {hasImage ? "Aktiv" : "Placeholder"}
+                        </span>
 
                         {/* Loading overlay */}
                         {isUploading && (
-                          <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm">
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                           </div>
                         )}
                       </div>
 
                       {/* Label & Description */}
-                      <div>
-                        <h4 className="font-medium text-sm">{visual.label}</h4>
+                      <div className="flex flex-col gap-[5px]">
+                        <h4 className="text-[13px] font-semibold leading-[1.35] text-foreground">
+                          {visual.label}
+                        </h4>
+                        <div className="flex flex-wrap items-center gap-[7px]">
+                          {/* Extract recommended size from description */}
+                          {visual.description?.includes("Empfohlene Größe:") && (
+                            <span className="whitespace-nowrap rounded-md border border-[hsl(0_0%_15%)] bg-white/5 px-[7px] py-0.5 font-mono text-[9.5px] tracking-[0.06em] text-[hsl(0_0%_72%)]">
+                              {visual.description.match(/Empfohlene Größe:\s*([^)]+\))/)?.[1] ||
+                                visual.description.match(/Empfohlene Größe:\s*(\d+[×x]\d+\s*px)/i)?.[1] ||
+                                "Größe in Beschreibung"}
+                            </span>
+                          )}
+                          <span className="max-w-full truncate font-mono text-[9.5px] text-muted-foreground/70">
+                            {visual.key}
+                          </span>
+                        </div>
                         {visual.description && (
-                          <>
-                            {/* Extract recommended size from description */}
-                            {visual.description.includes("Empfohlene Größe:") ? (
-                              <>
-                                <div className="flex items-center gap-1.5 mt-1.5 px-2 py-1 bg-primary/10 rounded-md w-fit">
-                                  <Maximize2 className="h-3 w-3 text-primary" />
-                                  <span className="text-xs font-medium text-primary">
-                                    {visual.description.match(/Empfohlene Größe:\s*([^)]+\))/)?.[1] || 
-                                     visual.description.match(/Empfohlene Größe:\s*(\d+[×x]\d+\s*px)/i)?.[1] ||
-                                     "Größe in Beschreibung"}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                  {visual.description.replace(/Empfohlene Größe:\s*[^.]+\.?\s*/i, "").trim() || visual.description}
-                                </p>
-                              </>
-                            ) : (
-                              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                                {visual.description}
-                              </p>
-                            )}
-                          </>
+                          <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">
+                            {visual.description.includes("Empfohlene Größe:")
+                              ? visual.description.replace(/Empfohlene Größe:\s*[^.]+\.?\s*/i, "").trim() ||
+                                visual.description
+                              : visual.description}
+                          </p>
                         )}
                       </div>
 
                       {/* Actions */}
                       {isVideoKey(visual.key) ? (
                         /* Video — URL input OR direct file upload */
-                        <div className="space-y-2">
+                        <div className="flex flex-col gap-2">
                           {/* URL */}
-                          <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Link className="h-3 w-3" /> Link (YouTube, Vimeo, .mp4-URL)
+                          <p className="flex items-center gap-1 text-[10.5px] text-muted-foreground">
+                            <LinkIcon className="h-3 w-3" /> Link (YouTube, Vimeo, .mp4-URL)
                           </p>
-                          <div className="flex gap-2">
+                          <div className="flex gap-[7px]">
                             <Input
-                              placeholder="https://youtu.be/..."
+                              placeholder="https://youtu.be/…"
                               value={urlInputs[visual.key] ?? (visual.image_url || "")}
                               onChange={(e) =>
                                 setUrlInputs(prev => ({ ...prev, [visual.key]: e.target.value }))
                               }
-                              className="text-xs h-8"
+                              className="h-8 min-w-0 flex-1 rounded-lg border-[hsl(0_0%_16%)] bg-white/5 px-2.5 font-mono text-[11px]"
                             />
                             <Button
                               size="sm"
-                              className="shrink-0"
+                              className="h-8 flex-none rounded-lg px-3 text-[11.5px] font-bold"
                               onClick={() => handleSaveUrl(visual.key)}
                               disabled={setUrlMutation.isPending}
                             >
@@ -189,11 +193,7 @@ export default function AdminVisuals() {
                           </div>
 
                           {/* Divider */}
-                          <div className="flex items-center gap-2 py-0.5">
-                            <div className="flex-1 h-px bg-border" />
-                            <span className="text-[10px] text-muted-foreground">oder</span>
-                            <div className="flex-1 h-px bg-border" />
-                          </div>
+                          <span className="text-center text-[10px] text-muted-foreground/70">oder</span>
 
                           {/* Direct file upload */}
                           <input
@@ -210,11 +210,11 @@ export default function AdminVisuals() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full text-xs"
+                            className="h-8 w-full rounded-lg border-dashed border-[hsl(0_0%_20%)] bg-white/5 text-[11.5px] font-bold text-[hsl(0_0%_82%)] hover:border-primary/50 hover:bg-white/5 hover:text-primary"
                             onClick={() => fileInputRefs.current[`${visual.key}__video`]?.click()}
                             disabled={isUploading}
                           >
-                            <Upload className="h-3.5 w-3.5 mr-1" />
+                            <Upload className="mr-1 h-3 w-3" />
                             {isUploading ? "Wird hochgeladen…" : "Video hochladen (.mp4, .webm)"}
                           </Button>
 
@@ -222,18 +222,18 @@ export default function AdminVisuals() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="w-full text-xs"
+                              className="h-8 w-full rounded-lg border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[11.5px] font-bold text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
                               onClick={() => handleDelete(visual.key)}
                               disabled={deleteMutation.isPending}
                             >
-                              <Trash2 className="h-3.5 w-3.5 mr-1" />
+                              <Trash2 className="mr-1 h-3 w-3" />
                               Zurücksetzen
                             </Button>
                           )}
                         </div>
                       ) : (
                         /* Image upload mode */
-                        <div className="flex gap-2">
+                        <div className="flex gap-[7px]">
                           <input
                             type="file"
                             accept="image/*"
@@ -248,21 +248,23 @@ export default function AdminVisuals() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1"
+                            className="h-8 flex-1 rounded-lg border-[hsl(0_0%_16%)] bg-white/5 text-[11.5px] font-bold text-[hsl(0_0%_82%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
                             onClick={() => fileInputRefs.current[visual.key]?.click()}
                             disabled={isUploading}
                           >
-                            <Upload className="h-4 w-4 mr-1" />
+                            <Upload className="mr-1 h-3 w-3" />
                             {hasImage ? "Ersetzen" : "Hochladen"}
                           </Button>
                           {hasImage && (
                             <Button
                               variant="outline"
                               size="sm"
+                              title="Auf Placeholder zurücksetzen"
+                              className="h-8 w-8 flex-none rounded-lg border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] p-0 text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
                               onClick={() => handleDelete(visual.key)}
                               disabled={isUploading || deleteMutation.isPending}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           )}
                         </div>
@@ -271,16 +273,18 @@ export default function AdminVisuals() {
                   );
                 })}
               </div>
-            </CardContent>
+            </div>
           </Card>
         ))}
 
         {(!groupedVisuals || Object.keys(groupedVisuals).length === 0) && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">Keine Visuals gefunden</p>
-            </CardContent>
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col items-center gap-3 py-10 text-center">
+              <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
+                <ImageIcon className="h-5 w-5" />
+              </span>
+              <p className="text-sm text-muted-foreground">Keine Visuals gefunden</p>
+            </div>
           </Card>
         )}
       </div>
