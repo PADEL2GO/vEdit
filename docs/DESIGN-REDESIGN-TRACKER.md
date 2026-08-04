@@ -26,7 +26,7 @@ _Erscheinen auf vielen Seiten — einmal neu designen wirkt überall._
 - ⬜ **Navigation (öffentlich)** — Sticky-Header, Logo, Menü, Sprache/Login (`components/Navigation.tsx`)
 - ⬜ **Navigation (Dashboard)** — eingeloggte Nav, respektiert Feature-Flags (`components/DashboardNavigation.tsx`)
 - ⬜ **Footer** — 4-spaltig: Brand | Plattform | Unternehmen | Rechtliches (`components/Footer.tsx`)
-- ⬜ **Admin-Layout + Sidebar** (`components/admin/*`)
+- ✅ **Admin-Layout + Sidebar** (`components/admin/*`) — 2026-08-04 aus `AdminSidebar.dc.html`: 5 Nav-Gruppen (Übersicht/Betrieb/Commerce/Content/System), eindeutige Icons, lokale Nav-Suche, P2G-Brand-Header + Admin-Badge, Footer-Links im neuen Stil. Design-Dummy-Counts (Buchungen/Marketplace) + Versionszeile bewusst weggelassen (keine Fake-Daten) → späteres Backend-Wiring.
 - ⬜ **Club-Layout** (`components/club/ClubLayout.tsx`)
 - ⬜ **Cookie-Consent-Banner** (`components/CookieConsentBanner.tsx`)
 - ⬜ **Geo/Sprach-Banner** (`components/GeoLanguageBanner.tsx`)
