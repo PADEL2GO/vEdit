@@ -9,8 +9,8 @@ import { Upload, Trash2, Loader2, Image as ImageIcon, Check, Play, Link as LinkI
 import { cn } from "@/lib/utils";
 
 // Keys that accept a URL (YouTube / Vimeo / direct video) instead of / in addition to file upload
-const isVideoKey = (key: string) =>
-  key.includes(".video") || key.includes(".video-");
+// (matches only ".video"/".video-N" as last segment, not keys that merely contain "video")
+const isVideoKey = (key: string) => /\.video(-\d+)?$/.test(key);
 
 export default function AdminVisuals() {
   const { data: visuals, isLoading } = useSiteVisuals();

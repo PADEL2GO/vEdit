@@ -275,14 +275,20 @@ export default function AdminFeatures() {
   const toggleCreditsPayment = async (enabled: boolean) => {
     setSavingKey("feature_credits_payment_enabled");
     try {
+      const { data: userData } = await supabase.auth.getUser();
       const { error } = await supabase
         .from("site_settings")
-        .update({ feature_credits_payment_enabled: enabled, updated_at: new Date().toISOString() })
+        .update({
+          feature_credits_payment_enabled: enabled,
+          updated_at: new Date().toISOString(),
+          updated_by: userData.user?.id,
+        } as any)
         .eq("id", "global");
       if (error) throw error;
       setCreditsPaymentEnabled(enabled);
       toast.success(enabled ? "Credits-Zahlung aktiviert" : "Credits-Zahlung deaktiviert");
     } catch (err) {
+      console.error("Error toggling credits payment:", err);
       toast.error("Fehler beim Speichern");
     } finally {
       setSavingKey(null);
@@ -300,17 +306,20 @@ export default function AdminFeatures() {
     }
     setIsSavingCredits(true);
     try {
+      const { data: userData } = await supabase.auth.getUser();
       const { error } = await supabase
         .from("site_settings")
         .update({
           credits_payment_max_percent: creditsMaxPercent,
           credits_per_euro: creditsPerEuro,
           updated_at: new Date().toISOString(),
-        })
+          updated_by: userData.user?.id,
+        } as any)
         .eq("id", "global");
       if (error) throw error;
       toast.success("Credits-Einstellungen gespeichert");
     } catch (err) {
+      console.error("Error saving credits settings:", err);
       toast.error("Fehler beim Speichern");
     } finally {
       setIsSavingCredits(false);

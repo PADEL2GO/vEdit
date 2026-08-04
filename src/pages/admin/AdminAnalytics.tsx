@@ -84,7 +84,7 @@ export default function AdminAnalytics() {
           .from("profiles")
           .select("*", { count: "exact", head: true })
           .gte("created_at", startDate.toISOString())
-          .lte("created_at", endDate.toISOString());
+          .lt("created_at", endDate.toISOString());
         weeks.push({
           week: `KW ${format(endDate, "w")}`,
           users: count || 0,
