@@ -3,25 +3,32 @@ import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Coins, Users, Trophy, Loader2, Save } from "lucide-react";
+import { Settings, Wallet, Crown, Loader2, Save, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { P2GWalletsTab } from "@/components/admin/p2g/P2GWalletsTab";
 import { P2GExpertLevelsTab } from "@/components/admin/p2g/P2GExpertLevelsTab";
 
 const TABS = [
-  { id: "dashboard", label: "Einstellungen", icon: Coins },
-  { id: "wallets", label: "Benutzer-Wallets", icon: Users },
-  { id: "expert-levels", label: "Expert Levels", icon: Trophy },
+  { id: "dashboard", label: "Einstellungen", icon: Settings },
+  { id: "wallets", label: "Benutzer-Wallets", icon: Wallet },
+  { id: "expert-levels", label: "Expert Levels", icon: Crown },
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
+
+const TAB_TRIGGER_CLASSES =
+  "-mb-px gap-2 whitespace-nowrap rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-[11px] pt-0 text-sm font-bold text-[hsl(0_0%_60%)] shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none";
+
+const FIELD_LABEL_CLASSES = "font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground";
+
+const SAVE_BUTTON_CLASSES =
+  "h-[42px] w-fit gap-2 rounded-[11px] bg-gradient-lime px-5 text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition-opacity hover:opacity-90";
 
 function P2GExchangeRateCard() {
   const [creditsPerEuro, setCreditsPerEuro] = useState(100);
@@ -104,10 +111,10 @@ function P2GExchangeRateCard() {
 
   if (isLoading) {
     return (
-      <Card className="bg-card border-border">
-        <CardContent className="pt-6 flex items-center justify-center py-10">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
-        </CardContent>
+      <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+        <div className="flex items-center justify-center py-10">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </div>
       </Card>
     );
   }
@@ -118,32 +125,31 @@ function P2GExchangeRateCard() {
       : "0,00";
 
   return (
-    <Card className="bg-card border-border">
-      <CardHeader className="pb-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className={`p-3 rounded-xl ${creditsPaymentEnabled ? "bg-primary/10" : "bg-muted"}`}>
-              <Coins className={`h-6 w-6 ${creditsPaymentEnabled ? "text-primary" : "text-muted-foreground"}`} />
-            </div>
-            <div>
-              <CardTitle className="text-lg text-foreground flex items-center gap-2">
+    <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+      <div className="flex flex-col gap-[18px]">
+        <div className="flex flex-wrap items-start justify-between gap-3.5">
+          <div className="flex min-w-0 flex-col gap-[5px]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="font-display text-base font-bold tracking-tight text-foreground">
                 P2G Punktewert
-                {creditsPaymentEnabled ? (
-                  <Badge variant="default" className="bg-green-500/20 text-green-600 border-green-500/30">
-                    Aktiv
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="text-muted-foreground">
-                    Inaktiv
-                  </Badge>
-                )}
-              </CardTitle>
-              <CardDescription className="mt-1">
-                Wechselkurs für P2G Punkte als Zahlungsmittel beim Buchungs-Checkout.
-              </CardDescription>
+              </h2>
+              {creditsPaymentEnabled ? (
+                <span className="inline-flex items-center gap-[7px] whitespace-nowrap rounded-full border border-primary/[0.28] bg-primary/[0.09] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-primary">
+                  <span className="h-[5px] w-[5px] rounded-full bg-primary" />
+                  Aktiv
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-[7px] whitespace-nowrap rounded-full border border-[hsl(0_0%_16%)] bg-white/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                  <span className="h-[5px] w-[5px] rounded-full bg-muted-foreground" />
+                  Inaktiv
+                </span>
+              )}
             </div>
+            <span className="text-[13px] leading-normal text-muted-foreground">
+              Wechselkurs für P2G Punkte als Zahlungsmittel beim Buchungs-Checkout.
+            </span>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-none items-center gap-3">
             <span className="text-sm text-muted-foreground">
               {creditsPaymentEnabled ? "Aktiv" : "Inaktiv"}
             </span>
@@ -152,46 +158,55 @@ function P2GExchangeRateCard() {
               onCheckedChange={toggleCreditsPayment}
               disabled={isToggling}
             />
-            {isToggling && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+            {isToggling && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="border-t border-border/50 pt-4 space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label className="text-sm text-foreground">Punkte pro Euro</Label>
-            <p className="text-xs text-muted-foreground">Wie viele P2G Punkte einem Euro entsprechen.</p>
-            <Input
-              type="number"
-              min={1}
-              value={creditsPerEuro}
-              onChange={(e) => setCreditsPerEuro(Number(e.target.value))}
-              className="w-32"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-sm text-foreground">Max. Rabatt durch Punkte (%)</Label>
-            <p className="text-xs text-muted-foreground">
-              Wie viel Prozent des Buchungspreises maximal mit Punkten bezahlt werden kann.
-            </p>
-            <Input
-              type="number"
-              min={1}
-              max={100}
-              value={creditsMaxPercent}
-              onChange={(e) => setCreditsMaxPercent(Number(e.target.value))}
-              className="w-32"
-            />
-          </div>
+
+        <div className="flex flex-col gap-[7px]">
+          <Label className={FIELD_LABEL_CLASSES}>
+            Punkte pro Euro<span className="text-primary"> *</span>
+          </Label>
+          <Input
+            type="number"
+            min={1}
+            value={creditsPerEuro}
+            onChange={(e) => setCreditsPerEuro(Number(e.target.value))}
+            className="h-[42px] rounded-[11px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-[15px] font-bold"
+          />
+          <p className="text-[11.5px] text-muted-foreground">
+            Wie viele P2G Punkte einem Euro entsprechen.
+          </p>
         </div>
-        <p className="text-sm font-medium text-foreground">
-          100 Punkte = {euroValue} €
-        </p>
-        <Button size="sm" onClick={saveExchangeRate} disabled={isSaving} className="gap-2">
-          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+
+        <div className="flex flex-col gap-[7px]">
+          <Label className={FIELD_LABEL_CLASSES}>
+            Max. Rabatt durch Punkte (%)<span className="text-primary"> *</span>
+          </Label>
+          <Input
+            type="number"
+            min={1}
+            max={100}
+            value={creditsMaxPercent}
+            onChange={(e) => setCreditsMaxPercent(Number(e.target.value))}
+            className="h-[42px] rounded-[11px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-[15px] font-bold"
+          />
+          <p className="text-[11.5px] leading-relaxed text-muted-foreground">
+            Wie viel Prozent des Buchungspreises maximal mit Punkten bezahlt werden kann.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[15px] border border-primary/[0.26] bg-gradient-to-br from-primary/[0.09] to-primary/[0.02] px-[17px] py-[15px]">
+          <span className="text-[13px] text-[hsl(0_0%_72%)]">Live-Berechnung</span>
+          <span className="whitespace-nowrap font-mono text-[17px] font-bold text-primary">
+            100 Punkte = {euroValue} €
+          </span>
+        </div>
+
+        <Button onClick={saveExchangeRate} disabled={isSaving} className={SAVE_BUTTON_CLASSES}>
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Einstellungen speichern
         </Button>
-      </CardContent>
+      </div>
     </Card>
   );
 }
@@ -241,43 +256,69 @@ function P2GPaybackRatesCard() {
   };
 
   if (isLoading) return null;
+
+  const rows = [
+    { id: "payback-60", label: "Payback für 60 Min. (Punkte)", value: rate60, setValue: setRate60 },
+    { id: "payback-90", label: "Payback für 90 Min. (Punkte)", value: rate90, setValue: setRate90 },
+    { id: "payback-120", label: "Payback für 120 Min. (Punkte)", value: rate120, setValue: setRate120 },
+  ];
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Coins className="w-5 h-5 text-primary" />
-          Payback pro Buchung
-        </CardTitle>
-        <CardDescription>
-          Feste Punkte-Rückvergütung je Buchungslänge — wird mit dem Expert-Level-Multiplikator multipliziert.
-          Kein Payback bei Zahlung mit Gutscheincode.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label>Payback für 60 Min (Punkte)</Label>
-            <Input type="number" min={0} value={rate60} onChange={(e) => setRate60(parseInt(e.target.value) || 0)} />
-          </div>
-          <div className="space-y-2">
-            <Label>Payback für 90 Min (Punkte)</Label>
-            <Input type="number" min={0} value={rate90} onChange={(e) => setRate90(parseInt(e.target.value) || 0)} />
-          </div>
-          <div className="space-y-2">
-            <Label>Payback für 120 Min (Punkte)</Label>
-            <Input type="number" min={0} value={rate120} onChange={(e) => setRate120(parseInt(e.target.value) || 0)} />
-          </div>
+    <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+      <div className="flex flex-col gap-[18px]">
+        <div className="flex flex-col gap-[5px]">
+          <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+            Payback pro Buchung
+          </h2>
+          <span className="text-[13px] leading-normal text-muted-foreground">
+            Feste Punkte-Rückvergütung je Buchungslänge — wird mit dem Expert-Level-Multiplikator
+            multipliziert. Kein Payback bei Zahlung mit Gutscheincode.
+          </span>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Beispiel bei Level-Multiplikator ×1,5: 60-Min-Buchung ergibt {Math.round(rate60 * 1.5)} Punkte,
-          90-Min-Buchung {Math.round(rate90 * 1.5)} Punkte, 120-Min-Buchung {Math.round(rate120 * 1.5)} Punkte.
-          Bei Stornierung wird das gutgeschriebene Payback automatisch zurückgebucht.
-        </p>
-        <Button onClick={save} disabled={isSaving} className="gap-2">
-          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+
+        <div className="flex flex-col gap-[11px]">
+          {rows.map((row) => (
+            <div
+              key={row.id}
+              className="flex items-center gap-3.5 rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.03] px-[15px] py-[13px]"
+            >
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <Label htmlFor={row.id} className="text-[13.5px] font-semibold leading-snug text-foreground">
+                  {row.label}
+                </Label>
+                <span className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
+                  ×1,5 Level = {Math.round(row.value * 1.5)} P.
+                </span>
+              </div>
+              <div className="relative flex flex-none items-center">
+                <Input
+                  id={row.id}
+                  type="number"
+                  min={0}
+                  value={row.value}
+                  onChange={(e) => row.setValue(parseInt(e.target.value) || 0)}
+                  className="h-[38px] w-24 rounded-[10px] border-[hsl(0_0%_16%)] bg-white/[0.05] pr-8 font-mono text-sm font-bold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                />
+                <span className="pointer-events-none absolute right-3 font-mono text-[11px] text-muted-foreground">
+                  P.
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-start gap-3 rounded-[13px] border border-[hsl(41_100%_65%/0.22)] bg-[hsl(41_100%_65%/0.06)] px-[15px] py-[13px]">
+          <Info className="mt-0.5 h-4 w-4 flex-none text-[#FFC44D]" />
+          <span className="text-[12.5px] leading-relaxed text-[hsl(0_0%_78%)]">
+            Bei Stornierung wird das gutgeschriebene Payback automatisch zurückgebucht.
+          </span>
+        </div>
+
+        <Button onClick={save} disabled={isSaving} className={SAVE_BUTTON_CLASSES}>
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Payback-Raten speichern
         </Button>
-      </CardContent>
+      </div>
     </Card>
   );
 }
@@ -298,35 +339,23 @@ export default function AdminP2GPoints() {
         <title>P2G Points | Admin</title>
       </Helmet>
 
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Coins className="w-6 h-6 text-primary" />
-            P2G Points
-          </h1>
-          <p className="text-muted-foreground">
-            Exchange-Rate, Payback und Expert Levels verwalten
-          </p>
-        </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <p className="text-sm text-muted-foreground">
+          Exchange-Rate, Payback und Expert Levels verwalten
+        </p>
 
-        {/* Tab Navigation */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="flex flex-col gap-5">
+          <TabsList className="h-auto w-full justify-start gap-5 overflow-x-auto rounded-none border-b border-[hsl(0_0%_12%)] bg-transparent p-0 sm:gap-[22px]">
             {TABS.map((tab) => (
-              <TabsTrigger
-                key={tab.id}
-                value={tab.id}
-                className="flex items-center gap-2 data-[state=active]:bg-background"
-              >
-                <tab.icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
+              <TabsTrigger key={tab.id} value={tab.id} className={TAB_TRIGGER_CLASSES}>
+                <tab.icon className="h-4 w-4" />
+                <span className="whitespace-nowrap">{tab.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-0">
-            <div className="space-y-6">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(340px,100%),1fr))] items-start gap-[18px]">
               <P2GExchangeRateCard />
               <P2GPaybackRatesCard />
             </div>

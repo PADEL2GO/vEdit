@@ -30,6 +30,11 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 8. **AdminClubs:** `selectedClub` ist eine Kopie aus der Query — nach Mutationen (Aktiv-Toggle, Court/Mitglied ändern) zeigt der Detailbereich veraltete Daten bis zur erneuten Club-Auswahl (Stale-State-Bug). `window.confirm()` für Club-Löschen/Mitglied-Entfernen wirkt im neuen Design fremd → AlertDialog. Mitglieder-Zähler zählt nur aktive, Tabelle zeigt alle.
 9. **AdminMarketplace:** Punkte-Rabatt-Hinweis rechnet unleserlich (`formatEuro(Math.floor(credit_cost))` — Ergebnis stimmt zufällig, `Math.floor` wirkungslos). Produktfilter „Status" filtert `is_active`, die Status-Spalte zeigt aber Live/Entwurf — begrifflich verwirrend. SEO-Felder ohne Zeichenlimits/Zähler (Design: 60/155).
 
+10. **AdminVouchers:** Zeitzonen-Bug beim Bearbeiten — `valid_from/until` (UTC-ISO) wird per `.slice(0,16)` in `datetime-local` gesteckt und ohne Offset zurückgespeichert → Zeiten verschieben sich um den UTC-Versatz. `toggleMutation` ohne `onError` (Fehlschlag unsichtbar). `handleUpdate` bricht bei leerem Code stumm ab. DB-Fehler landen roh/englisch im Toast.
+11. **AdminP2GPoints / LocationTeasers / SkyPadel:** `parseInt(...) || 0`-Muster macht Zahlenfelder beim Tippen nicht leerbar (springt auf 0) — betrifft mehrere Seiten. SkyPadel: `handleSortChange` feuert auch ohne Wertänderung; Datei-Input wird nach Upload nicht zurückgesetzt (gleiche Datei zweimal wählen geht nicht); Bild-Löschen entfernt nur die DB-Zeile, Storage-Datei bleibt verwaist.
+12. **`confirm()`-Dialoge vereinheitlichen:** LocationTeasers, SkyPadel, Clubs, ClubOwners (dort sogar ganz ohne Bestätigung) nutzen native/keine Dialoge, Events/Vouchers/Marketplace haben AlertDialogs → einheitlich AlertDialog.
+13. **Geteilte `TranslatableField`-Komponente** hat noch den alten Stil (amber Lock-Badge; Design: lime DE / hellblau EN „DeepL") — zentraler Redesign-Pass wirkt auf viele Admin-Seiten.
+
 ## Backend-Wiring offen (Design zeigt es, Seite hat kein Gegenstück)
 
 - **Sidebar:** Live-Counts an „Buchungen" und „Marketplace" (Design-Dummies weggelassen)
@@ -37,6 +42,8 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 - **Bookings:** Court-Filter, Spalten Dauer/Betrag/Zahlung/Lobby-Herkunft, „LÖSCHEN"-Tipp-Bestätigung im Reset-Dialog (sinnvolles Sicherheits-Upgrade), Teilnehmer-Sektion im Detail-Drawer
 - **Club Owners:** Kontingent-Nutzungsanzeige (Progressbar „X h genutzt" + Prozent) — braucht Aggregation der genutzten Freiminuten pro Owner/Monat
 - **Marketplace:** KPI-Trend-Badges, Tab-Counts „X offen" für Bestellungen/Retouren
+- **Vouchers:** KPI-Zeile (Aktive Codes / Einlösungen / Rabattwert € / Abgelaufen), Code-Suche mit Live-Filter
+- **SkyPadel:** Drag&Drop-Sortierung (Design zeigt Grip-Cursor), „Live-Seite öffnen"-Link
 
 ## Folge-Pass: Kind-Komponenten (Design da, Komponente noch alt)
 
@@ -44,6 +51,8 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 - `AdminLocationCard.tsx`, `AdminCourtCard.tsx`, `LocationAnalyticsTab.tsx`, Camera-Komponenten, `CourtPriceDialog` (aus Admin 03)
 - `EventForm.tsx` + ArtistManager/BrandManager/HighlightsInput (aus Admin 07)
 - `MarketplaceOrdersSection.tsx`, `CatalogManagerDialog.tsx` (aus Admin 08 — sonst Stilbruch im Bestellungen-Tab)
+- `P2GWalletsTab.tsx`, `P2GExpertLevelsTab.tsx` (aus Admin 09 — sonst Stilbruch beim Tab-Wechsel)
+- `TranslatableField` (geteilt — betrifft LocationTeasers, SkyPadel, News u. a.)
 
 ## Erledigt
 

@@ -12,7 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TranslatableField } from "@/components/admin/TranslatableField";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, MapPin, Image as ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, MapPin, Image as ImageIcon, ImagePlus, CalendarClock } from "lucide-react";
 
 interface TeaserForm {
   title: string;
@@ -184,61 +184,94 @@ export default function AdminLocationTeasers() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Location Teasers</h1>
-            <p className="text-muted-foreground text-sm">Kommende Standorte auf der Homepage verwalten</p>
-          </div>
-          <Button onClick={openCreate}>
-            <Plus className="w-4 h-4 mr-2" /> Neuer Teaser
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        {/* Kopfzeile: Beschreibung + Neuer Teaser */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Kommende Standorte („Bald bei dir“) auf der Homepage verwalten — Sortierung über das
+            Zahlenfeld im Dialog.
+          </p>
+          <Button
+            onClick={openCreate}
+            className="h-9 w-full gap-[7px] rounded-[10px] bg-gradient-lime px-[15px] text-[13px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.28)] transition-opacity hover:opacity-90 sm:w-auto"
+          >
+            <Plus className="h-[15px] w-[15px]" /> Neuer Teaser
           </Button>
         </div>
 
         {isLoading ? (
-          <p className="text-muted-foreground">Laden…</p>
+          <p className="text-sm text-muted-foreground">Laden…</p>
         ) : !teasers?.length ? (
-          <Card className="p-8 text-center text-muted-foreground">
-            <MapPin className="w-8 h-8 mx-auto mb-2 opacity-40" />
+          <Card className="rounded-2xl border-border bg-gradient-card p-8 text-center text-sm text-muted-foreground">
+            <MapPin className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
             Noch keine Teaser vorhanden.
           </Card>
         ) : (
-          <div className="grid gap-4">
+          <div className="flex flex-col gap-[11px]">
             {teasers.map((t) => (
-              <Card key={t.id} className="p-4 flex items-center gap-4">
-                <div className="w-20 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                  {t.image_url ? (
-                    <img src={t.image_url} alt={t.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="w-5 h-5 text-muted-foreground/40" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium truncate">{t.title}</span>
-                    {t.city && <span className="text-xs text-muted-foreground">· {t.city}</span>}
-                    {!t.is_active && (
-                      <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">Inaktiv</span>
+              <Card key={t.id} className="rounded-2xl border-border bg-gradient-card p-4 sm:p-5">
+                <div className="flex flex-wrap items-center gap-4">
+                  <span className="hidden w-[22px] flex-none text-center font-mono text-xs font-bold text-muted-foreground sm:block">
+                    {t.sort_order}
+                  </span>
+                  <div className="h-14 w-20 flex-none overflow-hidden rounded-[9px] border border-[hsl(0_0%_15%)] bg-white/[0.04]">
+                    {t.image_url ? (
+                      <img src={t.image_url} alt={t.title} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
+                      </div>
                     )}
                   </div>
-                  {t.expected_date && <span className="text-xs text-muted-foreground">{t.expected_date}</span>}
-                </div>
-                <div className="flex gap-2 flex-shrink-0">
-                  <Button variant="outline" size="icon" onClick={() => openEdit(t)}>
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="text-destructive"
-                    onClick={() => {
-                      if (confirm("Teaser wirklich löschen?")) deleteMutation.mutate(t.id);
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="flex min-w-[190px] flex-1 flex-col gap-[5px]">
+                    <div className="flex flex-wrap items-center gap-x-[9px] gap-y-1">
+                      <span className="font-display text-base font-bold tracking-tight text-foreground">
+                        {t.title}
+                      </span>
+                      {t.city && <span className="text-[13px] text-muted-foreground">· {t.city}</span>}
+                      {!t.is_active && (
+                        <span className="whitespace-nowrap rounded-full border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] px-[9px] py-[3px] text-[10.5px] font-bold text-[#FF6B6B]">
+                          Inaktiv
+                        </span>
+                      )}
+                      {t.title_en && (
+                        <span className="whitespace-nowrap rounded-full border border-[hsl(200_100%_75%/0.28)] bg-[hsl(200_100%_75%/0.1)] px-2 py-[3px] font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#7FD4FF]">
+                          EN
+                        </span>
+                      )}
+                    </div>
+                    {t.expected_date && (
+                      <span className="inline-flex items-center gap-[7px] font-mono text-[11.5px] text-muted-foreground">
+                        <CalendarClock className="h-[13px] w-[13px] flex-none" />
+                        {t.expected_date}
+                      </span>
+                    )}
+                    {t.description && (
+                      <span className="max-w-[520px] text-[12.5px] leading-relaxed text-muted-foreground">
+                        {t.description}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-none gap-[9px]">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-[10px] border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_82%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
+                      onClick={() => openEdit(t)}
+                    >
+                      <Pencil className="h-[15px] w-[15px]" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-[10px] border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+                      onClick={() => {
+                        if (confirm("Teaser wirklich löschen?")) deleteMutation.mutate(t.id);
+                      }}
+                    >
+                      <Trash2 className="h-[15px] w-[15px]" />
+                    </Button>
+                  </div>
                 </div>
               </Card>
             ))}
@@ -247,91 +280,150 @@ export default function AdminLocationTeasers() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editId ? "Teaser bearbeiten" : "Neuer Teaser"}</DialogTitle>
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))]">
+          <DialogHeader className="gap-[5px] space-y-0 text-left">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
+              Teaser
+            </span>
+            <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-foreground">
+              {editId ? "Teaser bearbeiten" : "Neuer Teaser"}
+            </DialogTitle>
           </DialogHeader>
           <form
-            className="space-y-4"
+            className="flex flex-col gap-[15px]"
             onSubmit={(e) => {
               e.preventDefault();
               saveMutation.mutate({ ...form, id: editId || undefined });
             }}
           >
-            <TranslatableField
-              label="Titel *"
-              deValue={form.title}
-              onDeChange={(v) => setForm((f) => ({ ...f, title: v }))}
-              enValue={form.title_en}
-              onEnChange={(v) => setForm((f) => ({ ...f, title_en: v }))}
-              locked={form.title_en_locked}
-              onLockedChange={(v) => setForm((f) => ({ ...f, title_en_locked: v }))}
-              disabled={saveMutation.isPending}
-            />
-            <TranslatableField
-              label="Stadt"
-              deValue={form.city}
-              onDeChange={(v) => setForm((f) => ({ ...f, city: v }))}
-              enValue={form.city_en}
-              onEnChange={(v) => setForm((f) => ({ ...f, city_en: v }))}
-              locked={form.city_en_locked}
-              onLockedChange={(v) => setForm((f) => ({ ...f, city_en_locked: v }))}
-              disabled={saveMutation.isPending}
-            />
-            <TranslatableField
-              label="Beschreibung"
-              deValue={form.description}
-              onDeChange={(v) => setForm((f) => ({ ...f, description: v }))}
-              enValue={form.description_en}
-              onEnChange={(v) => setForm((f) => ({ ...f, description_en: v }))}
-              locked={form.description_en_locked}
-              onLockedChange={(v) => setForm((f) => ({ ...f, description_en_locked: v }))}
-              multiline
-              rows={3}
-              disabled={saveMutation.isPending}
-            />
-            <div>
-              <Label>Vereins-Website (URL)</Label>
-              <Input
-                value={form.club_url}
-                onChange={(e) => setForm((f) => ({ ...f, club_url: e.target.value }))}
-                placeholder="https://..."
-              />
-            </div>
-            <TranslatableField
-              label="Erwartetes Datum"
-              deValue={form.expected_date}
-              onDeChange={(v) => setForm((f) => ({ ...f, expected_date: v }))}
-              enValue={form.expected_date_en}
-              onEnChange={(v) => setForm((f) => ({ ...f, expected_date_en: v }))}
-              locked={form.expected_date_en_locked}
-              onLockedChange={(v) => setForm((f) => ({ ...f, expected_date_en_locked: v }))}
-              placeholder="z.B. Sommer 2026"
-              disabled={saveMutation.isPending}
-            />
-            <div>
-              <Label>Bild</Label>
+            <div className="flex flex-col gap-[9px]">
+              <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Bild
+              </Label>
               {form.image_url && (
-                <img src={form.image_url} alt="Preview" className="w-full h-32 object-cover rounded-lg mb-2" />
+                <img
+                  src={form.image_url}
+                  alt="Preview"
+                  className="h-32 w-full rounded-[14px] border border-[hsl(0_0%_15%)] object-cover"
+                />
               )}
-              <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} />
-              {uploading && <p className="text-xs text-muted-foreground mt-1">Hochladen…</p>}
+              <label
+                className={`flex h-[88px] cursor-pointer items-center justify-center gap-[11px] rounded-[14px] border border-dashed border-[hsl(0_0%_20%)] bg-white/[0.028] transition-colors hover:border-primary/50 ${
+                  uploading ? "pointer-events-none opacity-60" : ""
+                }`}
+              >
+                <ImagePlus className="h-[19px] w-[19px] flex-none text-muted-foreground" />
+                <span className="text-[13px] text-muted-foreground">
+                  Bild auswählen — lädt sofort hoch
+                </span>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className="hidden"
+                />
+              </label>
+              {uploading && <p className="text-xs text-muted-foreground">Hochladen…</p>}
             </div>
-            <div>
-              <Label>Sortierung</Label>
-              <Input
-                type="number"
-                value={form.sort_order}
-                onChange={(e) => setForm((f) => ({ ...f, sort_order: parseInt(e.target.value) || 0 }))}
+
+            <div className="rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.025] p-[15px]">
+              <TranslatableField
+                label="Titel *"
+                deValue={form.title}
+                onDeChange={(v) => setForm((f) => ({ ...f, title: v }))}
+                enValue={form.title_en}
+                onEnChange={(v) => setForm((f) => ({ ...f, title_en: v }))}
+                locked={form.title_en_locked}
+                onLockedChange={(v) => setForm((f) => ({ ...f, title_en_locked: v }))}
+                disabled={saveMutation.isPending}
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={form.is_active} onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))} />
-              <Label>Aktiv (auf Homepage sichtbar)</Label>
+            <div className="rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.025] p-[15px]">
+              <TranslatableField
+                label="Stadt"
+                deValue={form.city}
+                onDeChange={(v) => setForm((f) => ({ ...f, city: v }))}
+                enValue={form.city_en}
+                onEnChange={(v) => setForm((f) => ({ ...f, city_en: v }))}
+                locked={form.city_en_locked}
+                onLockedChange={(v) => setForm((f) => ({ ...f, city_en_locked: v }))}
+                disabled={saveMutation.isPending}
+              />
             </div>
-            <Button type="submit" className="w-full" disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? "Speichern…" : "Speichern"}
-            </Button>
+            <div className="rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.025] p-[15px]">
+              <TranslatableField
+                label="Beschreibung"
+                deValue={form.description}
+                onDeChange={(v) => setForm((f) => ({ ...f, description: v }))}
+                enValue={form.description_en}
+                onEnChange={(v) => setForm((f) => ({ ...f, description_en: v }))}
+                locked={form.description_en_locked}
+                onLockedChange={(v) => setForm((f) => ({ ...f, description_en_locked: v }))}
+                multiline
+                rows={3}
+                disabled={saveMutation.isPending}
+              />
+            </div>
+            <div className="rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.025] p-[15px]">
+              <TranslatableField
+                label="Erwartetes Datum"
+                deValue={form.expected_date}
+                onDeChange={(v) => setForm((f) => ({ ...f, expected_date: v }))}
+                enValue={form.expected_date_en}
+                onEnChange={(v) => setForm((f) => ({ ...f, expected_date_en: v }))}
+                locked={form.expected_date_en_locked}
+                onLockedChange={(v) => setForm((f) => ({ ...f, expected_date_en_locked: v }))}
+                placeholder="z.B. Sommer 2026"
+                disabled={saveMutation.isPending}
+              />
+            </div>
+
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(200px,100%),1fr))] gap-3">
+              <div className="flex flex-col gap-[7px]">
+                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Vereins-Website (URL)
+                </Label>
+                <Input
+                  value={form.club_url}
+                  onChange={(e) => setForm((f) => ({ ...f, club_url: e.target.value }))}
+                  placeholder="https://..."
+                  className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]"
+                />
+              </div>
+              <div className="flex flex-col gap-[7px]">
+                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Sortierung
+                </Label>
+                <Input
+                  type="number"
+                  value={form.sort_order}
+                  onChange={(e) => setForm((f) => ({ ...f, sort_order: parseInt(e.target.value) || 0 }))}
+                  className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-sm font-bold"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3.5 rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-[15px] py-[14px]">
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <Label className="text-[13.5px] font-bold text-foreground">Aktiv</Label>
+                <span className="text-xs text-muted-foreground">Auf der Homepage sichtbar.</span>
+              </div>
+              <Switch
+                checked={form.is_active}
+                onCheckedChange={(v) => setForm((f) => ({ ...f, is_active: v }))}
+              />
+            </div>
+
+            <div className="flex justify-end border-t border-[hsl(0_0%_12%)] pt-4">
+              <Button
+                type="submit"
+                disabled={saveMutation.isPending}
+                className="h-[42px] rounded-[11px] bg-gradient-lime px-5 text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition-opacity hover:opacity-90"
+              >
+                {saveMutation.isPending ? "Speichern…" : "Speichern"}
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

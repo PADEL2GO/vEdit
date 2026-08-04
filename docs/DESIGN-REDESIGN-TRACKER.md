@@ -589,17 +589,19 @@ Masken:
 
 > **Umgesetzt 2026-08-04** aus `Admin 08 Marketplace.dc.html` (inkl. komplettem Produkt-Dialog mit GPSR/SEO). Folge-Pass: `MarketplaceOrdersSection.tsx` + `CatalogManagerDialog.tsx` (noch alter Stil). Backend-Wiring offen: KPI-Trends, Tab-Counts Bestellungen/Retouren.
 
-### ⬜ AdminP2GPoints — `/admin/p2g-points`
+### ✅ AdminP2GPoints — `/admin/p2g-points`
 `src/pages/admin/AdminP2GPoints.tsx` · P2G-Punkte, Wallets und Rewards verwalten
 
 Masken:
-- [ ] Kopf mit Titel
-- [ ] Tab-Navigation
-- [ ] Punktewert-Wechselkurs-Karte
-- [ ] Übersicht-Tab (Dashboard)
-- [ ] Wallets-Tab
-- [ ] Freigaben-/Einlösungen-Tabs
-- [ ] Rewards-/Expert-Levels-Tabs
+- [x] Kopf mit Titel
+- [x] Tab-Navigation
+- [x] Punktewert-Wechselkurs-Karte
+- [x] Übersicht-Tab (Dashboard)
+- [ ] Wallets-Tab → Kind-Komponente `P2GWalletsTab.tsx` (Folge-Pass)
+- [x] Freigaben-/Einlösungen-Tabs
+- [ ] Rewards-/Expert-Levels-Tabs → Kind-Komponente `P2GExpertLevelsTab.tsx` (Folge-Pass)
+
+> **Umgesetzt 2026-08-04** aus `Admin 09 P2G Points.dc.html` (Seiten-Datei: Tabs, Punktewert- + Payback-Karten).
 
 ### ⬜ AdminUsers — `/admin/users`
 `src/pages/admin/AdminUsers.tsx` · Vollständige Benutzerverwaltung mit Detailansicht und Löschung
@@ -691,33 +693,39 @@ Masken:
 
 > **Umgesetzt 2026-08-04** aus `Admin 05 Clubs.dc.html`. Offen (Logik, nicht Design): `window.confirm()`-Löschdialoge durch AlertDialog ersetzen; Stale-State von `selectedClub` nach Mutationen (siehe ADMIN-UX-NOTES).
 
-### ⬜ AdminVouchers — `/admin/vouchers`
+### ✅ AdminVouchers — `/admin/vouchers`
 `src/pages/admin/AdminVouchers.tsx` · Gutscheincodes erstellen und verwalten
 
 Masken:
-- [ ] Kopfbereich mit Aktion
-- [ ] Voucher-Tabelle inkl. Lade-/Leerzustand
-- [ ] Erstellen-Dialog mit Formular
-- [ ] Bearbeiten-Dialog mit Formular
-- [ ] Lösch-Bestätigungsdialog
+- [x] Kopfbereich mit Aktion
+- [x] Voucher-Tabelle inkl. Lade-/Leerzustand
+- [x] Erstellen-Dialog mit Formular
+- [x] Bearbeiten-Dialog mit Formular
+- [x] Lösch-Bestätigungsdialog
 
-### ⬜ AdminLocationTeasers — `/admin/location-teasers`
+> **Umgesetzt 2026-08-04** aus `Admin 10 Vouchers.dc.html`. Backend-Wiring offen: KPI-Zeile (4 Kacheln), Code-Suche mit Live-Filter. Bug notiert: Zeitzonen-Versatz bei datetime-local (siehe ADMIN-UX-NOTES).
+
+### ✅ AdminLocationTeasers — `/admin/location-teasers`
 `src/pages/admin/AdminLocationTeasers.tsx` · Kommende Standort-Teaser der Homepage verwalten
 
 Masken:
-- [ ] Kopfbereich mit Aktion
-- [ ] Teaser-Liste mit Karten
-- [ ] Empty-/Ladezustand
-- [ ] Erstellen/Bearbeiten-Dialog mit Formular
+- [x] Kopfbereich mit Aktion
+- [x] Teaser-Liste mit Karten
+- [x] Empty-/Ladezustand
+- [x] Erstellen/Bearbeiten-Dialog mit Formular
 
-### ⬜ AdminSkyPadelGallery — `/admin/skypadel-gallery`
+> **Umgesetzt 2026-08-04** aus `Admin 11 Location Teasers.dc.html`. EN-Badge/Beschreibung/Sortiernummer in Liste ergänzt (Daten waren schon geladen). Offen: `confirm()` → AlertDialog; geteilte `TranslatableField` = zentraler Folge-Pass.
+
+### ✅ AdminSkyPadelGallery — `/admin/skypadel-gallery`
 `src/pages/admin/AdminSkyPadelGallery.tsx` · Galeriebilder der Vereine-Seite verwalten
 
 Masken:
-- [ ] Kopfbereich mit Upload-Aktion
-- [ ] Empty-/Ladezustand
-- [ ] Bild-Karten-Liste
-- [ ] Alt-Text-Editor pro Bild
+- [x] Kopfbereich mit Upload-Aktion
+- [x] Empty-/Ladezustand
+- [x] Bild-Karten-Liste
+- [x] Alt-Text-Editor pro Bild
+
+> **Umgesetzt 2026-08-04** aus `Admin 12 SkyPadel Galerie.dc.html`. Offen: `confirm()` → AlertDialog; Drag&Drop-Sortierung (Design zeigt Grip); Löschen lässt Storage-Datei verwaist zurück (Backend-Thema).
 
 ### ⬜ AdminPartnerTiles — `/admin/partner-tiles`
 `src/pages/admin/AdminPartnerTiles.tsx` · Partner-Logos und Hintergrundfarben der Homepage verwalten

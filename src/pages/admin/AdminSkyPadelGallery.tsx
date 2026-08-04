@@ -57,14 +57,24 @@ const AdminSkyPadelGallery = () => {
     await updateMutation.mutateAsync({ id, sort_order: newSort });
   };
 
+  const activeCount = images?.filter((img) => img.is_active).length ?? 0;
+
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">SkyPadel Galerie</h1>
-            <p className="text-muted-foreground text-sm">Bilder für die „Für Vereine"-Seite verwalten</p>
-          </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Bilder für die „Für Vereine“-Seite verwalten
+            {images?.length ? (
+              <>
+                {" — "}
+                <span className="font-bold text-foreground">
+                  {images.length} {images.length === 1 ? "Bild" : "Bilder"}
+                </span>
+                , {activeCount} aktiv
+              </>
+            ) : null}
+          </p>
           <div>
             <input
               ref={fileInputRef}
@@ -74,66 +84,87 @@ const AdminSkyPadelGallery = () => {
               className="hidden"
               onChange={handleUpload}
             />
-            <Button onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-              <Upload className="w-4 h-4 mr-2" />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="h-9 gap-2 rounded-[10px] bg-gradient-lime px-[15px] text-[13px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.28)] hover:opacity-90"
+            >
+              <Upload className="h-[15px] w-[15px]" />
               {uploading ? "Lädt…" : "Bilder hochladen"}
             </Button>
           </div>
         </div>
 
         {isLoading ? (
-          <p className="text-muted-foreground">Laden…</p>
+          <p className="text-sm text-muted-foreground">Laden…</p>
         ) : !images?.length ? (
-          <Card className="p-12 flex flex-col items-center gap-3 text-muted-foreground">
-            <ImageIcon className="w-12 h-12" />
-            <p>Noch keine Bilder hochgeladen</p>
+          <Card className="flex flex-col items-center gap-3 rounded-2xl border-border bg-gradient-card p-10 sm:p-12">
+            <span className="flex h-11 w-11 flex-none items-center justify-center rounded-[13px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
+              <ImageIcon className="h-5 w-5" />
+            </span>
+            <p className="text-sm text-muted-foreground">Noch keine Bilder hochgeladen</p>
           </Card>
         ) : (
-          <div className="grid gap-4">
+          <div className="flex flex-col gap-[11px]">
             {images.map((img) => (
-              <Card key={img.id} className="p-4 flex items-start gap-4">
-                <GripVertical className="w-5 h-5 text-muted-foreground shrink-0 mt-1" />
-                <img
-                  src={img.image_url}
-                  alt={img.alt_text || "Gallery"}
-                  className="w-28 h-20 object-cover rounded-lg shrink-0"
-                />
-                <div className="flex-1 space-y-3">
-                  <GalleryAltTextEditor
-                    image={img}
-                    onSave={async (payload) => {
-                      await (supabase as any)
-                        .from("skypadel_gallery")
-                        .update({ ...payload, updated_at: new Date().toISOString() })
-                        .eq("id", img.id);
-                      runTranslate(img.id);
-                      queryClient.invalidateQueries({ queryKey: ["skypadel-gallery"] });
-                    }}
+              <Card key={img.id} className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+                <div className="flex flex-wrap items-start gap-[15px]">
+                  <span className="flex flex-none cursor-grab pt-8 text-[hsl(0_0%_40%)]">
+                    <GripVertical className="h-4 w-4" />
+                  </span>
+                  <img
+                    src={img.image_url}
+                    alt={img.alt_text || "Gallery"}
+                    className="h-20 w-28 flex-none rounded-[10px] border border-[hsl(0_0%_15%)] object-cover"
                   />
-                  <div className="flex items-center gap-4">
-                    <label className="text-sm text-muted-foreground flex items-center gap-2">
-                      Reihenfolge:
+                  <div className="flex min-w-[240px] flex-1 flex-col gap-2">
+                    <GalleryAltTextEditor
+                      image={img}
+                      onSave={async (payload) => {
+                        await (supabase as any)
+                          .from("skypadel_gallery")
+                          .update({ ...payload, updated_at: new Date().toISOString() })
+                          .eq("id", img.id);
+                        runTranslate(img.id);
+                        queryClient.invalidateQueries({ queryKey: ["skypadel-gallery"] });
+                      }}
+                    />
+                  </div>
+                  <div className="flex flex-none flex-wrap items-start gap-3.5 sm:pt-[22px]">
+                    <label className="flex flex-col gap-[5px]">
+                      <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
+                        Reihenfolge
+                      </span>
                       <Input
                         type="number"
-                        className="w-20"
+                        className="h-[34px] w-[68px] rounded-[9px] border-[hsl(0_0%_16%)] bg-white/[0.05] text-center font-mono text-[13px] font-bold"
                         defaultValue={img.sort_order}
                         onBlur={(e) => handleSortChange(img.id, Number(e.target.value))}
                       />
                     </label>
-                    <label className="text-sm text-muted-foreground flex items-center gap-2">
-                      Aktiv:
+                    <label className="flex flex-col items-center gap-[5px]">
+                      <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
+                        Aktiv
+                      </span>
                       <Switch
+                        className="mt-[5px]"
                         checked={img.is_active}
                         onCheckedChange={(checked) =>
                           updateMutation.mutate({ id: img.id, is_active: checked })
                         }
                       />
                     </label>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Bild löschen"
+                      onClick={() => handleDelete(img.id)}
+                      className="mt-[18px] h-[34px] w-[34px] flex-none rounded-[9px] border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => handleDelete(img.id)}>
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
               </Card>
             ))}
           </div>
@@ -183,7 +214,7 @@ const GalleryAltTextEditor = ({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
       <TranslatableField
         label="Alt-Text"
         deValue={de}
@@ -197,7 +228,12 @@ const GalleryAltTextEditor = ({
       />
       {hasChanged && (
         <div className="flex justify-end">
-          <Button size="sm" onClick={handleSave} disabled={saving}>
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={saving}
+            className="h-7 rounded-lg bg-gradient-lime px-3 text-xs font-bold text-primary-foreground hover:opacity-90"
+          >
             {saving ? "Speichern…" : "Speichern"}
           </Button>
         </div>
