@@ -107,7 +107,7 @@ interface ClubUser {
 export default function AdminClubs() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
+  const [selectedClubRef, setSelectedClub] = useState<Club | null>(null);
   
   // Dialog states
   const [isClubDialogOpen, setIsClubDialogOpen] = useState(false);
@@ -179,6 +179,12 @@ export default function AdminClubs() {
       return data as Club[];
     },
   });
+
+  // Auswahl immer aus den frischen Query-Daten auflösen — der State hält nur die
+  // Auswahl fest; nach Mutationen (Toggle, Courts, Mitglieder) wäre die Kopie veraltet
+  const selectedClub = selectedClubRef
+    ? (clubs?.find((c) => c.id === selectedClubRef.id) ?? selectedClubRef)
+    : null;
 
   // Fetch all courts for assignment
   const { data: courts } = useQuery({

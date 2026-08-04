@@ -46,7 +46,9 @@ export default function AdminVisuals() {
   };
 
   const handleSaveUrl = async (key: string) => {
-    const url = urlInputs[key] ?? "";
+    // Gleicher Fallback wie die Input-Anzeige — sonst löscht "OK" ohne Eingabe die gespeicherte URL
+    const current = visuals?.find((v) => v.key === key);
+    const url = urlInputs[key] ?? (current?.image_url || "");
     await setUrlMutation.mutateAsync({ key, url });
     setUrlInputs(prev => ({ ...prev, [key]: "" }));
   };

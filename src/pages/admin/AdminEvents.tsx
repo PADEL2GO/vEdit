@@ -389,7 +389,10 @@ export default function AdminEvents() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-[7px]">
-                            <Dialog>
+                            <Dialog
+                              open={editingEvent?.id === event.id}
+                              onOpenChange={(open) => setEditingEvent(open ? event : null)}
+                            >
                               <DialogTrigger asChild>
                                 <Button
                                   variant="ghost"

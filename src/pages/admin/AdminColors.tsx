@@ -28,11 +28,23 @@ function useSaveSectionColor() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ section, hex }: { section: SectionKey; hex: string | null }) => {
-      const { error } = await (supabase as any)
+      const { data, error } = await (supabase as any)
         .from("site_visuals")
         .update({ image_url: hex, updated_at: new Date().toISOString() })
-        .eq("key", `app.theme.${section}`);
+        .eq("key", `app.theme.${section}`)
+        .select("id");
       if (error) throw error;
+      // Zeile existiert noch nicht (keine Migration seedet app.theme.*) → anlegen,
+      // sonst ginge das Speichern still verloren (0 rows affected)
+      if (!data || data.length === 0) {
+        const { error: insertError } = await (supabase as any).from("site_visuals").insert({
+          key: `app.theme.${section}`,
+          label: `Farbe · ${SECTION_LABELS[section]}`,
+          category: "app-theme",
+          image_url: hex,
+        });
+        if (insertError) throw insertError;
+      }
     },
     onSuccess: (_r, vars) => {
       qc.invalidateQueries({ queryKey: ["section-themes"] });

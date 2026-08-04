@@ -238,8 +238,8 @@ export default function AdminVouchers() {
         : v.discount_value?.toString() || ""
     );
     setFormMaxUses(v.max_uses?.toString() || "");
-    setFormValidFrom(v.valid_from ? v.valid_from.slice(0, 16) : "");
-    setFormValidUntil(v.valid_until ? v.valid_until.slice(0, 16) : "");
+    setFormValidFrom(v.valid_from ? format(new Date(v.valid_from), "yyyy-MM-dd'T'HH:mm") : "");
+    setFormValidUntil(v.valid_until ? format(new Date(v.valid_until), "yyyy-MM-dd'T'HH:mm") : "");
     setFormIsActive(v.is_active);
   };
 
@@ -262,8 +262,8 @@ export default function AdminVouchers() {
       discount_type: formDiscountType,
       discount_value: parseDiscountValue(),
       max_uses: formMaxUses ? parseInt(formMaxUses) : null,
-      valid_from: formValidFrom || new Date().toISOString(),
-      valid_until: formValidUntil || null,
+      valid_from: formValidFrom ? new Date(formValidFrom).toISOString() : new Date().toISOString(),
+      valid_until: formValidUntil ? new Date(formValidUntil).toISOString() : null,
       is_active: formIsActive,
     });
   };
@@ -280,8 +280,8 @@ export default function AdminVouchers() {
       discount_type: formDiscountType,
       discount_value: parseDiscountValue(),
       max_uses: formMaxUses ? parseInt(formMaxUses) : null,
-      valid_from: formValidFrom || editVoucher.valid_from,
-      valid_until: formValidUntil || null,
+      valid_from: formValidFrom ? new Date(formValidFrom).toISOString() : editVoucher.valid_from,
+      valid_until: formValidUntil ? new Date(formValidUntil).toISOString() : null,
       is_active: formIsActive,
     });
   };
