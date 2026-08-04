@@ -234,13 +234,17 @@ export default function AdminNewsletter() {
       .eq("id", c.id)
       .single()
       .then(({ data }: { data: { subject?: string; preheader?: string; blocks?: Block[] } | null }) => {
-        if (!data) return;
+        if (!data) {
+          toast.error("Entwurf konnte nicht geladen werden");
+          return;
+        }
         setCampaignId(c.id);
         setSubject(data.subject ?? "");
         setPreheader(data.preheader ?? "");
         setBlocks((data.blocks ?? []) as Block[]);
         window.scrollTo({ top: 0, behavior: "smooth" });
-      });
+      })
+      .catch(() => toast.error("Entwurf konnte nicht geladen werden"));
   };
 
   // Unguarded save — the actual persistence, shared by all three actions. The
@@ -340,6 +344,13 @@ export default function AdminNewsletter() {
   };
 
   const resetCampaign = async (id: string) => {
+    if (
+      !window.confirm(
+        "Kampagne wirklich auf Entwurf zurücksetzen? Ein erneutes Senden kann bereits beschickte Empfänger doppelt erreichen.",
+      )
+    ) {
+      return;
+    }
     const { error } = await db.from("newsletter_campaigns").update({ status: "draft" }).eq("id", id);
     if (error) {
       toast.error("Zurücksetzen fehlgeschlagen");

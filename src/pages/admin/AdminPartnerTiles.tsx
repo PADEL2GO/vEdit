@@ -58,7 +58,11 @@ const AdminPartnerTiles = () => {
   };
 
   const handleSortChange = async (id: string, sort_order: number) => {
-    await updateMutation.mutateAsync({ id, sort_order } as any);
+    try {
+      await updateMutation.mutateAsync({ id, sort_order } as any);
+    } catch (err: any) {
+      toast.error("Sortierung konnte nicht gespeichert werden: " + err.message);
+    }
   };
 
   const handleCreate = async () => {

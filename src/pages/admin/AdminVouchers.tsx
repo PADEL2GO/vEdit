@@ -208,6 +208,9 @@ export default function AdminVouchers() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-vouchers"] });
     },
+    onError: (err: Error) => {
+      toast.error("Status konnte nicht geändert werden: " + err.message);
+    },
   });
 
   const resetForm = () => {
@@ -269,7 +272,8 @@ export default function AdminVouchers() {
   };
 
   const handleUpdate = () => {
-    if (!editVoucher || !formCode.trim()) return;
+    if (!editVoucher) return;
+    if (!formCode.trim()) return toast.error("Code ist erforderlich");
     if (formDiscountType !== "free" && (!formDiscountValue || parseDiscountValue() === 0)) {
       return toast.error("Rabattwert erforderlich");
     }

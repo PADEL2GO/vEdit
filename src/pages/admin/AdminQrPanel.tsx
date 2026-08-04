@@ -355,7 +355,7 @@ const SectionEditor = ({
                   <Input
                     ref={ref}
                     type="file"
-                    accept="application/pdf,image/*"
+                    accept="application/pdf,image/png,image/jpeg,image/webp"
                     className="hidden"
                     onChange={(e) => handleUpload(lang, e.target.files?.[0])}
                   />
