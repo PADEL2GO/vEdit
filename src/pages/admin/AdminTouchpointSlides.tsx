@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { TranslatableField } from "@/components/admin/TranslatableField";
 import { toast } from "sonner";
-import { Upload, Trash2, Plus, ImageIcon } from "lucide-react";
+import { ImagePlus, Trash2, Plus, ImageIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -103,56 +103,74 @@ const AdminTouchpointSlides = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Partner Touchpoint Slides</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Bilder und Texte für das Karussell auf der Partner-Seite ("Wo deine Marke auf PADEL2GO trifft").
-          </p>
-        </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <p className="max-w-[660px] text-sm text-muted-foreground">
+          Bilder und Texte für das Karussell auf der Partner-Seite — „Wo deine Marke auf PADEL2GO trifft“.
+        </p>
 
         {/* Add New */}
-        <Card className="bg-card border-border p-6 space-y-4">
-          <h2 className="font-semibold text-foreground">Neuer Slide</h2>
-          <Input
-            placeholder="Titel (z. B. Branding am Court)"
-            value={newTitle}
-            onChange={e => setNewTitle(e.target.value)}
-            className="bg-background border-border"
-          />
-          <Textarea
-            placeholder="Beschreibung (optional)"
-            value={newDescription}
-            onChange={e => setNewDescription(e.target.value)}
-            className="bg-background border-border"
-            rows={2}
-          />
-          <Button onClick={handleCreate} disabled={creating} className="w-full sm:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
-            {creating ? "Hinzufügen…" : "Slide hinzufügen"}
-          </Button>
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-3.5">
+            <span className="font-display text-[15px] font-bold tracking-tight text-foreground">
+              Neuer Slide
+            </span>
+            <label className="flex flex-col gap-[7px]">
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Titel<span className="text-primary"> *</span>
+              </span>
+              <Input
+                placeholder="Titel (z. B. Branding am Court)"
+                value={newTitle}
+                onChange={e => setNewTitle(e.target.value)}
+                className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]"
+              />
+            </label>
+            <label className="flex flex-col gap-[7px]">
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Beschreibung
+              </span>
+              <Textarea
+                placeholder="Beschreibung (optional)"
+                value={newDescription}
+                onChange={e => setNewDescription(e.target.value)}
+                className="min-h-[62px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] leading-relaxed"
+                rows={2}
+              />
+            </label>
+            <Button
+              onClick={handleCreate}
+              disabled={creating}
+              className="h-10 w-full gap-[7px] rounded-[10px] bg-gradient-lime px-[17px] text-[13px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] hover:brightness-110 sm:w-auto sm:self-start"
+            >
+              <Plus className="h-[15px] w-[15px]" />
+              {creating ? "Hinzufügen…" : "Slide hinzufügen"}
+            </Button>
+          </div>
         </Card>
 
         {/* Slide List */}
         {isLoading ? (
-          <p className="text-muted-foreground">Lädt...</p>
+          <p className="text-sm text-muted-foreground">Lädt...</p>
         ) : (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-[11px]">
             {(slides || []).map(slide => (
-              <Card key={slide.id} className="bg-card border-border p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row gap-4">
+              <Card key={slide.id} className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+                <div className="flex flex-wrap items-start gap-4">
                   {/* Image Preview */}
-                  <div className="relative w-full sm:w-48 h-32 rounded-lg bg-muted overflow-hidden shrink-0 flex items-center justify-center border border-border">
+                  <div className="relative h-32 w-full flex-none overflow-hidden rounded-xl border border-[hsl(0_0%_15%)] bg-white/[0.03] sm:w-48">
                     {slide.image_url ? (
-                      <img src={slide.image_url} alt={slide.title} className="w-full h-full object-cover" />
+                      <img src={slide.image_url} alt={slide.title} className="h-full w-full object-cover" />
                     ) : (
-                      <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                      <div className="flex h-full w-full items-center justify-center">
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      </div>
                     )}
                     <button
                       onClick={() => fileInputRefs.current[slide.id]?.click()}
-                      className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm font-medium"
+                      className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/70 opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100"
                     >
-                      <Upload className="w-5 h-5 mr-1" /> Bild
+                      <ImagePlus className="h-[19px] w-[19px] text-primary" />
+                      <span className="text-xs font-bold text-foreground">Bild ändern</span>
                     </button>
                     <input
                       ref={el => { fileInputRefs.current[slide.id] = el; }}
@@ -164,7 +182,7 @@ const AdminTouchpointSlides = () => {
                   </div>
 
                   {/* Fields */}
-                  <div className="flex-1 space-y-3">
+                  <div className="min-w-0 flex-[1_1_260px]">
                     <TouchpointTextEditor
                       slide={slide}
                       onSave={async (payload) => {
@@ -172,43 +190,49 @@ const AdminTouchpointSlides = () => {
                         runTranslate(slide.id);
                       }}
                     />
-                    <div className="flex items-center gap-4 flex-wrap">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Reihenfolge</span>
-                        <Input
-                          type="number"
-                          defaultValue={slide.sort_order}
-                          onBlur={e => handleSortChange(slide.id, Number(e.target.value))}
-                          className="bg-background border-border w-20"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={slide.is_active}
-                          onCheckedChange={v => handleToggleActive(slide.id, v)}
-                        />
-                        <span className="text-sm text-muted-foreground">
-                          {slide.is_active ? "Aktiv" : "Inaktiv"}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(slide.id)}
-                        className="text-destructive hover:text-destructive ml-auto"
+                  </div>
+
+                  {/* Controls */}
+                  <div className="flex min-w-[120px] flex-none flex-row flex-wrap items-center gap-4 sm:flex-col sm:items-stretch sm:gap-[13px]">
+                    <label className="flex flex-col gap-1.5">
+                      <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">
+                        Reihenfolge
+                      </span>
+                      <Input
+                        type="number"
+                        defaultValue={slide.sort_order}
+                        onBlur={e => handleSortChange(slide.id, Number(e.target.value))}
+                        className="h-9 w-16 rounded-[9px] border-[hsl(0_0%_16%)] bg-white/[0.05] text-center font-mono text-[13px] font-bold"
+                      />
+                    </label>
+                    <div className="flex items-center gap-2.5">
+                      <Switch
+                        checked={slide.is_active}
+                        onCheckedChange={v => handleToggleActive(slide.id, v)}
+                      />
+                      <span
+                        className={`text-xs font-bold ${slide.is_active ? "text-primary" : "text-muted-foreground"}`}
                       >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                        {slide.is_active ? "Aktiv" : "Inaktiv"}
+                      </span>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(slide.id)}
+                      className="ml-auto h-[34px] w-[34px] rounded-[9px] border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] p-0 text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B] sm:ml-0 sm:self-start"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </Card>
             ))}
 
             {(slides || []).length === 0 && (
-              <Card className="bg-card border-border p-12 text-center">
-                <ImageIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">Noch keine Slides. Füge den ersten hinzu.</p>
+              <Card className="rounded-2xl border-border bg-gradient-card p-10 text-center sm:p-12">
+                <ImageIcon className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Noch keine Slides. Füge den ersten hinzu.</p>
               </Card>
             )}
           </div>
@@ -274,7 +298,7 @@ const TouchpointTextEditor = ({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       <TranslatableField
         label="Titel"
         deValue={titleDe}
@@ -301,7 +325,12 @@ const TouchpointTextEditor = ({
       />
       {hasChanged && (
         <div className="flex justify-end">
-          <Button size="sm" onClick={handleSave} disabled={saving}>
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={saving}
+            className="h-7 rounded-lg bg-gradient-lime px-3 text-xs font-bold text-primary-foreground hover:brightness-110"
+          >
             {saving ? "Speichern…" : "Speichern"}
           </Button>
         </div>

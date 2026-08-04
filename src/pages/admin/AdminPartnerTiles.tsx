@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TranslatableField } from "@/components/admin/TranslatableField";
 import { toast } from "sonner";
-import { Upload, Trash2, Plus, Palette, ImageIcon, Link } from "lucide-react";
+import { Upload, Trash2, Plus, ImageIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -89,173 +89,214 @@ const AdminPartnerTiles = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Partner-Kacheln</h1>
-            <p className="text-muted-foreground">Verwalte die Partner-Logos und Hintergrundfarben auf der Homepage.</p>
-          </div>
-        </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <p className="text-sm text-muted-foreground">
+          Partner-Logos und Hintergrundfarben auf der Homepage verwalten — alle Felder speichern sofort.
+        </p>
 
-        {/* Create new */}
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3 flex items-center gap-2"><Plus className="w-4 h-4" /> Neuen Partner hinzufügen</h3>
-          <div className="flex gap-3 items-end flex-wrap">
-            <div className="flex-1 min-w-[140px]">
-              <label className="text-sm text-muted-foreground">Name</label>
-              <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="z.B. Red Bull" />
+        {/* Neuen Partner hinzufügen */}
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-3.5">
+            <h3 className="font-display text-[15px] font-bold tracking-tight text-foreground">
+              Neuen Partner hinzufügen
+            </h3>
+            <div className="flex flex-wrap items-end gap-[11px]">
+              <div className="flex min-w-[min(180px,100%)] flex-1 flex-col gap-[7px]">
+                <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Name<span className="text-primary"> *</span>
+                </label>
+                <Input
+                  value={newName}
+                  onChange={e => setNewName(e.target.value)}
+                  placeholder="z. B. Red Bull"
+                  className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]"
+                />
+              </div>
+              <div className="flex min-w-[min(180px,100%)] flex-1 flex-col gap-[7px]">
+                <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Slug<span className="text-primary"> *</span>
+                </label>
+                <Input
+                  value={newSlug}
+                  onChange={e => setNewSlug(e.target.value)}
+                  placeholder="z. B. redbull"
+                  className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-[13px]"
+                />
+              </div>
+              <div className="flex min-w-[176px] flex-col gap-[7px]">
+                <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Typ</label>
+                <Select value={newType} onValueChange={(v: "equipment" | "local") => setNewType(v)}>
+                  <SelectTrigger className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="equipment">Equipment-Partner</SelectItem>
+                    <SelectItem value="local">Standortpartner</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                onClick={handleCreate}
+                disabled={createMutation.isPending}
+                className="h-10 gap-[7px] rounded-[10px] px-[17px] text-[13px] font-bold"
+              >
+                <Plus className="h-[15px] w-[15px]" /> Hinzufügen
+              </Button>
             </div>
-            <div className="flex-1 min-w-[140px]">
-              <label className="text-sm text-muted-foreground">Slug</label>
-              <Input value={newSlug} onChange={e => setNewSlug(e.target.value)} placeholder="z.B. redbull" />
-            </div>
-            <div className="w-[180px]">
-              <label className="text-sm text-muted-foreground">Typ</label>
-              <Select value={newType} onValueChange={(v: "equipment" | "local") => setNewType(v)}>
-                <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="equipment">Equipment-Partner</SelectItem>
-                  <SelectItem value="local">Standortpartner</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button onClick={handleCreate} disabled={createMutation.isPending}>
-              <Plus className="w-4 h-4 mr-1" /> Hinzufügen
-            </Button>
           </div>
         </Card>
 
         {isLoading ? (
-          <div className="grid gap-4">
-            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          <div className="flex flex-col gap-[11px]">
+            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 rounded-2xl" />)}
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="flex flex-col gap-[11px]">
             {tiles?.map(tile => (
-              <Card key={tile.id} className="p-4 space-y-3">
-                <div className="flex items-center gap-4 flex-wrap">
-                  {/* Logo preview */}
-                  <div
-                    className="w-20 h-20 rounded-xl flex items-center justify-center border border-border shrink-0 overflow-hidden"
-                    style={{ backgroundColor: tile.bg_color || "#FFFFFF" }}
-                  >
-                    {tile.logo_url ? (
-                      <img src={tile.logo_url} alt={tile.name} className="h-14 w-auto object-contain" />
-                    ) : (
-                      <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
-                    )}
-                  </div>
-
-                  {/* Name & slug */}
-                  <div className="flex-1 min-w-[150px]">
-                    <p className="font-semibold">{tile.name}</p>
-                    <p className="text-sm text-muted-foreground">{tile.slug}</p>
-                  </div>
-
-                  {/* Partner type */}
-                  <div className="w-[180px]">
-                    <Select
-                      value={tile.partner_type || "equipment"}
-                      onValueChange={(v) => updateMutation.mutate({ id: tile.id, partner_type: v } as any)}
+              <Card key={tile.id} className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+                <div className="flex flex-col gap-[15px]">
+                  <div className="grid grid-cols-[80px_minmax(0,1fr)] items-center gap-3.5 xl:grid-cols-[80px_minmax(0,1.1fr)_176px_minmax(0,1fr)_auto_74px_auto]">
+                    {/* Logo preview */}
+                    <div
+                      className="flex h-20 w-20 flex-none items-center justify-center overflow-hidden rounded-[14px]"
+                      style={{ backgroundColor: tile.bg_color || "#FFFFFF" }}
                     >
-                      <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="equipment">Equipment-Partner</SelectItem>
-                        <SelectItem value="local">Standortpartner</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      {tile.logo_url ? (
+                        <img src={tile.logo_url} alt={tile.name} className="h-14 w-auto object-contain" />
+                      ) : (
+                        <ImageIcon className="h-8 w-8 text-muted-foreground/30" />
+                      )}
+                    </div>
+
+                    {/* Name & slug & logo upload */}
+                    <div className="flex min-w-0 flex-col gap-[3px]">
+                      <p className="truncate font-display text-base font-bold tracking-tight text-foreground">{tile.name}</p>
+                      <p className="truncate font-mono text-[11px] text-muted-foreground">{tile.slug}</p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        ref={el => { fileInputRefs.current[tile.id] = el; }}
+                        onChange={e => handleLogoUpload(tile.id, e)}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRefs.current[tile.id]?.click()}
+                        className="mt-[5px] h-7 gap-1.5 self-start rounded-lg border-[hsl(0_0%_16%)] bg-white/5 px-[11px] text-[11.5px] font-bold text-[hsl(0_0%_82%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
+                      >
+                        <Upload className="h-3 w-3" /> Logo
+                      </Button>
+                    </div>
+
+                    <div className="max-xl:col-span-full max-xl:flex max-xl:flex-wrap max-xl:items-end max-xl:gap-3.5 xl:contents">
+                      {/* Partner type */}
+                      <div className="flex min-w-0 flex-col gap-1.5 max-xl:w-44">
+                        <label className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">Typ</label>
+                        <Select
+                          value={tile.partner_type || "equipment"}
+                          onValueChange={(v) => updateMutation.mutate({ id: tile.id, partner_type: v } as any)}
+                        >
+                          <SelectTrigger className="h-9 rounded-[9px] border-[hsl(0_0%_16%)] bg-white/5 text-[12.5px] font-semibold">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="equipment">Equipment-Partner</SelectItem>
+                            <SelectItem value="local">Standortpartner</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Website URL */}
+                      <div className="flex min-w-0 flex-col gap-1.5 max-xl:min-w-[min(220px,100%)] max-xl:flex-1">
+                        <label className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">Website-URL</label>
+                        <Input
+                          type="url"
+                          placeholder="https://…"
+                          defaultValue={tile.website_url || ""}
+                          onBlur={e => {
+                            const val = e.target.value.trim() || null;
+                            if (val !== (tile.website_url || null)) {
+                              updateMutation.mutate({ id: tile.id, website_url: val } as any);
+                            }
+                          }}
+                          className="h-9 rounded-[9px] border-[hsl(0_0%_16%)] bg-white/5 text-[12.5px]"
+                        />
+                      </div>
+
+                      {/* Color picker */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">BG-Farbe</label>
+                        <div className="flex h-9 items-center gap-[7px] rounded-[9px] border border-[hsl(0_0%_16%)] bg-white/5 px-2">
+                          <input
+                            type="color"
+                            value={tile.bg_color || "#FFFFFF"}
+                            onChange={e => handleColorChange(tile.id, e.target.value)}
+                            className="h-5 w-5 flex-none cursor-pointer appearance-none rounded-[5px] border border-white/[0.18] bg-transparent p-0 [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-[4px] [&::-webkit-color-swatch]:border-none"
+                          />
+                          <span className="whitespace-nowrap font-mono text-[11px] text-[hsl(0_0%_78%)]">
+                            {(tile.bg_color || "#FFFFFF").toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Sort order */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">Sort</label>
+                        <Input
+                          type="number"
+                          value={tile.sort_order ?? 0}
+                          onChange={e => handleSortChange(tile.id, parseInt(e.target.value) || 0)}
+                          className="h-9 w-16 rounded-[9px] border-[hsl(0_0%_16%)] bg-white/5 text-center font-mono text-[13px] font-bold"
+                        />
+                      </div>
+
+                      {/* Active toggle + delete */}
+                      <div className="flex flex-none items-center gap-[11px] max-xl:ml-auto">
+                        <Switch
+                          checked={tile.is_active ?? true}
+                          onCheckedChange={v => handleToggleActive(tile.id, v)}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(tile.id)}
+                          className="h-[34px] w-[34px] flex-none rounded-[9px] border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] p-0 text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Website URL */}
-                  <div className="flex items-center gap-2 min-w-[200px]">
-                    <Link className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <Input
-                      type="url"
-                      placeholder="https://..."
-                      defaultValue={tile.website_url || ""}
-                      onBlur={e => {
-                        const val = e.target.value.trim() || null;
-                        if (val !== (tile.website_url || null)) {
-                          updateMutation.mutate({ id: tile.id, website_url: val } as any);
-                        }
-                      }}
-                      className="h-8 text-sm"
-                    />
-                  </div>
-
-                  {/* Color picker */}
-                  <div className="flex items-center gap-2">
-                    <Palette className="w-4 h-4 text-muted-foreground" />
-                    <input
-                      type="color"
-                      value={tile.bg_color || "#FFFFFF"}
-                      onChange={e => handleColorChange(tile.id, e.target.value)}
-                      className="w-10 h-10 rounded-lg border border-border cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Sort order */}
-                  <div className="flex items-center gap-1">
-                    <label className="text-xs text-muted-foreground">Sort:</label>
-                    <Input
-                      type="number"
-                      value={tile.sort_order ?? 0}
-                      onChange={e => handleSortChange(tile.id, parseInt(e.target.value) || 0)}
-                      className="w-16 h-8 text-center"
-                    />
-                  </div>
-
-                  {/* Active toggle */}
-                  <Switch
-                    checked={tile.is_active ?? true}
-                    onCheckedChange={v => handleToggleActive(tile.id, v)}
-                  />
-
-                  {/* Upload */}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    ref={el => { fileInputRefs.current[tile.id] = el; }}
-                    onChange={e => handleLogoUpload(tile.id, e)}
-                  />
-                  <Button variant="outline" size="sm" onClick={() => fileInputRefs.current[tile.id]?.click()}>
-                    <Upload className="w-4 h-4" />
-                  </Button>
-
-                  {/* Delete */}
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(tile.id)} className="text-destructive hover:text-destructive">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {/* Local partner fields: Region + Description */}
-                {/* Description for ALL partner types — translatable DE+EN */}
-                <div className="flex gap-4 pl-24 flex-wrap">
-                  {tile.partner_type === "local" && (
-                    <div className="w-[200px]">
-                      <label className="text-xs text-muted-foreground">Region</label>
-                      <Input
-                        placeholder="z.B. Bamberg"
-                        defaultValue={tile.region || ""}
-                        onBlur={e => {
-                          const val = e.target.value.trim() || null;
-                          if (val !== (tile.region || null)) {
-                            updateMutation.mutate({ id: tile.id, region: val } as any);
-                          }
+                  {/* Local partner fields: Region + Description */}
+                  {/* Description for ALL partner types — translatable DE+EN */}
+                  <div className="flex flex-col gap-2.5 border-t border-[hsl(0_0%_12%)] pt-3.5">
+                    {tile.partner_type === "local" && (
+                      <div className="flex w-full max-w-[280px] flex-col gap-1.5">
+                        <label className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">Region</label>
+                        <Input
+                          placeholder="z. B. Bamberg"
+                          defaultValue={tile.region || ""}
+                          onBlur={e => {
+                            const val = e.target.value.trim() || null;
+                            if (val !== (tile.region || null)) {
+                              updateMutation.mutate({ id: tile.id, region: val } as any);
+                            }
+                          }}
+                          className="h-9 rounded-[9px] border-[hsl(0_0%_16%)] bg-white/5 text-[12.5px]"
+                        />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <PartnerDescriptionEditor
+                        tile={tile}
+                        onSave={async (payload) => {
+                          await updateMutation.mutateAsync({ id: tile.id, ...payload } as any);
+                          runTranslate(tile.id);
                         }}
-                        className="h-8 text-sm"
                       />
                     </div>
-                  )}
-                  <div className="flex-1 min-w-[300px]">
-                    <PartnerDescriptionEditor
-                      tile={tile}
-                      onSave={async (payload) => {
-                        await updateMutation.mutateAsync({ id: tile.id, ...payload } as any);
-                        runTranslate(tile.id);
-                      }}
-                    />
                   </div>
                 </div>
               </Card>
@@ -323,7 +364,7 @@ const PartnerDescriptionEditor = ({
       />
       {hasChanged && (
         <div className="flex justify-end">
-          <Button size="sm" onClick={handleSave} disabled={saving}>
+          <Button size="sm" onClick={handleSave} disabled={saving} className="h-7 rounded-lg px-3 text-xs font-bold">
             {saving ? "Speichern…" : "Speichern"}
           </Button>
         </div>

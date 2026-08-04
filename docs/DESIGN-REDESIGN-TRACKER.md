@@ -727,49 +727,57 @@ Masken:
 
 > **Umgesetzt 2026-08-04** aus `Admin 12 SkyPadel Galerie.dc.html`. Offen: `confirm()` → AlertDialog; Drag&Drop-Sortierung (Design zeigt Grip); Löschen lässt Storage-Datei verwaist zurück (Backend-Thema).
 
-### ⬜ AdminPartnerTiles — `/admin/partner-tiles`
+### ✅ AdminPartnerTiles — `/admin/partner-tiles`
 `src/pages/admin/AdminPartnerTiles.tsx` · Partner-Logos und Hintergrundfarben der Homepage verwalten
 
 Masken:
-- [ ] Kopfbereich
-- [ ] Karte Neuen Partner hinzufügen
-- [ ] Skeleton-Ladezustand
-- [ ] Partner-Karten-Liste
-- [ ] Beschreibungs-Editor pro Partner
+- [x] Kopfbereich
+- [x] Karte Neuen Partner hinzufügen
+- [x] Skeleton-Ladezustand
+- [x] Partner-Karten-Liste
+- [x] Beschreibungs-Editor pro Partner
 
-### ⬜ AdminTouchpointSlides — `/admin/touchpoint-slides`
+> **Umgesetzt 2026-08-04** aus `Admin 13 Partner-Kacheln.dc.html`. Offen: `confirm()` → AlertDialog; `handleSortChange` ohne Debounce/try-catch (siehe ADMIN-UX-NOTES).
+
+### ✅ AdminTouchpointSlides — `/admin/touchpoint-slides`
 `src/pages/admin/AdminTouchpointSlides.tsx` · Karussell-Slides der Partner-Seite verwalten (Bild, Text, Reihenfolge)
 
 Masken:
-- [ ] Seitenkopf mit Titel
-- [ ] Neuer-Slide-Formular-Card
-- [ ] Slide-Listenkarte mit Bild-Upload und Feldern
-- [ ] Zweisprachiger Text-Editor (Titel/Beschreibung)
-- [ ] Empty-State ohne Slides
-- [ ] Ladezustand
+- [x] Seitenkopf mit Titel
+- [x] Neuer-Slide-Formular-Card
+- [x] Slide-Listenkarte mit Bild-Upload und Feldern
+- [x] Zweisprachiger Text-Editor (Titel/Beschreibung)
+- [x] Empty-State ohne Slides
+- [x] Ladezustand
 
-### ⬜ AdminQrPanel — `/admin/qr-panel`
+> **Umgesetzt 2026-08-04** aus `Admin 14 Touchpoint Slides.dc.html`. Offen: `confirm()` → AlertDialog; TranslatableField = zentraler Folge-Pass.
+
+### ✅ AdminQrPanel — `/admin/qr-panel`
 `src/pages/admin/AdminQrPanel.tsx` · QR-Landingpage-Sektionen mit Texten und PDFs verwalten
 
 Masken:
-- [ ] Seitenkopf mit Live-Link
-- [ ] Neue-Sektion-Anlegen-Card
-- [ ] Sektions-Editor-Card mit Sichtbarkeit und Sortierung
-- [ ] Zweisprachige Textfelder
-- [ ] DE/EN Datei-Upload-Bereich
-- [ ] Skeleton-Ladezustand
-- [ ] Empty-State ohne Sektionen
+- [x] Seitenkopf mit Live-Link
+- [x] Neue-Sektion-Anlegen-Card
+- [x] Sektions-Editor-Card mit Sichtbarkeit und Sortierung
+- [x] Zweisprachige Textfelder
+- [x] DE/EN Datei-Upload-Bereich
+- [x] Skeleton-Ladezustand
+- [x] Empty-State ohne Sektionen
 
-### ⬜ AdminNews — `/admin/news`
+> **Umgesetzt 2026-08-04** aus `Admin 15 QR-Panel.dc.html`. Offen: `confirm()` → AlertDialog (Sektion + Datei); `accept`-Attribut enger fassen (erlaubt browserseitig GIF/SVG, Validierung lehnt erst danach ab).
+
+### ✅ AdminNews — `/admin/news`
 `src/pages/admin/AdminNews.tsx` · News-Artikel für Startseite und Dashboard verwalten
 
 Masken:
-- [ ] Seitenkopf mit Neuer-Artikel-Button
-- [ ] Artikel-Listenkarten
-- [ ] Empty-State ohne Artikel
-- [ ] Artikel-Editor-Dialog
-- [ ] KI-Voice-In-Generierungsbereich
-- [ ] Formularfelder mit Titelbild und Editor
+- [x] Seitenkopf mit Neuer-Artikel-Button
+- [x] Artikel-Listenkarten
+- [x] Empty-State ohne Artikel
+- [x] Artikel-Editor-Dialog
+- [x] KI-Voice-In-Generierungsbereich
+- [x] Formularfelder mit Titelbild und Editor
+
+> **Umgesetzt 2026-08-04** aus `Admin 16 News.dc.html` (Seitenkopf, KI-Generator, Autoren, Filter+Liste, kompletter Artikel-Dialog). Nebenbei behoben: Filter-Chips verschwanden bei 0 Treffern (Filter war nicht zurücksetzbar). Folge-Pass: `WritingStyleManager.tsx`, `VoiceInArticle.tsx`. Offen: `confirm()` → AlertDialog.
 
 ### ✅ AdminSettings — `/admin/settings`
 `src/pages/admin/AdminSettings.tsx` · System- und App-Einstellungen umschalten

@@ -26,7 +26,6 @@ import {
   X,
   Save,
   Loader2,
-  QrCode,
 } from "lucide-react";
 
 const TRANSLATABLE_FIELDS = ["title", "description"];
@@ -169,156 +168,202 @@ const SectionEditor = ({
   };
 
   return (
-    <Card className="p-5 md:p-6 space-y-4">
-      {/* Header row */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <code className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground font-mono">
-            /{section.slug}
-          </code>
-          <label className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-            <Switch
-              checked={section.is_visible}
-              onCheckedChange={handleToggleVisible}
-            />
-            {section.is_visible ? "Sichtbar" : "Versteckt"}
-          </label>
+    <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+      <div className="flex flex-col gap-[17px]">
+        {/* Header row */}
+        <div className="flex flex-wrap items-center justify-between gap-3.5">
+          <div className="flex flex-wrap items-center gap-[11px]">
+            <code className="whitespace-nowrap rounded-lg border border-primary/[0.26] bg-primary/[0.09] px-[11px] py-[5px] font-mono text-[12.5px] font-bold text-primary">
+              /{section.slug}
+            </code>
+            <label className="inline-flex cursor-pointer items-center gap-2.5">
+              <Switch
+                checked={section.is_visible}
+                onCheckedChange={handleToggleVisible}
+              />
+              <span
+                className={`whitespace-nowrap text-xs font-bold ${
+                  section.is_visible ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                {section.is_visible ? "Sichtbar" : "Versteckt"}
+              </span>
+            </label>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={isFirst}
+              onClick={onMoveUp}
+              title="Nach oben"
+              className="h-8 w-8 rounded-[9px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground"
+            >
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={isLast}
+              onClick={onMoveDown}
+              title="Nach unten"
+              className="h-8 w-8 rounded-[9px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onDelete}
+              title="Sektion löschen"
+              className="h-8 w-8 rounded-[9px] border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" disabled={isFirst} onClick={onMoveUp} title="Nach oben">
-            <ChevronUp className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="icon" disabled={isLast} onClick={onMoveDown} title="Nach unten">
-            <ChevronDown className="w-4 h-4" />
-          </Button>
+
+        {/* Translatable fields */}
+        <div className="flex flex-col gap-[11px]">
+          <TranslatableField
+            label="Titel"
+            deValue={state.title}
+            onDeChange={(v) => setState((s) => ({ ...s, title: v }))}
+            enValue={state.title_en}
+            onEnChange={(v) => setState((s) => ({ ...s, title_en: v }))}
+            locked={state.title_en_locked}
+            onLockedChange={(v) => setState((s) => ({ ...s, title_en_locked: v }))}
+            placeholder="z. B. Für Vereine"
+          />
+          <TranslatableField
+            label="Beschreibung"
+            multiline
+            rows={3}
+            deValue={state.description}
+            onDeChange={(v) => setState((s) => ({ ...s, description: v }))}
+            enValue={state.description_en}
+            onEnChange={(v) => setState((s) => ({ ...s, description_en: v }))}
+            locked={state.description_en_locked}
+            onLockedChange={(v) => setState((s) => ({ ...s, description_en_locked: v }))}
+            placeholder="Worum geht es in dieser Sektion?"
+          />
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={onDelete}
-            title="Sektion löschen"
-            className="text-destructive hover:text-destructive"
+            onClick={handleSave}
+            disabled={saving}
+            size="sm"
+            className="h-9 self-start rounded-[10px] px-[15px] text-[12.5px] font-bold"
           >
-            <Trash2 className="w-4 h-4" />
+            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            Texte speichern
           </Button>
         </div>
-      </div>
 
-      {/* Translatable fields */}
-      <TranslatableField
-        label="Titel"
-        deValue={state.title}
-        onDeChange={(v) => setState((s) => ({ ...s, title: v }))}
-        enValue={state.title_en}
-        onEnChange={(v) => setState((s) => ({ ...s, title_en: v }))}
-        locked={state.title_en_locked}
-        onLockedChange={(v) => setState((s) => ({ ...s, title_en_locked: v }))}
-        placeholder="z.B. Für Vereine"
-      />
-      <TranslatableField
-        label="Beschreibung"
-        multiline
-        rows={3}
-        deValue={state.description}
-        onDeChange={(v) => setState((s) => ({ ...s, description: v }))}
-        enValue={state.description_en}
-        onEnChange={(v) => setState((s) => ({ ...s, description_en: v }))}
-        locked={state.description_en_locked}
-        onLockedChange={(v) => setState((s) => ({ ...s, description_en_locked: v }))}
-        placeholder="Worum geht es in dieser Sektion?"
-      />
-
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={saving} size="sm">
-          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-          Texte speichern
-        </Button>
-      </div>
-
-      {/* File uploads */}
-      <div className="grid sm:grid-cols-2 gap-4 pt-4 border-t border-border">
-        {(["de", "en"] as const).map((lang) => {
-          const url = lang === "de" ? section.file_de_url : section.file_en_url;
-          const name = lang === "de" ? section.file_de_name : section.file_en_name;
-          const size = lang === "de" ? section.file_de_size_bytes : section.file_en_size_bytes;
-          const ref = lang === "de" ? fileInputDe : fileInputEn;
-          return (
-            <div key={lang} className="space-y-2">
-              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
-                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${lang === "de" ? "bg-primary/15 text-primary" : "bg-[#0F2B46]/15 text-[#0F2B46] dark:text-white dark:bg-white/15"}`}>
-                  {lang.toUpperCase()}
-                </span>
-                Datei
-              </div>
-              {url ? (
-                <div className="rounded-xl border border-border bg-muted/40 p-3 flex flex-col gap-2">
-                  <div className="flex items-start gap-2 min-w-0">
-                    <FileText className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate" title={name ?? ""}>
-                        {name ?? "Datei"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{formatSize(size)}</p>
+        {/* File uploads */}
+        <div className="flex flex-col gap-[11px] border-t border-[hsl(0_0%_12%)] pt-[15px]">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Downloads
+            </span>
+            <span className="text-[11.5px] text-muted-foreground/80">
+              PDF / PNG / JPG / WEBP · max. 25 MB
+            </span>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(["de", "en"] as const).map((lang) => {
+              const url = lang === "de" ? section.file_de_url : section.file_en_url;
+              const name = lang === "de" ? section.file_de_name : section.file_en_name;
+              const size = lang === "de" ? section.file_de_size_bytes : section.file_en_size_bytes;
+              const ref = lang === "de" ? fileInputDe : fileInputEn;
+              return (
+                <div
+                  key={lang}
+                  className="flex flex-col gap-[9px] rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.028] p-3.5"
+                >
+                  <span
+                    className={`self-start whitespace-nowrap rounded-full border px-[9px] py-[3px] font-mono text-[9.5px] uppercase tracking-[0.16em] ${
+                      lang === "de"
+                        ? "border-primary/30 bg-primary/10 text-primary"
+                        : "border-[hsl(200_100%_75%/0.3)] bg-[hsl(200_100%_75%/0.1)] text-[#7FD4FF]"
+                    }`}
+                  >
+                    {lang.toUpperCase()}
+                  </span>
+                  {url ? (
+                    <div className="flex flex-col gap-2.5">
+                      <div className="flex items-center gap-[11px] rounded-[11px] border border-[hsl(0_0%_15%)] bg-white/[0.04] px-3 py-[11px]">
+                        <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-primary/[0.28] bg-primary/10 text-primary">
+                          <FileText className="h-[15px] w-[15px]" />
+                        </span>
+                        <div className="flex min-w-0 flex-1 flex-col gap-px">
+                          <span className="truncate text-[12.5px] font-semibold text-foreground" title={name ?? ""}>
+                            {name ?? "Datei"}
+                          </span>
+                          <span className="whitespace-nowrap font-mono text-[10.5px] text-muted-foreground">
+                            {formatSize(size)}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFile(lang)}
+                          title="Entfernen"
+                          className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-[7px] border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] transition-colors hover:bg-[hsl(0_100%_71%/0.16)]"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-semibold text-primary transition-colors hover:text-primary/80"
+                        >
+                          Öffnen
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => ref.current?.click()}
+                          disabled={uploadingLang === lang}
+                          className="h-7 rounded-lg border-[hsl(0_0%_16%)] bg-white/5 px-[11px] text-[11.5px] font-bold text-[hsl(0_0%_82%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
+                        >
+                          {uploadingLang === lang ? (
+                            <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                          ) : (
+                            <Upload className="mr-1.5 h-3 w-3" />
+                          )}
+                          Ersetzen
+                        </Button>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFile(lang)}
-                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
-                      title="Entfernen"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="flex gap-2">
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-md border border-border hover:bg-accent transition-colors"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      Öffnen
-                    </a>
+                  ) : (
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
                       onClick={() => ref.current?.click()}
                       disabled={uploadingLang === lang}
+                      className="flex h-24 w-full flex-col items-center justify-center gap-2 rounded-[11px] border border-dashed border-[hsl(0_0%_20%)] bg-white/[0.028] text-muted-foreground transition-colors hover:border-primary/50 hover:bg-white/[0.028] hover:text-muted-foreground"
                     >
                       {uploadingLang === lang ? (
-                        <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                        <Loader2 className="h-[18px] w-[18px] animate-spin" />
                       ) : (
-                        <Upload className="w-3 h-3 mr-1.5" />
+                        <Upload className="h-[18px] w-[18px]" />
                       )}
-                      Ersetzen
+                      <span className="text-xs">PDF hochladen (max. 25 MB)</span>
                     </Button>
-                  </div>
-                </div>
-              ) : (
-                <Button
-                  variant="outline"
-                  className="w-full h-20 border-dashed flex flex-col gap-1"
-                  onClick={() => ref.current?.click()}
-                  disabled={uploadingLang === lang}
-                >
-                  {uploadingLang === lang ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Upload className="w-4 h-4" />
                   )}
-                  <span className="text-xs">PDF hochladen (max 25 MB)</span>
-                </Button>
-              )}
-              <Input
-                ref={ref}
-                type="file"
-                accept="application/pdf,image/*"
-                className="hidden"
-                onChange={(e) => handleUpload(lang, e.target.files?.[0])}
-              />
-            </div>
-          );
-        })}
+                  <Input
+                    ref={ref}
+                    type="file"
+                    accept="application/pdf,image/*"
+                    className="hidden"
+                    onChange={(e) => handleUpload(lang, e.target.files?.[0])}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </Card>
   );
@@ -369,59 +414,69 @@ const AdminQrPanel = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <QrCode className="h-6 w-6 text-primary" />
-              QR-Panel
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Inhalte für die Visitenkarten-Landingpage <code className="text-xs font-mono px-1.5 py-0.5 rounded bg-muted">/qr</code>.
-              Sektionen, Texte und PDFs verwalten. Änderungen sind sofort live.
-            </p>
-          </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <div className="flex flex-wrap items-center gap-[11px]">
+          <p className="max-w-[640px] text-sm text-muted-foreground">
+            Inhalte für die Visitenkarten-Landingpage{" "}
+            <code className="font-mono text-[13px] text-primary">/qr</code> — Sektionen, Texte und
+            PDFs verwalten.
+          </p>
+          <span className="inline-flex items-center gap-[7px] whitespace-nowrap rounded-full border border-primary/[0.28] bg-primary/[0.09] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-primary">
+            <span className="h-[5px] w-[5px] rounded-full bg-primary" />
+            Sofort live
+          </span>
           <a
             href="/qr"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+            className="ml-auto inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-[10px] border border-[hsl(0_0%_16%)] bg-white/5 px-[13px] text-[12.5px] font-bold text-[hsl(0_0%_85%)] transition-colors hover:border-primary/40 hover:text-primary"
           >
-            <ExternalLink className="w-4 h-4" />
+            <ExternalLink className="h-3.5 w-3.5" />
             Live-Seite öffnen
           </a>
         </div>
 
         {/* Add new */}
-        <Card className="p-4 flex items-center gap-3">
-          <Input
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="Neue Sektion (z.B. 'Pressekit')"
-            className="flex-1"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleCreate();
-            }}
-          />
-          <Button onClick={handleCreate} disabled={creating || !newTitle.trim()}>
-            {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-            Hinzufügen
-          </Button>
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-wrap items-end gap-[11px]">
+            <label className="flex min-w-[min(240px,100%)] flex-1 flex-col gap-[7px]">
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Neue Sektion<span className="text-primary"> *</span>
+              </span>
+              <Input
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Neue Sektion (z. B. „Pressekit“)"
+                className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreate();
+                }}
+              />
+            </label>
+            <Button
+              onClick={handleCreate}
+              disabled={creating || !newTitle.trim()}
+              className="h-10 rounded-[10px] px-[17px] text-[13px] font-bold"
+            >
+              {creating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+              Hinzufügen
+            </Button>
+          </div>
         </Card>
 
         {/* Sections list */}
         {isLoading ? (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3.5">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="h-64 animate-pulse bg-muted/30" />
+              <Card key={i} className="h-64 animate-pulse rounded-2xl border-border bg-muted/30" />
             ))}
           </div>
         ) : sections.length === 0 ? (
-          <Card className="p-10 text-center text-muted-foreground">
+          <Card className="rounded-2xl border-border bg-gradient-card p-10 text-center text-sm text-muted-foreground">
             Noch keine Sektion. Leg oben eine an.
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3.5">
             {sections.map((section, index) => (
               <SectionEditor
                 key={section.id}

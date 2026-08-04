@@ -23,19 +23,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  ChevronDown,
   Eye,
+  FileUp,
   Flame,
+  Globe,
   GripVertical,
+  Heart,
   Image as ImageIcon,
+  ImagePlus,
   Languages,
   Loader2,
+  Lock,
   Newspaper,
   Pencil,
   Plus,
   Sparkles,
-  ThumbsUp,
-  UserRound,
   Trash2,
+  UserX,
   X,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -62,6 +67,20 @@ import { useTranslateContent, toastTranslateResult } from "@/hooks/useTranslateC
 import { AUDIENCE_LABELS, TOPICS, topicColor, type Article, type ArticleAudience, type NewsAuthor } from "@/types/article";
 
 const ARTICLE_TRANSLATE_FIELDS = ["title", "excerpt", "body_html", "title_highlight", "lead"];
+
+const AUDIENCE_ICONS: Record<ArticleAudience, typeof Globe> = {
+  everyone: Globe,
+  logged_in: Lock,
+  logged_out: UserX,
+};
+
+const fieldLabelClass = "font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground";
+const inputClass = "h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]";
+const areaClass = "rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] leading-relaxed";
+const selectTriggerClass = "h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px] font-semibold";
+const hintClass = "text-[11px] leading-[1.45] text-[hsl(0_0%_58%)]";
+const iconBtnClass =
+  "h-[30px] w-[30px] rounded-lg border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_82%)]";
 
 interface ArticleForm {
   title: string;
@@ -170,102 +189,122 @@ function AuthorManager() {
   };
 
   return (
-    <Card className="p-5">
-      <div className="mb-4 flex items-start gap-3">
-        <UserRound className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-        <div>
-          <h2 className="font-bold">Autoren</h2>
-          <p className="text-sm text-muted-foreground">
+    <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+      <div className="flex flex-col gap-[15px]">
+        <div className="flex flex-col gap-[3px]">
+          <span className="font-display text-[15px] font-bold tracking-tight text-foreground">Autoren</span>
+          <p className="text-[11.5px] leading-normal text-muted-foreground">
             Erscheinen als „Geschrieben von" auf der Artikelseite — Foto anklicken zum Hochladen.
           </p>
         </div>
-      </div>
 
-      <div className="space-y-2">
-        {authors.map((a) => (
-          <div key={a.id} className="flex items-center gap-2 rounded-lg border border-border p-2">
-            <label
-              className={a.user_id ? "cursor-default" : "cursor-pointer"}
-              title={a.user_id ? "Profilbild kommt aus dem verknüpften Account und bleibt automatisch synchron" : "Foto hochladen"}
+        <div className="flex flex-col gap-[9px]">
+          {authors.map((a) => (
+            <div
+              key={a.id}
+              className="flex items-center gap-3 rounded-xl border border-[hsl(0_0%_12%)] bg-white/[0.028] px-3 py-[11px]"
             >
-              {a.avatar_url ? (
-                <img src={a.avatar_url} alt={a.name} className="h-10 w-10 rounded-full object-cover" />
-              ) : (
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-display text-sm font-extrabold text-primary-foreground">
-                  {a.name.slice(0, 2).toUpperCase()}
-                </span>
-              )}
-              {!a.user_id && (
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    e.target.value = "";
-                    if (file) uploadAvatar(a, file);
+              <label
+                className={`flex-none ${a.user_id ? "cursor-default" : "cursor-pointer"}`}
+                title={a.user_id ? "Profilbild kommt aus dem verknüpften Account und bleibt automatisch synchron" : "Foto hochladen"}
+              >
+                {a.avatar_url ? (
+                  <img
+                    src={a.avatar_url}
+                    alt={a.name}
+                    className="h-[38px] w-[38px] rounded-full border border-[hsl(0_0%_18%)] object-cover"
+                  />
+                ) : (
+                  <span
+                    className={`flex h-[38px] w-[38px] items-center justify-center rounded-full border font-display text-xs font-extrabold ${
+                      a.user_id
+                        ? "border-primary bg-gradient-lime text-primary-foreground"
+                        : "border-[hsl(0_0%_18%)] bg-white/[0.06] text-[hsl(0_0%_82%)]"
+                    }`}
+                  >
+                    {a.name.slice(0, 2).toUpperCase()}
+                  </span>
+                )}
+                {!a.user_id && (
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (file) uploadAvatar(a, file);
+                    }}
+                  />
+                )}
+              </label>
+              <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
+                <Input
+                  defaultValue={a.name}
+                  className="h-[30px] rounded-lg border-[hsl(0_0%_14%)] bg-white/[0.04] px-[9px] text-[13px] font-semibold"
+                  onBlur={(e) => {
+                    const v = e.target.value.trim();
+                    if (v && v !== a.name) save(a, { name: v });
                   }}
                 />
-              )}
-            </label>
-            <Input
-              defaultValue={a.name}
-              className="h-8 flex-1"
-              onBlur={(e) => {
-                const v = e.target.value.trim();
-                if (v && v !== a.name) save(a, { name: v });
-              }}
-            />
-            <Input
-              defaultValue={a.role ?? ""}
-              placeholder="Rolle, z. B. Founder"
-              className="h-8 w-44"
-              onBlur={(e) => {
-                const v = e.target.value.trim();
-                if (v !== (a.role ?? "")) save(a, { role: v });
-              }}
-            />
-            <Input
-              defaultValue={a.role_en ?? ""}
-              placeholder="Rolle EN"
-              className="h-8 w-36"
-              onBlur={(e) => {
-                const v = e.target.value.trim();
-                if (v !== (a.role_en ?? "")) save(a, { role_en: v });
-              }}
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-destructive"
-              onClick={() => {
-                if (confirm(`Autor „${a.name}" löschen? Artikel behalten dann keinen Autor.`)) deleteMutation.mutate(a.id);
-              }}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        ))}
-      </div>
+                <div className="flex gap-1.5">
+                  <Input
+                    defaultValue={a.role ?? ""}
+                    placeholder="Rolle, z. B. Founder"
+                    className="h-7 min-w-0 flex-1 rounded-lg border-[hsl(0_0%_14%)] bg-white/[0.04] px-[9px] text-[11.5px] text-[hsl(0_0%_78%)]"
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      if (v !== (a.role ?? "")) save(a, { role: v });
+                    }}
+                  />
+                  <Input
+                    defaultValue={a.role_en ?? ""}
+                    placeholder="Rolle EN"
+                    className="h-7 min-w-0 flex-1 rounded-lg border-[hsl(200_100%_75%/0.16)] bg-[hsl(200_100%_75%/0.04)] px-[9px] text-[11.5px] text-[hsl(0_0%_78%)]"
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      if (v !== (a.role_en ?? "")) save(a, { role_en: v });
+                    }}
+                  />
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 flex-none rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+                onClick={() => {
+                  if (confirm(`Autor „${a.name}" löschen? Artikel behalten dann keinen Autor.`)) deleteMutation.mutate(a.id);
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+        </div>
 
-      <div className="mt-3 flex gap-2">
-        <Input
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          placeholder="Name"
-          className="h-9 flex-1"
-          onKeyDown={(e) => e.key === "Enter" && addAuthor()}
-        />
-        <Input
-          value={newRole}
-          onChange={(e) => setNewRole(e.target.value)}
-          placeholder="Rolle (optional)"
-          className="h-9 w-44"
-          onKeyDown={(e) => e.key === "Enter" && addAuthor()}
-        />
-        <Button onClick={addAuthor} disabled={!newName.trim() || saveMutation.isPending}>
-          <Plus className="mr-1 h-4 w-4" /> Anlegen
-        </Button>
+        <div className="flex flex-wrap items-center gap-2 border-t border-[hsl(0_0%_12%)] pt-[13px]">
+          <Input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Name"
+            className="h-9 min-w-[110px] flex-1 rounded-[9px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[12.5px]"
+            onKeyDown={(e) => e.key === "Enter" && addAuthor()}
+          />
+          <Input
+            value={newRole}
+            onChange={(e) => setNewRole(e.target.value)}
+            placeholder="Rolle (optional)"
+            className="h-9 min-w-[110px] flex-1 rounded-[9px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[12.5px]"
+            onKeyDown={(e) => e.key === "Enter" && addAuthor()}
+          />
+          <Button
+            onClick={addAuthor}
+            disabled={!newName.trim() || saveMutation.isPending}
+            className="h-9 rounded-[9px] bg-gradient-lime px-3.5 text-[12.5px] font-bold text-primary-foreground hover:opacity-90"
+          >
+            <Plus className="mr-1 h-4 w-4" /> Anlegen
+          </Button>
+        </div>
       </div>
     </Card>
   );
@@ -281,10 +320,10 @@ function ArticlePreview({ form }: { form: ArticleForm }) {
   const dateLabel = format(new Date(), "dd.MM.yyyy");
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Live-Vorschau</p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Live-Vorschau</p>
 
-      <div className="w-full max-w-[260px]">
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] border border-border bg-black">
+      <div className="w-full">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-[14px] border border-[hsl(0_0%_15%)] bg-black">
           {form.cover_image_url ? (
             <img src={form.cover_image_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
           ) : (
@@ -315,7 +354,7 @@ function ArticlePreview({ form }: { form: ArticleForm }) {
       </div>
 
       <div
-        className="rounded-2xl border border-border p-4"
+        className="rounded-2xl border border-[hsl(0_0%_15%)] p-4"
         style={{ background: `radial-gradient(120% 120% at 85% 0%, ${acc}26, transparent 60%), #000` }}
       >
         <div className="flex flex-wrap items-center gap-2">
@@ -348,7 +387,9 @@ function ArticlePreview({ form }: { form: ArticleForm }) {
 function CharCount({ value, limit }: { value: string; limit: number }) {
   const over = value.length > limit;
   return (
-    <span className={`text-xs tabular-nums ${over ? "font-semibold text-destructive" : "text-muted-foreground"}`}>
+    <span
+      className={`whitespace-nowrap font-mono text-[10.5px] tabular-nums ${over ? "font-semibold text-destructive" : "text-[hsl(0_0%_58%)]"}`}
+    >
       {value.length}/{limit}
     </span>
   );
@@ -672,680 +713,847 @@ export default function AdminNews() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Newspaper className="h-6 w-6 text-primary" />
-              News / Artikel
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Artikel für /news, die Startseite und das Dashboard verwalten — Reihenfolge per Drag &amp; Drop
-            </p>
-          </div>
-          <div className="flex gap-2">
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Artikel für /news, die Startseite und das Dashboard verwalten — Reihenfolge per Drag &amp; Drop.
+          </p>
+          <div className="flex flex-wrap items-center gap-2.5">
             {!!articles?.length && (
-              <Button variant="outline" onClick={translateAll} disabled={!!bulk}>
+              <Button
+                variant="outline"
+                onClick={translateAll}
+                disabled={!!bulk}
+                className="h-9 rounded-[10px] border-[hsl(0_0%_16%)] bg-white/5 px-3.5 text-[12.5px] font-bold text-[hsl(0_0%_85%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
+              >
                 {bulk ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     {t("admin.translateAllRunning", { done: bulk.done, total: bulk.total })}
                   </>
                 ) : (
                   <>
-                    <Languages className="h-4 w-4 mr-2" /> {t("admin.translateAll")}
+                    <Languages className="mr-2 h-4 w-4" /> {t("admin.translateAll")}
                   </>
                 )}
               </Button>
             )}
-            <Button onClick={openCreate}>
-              <Plus className="h-4 w-4 mr-2" /> Neuer Artikel
+            <Button
+              onClick={openCreate}
+              className="h-9 rounded-[10px] bg-gradient-lime px-[15px] text-[13px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.28)] hover:opacity-90"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Neuer Artikel
             </Button>
           </div>
         </div>
 
-        {/* Wochen-News-Generator: 3 Quell-URLs → 3 KI-Entwürfe (DE + EN) */}
-        <Card className="p-5 border-primary/30">
-          <div className="flex items-start gap-3 mb-4">
-            <Sparkles className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-            <div>
-              <h2 className="font-bold">Wochen-News-Generator (KI)</h2>
-              <p className="text-sm text-muted-foreground">
-                Bis zu 3 Quellen — URLs aus der Padel-Presse und/oder hochgeladene Dateien (PDF, z.B.
-                Pressemitteilungen, HTML oder TXT-Notizen) — pro Quelle entsteht ein eigenständig
-                formulierter Artikel als <strong>Entwurf</strong> — inkl. Topic, Titel-Highlight, Lead,
-                Lesezeit und SEO-Feldern (DE + automatische EN-Übersetzung, mit KI-Kennzeichnung und bei
-                URLs mit Quellenlink). Optional orientiert sich die KI an einem gespeicherten
-                Schreibstil. Danach: Titelbild (4:5) hinterlegen, prüfen und veröffentlichen.
-              </p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {genUrls.map((url, idx) => (
-              <Input
-                key={idx}
-                value={url}
-                onChange={(e) => setGenUrls((prev) => prev.map((u, i) => (i === idx ? e.target.value : u)))}
-                placeholder={`https://… (Quelle ${idx + 1}${idx > 0 ? " – optional" : ""})`}
-                disabled={generating}
-              />
-            ))}
-            {genFiles.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {genFiles.map((f, i) => (
-                  <span
-                    key={`${f.name}-${i}`}
-                    className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-xs"
-                  >
-                    {f.name}
-                    <button
-                      type="button"
-                      onClick={() => setGenFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                      disabled={generating}
-                      title="Entfernen"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
+        <div className="grid items-start gap-[18px] xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+          {/* Wochen-News-Generator: 3 Quell-URLs → 3 KI-Entwürfe (DE + EN) */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-[15px]">
+              <div className="flex items-start gap-3">
+                <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[10px] border border-primary/30 bg-primary/10 text-primary">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span className="font-display text-[15px] font-bold tracking-tight text-foreground">
+                    Wochen-News-Generator (KI)
                   </span>
+                  <p className="text-[11.5px] leading-relaxed text-muted-foreground">
+                    Bis zu 3 Quellen — URLs aus der Padel-Presse und/oder hochgeladene Dateien (PDF, z.B.
+                    Pressemitteilungen, HTML oder TXT-Notizen) — pro Quelle entsteht ein eigenständig
+                    formulierter Artikel als <strong className="text-foreground">Entwurf</strong> — inkl. Topic,
+                    Titel-Highlight, Lead, Lesezeit und SEO-Feldern (DE + automatische EN-Übersetzung, mit
+                    KI-Kennzeichnung und bei URLs mit Quellenlink). Optional orientiert sich die KI an einem
+                    gespeicherten Schreibstil. Danach: Titelbild (4:5) hinterlegen, prüfen und veröffentlichen.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-[9px]">
+                {genUrls.map((url, idx) => (
+                  <Input
+                    key={idx}
+                    value={url}
+                    onChange={(e) => setGenUrls((prev) => prev.map((u, i) => (i === idx ? e.target.value : u)))}
+                    placeholder={`https://… (Quelle ${idx + 1}${idx > 0 ? " – optional" : ""})`}
+                    disabled={generating}
+                    className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]"
+                  />
                 ))}
               </div>
-            )}
-            <p className="text-xs text-muted-foreground">Oder Quell-Dateien hochladen (PDF / HTML / TXT):</p>
-            <Input type="file" accept=".pdf,.html,.htm,.txt" multiple onChange={addGenFiles} disabled={generating} />
-            <div className="flex items-center gap-2 flex-wrap pt-1">
-              <span className="text-xs text-muted-foreground">Schreibstil:</span>
-              <Select value={genStyleId} onValueChange={setGenStyleId} disabled={generating}>
-                <SelectTrigger className="w-[240px]">
-                  <SelectValue placeholder="Schreibstil wählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Standard (kein eigener Stil)</SelectItem>
-                  {writingStyles.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="sm" onClick={() => setStyleManagerOpen(true)} disabled={generating}>
-                <Pencil className="w-3.5 h-3.5 mr-1.5" />
-                Schreibstile verwalten
+
+              <div className="flex flex-col gap-[9px]">
+                <label
+                  className={`flex h-11 items-center justify-center gap-2 rounded-[11px] border border-dashed border-[hsl(0_0%_20%)] bg-white/[0.03] transition-colors hover:border-primary/50 ${
+                    generating ? "pointer-events-none opacity-60" : "cursor-pointer"
+                  }`}
+                >
+                  <FileUp className="h-[15px] w-[15px] flex-none text-[hsl(0_0%_58%)]" />
+                  <span className="px-2.5 text-center text-[12.5px] text-muted-foreground">
+                    Quell-Dateien (PDF / HTML / TXT, max. 15 MB)
+                  </span>
+                  <input
+                    type="file"
+                    accept=".pdf,.html,.htm,.txt"
+                    multiple
+                    onChange={addGenFiles}
+                    disabled={generating}
+                    className="hidden"
+                  />
+                </label>
+                {genFiles.length > 0 && (
+                  <div className="flex flex-wrap gap-[7px]">
+                    {genFiles.map((f, i) => (
+                      <span
+                        key={`${f.name}-${i}`}
+                        className="inline-flex items-center gap-[7px] whitespace-nowrap rounded-full border border-[hsl(0_0%_16%)] bg-white/5 px-[11px] py-[5px] font-mono text-[11px] text-[hsl(0_0%_82%)]"
+                      >
+                        {f.name}
+                        <button
+                          type="button"
+                          onClick={() => setGenFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                          disabled={generating}
+                          title="Entfernen"
+                          className="flex text-[hsl(0_0%_55%)] transition-colors hover:text-foreground"
+                        >
+                          <X className="h-[11px] w-[11px]" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-end gap-2.5">
+                <div className="flex min-w-[min(180px,100%)] flex-1 flex-col gap-[7px]">
+                  <span className={fieldLabelClass}>Schreibstil</span>
+                  <Select value={genStyleId} onValueChange={setGenStyleId} disabled={generating}>
+                    <SelectTrigger className={selectTriggerClass}>
+                      <SelectValue placeholder="Schreibstil wählen" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Standard (kein eigener Stil)</SelectItem>
+                      {writingStyles.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setStyleManagerOpen(true)}
+                  disabled={generating}
+                  className="h-[38px] rounded-[10px] border-[hsl(0_0%_16%)] bg-white/5 px-3.5 text-[12.5px] font-bold text-[hsl(0_0%_85%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
+                >
+                  <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                  Schreibstile verwalten
+                </Button>
+              </div>
+
+              <Button
+                onClick={runGenerator}
+                disabled={generating || (!genUrls.some((u) => u.trim()) && !genFiles.length)}
+                className="h-10 self-start rounded-[11px] bg-gradient-lime px-[17px] text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] hover:opacity-90"
+              >
+                {generating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Artikel werden generiert…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-2 h-[15px] w-[15px]" /> Artikel generieren
+                  </>
+                )}
               </Button>
             </div>
-          </div>
-          <Button
-            className="mt-3"
-            onClick={runGenerator}
-            disabled={generating || (!genUrls.some((u) => u.trim()) && !genFiles.length)}
-          >
-            {generating ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Artikel werden generiert…
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" /> Artikel generieren
-              </>
-            )}
-          </Button>
-        </Card>
+          </Card>
+
+          <AuthorManager />
+        </div>
 
         <WritingStyleManager open={styleManagerOpen} onOpenChange={setStyleManagerOpen} />
 
-        <AuthorManager />
-
         {isLoading ? (
-          <p className="text-muted-foreground">Laden…</p>
-        ) : !visibleList.length ? (
-          <Card className="p-8 text-center text-muted-foreground">
-            <Newspaper className="h-8 w-8 mx-auto mb-2 opacity-40" />
+          <p className="text-sm text-muted-foreground">Laden…</p>
+        ) : !list.length ? (
+          <Card className="rounded-2xl border-border bg-gradient-card p-8 text-center text-sm text-muted-foreground">
+            <Newspaper className="mx-auto mb-2 h-8 w-8 opacity-40" />
             Noch keine Artikel vorhanden.
           </Card>
         ) : (
-          <div className="grid gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              {([["all", "Alle"], ["live", "Live"], ["draft", "Entwurf"]] as const).map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setStatusFilter(key)}
-                  className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                    statusFilter === key
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-white/[0.04] text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-              <span className="mx-1 h-4 w-px bg-border" />
-              <button
-                type="button"
-                onClick={() => setTopicFilter(null)}
-                className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                  topicFilter === null
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-white/[0.04] text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Alle Topics
-              </button>
-              {TOPICS.map((topic) => (
-                <button
-                  key={topic}
-                  type="button"
-                  onClick={() => setTopicFilter(topicFilter === topic ? null : topic)}
-                  className="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-colors"
-                  style={
-                    topicFilter === topic
-                      ? { background: topicColor(topic), borderColor: topicColor(topic), color: "#0A0A0A" }
-                      : { borderColor: "hsl(var(--border))", background: "rgba(255,255,255,0.04)", color: `${topicColor(topic)}D9` }
-                  }
-                >
-                  <span className="h-2 w-2 rounded-full" style={{ background: topicFilter === topic ? "#0A0A0A" : topicColor(topic) }} />
-                  {topic}
-                </button>
-              ))}
-              {isFiltered && (
-                <span className="text-xs text-muted-foreground">Sortieren per Drag &amp; Drop nur ohne aktive Filter</span>
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-[11px]">
+                <div className="flex flex-wrap gap-2">
+                  {([["all", "Alle"], ["live", "Live"], ["draft", "Entwurf"]] as const).map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setStatusFilter(key)}
+                      className={`whitespace-nowrap rounded-full border px-[13px] py-[7px] text-[12.5px] font-bold transition-colors ${
+                        statusFilter === key
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_70%)] hover:text-foreground"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTopicFilter(null)}
+                    className={`whitespace-nowrap rounded-full border px-[13px] py-[7px] text-[12.5px] font-bold transition-colors ${
+                      topicFilter === null
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_70%)] hover:text-foreground"
+                    }`}
+                  >
+                    Alle Topics
+                  </button>
+                  {TOPICS.map((topic) => (
+                    <button
+                      key={topic}
+                      type="button"
+                      onClick={() => setTopicFilter(topicFilter === topic ? null : topic)}
+                      className={`inline-flex items-center gap-[7px] whitespace-nowrap rounded-full border px-[13px] py-[7px] text-[12.5px] font-bold transition-colors ${
+                        topicFilter === topic ? "" : "text-[hsl(0_0%_70%)] hover:text-foreground"
+                      }`}
+                      style={
+                        topicFilter === topic
+                          ? { background: topicColor(topic), borderColor: topicColor(topic), color: "#0A0A0A" }
+                          : { borderColor: "hsl(0 0% 16%)", background: "rgba(255,255,255,0.05)" }
+                      }
+                    >
+                      <span
+                        className="h-[7px] w-[7px] flex-none rounded-full"
+                        style={{ background: topicFilter === topic ? "#0A0A0A" : topicColor(topic) }}
+                      />
+                      {topic}
+                    </button>
+                  ))}
+                </div>
+                {isFiltered && (
+                  <span className="text-[11.5px] text-[#FFC44D]">
+                    Sortieren per Drag &amp; Drop nur ohne aktive Filter.
+                  </span>
+                )}
+              </div>
+
+              {reorderMutation.isPending && (
+                <p className="text-xs text-muted-foreground">
+                  <Loader2 className="mr-1 inline h-3 w-3 animate-spin" /> Reihenfolge wird gespeichert…
+                </p>
+              )}
+
+              <div className="flex flex-col gap-2.5">
+                {visibleList.map((a, index) => {
+                  const acc = topicColor(a.topic);
+                  const AudienceIcon = AUDIENCE_ICONS[a.audience] ?? Globe;
+                  return (
+                    <div
+                      key={a.id}
+                      draggable={!isFiltered}
+                      onDragStart={() => !isFiltered && onDragStart(index)}
+                      onDragOver={(e) => !isFiltered && onDragOver(e, index)}
+                      onDragEnd={onDragEnd}
+                      onDrop={(e) => e.preventDefault()}
+                      className={`flex flex-wrap items-center gap-3.5 rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-[13px] py-3 transition-colors hover:border-[hsl(0_0%_20%)] ${
+                        isFiltered ? "" : "cursor-grab active:cursor-grabbing"
+                      }`}
+                    >
+                      <GripVertical
+                        className={`h-4 w-4 flex-none ${isFiltered ? "text-muted-foreground/20" : "text-[hsl(0_0%_40%)]"}`}
+                      />
+                      <div className="h-[65px] w-[52px] flex-none overflow-hidden rounded-[9px] border border-[hsl(0_0%_15%)] bg-white/[0.04]">
+                        {a.cover_image_url ? (
+                          <img src={a.cover_image_url} alt={a.title} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex min-w-[200px] flex-1 flex-col gap-1.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {a.is_featured && <Flame className="h-3.5 w-3.5 flex-none text-[#FF8A1F]" />}
+                          <span className="text-[13.5px] font-bold leading-snug text-foreground">{a.title}</span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-[7px]">
+                          <Badge
+                            variant="outline"
+                            className="rounded-full border px-[9px] py-[3px] text-[10.5px] font-bold uppercase tracking-[0.06em]"
+                            style={{ color: acc, borderColor: `${acc}59`, background: `${acc}1F` }}
+                          >
+                            {a.topic}
+                          </Badge>
+                          {isTranslated(a) && (
+                            <Badge
+                              variant="outline"
+                              className="rounded-full border-[hsl(200_100%_75%/0.28)] bg-[hsl(200_100%_75%/0.1)] px-2 py-[3px] font-mono text-[9.5px] font-normal uppercase tracking-[0.1em] text-[#7FD4FF]"
+                            >
+                              Übersetzt
+                            </Badge>
+                          )}
+                          <span className="inline-flex items-center gap-[5px] whitespace-nowrap text-[11px] text-muted-foreground">
+                            <AudienceIcon className="h-[11px] w-[11px]" />
+                            {AUDIENCE_LABELS[a.audience]}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-none items-center gap-3.5">
+                        <span className="inline-flex items-center gap-[5px] whitespace-nowrap font-mono text-[11.5px] text-muted-foreground">
+                          <Heart className="h-3 w-3" /> {a.like_count ?? 0}
+                        </span>
+                        <span className="inline-flex items-center gap-[5px] whitespace-nowrap font-mono text-[11.5px] text-muted-foreground">
+                          <Eye className="h-3 w-3" /> {a.view_count ?? 0}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-none items-center gap-2">
+                        <label className="mr-1 flex cursor-pointer items-center gap-2">
+                          <Switch
+                            checked={a.is_published}
+                            disabled={publishMutation.isPending}
+                            onCheckedChange={(v) =>
+                              publishMutation.mutate({ id: a.id, publish: v, publishedAt: a.published_at })
+                            }
+                          />
+                          <span
+                            className={`min-w-[48px] text-[11.5px] font-bold ${a.is_published ? "text-primary" : "text-[#FFC44D]"}`}
+                          >
+                            {a.is_published ? "Live" : "Entwurf"}
+                          </span>
+                        </label>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          title={isTranslated(a) ? "Erneut übersetzen (DE → EN)" : "Ins Englische übersetzen"}
+                          onClick={() => runTranslate(a.id)}
+                          disabled={translatingId === a.id}
+                          className={`${iconBtnClass} hover:border-[hsl(200_100%_75%/0.4)] hover:bg-white/5 hover:text-[#7FD4FF]`}
+                        >
+                          {translatingId === a.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Languages className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => openEdit(a)}
+                          className={`${iconBtnClass} hover:border-primary/40 hover:bg-white/5 hover:text-primary`}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-[30px] w-[30px] rounded-lg border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+                          onClick={() => {
+                            if (confirm("Artikel wirklich löschen?")) deleteMutation.mutate(a.id);
+                          }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {!visibleList.length && (
+                <p className="py-5 text-center text-[13.5px] text-muted-foreground">Keine Artikel gefunden</p>
               )}
             </div>
-            {reorderMutation.isPending && (
-              <p className="text-xs text-muted-foreground">
-                <Loader2 className="mr-1 inline h-3 w-3 animate-spin" /> Reihenfolge wird gespeichert…
-              </p>
-            )}
-            {visibleList.map((a, index) => (
-              <Card
-                key={a.id}
-                draggable={!isFiltered}
-                onDragStart={() => !isFiltered && onDragStart(index)}
-                onDragOver={(e) => !isFiltered && onDragOver(e, index)}
-                onDragEnd={onDragEnd}
-                onDrop={(e) => e.preventDefault()}
-                className={`p-4 flex items-center gap-3 ${isFiltered ? "" : "cursor-grab active:cursor-grabbing"}`}
-              >
-                <GripVertical className={`h-5 w-5 flex-shrink-0 ${isFiltered ? "text-muted-foreground/15" : "text-muted-foreground/50"}`} />
-                <div className="h-20 w-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                  {a.cover_image_url ? (
-                    <img src={a.cover_image_url} alt={a.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="w-5 h-5 text-muted-foreground/40" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">
-                    {a.is_featured && <Flame className="mr-1 inline h-3.5 w-3.5 text-primary" />}
-                    {a.title}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                    <Badge
-                      variant="outline"
-                      style={{ color: topicColor(a.topic), borderColor: `${topicColor(a.topic)}66` }}
-                    >
-                      {a.topic}
-                    </Badge>
-                    {isTranslated(a) && (
-                      <Badge variant="outline" className="gap-1 border-sky-500/40 text-sky-500">
-                        <Languages className="h-3 w-3" /> Übersetzt
-                      </Badge>
-                    )}
-                    <span className="text-xs text-muted-foreground">{AUDIENCE_LABELS[a.audience]}</span>
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                      <ThumbsUp className="h-3 w-3" /> {a.like_count ?? 0}
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                      <Eye className="h-3 w-3" /> {a.view_count ?? 0}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <label className="mr-1 flex cursor-pointer flex-col items-center gap-1">
-                    <Switch
-                      checked={a.is_published}
-                      disabled={publishMutation.isPending}
-                      onCheckedChange={(v) =>
-                        publishMutation.mutate({ id: a.id, publish: v, publishedAt: a.published_at })
-                      }
-                    />
-                    <span className={`text-[10.5px] font-semibold ${a.is_published ? "text-green-500" : "text-muted-foreground"}`}>
-                      {a.is_published ? "Live" : "Entwurf"}
-                    </span>
-                  </label>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    title={isTranslated(a) ? "Erneut übersetzen (DE → EN)" : "Ins Englische übersetzen"}
-                    onClick={() => runTranslate(a.id)}
-                    disabled={translatingId === a.id}
-                  >
-                    {translatingId === a.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Languages className="h-4 w-4" />}
-                  </Button>
-                  <Button variant="outline" size="icon" onClick={() => openEdit(a)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="text-destructive"
-                    onClick={() => {
-                      if (confirm("Artikel wirklich löschen?")) deleteMutation.mutate(a.id);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
+          </Card>
         )}
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editId ? "Artikel bearbeiten" : "Neuer Artikel"}</DialogTitle>
+        <DialogContent className="max-h-[92vh] w-[calc(100vw-32px)] max-w-[1080px] gap-0 overflow-y-auto rounded-[18px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))] p-0 sm:rounded-[22px]">
+          <DialogHeader className="sticky top-0 space-y-0 border-b border-[hsl(0_0%_14%)] bg-[hsl(0_0%_6%/0.95)] px-5 py-[18px] pr-12 text-left backdrop-blur-xl sm:px-6 sm:pr-12">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">Artikel</span>
+            <DialogTitle className="mt-1 font-display text-[21px] font-extrabold tracking-tight text-foreground">
+              {editId ? "Artikel bearbeiten" : "Neuer Artikel"}
+            </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-            <div className="space-y-4">
-            <VoiceInArticle
-              onGenerated={({ title, excerpt, body_html }) => {
-                setForm((f) => ({ ...f, title, excerpt, body_html }));
-                setEditorKey((k) => k + 1);
-              }}
-            />
+          <form onSubmit={handleSubmit} className="px-5 py-6 sm:px-6">
+            <div className="grid gap-[22px] lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+              <div className="flex min-w-0 flex-col gap-5">
+                <VoiceInArticle
+                  onGenerated={({ title, excerpt, body_html }) => {
+                    setForm((f) => ({ ...f, title, excerpt, body_html }));
+                    setEditorKey((k) => k + 1);
+                  }}
+                />
 
-            <Tabs value={langTab} onValueChange={(v) => setLangTab(v as "de" | "en")}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="de">Deutsch</TabsTrigger>
-                <TabsTrigger value="en">English</TabsTrigger>
-              </TabsList>
+                <Tabs value={langTab} onValueChange={(v) => setLangTab(v as "de" | "en")}>
+                  <TabsList className="h-auto w-full justify-start gap-[22px] rounded-none border-b border-[hsl(0_0%_12%)] bg-transparent p-0">
+                    <TabsTrigger
+                      value="de"
+                      className="rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-2.5 pt-0 text-[13.5px] font-bold text-[hsl(0_0%_60%)] shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                    >
+                      Deutsch
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="en"
+                      className="rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-2.5 pt-0 text-[13.5px] font-bold text-[hsl(0_0%_60%)] shadow-none transition-colors data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                    >
+                      English
+                    </TabsTrigger>
+                  </TabsList>
 
-              <TabsContent value="de" className="mt-4 space-y-4">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Label>Titel *</Label>
-                    <CharCount value={form.title} limit={60} />
+                  <TabsContent value="de" className="mt-5 flex flex-col gap-5">
+                    <div className="flex flex-col gap-[7px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label className={fieldLabelClass}>
+                          Titel <span className="text-primary">*</span>
+                        </Label>
+                        <CharCount value={form.title} limit={60} />
+                      </div>
+                      <Input
+                        value={form.title}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            title: e.target.value,
+                            slug: f.slugTouched ? f.slug : slugify(e.target.value),
+                          }))
+                        }
+                        required
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-[7px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label className={fieldLabelClass}>Titel-Highlight</Label>
+                        <CharCount value={form.title_highlight} limit={30} />
+                      </div>
+                      <Input
+                        value={form.title_highlight}
+                        onChange={(e) => setForm((f) => ({ ...f, title_highlight: e.target.value }))}
+                        placeholder="z. B. zwei Courts, ein Statement."
+                        className={inputClass}
+                      />
+                      <p className={hintClass}>Wird in der H1 in Topic-Farbe + kursiv angehängt.</p>
+                    </div>
+
+                    <div className="flex flex-col gap-[7px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label className={fieldLabelClass}>Kurzbeschreibung (Vorschau)</Label>
+                        <CharCount value={form.excerpt} limit={120} />
+                      </div>
+                      <Textarea
+                        value={form.excerpt}
+                        onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
+                        rows={2}
+                        placeholder="Kurzer Anreißer unter der Card im News-Grid."
+                        className={areaClass}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-[7px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label className={fieldLabelClass}>Lead (Einstiegsabsatz)</Label>
+                        <CharCount value={form.lead} limit={280} />
+                      </div>
+                      <Textarea
+                        value={form.lead}
+                        onChange={(e) => setForm((f) => ({ ...f, lead: e.target.value }))}
+                        rows={3}
+                        placeholder="Fett gesetzter Einstieg im Artikel-Hero (optional)."
+                        className={areaClass}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-[7px]">
+                      <Label className={fieldLabelClass}>Inhalt</Label>
+                      <ArticleEditor
+                        key={`de-${editId ?? "new"}-${editorKey}`}
+                        value={form.body_html}
+                        onChange={(html) => setForm((f) => ({ ...f, body_html: html }))}
+                      />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="en" className="mt-5 flex flex-col gap-5">
+                    <p className="rounded-[11px] border border-[hsl(200_100%_75%/0.2)] bg-[hsl(200_100%_75%/0.06)] px-[13px] py-[11px] text-xs leading-relaxed text-[#7FD4FF]">
+                      Leere Felder zeigen auf der englischen Seite automatisch die deutsche Fassung.
+                      Von Hand geänderte Felder werden gesperrt und von der Auto-Übersetzung nicht mehr überschrieben.
+                    </p>
+
+                    <div className="flex flex-col gap-[7px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label className={fieldLabelClass}>Title (EN)</Label>
+                        <CharCount value={form.title_en} limit={60} />
+                      </div>
+                      <Input
+                        value={form.title_en}
+                        onChange={(e) => setForm((f) => ({ ...f, title_en: e.target.value }))}
+                        placeholder={form.title || "English title"}
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-[7px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label className={fieldLabelClass}>Title-Highlight (EN)</Label>
+                        <CharCount value={form.title_highlight_en} limit={30} />
+                      </div>
+                      <Input
+                        value={form.title_highlight_en}
+                        onChange={(e) => setForm((f) => ({ ...f, title_highlight_en: e.target.value }))}
+                        placeholder={form.title_highlight || "—"}
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-[7px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label className={fieldLabelClass}>Excerpt (EN)</Label>
+                        <CharCount value={form.excerpt_en} limit={120} />
+                      </div>
+                      <Textarea
+                        value={form.excerpt_en}
+                        onChange={(e) => setForm((f) => ({ ...f, excerpt_en: e.target.value }))}
+                        rows={2}
+                        placeholder={form.excerpt || "English excerpt"}
+                        className={areaClass}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-[7px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label className={fieldLabelClass}>Lead (EN)</Label>
+                        <CharCount value={form.lead_en} limit={280} />
+                      </div>
+                      <Textarea
+                        value={form.lead_en}
+                        onChange={(e) => setForm((f) => ({ ...f, lead_en: e.target.value }))}
+                        rows={3}
+                        placeholder={form.lead || "English lead paragraph"}
+                        className={areaClass}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-[7px]">
+                      <Label className={fieldLabelClass}>Content (EN)</Label>
+                      <ArticleEditor
+                        key={`en-${editId ?? "new"}-${editorKey}`}
+                        value={form.body_html_en}
+                        onChange={(html) => setForm((f) => ({ ...f, body_html_en: html }))}
+                      />
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
+                <details className="group rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.028] transition-colors hover:border-[hsl(0_0%_20%)]">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-[15px] py-3.5 [&::-webkit-details-marker]:hidden">
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-[13.5px] font-bold text-foreground">Call-to-Action im Artikel (optional)</span>
+                      <span className="text-[11.5px] text-muted-foreground">CTA-Titel, Untertitel, Buttontext &amp; Link</span>
+                    </span>
+                    <ChevronDown className="h-4 w-4 flex-none text-[hsl(0_0%_58%)] transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="flex flex-col gap-3 px-[15px] pb-4">
+                    <Input
+                      value={form.cta_title}
+                      onChange={(e) => setForm((f) => ({ ...f, cta_title: e.target.value }))}
+                      placeholder="CTA-Titel, z. B. Slot in München sichern."
+                      className={inputClass}
+                    />
+                    <Input
+                      value={form.cta_subtitle}
+                      onChange={(e) => setForm((f) => ({ ...f, cta_subtitle: e.target.value }))}
+                      placeholder="CTA-Untertitel, z. B. Buchung ab 9 € p. P."
+                      className={inputClass}
+                    />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <Input
+                        value={form.cta_label}
+                        onChange={(e) => setForm((f) => ({ ...f, cta_label: e.target.value }))}
+                        placeholder="Buttontext (Default: Court buchen)"
+                        className={inputClass}
+                      />
+                      <Input
+                        value={form.cta_url}
+                        onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))}
+                        placeholder="Button-Link, z. B. /booking"
+                        className={inputClass}
+                      />
+                    </div>
                   </div>
-                  <Input
-                    value={form.title}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        title: e.target.value,
-                        slug: f.slugTouched ? f.slug : slugify(e.target.value),
-                      }))
+                </details>
+
+                <details className="group rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.028] transition-colors hover:border-[hsl(0_0%_20%)]">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-[15px] py-3.5 [&::-webkit-details-marker]:hidden">
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="text-[13.5px] font-bold text-foreground">SEO (optional)</span>
+                      <span className="text-[11.5px] text-muted-foreground">SEO-Titel und SEO-Beschreibung</span>
+                    </span>
+                    <ChevronDown className="h-4 w-4 flex-none text-[hsl(0_0%_58%)] transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="flex flex-col gap-3 px-[15px] pb-4">
+                    <Input
+                      value={form.seo_title}
+                      onChange={(e) => setForm((f) => ({ ...f, seo_title: e.target.value }))}
+                      placeholder="SEO-Titel (Default: Artikeltitel)"
+                      className={inputClass}
+                    />
+                    <Textarea
+                      value={form.seo_description}
+                      onChange={(e) => setForm((f) => ({ ...f, seo_description: e.target.value }))}
+                      rows={2}
+                      placeholder="SEO-Beschreibung (Default: Kurzbeschreibung)"
+                      className={areaClass}
+                    />
+                  </div>
+                </details>
+              </div>
+
+              <div className="flex min-w-0 flex-col gap-4 self-start">
+                <div className="rounded-[15px] border border-[hsl(0_0%_12%)] bg-white/[0.025] p-4">
+                  <ArticlePreview
+                    form={
+                      langTab === "en"
+                        ? {
+                            ...form,
+                            title: form.title_en || form.title,
+                            title_highlight: form.title_highlight_en || form.title_highlight,
+                            excerpt: form.excerpt_en || form.excerpt,
+                            lead: form.lead_en || form.lead,
+                          }
+                        : form
                     }
-                    required
                   />
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Label>Titel-Highlight</Label>
-                    <CharCount value={form.title_highlight} limit={30} />
-                  </div>
+                <div className="flex flex-col gap-[9px]">
+                  <Label className={fieldLabelClass}>Titelbild · 4:5 Hochformat, min. 1080 × 1350</Label>
+                  {form.cover_image_url && (
+                    <div className="w-36 overflow-hidden rounded-lg border border-[hsl(0_0%_15%)]">
+                      <img src={form.cover_image_url} alt="Vorschau" className="aspect-[4/5] w-full object-cover" />
+                    </div>
+                  )}
+                  <label
+                    className={`flex h-[52px] items-center justify-center gap-2 rounded-[11px] border border-dashed border-[hsl(0_0%_20%)] bg-white/[0.03] transition-colors hover:border-primary/50 ${
+                      uploadingCover ? "pointer-events-none opacity-60" : "cursor-pointer"
+                    }`}
+                  >
+                    <ImagePlus className="h-4 w-4 flex-none text-[hsl(0_0%_58%)]" />
+                    <span className="text-[12.5px] text-muted-foreground">Titelbild wählen</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverUpload}
+                      disabled={uploadingCover}
+                      className="hidden"
+                    />
+                  </label>
+                  {uploadingCover && <p className={hintClass}>Hochladen…</p>}
+                  <p className={hintClass}>
+                    Wird nur auf den 4:5-News-Cards gezeigt (unten liegt ein dunkler Verlauf mit Titel —
+                    wichtige Bildelemente in die obere Hälfte). Die Artikelseite nutzt als Hero den
+                    Farb-Shader in Topic-Farbe.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>Alt-Text (Barrierefreiheit)</Label>
                   <Input
-                    value={form.title_highlight}
-                    onChange={(e) => setForm((f) => ({ ...f, title_highlight: e.target.value }))}
-                    placeholder="z. B. zwei Courts, ein Statement."
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Wird in der H1 in Topic-Farbe + kursiv angehängt.</p>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Label>Kurzbeschreibung (Vorschau)</Label>
-                    <CharCount value={form.excerpt} limit={120} />
-                  </div>
-                  <Textarea
-                    value={form.excerpt}
-                    onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
-                    rows={2}
-                    placeholder="Kurzer Anreißer unter der Card im News-Grid."
+                    value={form.cover_alt}
+                    onChange={(e) => setForm((f) => ({ ...f, cover_alt: e.target.value }))}
+                    placeholder="Bildbeschreibung"
+                    className={inputClass}
                   />
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Label>Lead (Einstiegsabsatz)</Label>
-                    <CharCount value={form.lead} limit={280} />
-                  </div>
-                  <Textarea
-                    value={form.lead}
-                    onChange={(e) => setForm((f) => ({ ...f, lead: e.target.value }))}
-                    rows={3}
-                    placeholder="Fett gesetzter Einstieg im Artikel-Hero (optional)."
-                  />
-                </div>
-
-                <div>
-                  <Label>Inhalt</Label>
-                  <ArticleEditor
-                    key={`de-${editId ?? "new"}-${editorKey}`}
-                    value={form.body_html}
-                    onChange={(html) => setForm((f) => ({ ...f, body_html: html }))}
-                  />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="en" className="mt-4 space-y-4">
-                <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                  Leere Felder zeigen auf der englischen Seite automatisch die deutsche Fassung.
-                  Von Hand geänderte Felder werden gesperrt und von der Auto-Übersetzung nicht mehr überschrieben.
-                </p>
-
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Label>Title (EN)</Label>
-                    <CharCount value={form.title_en} limit={60} />
-                  </div>
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>Slug (URL)</Label>
                   <Input
-                    value={form.title_en}
-                    onChange={(e) => setForm((f) => ({ ...f, title_en: e.target.value }))}
-                    placeholder={form.title || "English title"}
+                    value={form.slug}
+                    onChange={(e) => setForm((f) => ({ ...f, slug: slugify(e.target.value), slugTouched: true }))}
+                    placeholder="wird-aus-titel-erzeugt"
+                    className={inputClass}
                   />
+                  <p className="font-mono text-[10.5px] tracking-[0.02em] text-muted-foreground">
+                    /news/{form.slug || "…"}
+                  </p>
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Label>Title-Highlight (EN)</Label>
-                    <CharCount value={form.title_highlight_en} limit={30} />
-                  </div>
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>Quelle / Link (optional)</Label>
                   <Input
-                    value={form.title_highlight_en}
-                    onChange={(e) => setForm((f) => ({ ...f, title_highlight_en: e.target.value }))}
-                    placeholder={form.title_highlight || "—"}
+                    type="url"
+                    value={form.source_url}
+                    onChange={(e) => setForm((f) => ({ ...f, source_url: e.target.value }))}
+                    placeholder="https://…"
+                    className={inputClass}
                   />
+                  <p className={hintClass}>Wird als „Zur Quelle"-Link unter dem Artikel angezeigt.</p>
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Label>Excerpt (EN)</Label>
-                    <CharCount value={form.excerpt_en} limit={120} />
-                  </div>
-                  <Textarea
-                    value={form.excerpt_en}
-                    onChange={(e) => setForm((f) => ({ ...f, excerpt_en: e.target.value }))}
-                    rows={2}
-                    placeholder={form.excerpt || "English excerpt"}
-                  />
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>
+                    Topic <span className="text-primary">*</span>
+                  </Label>
+                  <Select value={form.topic} onValueChange={(v) => setForm((f) => ({ ...f, topic: v }))}>
+                    <SelectTrigger className={selectTriggerClass}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TOPICS.map((topic) => (
+                        <SelectItem key={topic} value={topic}>
+                          <span className="inline-flex items-center gap-2">
+                            <span
+                              className="inline-block h-2.5 w-2.5 rounded-full"
+                              style={{ background: topicColor(topic) }}
+                            />
+                            {topic}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Label>Lead (EN)</Label>
-                    <CharCount value={form.lead_en} limit={280} />
-                  </div>
-                  <Textarea
-                    value={form.lead_en}
-                    onChange={(e) => setForm((f) => ({ ...f, lead_en: e.target.value }))}
-                    rows={3}
-                    placeholder={form.lead || "English lead paragraph"}
-                  />
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>
+                    Sichtbar für <span className="text-primary">*</span>
+                  </Label>
+                  <Select
+                    value={form.audience}
+                    onValueChange={(v) => setForm((f) => ({ ...f, audience: v as ArticleAudience }))}
+                  >
+                    <SelectTrigger className={selectTriggerClass}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="everyone">{AUDIENCE_LABELS.everyone}</SelectItem>
+                      <SelectItem value="logged_in">{AUDIENCE_LABELS.logged_in}</SelectItem>
+                      <SelectItem value="logged_out">{AUDIENCE_LABELS.logged_out}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div>
-                  <Label>Content (EN)</Label>
-                  <ArticleEditor
-                    key={`en-${editId ?? "new"}-${editorKey}`}
-                    value={form.body_html_en}
-                    onChange={(html) => setForm((f) => ({ ...f, body_html_en: html }))}
-                  />
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>Autor</Label>
+                  <Select
+                    value={form.author_id || "none"}
+                    onValueChange={(v) => setForm((f) => ({ ...f, author_id: v === "none" ? "" : v }))}
+                  >
+                    <SelectTrigger className={selectTriggerClass}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Kein Autor</SelectItem>
+                      {authors.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>
+                          {a.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className={hintClass}>Erscheint als „Geschrieben von".</p>
                 </div>
-              </TabsContent>
-            </Tabs>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Slug (URL)</Label>
-                <Input
-                  value={form.slug}
-                  onChange={(e) => setForm((f) => ({ ...f, slug: slugify(e.target.value), slugTouched: true }))}
-                  placeholder="wird-aus-titel-erzeugt"
-                />
-                <p className="text-xs text-muted-foreground mt-1">/news/{form.slug || "…"}</p>
-              </div>
-              <div>
-                <Label>Quelle / Link (optional)</Label>
-                <Input
-                  type="url"
-                  value={form.source_url}
-                  onChange={(e) => setForm((f) => ({ ...f, source_url: e.target.value }))}
-                  placeholder="https://…"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Wird als "Zur Quelle"-Link unter dem Artikel angezeigt.
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <Label>Titelbild (4:5 Hochformat, min. 1080×1350)</Label>
-              {form.cover_image_url && (
-                <div className="mb-2 w-36 overflow-hidden rounded-lg">
-                  <img src={form.cover_image_url} alt="Vorschau" className="aspect-[4/5] w-full object-cover" />
-                </div>
-              )}
-              <Input type="file" accept="image/*" onChange={handleCoverUpload} disabled={uploadingCover} />
-              {uploadingCover && <p className="text-xs text-muted-foreground mt-1">Hochladen…</p>}
-              <p className="text-xs text-muted-foreground mt-1">
-                Wird nur auf den 4:5-News-Cards gezeigt (unten liegt ein dunkler Verlauf mit Titel —
-                wichtige Bildelemente in die obere Hälfte). Die Artikelseite nutzt als Hero den
-                Farb-Shader in Topic-Farbe.
-              </p>
-              <Input
-                className="mt-2"
-                value={form.cover_alt}
-                onChange={(e) => setForm((f) => ({ ...f, cover_alt: e.target.value }))}
-                placeholder="Alt-Text (Barrierefreiheit)"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Topic</Label>
-                <Select
-                  value={form.topic}
-                  onValueChange={(v) => setForm((f) => ({ ...f, topic: v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TOPICS.map((topic) => (
-                      <SelectItem key={topic} value={topic}>
-                        <span className="inline-flex items-center gap-2">
-                          <span
-                            className="inline-block h-2.5 w-2.5 rounded-full"
-                            style={{ background: topicColor(topic) }}
-                          />
-                          {topic}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Sichtbar für</Label>
-                <Select
-                  value={form.audience}
-                  onValueChange={(v) => setForm((f) => ({ ...f, audience: v as ArticleAudience }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="everyone">{AUDIENCE_LABELS.everyone}</SelectItem>
-                    <SelectItem value="logged_in">{AUDIENCE_LABELS.logged_in}</SelectItem>
-                    <SelectItem value="logged_out">{AUDIENCE_LABELS.logged_out}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Autor</Label>
-                <Select
-                  value={form.author_id || "none"}
-                  onValueChange={(v) => setForm((f) => ({ ...f, author_id: v === "none" ? "" : v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Kein Autor</SelectItem>
-                    {authors.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-1">Erscheint als „Geschrieben von".</p>
-              </div>
-              <div>
-                <Label>Lesezeit (Minuten)</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={form.reading_minutes}
-                  onChange={(e) => setForm((f) => ({ ...f, reading_minutes: parseInt(e.target.value) || 1 }))}
-                />
-                <button
-                  type="button"
-                  className="text-xs text-primary mt-1 hover:underline"
-                  onClick={() => setForm((f) => ({ ...f, reading_minutes: readingSuggestion }))}
-                >
-                  Vorschlag aus Wortzahl: {readingSuggestion} Min übernehmen
-                </button>
-              </div>
-              <div>
-                <Label>Standort-Verknüpfung</Label>
-                <Select
-                  value={form.location_id || "none"}
-                  onValueChange={(v) => setForm((f) => ({ ...f, location_id: v === "none" ? "" : v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Kein Standort</SelectItem>
-                    {locations.map((l) => (
-                      <SelectItem key={l.id} value={l.id}>
-                        {l.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-1">Zeigt die Standort-Karte in der Artikel-Sidebar.</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={form.is_featured}
-                  onCheckedChange={(v) => setForm((f) => ({ ...f, is_featured: v }))}
-                />
-                <Label>Highlight (obere Rail)</Label>
-              </div>
-              {form.is_featured && (
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs text-muted-foreground">Position</Label>
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>
+                    Lesezeit (Minuten) <span className="text-primary">*</span>
+                  </Label>
                   <Input
                     type="number"
-                    className="h-8 w-20"
-                    value={form.featured_rank}
-                    onChange={(e) => setForm((f) => ({ ...f, featured_rank: parseInt(e.target.value) || 0 }))}
+                    min={1}
+                    value={form.reading_minutes}
+                    onChange={(e) => setForm((f) => ({ ...f, reading_minutes: parseInt(e.target.value) || 1 }))}
+                    className={inputClass}
+                  />
+                  <button
+                    type="button"
+                    className="self-start text-[11px] font-semibold text-primary hover:underline"
+                    onClick={() => setForm((f) => ({ ...f, reading_minutes: readingSuggestion }))}
+                  >
+                    Vorschlag aus Wortzahl: {readingSuggestion} Min übernehmen
+                  </button>
+                </div>
+
+                <div className="flex flex-col gap-[7px]">
+                  <Label className={fieldLabelClass}>Standort-Verknüpfung</Label>
+                  <Select
+                    value={form.location_id || "none"}
+                    onValueChange={(v) => setForm((f) => ({ ...f, location_id: v === "none" ? "" : v }))}
+                  >
+                    <SelectTrigger className={selectTriggerClass}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Kein Standort</SelectItem>
+                      {locations.map((l) => (
+                        <SelectItem key={l.id} value={l.id}>
+                          {l.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className={hintClass}>Zeigt die Standort-Karte in der Artikel-Sidebar.</p>
+                </div>
+
+                <div className="flex items-center gap-[13px] rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-3.5 py-[13px]">
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <Label className="text-[13px] font-bold text-foreground">Highlight (obere Rail)</Label>
+                    <span className="text-[11.5px] text-muted-foreground">Position nur bei aktivem Highlight</span>
+                    {form.is_featured && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <Label className="text-[11px] text-muted-foreground">Position</Label>
+                        <Input
+                          type="number"
+                          className="h-8 w-20 rounded-lg border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-xs"
+                          value={form.featured_rank}
+                          onChange={(e) => setForm((f) => ({ ...f, featured_rank: parseInt(e.target.value) || 0 }))}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <Switch
+                    checked={form.is_featured}
+                    onCheckedChange={(v) => setForm((f) => ({ ...f, is_featured: v }))}
                   />
                 </div>
-              )}
-            </div>
 
-            <details className="rounded-lg border border-border p-3">
-              <summary className="cursor-pointer text-sm font-semibold">Call-to-Action im Artikel (optional)</summary>
-              <div className="mt-3 space-y-3">
-                <Input
-                  value={form.cta_title}
-                  onChange={(e) => setForm((f) => ({ ...f, cta_title: e.target.value }))}
-                  placeholder="CTA-Titel, z. B. Slot in München sichern."
-                />
-                <Input
-                  value={form.cta_subtitle}
-                  onChange={(e) => setForm((f) => ({ ...f, cta_subtitle: e.target.value }))}
-                  placeholder="CTA-Untertitel, z. B. Buchung ab 9 € p. P."
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    value={form.cta_label}
-                    onChange={(e) => setForm((f) => ({ ...f, cta_label: e.target.value }))}
-                    placeholder="Buttontext (Default: Court buchen)"
-                  />
-                  <Input
-                    value={form.cta_url}
-                    onChange={(e) => setForm((f) => ({ ...f, cta_url: e.target.value }))}
-                    placeholder="Button-Link, z. B. /booking"
+                <div className="flex items-center gap-[13px] rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-3.5 py-[13px]">
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <Label className="text-[13px] font-bold text-foreground">Veröffentlicht</Label>
+                    <span className="text-[11.5px] text-muted-foreground">Für Nutzer sichtbar</span>
+                  </div>
+                  <Switch
+                    checked={form.is_published}
+                    onCheckedChange={(v) => setForm((f) => ({ ...f, is_published: v }))}
                   />
                 </div>
+
+                <Button
+                  type="submit"
+                  disabled={saveMutation.isPending || uploadingCover}
+                  className="h-[46px] w-full rounded-xl bg-gradient-lime text-sm font-bold text-primary-foreground shadow-[0_0_24px_hsl(71_91%_51%/0.28)] hover:opacity-90"
+                >
+                  {saveMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Speichern…
+                    </>
+                  ) : (
+                    "Speichern"
+                  )}
+                </Button>
               </div>
-            </details>
-
-            <details className="rounded-lg border border-border p-3">
-              <summary className="cursor-pointer text-sm font-semibold">SEO (optional)</summary>
-              <div className="mt-3 space-y-3">
-                <Input
-                  value={form.seo_title}
-                  onChange={(e) => setForm((f) => ({ ...f, seo_title: e.target.value }))}
-                  placeholder="SEO-Titel (Default: Artikeltitel)"
-                />
-                <Textarea
-                  value={form.seo_description}
-                  onChange={(e) => setForm((f) => ({ ...f, seo_description: e.target.value }))}
-                  rows={2}
-                  placeholder="SEO-Beschreibung (Default: Kurzbeschreibung)"
-                />
-              </div>
-            </details>
-
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={form.is_published}
-                onCheckedChange={(v) => setForm((f) => ({ ...f, is_published: v }))}
-              />
-              <Label>Veröffentlicht (für Nutzer sichtbar)</Label>
             </div>
-            </div>
-
-            <div className="lg:sticky lg:top-2 self-start">
-              <ArticlePreview
-                form={
-                  langTab === "en"
-                    ? {
-                        ...form,
-                        title: form.title_en || form.title,
-                        title_highlight: form.title_highlight_en || form.title_highlight,
-                        excerpt: form.excerpt_en || form.excerpt,
-                        lead: form.lead_en || form.lead,
-                      }
-                    : form
-                }
-              />
-            </div>
-            </div>
-
-            <Button type="submit" className="mt-4 w-full" disabled={saveMutation.isPending || uploadingCover}>
-              {saveMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Speichern…
-                </>
-              ) : (
-                "Speichern"
-              )}
-            </Button>
           </form>
         </DialogContent>
       </Dialog>

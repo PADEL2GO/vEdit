@@ -35,6 +35,10 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 12. **`confirm()`-Dialoge vereinheitlichen:** LocationTeasers, SkyPadel, Clubs, ClubOwners (dort sogar ganz ohne Bestätigung) nutzen native/keine Dialoge, Events/Vouchers/Marketplace haben AlertDialogs → einheitlich AlertDialog.
 13. **Geteilte `TranslatableField`-Komponente** hat noch den alten Stil (amber Lock-Badge; Design: lime DE / hellblau EN „DeepL") — zentraler Redesign-Pass wirkt auf viele Admin-Seiten.
 
+14. **AdminPartnerTiles:** `handleSortChange` feuert bei jedem Tastendruck eine Mutation (kein Debounce/onBlur) und hat als einziger Handler kein try/catch (Fehler ohne Toast). Seitentext „alle Felder speichern sofort" stimmt für die Beschreibung nicht (speichert per Button).
+15. **AdminNews:** DnD-Index basiert auf `visibleList`, Reihenfolge auf `list` — nur korrekt, weil DnD bei aktivem Filter gesperrt ist (fragil). Doppelte Cover-Vorschau im Dialog. Nebenbei behoben: Filter-Chips verschwanden bei 0 Treffern — Filter war nicht mehr zurücksetzbar.
+16. **AdminQrPanel:** `accept="application/pdf,image/*"` erlaubt browserseitig GIF/SVG, die Validierung lehnt erst nach Auswahl ab → `accept` enger fassen.
+
 ## Backend-Wiring offen (Design zeigt es, Seite hat kein Gegenstück)
 
 - **Sidebar:** Live-Counts an „Buchungen" und „Marketplace" (Design-Dummies weggelassen)
@@ -52,7 +56,8 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 - `EventForm.tsx` + ArtistManager/BrandManager/HighlightsInput (aus Admin 07)
 - `MarketplaceOrdersSection.tsx`, `CatalogManagerDialog.tsx` (aus Admin 08 — sonst Stilbruch im Bestellungen-Tab)
 - `P2GWalletsTab.tsx`, `P2GExpertLevelsTab.tsx` (aus Admin 09 — sonst Stilbruch beim Tab-Wechsel)
-- `TranslatableField` (geteilt — betrifft LocationTeasers, SkyPadel, News u. a.)
+- `TranslatableField` (geteilt — betrifft LocationTeasers, SkyPadel, Touchpoint Slides, Partner-Kacheln, QR-Panel u. a.)
+- `WritingStyleManager.tsx`, `VoiceInArticle.tsx` (aus Admin 16 News)
 
 ## Erledigt
 
