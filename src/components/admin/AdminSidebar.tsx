@@ -41,7 +41,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import padel2goLogo from "@/assets/padel2go-logo.png";
 
-const menuItems = [
+export const menuItems = [
   { title: "Overview", url: "/admin", icon: LayoutDashboard },
   { title: "Buchungen", url: "/admin/bookings", icon: Calendar },
   { title: "Courts & Standorte", url: "/admin/courts", icon: MapPin },

@@ -747,15 +747,17 @@ Masken:
 - [ ] KI-Voice-In-Generierungsbereich
 - [ ] Formularfelder mit Titelbild und Editor
 
-### ⬜ AdminSettings — `/admin/settings`
+### ✅ AdminSettings — `/admin/settings`
 `src/pages/admin/AdminSettings.tsx` · System- und App-Einstellungen umschalten
 
 Masken:
-- [ ] Seitenkopf
-- [ ] Inhalts-Sperre-Card (PIN-Locks)
-- [ ] Allgemeine-Einstellungen-Card
-- [ ] Benachrichtigungen-Card
-- [ ] Sicherheit-Card
+- [x] Seitenkopf
+- [x] Inhalts-Sperre-Card (PIN-Locks)
+- [x] Allgemeine-Einstellungen-Card
+- [x] Benachrichtigungen-Card
+- [x] Sicherheit-Card
+
+> **Umgesetzt 2026-08-04** aus `Admin 25 Einstellungen.dc.html` (Design-Projekt 28649d89). Styling only — PIN-Lock-Logik (useSiteSettings) unverändert. Platzhalter-Cards (Allgemein/Benachrichtigungen/Sicherheit) jetzt sichtbar als „UI-Platzhalter · ohne Backend" markiert (Badge + reduzierte Deckkraft). **Zusätzlich shared:** `AdminHeader` auf neues Design (sticky Glas-Header, Route-Pfad mono + dynamischer Seitentitel aus Sidebar-Items + User-Chip) — gilt für alle Admin-Seiten; die In-Page-h1 der übrigen Seiten werden beim jeweiligen Redesign entfernt. UX-Funde gesammelt in `docs/ADMIN-UX-NOTES.md`.
 
 ### ⬜ AdminIntegrations — `/admin/integrations`
 `src/pages/admin/AdminIntegrations.tsx` · Externe Dienste und API-Schlüssel konfigurieren
