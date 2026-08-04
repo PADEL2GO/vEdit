@@ -521,40 +521,46 @@ Masken:
 
 ## 🛠️ Admin
 
-### ⬜ AdminOverview — `/admin`
+### ✅ AdminOverview — `/admin`
 `src/pages/admin/AdminOverview.tsx` · Dashboard mit KPIs und letzten Buchungen
 
 Masken:
-- [ ] Seitenkopf mit Begrüßung
-- [ ] Plattform-KPI-Kacheln
-- [ ] Club-KPI-Kacheln
-- [ ] Letzte-Buchungen-Panel mit Court-Filter
-- [ ] Standorte-Übersicht-Panel
-- [ ] Empty-States (keine Buchungen/Standorte)
+- [x] Seitenkopf mit Begrüßung
+- [x] Plattform-KPI-Kacheln
+- [x] Club-KPI-Kacheln
+- [x] Letzte-Buchungen-Panel mit Court-Filter
+- [x] Standorte-Übersicht-Panel
+- [x] Empty-States (keine Buchungen/Standorte)
 
-### ⬜ AdminBookings — `/admin/bookings`
+> **Umgesetzt 2026-08-04** aus `Admin 01 Overview.dc.html`. Backend-Wiring offen (Design zeigt, Seite hat nicht): Zeitraum-Umschalter Heute/Woche/Monat, Umsatz-KPI, Trend-Badges, Spieler-/Betrag-Spalten, „Alle →"-Links, „Neuer Standort"-CTA.
+
+### ✅ AdminBookings — `/admin/bookings`
 `src/pages/admin/AdminBookings.tsx` · Buchungsverwaltung als Kalender und Liste
 
 Masken:
-- [ ] Kopf mit Ansichts-Umschalter
-- [ ] Filter-Panel (Woche, Standort, Status, Club)
-- [ ] Kalender-Wochenansicht
-- [ ] Buchungsliste-Tabelle mit Suche
-- [ ] Buchungsdetail-Drawer
-- [ ] Stornieren-Bestätigungsdialog
-- [ ] Buchungen-Reset-Dialog
+- [x] Kopf mit Ansichts-Umschalter
+- [x] Filter-Panel (Woche, Standort, Status, Club)
+- [ ] Kalender-Wochenansicht → Kind-Komponente `BookingWeekCalendar.tsx` (Folge-Pass)
+- [x] Buchungsliste-Tabelle mit Suche
+- [ ] Buchungsdetail-Drawer → Kind-Komponente `BookingDetailDrawer.tsx` (Folge-Pass)
+- [x] Stornieren-Bestätigungsdialog
+- [x] Buchungen-Reset-Dialog
 
-### ⬜ AdminCourts — `/admin/courts`
+> **Umgesetzt 2026-08-04** aus `Admin 02 Buchungen.dc.html` (Seiten-Datei). Nebenbei behoben: invalides nested-`<p>` im Reset-Dialog. Backend-Wiring offen: Court-Filter, Spalten Dauer/Betrag/Zahlung/Lobby-Origin, „LÖSCHEN"-Tipp-Bestätigung im Reset, Teilnehmer im Drawer.
+
+### ✅ AdminCourts — `/admin/courts`
 `src/pages/admin/AdminCourts.tsx` · Courts und Standorte mit Tabs verwalten
 
 Masken:
-- [ ] Kopf mit Statistik und Neuer-Standort-Button
-- [ ] Standort-Formular-Dialog
-- [ ] Standorte-Tab (Karten-Grid)
-- [ ] Courts-Tab (Karten-Grid)
-- [ ] Analytics-Tab
-- [ ] KI-Kameras-Tab
-- [ ] Loading-Skeletons und Empty-States
+- [x] Kopf mit Statistik und Neuer-Standort-Button
+- [x] Standort-Formular-Dialog (Rahmen; `LocationForm` unangetastet)
+- [x] Standorte-Tab (Karten-Grid) — Karten selbst: `AdminLocationCard.tsx` (Folge-Pass)
+- [x] Courts-Tab (Karten-Grid) — Karten selbst: `AdminCourtCard.tsx` (Folge-Pass)
+- [ ] Analytics-Tab → Kind-Komponente `LocationAnalyticsTab.tsx` (Folge-Pass)
+- [x] KI-Kameras-Tab (Zweispalter-Layout; Camera-Komponenten-Innenleben: Folge-Pass)
+- [x] Loading-Skeletons und Empty-States
+
+> **Umgesetzt 2026-08-04** aus `Admin 03 Courts.dc.html` (Seiten-Datei). Nebenbei: toter `xs:`-Breakpoint in Tab-Labels auf `sm:` korrigiert.
 
 ### ⬜ AdminEvents — `/admin/events`
 `src/pages/admin/AdminEvents.tsx` · Events erstellen, filtern und verwalten
@@ -621,15 +627,17 @@ Masken:
 - [ ] Balkendiagramm Buchungen pro Standort
 - [ ] Liniendiagramm Neue Benutzer pro Woche
 
-### ⬜ AdminUtilization — `/admin/utilization`
+### ✅ AdminUtilization — `/admin/utilization`
 `src/pages/admin/AdminUtilization.tsx` · Court-Auslastung im Netzwerk mit Monatsauswahl
 
 Masken:
-- [ ] Kopfzeile mit Monatswähler
-- [ ] KPI-Karten-Raster
-- [ ] Diagramme Auslastung pro Standort und Netzwerk-Verlauf
-- [ ] Courts-Tabelle mit Filter und Sortierung
-- [ ] Loading-/Error-/Empty-Zustände der Tabelle
+- [x] Kopfzeile mit Monatswähler
+- [x] KPI-Karten-Raster
+- [x] Diagramme Auslastung pro Standort und Netzwerk-Verlauf (designgemäß CSS-Balken statt Recharts — keine Hover-Tooltips mehr, Werte stehen direkt am Balken)
+- [x] Courts-Tabelle mit Filter und Sortierung
+- [x] Loading-/Error-/Empty-Zustände der Tabelle
+
+> **Umgesetzt 2026-08-04** aus `Admin 04 Auslastung.dc.html`. Hinweis: Kapazitätsfarben existieren doppelt (lib/utilization.ts vs. Design-Palette) → nach Abschluss aller Auslastungs-Ansichten konsolidieren.
 
 ### ⬜ AdminVisuals — `/admin/visuals`
 `src/pages/admin/AdminVisuals.tsx` · Website-Bilder und Videos verwalten und hochladen

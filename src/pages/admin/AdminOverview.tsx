@@ -1,7 +1,16 @@
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import BrandName from "@/components/BrandName";
-import { Calendar, Users, MapPin, TrendingUp, Clock, Activity, Building2, Percent } from "lucide-react";
+import {
+  CalendarCheck,
+  Users,
+  MapPin,
+  TrendingUp,
+  LayoutGrid,
+  Building2,
+  CalendarRange,
+  Gauge,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth } from "date-fns";
@@ -24,6 +33,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+const STATUS_PILL: Record<string, string> = {
+  confirmed: "border-primary/30 bg-primary/10 text-primary",
+  cancelled: "border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]",
+  pending_payment: "border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] text-[#FFC44D]",
+};
 
 export default function AdminOverview() {
   const today = new Date();
@@ -129,33 +144,33 @@ export default function AdminOverview() {
       const { data: assignments } = await supabase
         .from("club_court_assignments")
         .select("club_id, court_id, monthly_free_minutes");
-      
+
       if (!assignments || assignments.length === 0) return { used: 0, total: 0, percentage: 0 };
-      
+
       // Calculate month start
       const monthStart = startOfMonth(today);
       const monthStartStr = format(monthStart, "yyyy-MM-dd");
-      
+
       // Get usage for current month
       const { data: ledger } = await supabase
         .from("club_quota_ledger")
         .select("minutes_used, minutes_refunded")
         .eq("month_start_date", monthStartStr);
-      
+
       const totalMinutesUsed = (ledger || []).reduce(
-        (sum, entry) => sum + (entry.minutes_used || 0) - (entry.minutes_refunded || 0), 
+        (sum, entry) => sum + (entry.minutes_used || 0) - (entry.minutes_refunded || 0),
         0
       );
       const totalMinutesAvailable = assignments.reduce(
-        (sum, a) => sum + (a.monthly_free_minutes || 0), 
+        (sum, a) => sum + (a.monthly_free_minutes || 0),
         0
       );
-      
+
       return {
         used: totalMinutesUsed,
         total: totalMinutesAvailable,
-        percentage: totalMinutesAvailable > 0 
-          ? Math.round((totalMinutesUsed / totalMinutesAvailable) * 100) 
+        percentage: totalMinutesAvailable > 0
+          ? Math.round((totalMinutesUsed / totalMinutesAvailable) * 100)
           : 0,
       };
     },
@@ -215,7 +230,7 @@ export default function AdminOverview() {
     {
       title: "Buchungen heute",
       value: todayBookings ?? 0,
-      icon: Calendar,
+      icon: CalendarCheck,
       description: format(today, "EEEE, d. MMMM", { locale: de }),
     },
     {
@@ -233,7 +248,7 @@ export default function AdminOverview() {
     {
       title: "Aktive Courts",
       value: totalCourts ?? 0,
-      icon: MapPin,
+      icon: LayoutGrid,
       description: `an ${totalLocations ?? 0} Standorten`,
     },
   ];
@@ -244,178 +259,222 @@ export default function AdminOverview() {
       value: clubBookingsToday ?? 0,
       icon: Building2,
       description: "Über Club-Kontingente",
+      progress: undefined as number | undefined,
     },
     {
       title: "Club-Buchungen Woche",
       value: clubBookingsWeek ?? 0,
-      icon: Building2,
+      icon: CalendarRange,
       description: "Aktuelle Woche",
+      progress: undefined as number | undefined,
     },
     {
       title: "Kontingent-Nutzung",
       value: `${clubQuotaStats?.percentage ?? 0}%`,
-      icon: Percent,
+      icon: Gauge,
       description: `${clubQuotaStats?.used ?? 0} / ${clubQuotaStats?.total ?? 0} Min`,
+      progress: Math.min(100, clubQuotaStats?.percentage ?? 0),
     },
   ];
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Willkommen im <BrandName inline /> Admin Panel
-          </p>
-        </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        <p className="text-sm text-muted-foreground">
+          Willkommen im <BrandName inline /> Admin Panel
+        </p>
 
-        {/* KPI Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {kpiCards.map((card) => (
-            <Card key={card.title} className="bg-card border-border">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {card.title}
-                </CardTitle>
-                <card.icon className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">{card.value}</div>
-                <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Plattform-KPIs */}
+        <section className="flex flex-col gap-3.5">
+          <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+            Plattform
+          </h2>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(224px,100%),1fr))] gap-4">
+            {kpiCards.map((card) => (
+              <Card key={card.title} className="rounded-2xl border-border bg-gradient-card p-5">
+                <div className="flex flex-col gap-3.5">
+                  <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[11px] border border-primary/30 bg-primary/10 text-primary">
+                    <card.icon className="h-[18px] w-[18px]" />
+                  </span>
+                  <div className="flex flex-col gap-[5px]">
+                    <span className="font-mono text-3xl font-bold leading-none text-foreground">
+                      {card.value}
+                    </span>
+                    <span className="text-[13px] text-muted-foreground">{card.title}</span>
+                    <span className="text-[11.5px] text-[hsl(0_0%_65%)]">{card.description}</span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
 
-        {/* Club KPI Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
-          {clubKpiCards.map((card) => (
-            <Card key={card.title} className="bg-card border-border">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {card.title}
-                </CardTitle>
-                <card.icon className="h-4 w-4 text-accent-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">{card.value}</div>
-                <p className="text-xs text-muted-foreground mt-1">{card.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Club-KPIs */}
+        <section className="flex flex-col gap-3.5">
+          <div className="flex flex-wrap items-baseline gap-2.5">
+            <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+              Clubs
+            </h2>
+            <span className="text-xs text-muted-foreground">Buchungen &amp; Kontingente</span>
+          </div>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-4">
+            {clubKpiCards.map((card) => (
+              <Card key={card.title} className="rounded-2xl border-border bg-gradient-card p-5">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[13px] font-semibold text-[hsl(0_0%_72%)]">
+                      {card.title}
+                    </span>
+                    <card.icon className="h-[15px] w-[15px] flex-none text-muted-foreground" />
+                  </div>
+                  <span className="font-mono text-[27px] font-bold leading-none text-foreground">
+                    {card.value}
+                  </span>
+                  {card.progress !== undefined ? (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="h-1.5 overflow-hidden rounded-full bg-[hsl(0_0%_13%)]">
+                        <div
+                          className="h-full rounded-full bg-gradient-lime"
+                          style={{ width: `${card.progress}%` }}
+                        />
+                      </div>
+                      <span className="text-[11.5px] text-[hsl(0_0%_65%)]">{card.description}</span>
+                    </div>
+                  ) : (
+                    <span className="text-[11.5px] text-[hsl(0_0%_65%)]">{card.description}</span>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Recent Activity */}
-          <Card className="bg-card border-border">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <Activity className="h-5 w-5 text-primary" />
-                Letzte Buchungen
-              </CardTitle>
-              <Select
-                value={selectedCourtId || "all"}
-                onValueChange={(value) => setSelectedCourtId(value === "all" ? null : value)}
-              >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Court wählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle Courts</SelectItem>
-                  {Object.entries(courtsByLocation).map(([locationName, courts]) => (
-                    <SelectGroup key={locationName}>
-                      <SelectLabel className="text-xs text-muted-foreground">
-                        {locationName}
-                      </SelectLabel>
-                      {(courts as any[]).map((court) => (
-                        <SelectItem key={court.id} value={court.id}>
-                          {court.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
-            </CardHeader>
-            <CardContent>
+        {/* Letzte Buchungen + Standorte */}
+        <section className="grid grid-cols-1 items-start gap-[18px] xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+          {/* Letzte Buchungen */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-[18px]">
+              <div className="flex flex-wrap items-center justify-between gap-3.5">
+                <div className="flex flex-col gap-0.5">
+                  <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                    Letzte Buchungen
+                  </h2>
+                  <span className="text-xs text-muted-foreground">
+                    {recentBookings?.length ?? 0} Buchungen
+                  </span>
+                </div>
+                <Select
+                  value={selectedCourtId || "all"}
+                  onValueChange={(value) => setSelectedCourtId(value === "all" ? null : value)}
+                >
+                  <SelectTrigger className="h-9 w-[200px] max-w-full rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px] font-semibold text-foreground">
+                    <span className="flex min-w-0 items-center gap-2">
+                      <MapPin className="h-3.5 w-3.5 flex-none text-muted-foreground" />
+                      <SelectValue placeholder="Court wählen" />
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Courts</SelectItem>
+                    {Object.entries(courtsByLocation).map(([locationName, courts]) => (
+                      <SelectGroup key={locationName}>
+                        <SelectLabel className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                          {locationName}
+                        </SelectLabel>
+                        {(courts as any[]).map((court) => (
+                          <SelectItem key={court.id} value={court.id}>
+                            {court.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {recentBookings && recentBookings.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Datum / Uhrzeit</TableHead>
-                      {!selectedCourtId && <TableHead>Court</TableHead>}
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentBookings.map((booking: any) => (
-                      <TableRow key={booking.id}>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium text-foreground">
-                              {format(new Date(booking.start_time), "dd.MM.yyyy", { locale: de })}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {format(new Date(booking.start_time), "HH:mm", { locale: de })} - {format(new Date(booking.end_time), "HH:mm", { locale: de })}
-                            </p>
-                          </div>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b-0 hover:bg-transparent">
+                        <TableHead className="h-auto px-0 pb-3 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">
+                          Datum / Uhrzeit
+                        </TableHead>
                         {!selectedCourtId && (
-                          <TableCell>
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium text-foreground">
-                                {booking.courts?.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {booking.locations?.name}
-                              </p>
+                          <TableHead className="h-auto px-0 pb-3 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">
+                            Court
+                          </TableHead>
+                        )}
+                        <TableHead className="h-auto px-0 pb-3 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">
+                          Status
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recentBookings.map((booking: any) => (
+                        <TableRow
+                          key={booking.id}
+                          className="border-t border-[hsl(0_0%_12%)] hover:bg-white/[0.02]"
+                        >
+                          <TableCell className="px-0 py-[13px] pr-3.5">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="whitespace-nowrap text-[13.5px] font-semibold text-foreground">
+                                {format(new Date(booking.start_time), "dd.MM.yyyy", { locale: de })}
+                              </span>
+                              <span className="whitespace-nowrap font-mono text-xs text-muted-foreground">
+                                {format(new Date(booking.start_time), "HH:mm", { locale: de })} - {format(new Date(booking.end_time), "HH:mm", { locale: de })}
+                              </span>
                             </div>
                           </TableCell>
-                        )}
-                        <TableCell>
-                          <span
-                            className={`text-xs px-2 py-1 rounded-full ${
-                              booking.status === "confirmed"
-                                ? "bg-primary/20 text-primary"
-                                : booking.status === "cancelled"
-                                ? "bg-destructive/20 text-destructive"
-                                : booking.status === "pending_payment"
-                                ? "bg-amber-500/20 text-amber-600"
-                                : "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {booking.status === "confirmed" && "Bestätigt"}
-                            {booking.status === "cancelled" && "Storniert"}
-                            {booking.status === "pending" && "Ausstehend"}
-                            {booking.status === "pending_payment" && "Zahlung offen"}
-                            {booking.status === "expired" && "Abgelaufen"}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                          {!selectedCourtId && (
+                            <TableCell className="px-0 py-[13px] pr-3.5">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="whitespace-nowrap text-[13.5px] font-semibold text-foreground">
+                                  {booking.courts?.name}
+                                </span>
+                                <span className="whitespace-nowrap text-[11.5px] text-muted-foreground">
+                                  {booking.locations?.name}
+                                </span>
+                              </div>
+                            </TableCell>
+                          )}
+                          <TableCell className="px-0 py-[13px]">
+                            <span
+                              className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11.5px] font-bold ${
+                                STATUS_PILL[booking.status] ??
+                                "border-[hsl(0_0%_16%)] bg-white/5 text-muted-foreground"
+                              }`}
+                            >
+                              <span className="h-[5px] w-[5px] rounded-full bg-current" />
+                              {booking.status === "confirmed" && "Bestätigt"}
+                              {booking.status === "cancelled" && "Storniert"}
+                              {booking.status === "pending" && "Ausstehend"}
+                              {booking.status === "pending_payment" && "Zahlung offen"}
+                              {booking.status === "expired" && "Abgelaufen"}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               ) : (
-                <p className="text-muted-foreground text-sm">
+                <p className="text-sm text-muted-foreground">
                   {selectedCourtId ? "Keine Buchungen für diesen Court" : "Keine Buchungen vorhanden"}
                 </p>
               )}
-            </CardContent>
+            </div>
           </Card>
 
-          {/* Quick Stats */}
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <Clock className="h-5 w-5 text-primary" />
-                Standorte Übersicht
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          {/* Standorte */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                Standorte
+              </h2>
               <LocationsOverview />
-            </CardContent>
+            </div>
           </Card>
-        </div>
+        </section>
       </div>
     </AdminLayout>
   );
@@ -439,27 +498,59 @@ function LocationsOverview() {
   });
 
   if (!locations || locations.length === 0) {
-    return <p className="text-muted-foreground text-sm">Keine Standorte konfiguriert</p>;
+    return <p className="text-sm text-muted-foreground">Keine Standorte konfiguriert</p>;
   }
 
+  const totalActiveCourts = locations.reduce(
+    (sum: number, location: any) =>
+      sum + (location.courts?.filter((c: any) => c.is_active).length || 0),
+    0
+  );
+
   return (
-    <div className="space-y-4">
-      {locations.map((location: any) => (
-        <div
-          key={location.id}
-          className="flex items-center justify-between py-2 border-b border-border last:border-0"
-        >
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">{location.name}</p>
-            <p className="text-xs text-muted-foreground">{location.address}</p>
-          </div>
-          <div className="text-right">
-            <span className="text-sm font-medium text-primary">
-              {location.courts?.filter((c: any) => c.is_active).length || 0} Courts
-            </span>
-          </div>
-        </div>
-      ))}
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-[9px]">
+        {locations.map((location: any) => {
+          const activeCourts = location.courts?.filter((c: any) => c.is_active).length || 0;
+          return (
+            <div
+              key={location.id}
+              className="flex items-center gap-3 rounded-[14px] border border-[hsl(0_0%_13%)] bg-white/[0.028] px-3.5 py-[13px] transition-colors hover:border-primary/[0.35]"
+            >
+              <span
+                className={`flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[10px] border border-[hsl(0_0%_15%)] bg-white/5 ${
+                  activeCourts > 0 ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <MapPin className="h-[15px] w-[15px]" />
+              </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="truncate text-[13.5px] font-semibold text-foreground">
+                  {location.name}
+                </span>
+                <span className="truncate text-[11.5px] text-muted-foreground">
+                  {location.address}
+                </span>
+              </div>
+              <div className="flex flex-none flex-col items-end gap-0.5">
+                <span
+                  className={`font-mono text-[15px] font-bold ${
+                    activeCourts > 0 ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  {activeCourts}
+                </span>
+                <span className="whitespace-nowrap text-[10.5px] text-[hsl(0_0%_58%)]">Courts</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="border-t border-[hsl(0_0%_13%)] pt-3.5">
+        <span className="text-xs text-muted-foreground">
+          {locations.length} Standorte · {totalActiveCourts} Courts aktiv
+        </span>
+      </div>
     </div>
   );
 }

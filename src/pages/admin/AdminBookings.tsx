@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -59,6 +59,13 @@ import { de } from "date-fns/locale";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { BookingWeekCalendar, BookingDetailDrawer, type Booking } from "@/components/admin/bookings";
+
+const CALENDAR_LEGEND = [
+  { label: "Spieler", dot: "bg-primary" },
+  { label: "Club", dot: "bg-violet-500" },
+  { label: "Ausstehend", dot: "bg-yellow-500" },
+  { label: "Storniert", dot: "bg-destructive" },
+];
 
 export default function AdminBookings() {
   const [view, setView] = useState<"calendar" | "list">("calendar");
@@ -159,7 +166,7 @@ export default function AdminBookings() {
       const userIds = [...new Set((data || []).map((b) => b.user_id))];
       const clubBookedByIds = [...new Set((data || []).filter(b => b.club_booked_by_user_id).map((b) => b.club_booked_by_user_id!))];
       const allUserIds = [...new Set([...userIds, ...clubBookedByIds])];
-      
+
       const { data: profiles } = await supabase
         .from("profiles")
         .select("user_id, display_name, username")
@@ -170,8 +177,8 @@ export default function AdminBookings() {
       return (data || []).map((booking) => ({
         ...booking,
         profiles: profilesMap.get(booking.user_id) || null,
-        club_booked_by: booking.club_booked_by_user_id 
-          ? profilesMap.get(booking.club_booked_by_user_id) || null 
+        club_booked_by: booking.club_booked_by_user_id
+          ? profilesMap.get(booking.club_booked_by_user_id) || null
           : null,
       })) as Booking[];
     },
@@ -220,7 +227,7 @@ export default function AdminBookings() {
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
     if (!searchQuery) return bookings;
-    
+
     const searchLower = searchQuery.toLowerCase();
     return bookings.filter(
       (booking) =>
@@ -245,142 +252,140 @@ export default function AdminBookings() {
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      confirmed: "bg-primary/20 text-primary",
-      cancelled: "bg-destructive/20 text-destructive",
-      pending: "bg-yellow-500/20 text-yellow-500",
+      confirmed: "border-primary/30 bg-primary/10 text-primary",
+      cancelled: "border-destructive/30 bg-destructive/10 text-destructive",
+      pending: "border-yellow-500/30 bg-yellow-500/10 text-yellow-500",
     };
-    return styles[status as keyof typeof styles] || "bg-muted text-muted-foreground";
+    return styles[status as keyof typeof styles] || "border-[hsl(0_0%_18%)] bg-white/5 text-muted-foreground";
   };
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Buchungen</h1>
-            <p className="text-muted-foreground">
-              {bookings?.length || 0} Buchungen in dieser Woche
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        {/* Kopfzeile: Wochenzähler + Ansicht-Tabs + Reset */}
+        <div className="flex flex-wrap items-end justify-between gap-x-[18px] gap-y-3">
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-bold text-foreground">{bookings?.length || 0} Buchungen</span>{" "}
+              in dieser Woche
               {clubBookingsCount > 0 && (
-                <span className="ml-2">
-                  (<span className="text-primary">{clubBookingsCount} Club-Buchungen</span>)
+                <span className="ml-2 text-violet-400">
+                  ({clubBookingsCount} Club-Buchungen)
                 </span>
               )}
             </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowResetDialog(true)}
-              className="border-destructive/50 text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Buchungen Reset
-            </Button>
             <Tabs value={view} onValueChange={(v) => setView(v as "calendar" | "list")}>
-              <TabsList className="bg-secondary">
-                <TabsTrigger value="calendar" className="gap-2">
+              <TabsList className="h-auto justify-start gap-[22px] rounded-none border-b border-[hsl(0_0%_12%)] bg-transparent p-0">
+                <TabsTrigger
+                  value="calendar"
+                  className="-mb-px gap-2 rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-[11px] pt-0 text-sm font-bold text-[hsl(0_0%_60%)] shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                >
                   <CalendarDays className="h-4 w-4" />
                   Kalender
                 </TabsTrigger>
-                <TabsTrigger value="list" className="gap-2">
+                <TabsTrigger
+                  value="list"
+                  className="-mb-px gap-2 rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-[11px] pt-0 text-sm font-bold text-[hsl(0_0%_60%)] shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                >
                   <List className="h-4 w-4" />
                   Liste
                 </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowResetDialog(true)}
+            className="h-9 gap-2 rounded-[10px] border-[hsl(0_100%_71%/0.32)] bg-[hsl(0_100%_71%/0.08)] px-3.5 text-[13px] font-bold text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+          >
+            <Trash2 className="h-[15px] w-[15px]" />
+            Buchungen Reset
+          </Button>
         </div>
 
-        {/* Filters */}
-        <Card className="bg-card border-border">
-          <CardContent className="pt-6">
-            <div className="flex flex-col gap-4">
-              {/* Week Navigation */}
-              <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handlePrevWeek}
-                    className="border-border"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <div className="px-4 py-2 bg-secondary rounded-lg min-w-[200px] text-center">
-                    <span className="text-sm font-medium text-foreground">
-                      {format(weekStart, "dd. MMM", { locale: de })} -{" "}
-                      {format(weekEnd, "dd. MMM yyyy", { locale: de })}
-                    </span>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleNextWeek}
-                    className="border-border"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleThisWeek}
-                    className="border-border"
-                  >
-                    Diese Woche
-                  </Button>
-                </div>
+        {/* Filterkarte */}
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-4">
+            {/* Wochen-Navigation */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handlePrevWeek}
+                className="h-[34px] w-[34px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[hsl(0_0%_75%)] hover:border-primary/40 hover:bg-white/[0.04] hover:text-primary"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="min-w-[196px] text-center font-mono text-sm font-bold text-foreground">
+                {format(weekStart, "dd. MMM", { locale: de })} -{" "}
+                {format(weekEnd, "dd. MMM yyyy", { locale: de })}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleNextWeek}
+                className="h-[34px] w-[34px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[hsl(0_0%_75%)] hover:border-primary/40 hover:bg-white/[0.04] hover:text-primary"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleThisWeek}
+                className="h-[34px] rounded-[10px] border-primary/30 bg-primary/[0.09] px-3.5 text-[12.5px] font-bold text-primary hover:bg-primary/[0.16] hover:text-primary"
+              >
+                Diese Woche
+              </Button>
+            </div>
 
-                {/* Standard Filters */}
-                <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                  <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
-                    <SelectTrigger className="w-full sm:w-[200px] bg-background border-border">
-                      <SelectValue placeholder="Standort wählen" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Alle Standorte</SelectItem>
-                      {locations?.map((loc) => (
-                        <SelectItem key={loc.id} value={loc.id}>
-                          {loc.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full sm:w-[150px] bg-background border-border">
-                      <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Alle Status</SelectItem>
-                      <SelectItem value="confirmed">Bestätigt</SelectItem>
-                      <SelectItem value="pending">Ausstehend</SelectItem>
-                      <SelectItem value="cancelled">Storniert</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            {/* Filter */}
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(190px,100%),1fr))] gap-3">
+              <div className="flex flex-col gap-[7px]">
+                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Standort
+                </Label>
+                <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
+                  <SelectTrigger className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
+                    <SelectValue placeholder="Standort wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Standorte</SelectItem>
+                    {locations?.map((loc) => (
+                      <SelectItem key={loc.id} value={loc.id}>
+                        {loc.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              {/* Club Filters */}
-              <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-border">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="onlyClubBookings"
-                    checked={onlyClubBookings}
-                    onCheckedChange={(checked) => setOnlyClubBookings(checked === true)}
-                  />
-                  <Label htmlFor="onlyClubBookings" className="text-sm cursor-pointer flex items-center gap-1">
-                    <Building2 className="h-4 w-4 text-primary" />
-                    Nur Club-Buchungen
-                  </Label>
-                </div>
+              <div className="flex flex-col gap-[7px]">
+                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Status
+                </Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
+                    <Filter className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Status</SelectItem>
+                    <SelectItem value="confirmed">Bestätigt</SelectItem>
+                    <SelectItem value="pending">Ausstehend</SelectItem>
+                    <SelectItem value="cancelled">Storniert</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
+              <div className="flex flex-col gap-[7px]">
+                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Club
+                </Label>
                 <Select value={clubFilter} onValueChange={setClubFilter}>
-                  <SelectTrigger className="w-[200px] bg-background border-border">
-                    <Building2 className="h-4 w-4 mr-2" />
+                  <SelectTrigger className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
+                    <Building2 className="mr-2 h-4 w-4 text-muted-foreground" />
                     <SelectValue placeholder="Club wählen" />
                   </SelectTrigger>
                   <SelectContent>
@@ -394,21 +399,55 @@ export default function AdminBookings() {
                 </Select>
               </div>
             </div>
-          </CardContent>
+
+            {/* Club-Schnellfilter */}
+            <div className="flex flex-wrap items-center gap-2.5 border-t border-[hsl(0_0%_12%)] pt-[13px]">
+              <div className="flex items-center gap-2.5 rounded-full border border-[hsl(0_0%_15%)] bg-white/[0.04] py-[7px] pl-2.5 pr-3.5">
+                <Checkbox
+                  id="onlyClubBookings"
+                  checked={onlyClubBookings}
+                  onCheckedChange={(checked) => setOnlyClubBookings(checked === true)}
+                  className="h-[17px] w-[17px] rounded-[5px] border-[hsl(0_0%_30%)]"
+                />
+                <Label
+                  htmlFor="onlyClubBookings"
+                  className="flex cursor-pointer items-center gap-1.5 text-[13px] font-semibold text-[hsl(0_0%_75%)]"
+                >
+                  <Building2 className="h-4 w-4 text-primary" />
+                  Nur Club-Buchungen
+                </Label>
+              </div>
+            </div>
+          </div>
         </Card>
 
-        {/* Calendar View */}
+        {/* Kalenderansicht */}
         {view === "calendar" && (
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
-                Wochenübersicht (Mo - Fr)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-3.5">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[10px] border border-primary/30 bg-primary/10 text-primary">
+                    <Calendar className="h-4 w-4" />
+                  </span>
+                  <span className="font-display text-base font-bold tracking-tight text-foreground">
+                    Wochenübersicht
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-3.5">
+                  {CALENDAR_LEGEND.map((item) => (
+                    <span
+                      key={item.label}
+                      className="inline-flex items-center gap-[7px] whitespace-nowrap text-xs text-muted-foreground"
+                    >
+                      <span className={`h-[9px] w-[9px] rounded-[3px] ${item.dot}`} />
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
               {isLoading ? (
-                <div className="flex items-center justify-center h-64 text-muted-foreground">
+                <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
                   Laden...
                 </div>
               ) : (
@@ -418,96 +457,123 @@ export default function AdminBookings() {
                   onBookingClick={setSelectedBooking}
                 />
               )}
-            </CardContent>
+            </div>
           </Card>
         )}
 
-        {/* List View */}
+        {/* Listenansicht */}
         {view === "list" && (
-          <Card className="bg-card border-border">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-foreground">
-                  Buchungsliste ({filteredBookings?.length || 0})
-                </CardTitle>
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-3.5">
+                <span className="font-display text-base font-bold tracking-tight text-foreground">
+                  Buchungsliste{" "}
+                  <span className="font-mono text-sm font-normal text-muted-foreground">
+                    ({filteredBookings?.length || 0})
+                  </span>
+                </span>
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Suchen..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-background border-border"
+                    className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] pl-9 text-[13.5px]"
                   />
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
+
               {isLoading ? (
-                <p className="text-muted-foreground">Laden...</p>
+                <p className="text-sm text-muted-foreground">Laden...</p>
               ) : filteredBookings && filteredBookings.length > 0 ? (
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-border">
-                        <TableHead className="text-muted-foreground">Typ</TableHead>
-                        <TableHead className="text-muted-foreground">Datum & Zeit</TableHead>
-                        <TableHead className="text-muted-foreground">Standort</TableHead>
-                        <TableHead className="text-muted-foreground">Court</TableHead>
-                        <TableHead className="text-muted-foreground">Benutzer</TableHead>
-                        <TableHead className="text-muted-foreground">Club</TableHead>
-                        <TableHead className="text-muted-foreground">Gebucht von</TableHead>
-                        <TableHead className="text-muted-foreground">Für Mitglied</TableHead>
-                        <TableHead className="text-muted-foreground">Kontingent</TableHead>
-                        <TableHead className="text-muted-foreground">Status</TableHead>
-                        <TableHead className="text-muted-foreground text-right">Aktionen</TableHead>
+                      <TableRow className="border-[hsl(0_0%_12%)] hover:bg-transparent">
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Typ</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Datum & Zeit</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Standort</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Court</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Benutzer</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Club</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Gebucht von</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Für Mitglied</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Kontingent</TableHead>
+                        <TableHead className="whitespace-nowrap font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Status</TableHead>
+                        <TableHead className="whitespace-nowrap text-right font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">Aktionen</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredBookings.map((booking) => (
-                        <TableRow key={booking.id} className="border-border">
+                        <TableRow key={booking.id} className="border-[hsl(0_0%_12%)] hover:bg-white/[0.02]">
                           {/* Booking Type */}
                           <TableCell>
                             {booking.booking_origin === "club" ? (
-                              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
-                                <Building2 className="h-3 w-3 mr-1" />
+                              <Badge
+                                variant="outline"
+                                className="gap-1.5 whitespace-nowrap rounded-full border-violet-500/30 bg-violet-500/10 px-2.5 py-1 text-[11px] font-bold text-violet-400"
+                              >
+                                <Building2 className="h-3 w-3" />
                                 Club
                               </Badge>
                             ) : (
-                              <Badge variant="secondary">User</Badge>
+                              <Badge
+                                variant="outline"
+                                className="whitespace-nowrap rounded-full border-[hsl(0_0%_18%)] bg-white/5 px-2.5 py-1 text-[11px] font-bold text-[hsl(0_0%_80%)]"
+                              >
+                                User
+                              </Badge>
                             )}
                           </TableCell>
                           {/* Date & Time */}
-                          <TableCell className="text-foreground">
-                            <div>
-                              <p className="font-medium">
+                          <TableCell>
+                            <div className="flex flex-col gap-0.5">
+                              <p className="whitespace-nowrap font-mono text-[12.5px] text-foreground">
                                 {format(new Date(booking.start_time), "dd.MM.yyyy", { locale: de })}
                               </p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
                                 {format(new Date(booking.start_time), "HH:mm")} -{" "}
                                 {format(new Date(booking.end_time), "HH:mm")}
                               </p>
                             </div>
                           </TableCell>
                           {/* Location */}
-                          <TableCell className="text-foreground">
+                          <TableCell className="whitespace-nowrap text-[13px] text-[hsl(0_0%_78%)]">
                             {booking.locations?.name}
                           </TableCell>
                           {/* Court */}
-                          <TableCell className="text-foreground">
+                          <TableCell className="whitespace-nowrap text-[13px] font-semibold text-foreground">
                             {booking.courts?.name}
                           </TableCell>
                           {/* User (Owner) / Gast */}
-                          <TableCell className="text-foreground">
+                          <TableCell>
                             {booking.profiles?.display_name || booking.profiles?.username ? (
-                              booking.profiles?.display_name || booking.profiles?.username
+                              <div className="flex items-center gap-2.5">
+                                <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full border border-primary/[0.26] bg-primary/10 font-display text-[10.5px] font-extrabold text-primary">
+                                  {(booking.profiles?.display_name || booking.profiles?.username || "")
+                                    .slice(0, 2)
+                                    .toUpperCase()}
+                                </span>
+                                <span className="whitespace-nowrap text-[13px] font-semibold text-foreground">
+                                  {booking.profiles?.display_name || booking.profiles?.username}
+                                </span>
+                              </div>
                             ) : booking.guest_email || booking.guest_name ? (
                               <div className="flex flex-col gap-0.5">
-                                <span className="inline-flex items-center gap-1.5">
+                                <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
                                   {booking.guest_name || "Gast"}
-                                  <Badge variant="outline" className="text-[10px] py-0 border-primary/40 text-primary">Gast</Badge>
+                                  <Badge
+                                    variant="outline"
+                                    className="rounded-full border-primary/[0.28] bg-primary/[0.09] px-2 py-0 font-mono text-[10px] uppercase tracking-[0.1em] text-primary"
+                                  >
+                                    Gast
+                                  </Badge>
                                 </span>
                                 {booking.guest_email && (
-                                  <a href={`mailto:${booking.guest_email}`} className="text-xs text-muted-foreground hover:text-primary break-all">
+                                  <a
+                                    href={`mailto:${booking.guest_email}`}
+                                    className="break-all text-xs text-muted-foreground hover:text-primary"
+                                  >
                                     {booking.guest_email}
                                   </a>
                                 )}
@@ -516,25 +582,25 @@ export default function AdminBookings() {
                                 )}
                               </div>
                             ) : (
-                              "-"
+                              <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
                           {/* Club Name */}
-                          <TableCell>
+                          <TableCell className="whitespace-nowrap">
                             {booking.club?.name ? (
-                              <span className="text-primary font-medium">{booking.club.name}</span>
+                              <span className="text-[13px] font-semibold text-violet-400">{booking.club.name}</span>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
                           {/* Booked By (Club User) */}
-                          <TableCell>
+                          <TableCell className="whitespace-nowrap text-[13px] text-[hsl(0_0%_78%)]">
                             {booking.club_booked_by?.display_name || booking.club_booked_by?.username || (
                               <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
                           {/* For Member */}
-                          <TableCell>
+                          <TableCell className="whitespace-nowrap text-[13px] text-[hsl(0_0%_78%)]">
                             {booking.booked_for_member_name || (
                               <span className="text-muted-foreground">-</span>
                             )}
@@ -542,11 +608,16 @@ export default function AdminBookings() {
                           {/* Quota */}
                           <TableCell>
                             {booking.allocation_minutes ? (
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1.5">
                                 <Clock className="h-3 w-3 text-muted-foreground" />
-                                <span className="text-sm">{booking.allocation_minutes} Min</span>
+                                <span className="whitespace-nowrap font-mono text-[12.5px] text-[hsl(0_0%_78%)]">
+                                  {booking.allocation_minutes} Min
+                                </span>
                                 {booking.is_free_allocation && (
-                                  <Badge variant="outline" className="text-xs ml-1 bg-green-500/10 text-green-600 border-green-500/30">
+                                  <Badge
+                                    variant="outline"
+                                    className="ml-1 rounded-full border-green-500/30 bg-green-500/10 px-2 py-0 font-mono text-[10px] uppercase tracking-[0.1em] text-green-500"
+                                  >
                                     Frei
                                   </Badge>
                                 )}
@@ -558,10 +629,11 @@ export default function AdminBookings() {
                           {/* Status */}
                           <TableCell>
                             <span
-                              className={`text-xs px-2 py-1 rounded-full ${getStatusBadge(
+                              className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-bold ${getStatusBadge(
                                 booking.status
                               )}`}
                             >
+                              <span className="h-[5px] w-[5px] rounded-full bg-current" />
                               {booking.status === "confirmed"
                                 ? "Bestätigt"
                                 : booking.status === "cancelled"
@@ -576,6 +648,7 @@ export default function AdminBookings() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => setSelectedBooking(booking)}
+                                className="h-[30px] rounded-lg border border-[hsl(0_0%_16%)] bg-white/5 px-3 text-xs font-bold text-[hsl(0_0%_82%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
                               >
                                 Details
                               </Button>
@@ -583,10 +656,10 @@ export default function AdminBookings() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 text-destructive hover:text-destructive"
+                                  className="h-[30px] w-[30px] rounded-lg border border-[hsl(0_100%_71%/0.28)] bg-[hsl(0_100%_71%/0.08)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.18)] hover:text-[#FF6B6B]"
                                   onClick={() => setCancelBookingId(booking.id)}
                                 >
-                                  <XCircle className="h-4 w-4" />
+                                  <XCircle className="h-3.5 w-3.5" />
                                 </Button>
                               )}
                             </div>
@@ -597,11 +670,11 @@ export default function AdminBookings() {
                   </Table>
                 </div>
               ) : (
-                <p className="text-muted-foreground text-center py-8">
+                <p className="py-8 text-center text-sm text-muted-foreground">
                   Keine Buchungen in dieser Woche gefunden
                 </p>
               )}
-            </CardContent>
+            </div>
           </Card>
         )}
       </div>
@@ -616,18 +689,25 @@ export default function AdminBookings() {
 
       {/* Cancel Confirmation Dialog */}
       <AlertDialog open={!!cancelBookingId} onOpenChange={() => setCancelBookingId(null)}>
-        <AlertDialogContent className="bg-card border-border">
+        <AlertDialogContent className="rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground">Buchung stornieren?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Buchung stornieren?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-relaxed text-[hsl(0_0%_68%)]">
               Diese Aktion kann nicht rückgängig gemacht werden. Die Buchung wird als storniert
               markiert.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-border">Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="rounded-[11px] bg-[#FF6B6B] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
               onClick={() => cancelBookingId && cancelMutation.mutate(cancelBookingId)}
             >
               Stornieren
@@ -638,41 +718,55 @@ export default function AdminBookings() {
 
       {/* Reset Bookings Dialog */}
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-        <AlertDialogContent className="bg-card border-border">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-foreground flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+        <AlertDialogContent className="rounded-[20px] border-[hsl(0_100%_71%/0.25)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:rounded-[20px]">
+          <AlertDialogHeader className="gap-1.5">
+            <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[#FF6B6B]">
+              <AlertTriangle className="h-3.5 w-3.5 flex-none" />
+              Achtung: Diese Aktion ist unwiderruflich!
+            </span>
+            <AlertDialogTitle className="font-display text-[20px] font-extrabold tracking-tight text-foreground">
               Buchungen löschen?
             </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4">
-              <p className="text-destructive font-medium">
-                ⚠️ ACHTUNG: Diese Aktion ist UNWIDERRUFLICH!
-              </p>
-              <p>
-                Es werden alle zugehörigen Daten gelöscht:
-              </p>
-              <ul className="list-disc list-inside text-sm space-y-1">
-                <li>Alle Buchungen</li>
-                <li>Alle Teilnehmer-Einladungen</li>
-                <li>Alle Spieler-Zuordnungen</li>
-                <li>Alle Zahlungsdaten</li>
-              </ul>
-              <div className="flex items-center space-x-2 pt-2">
-                <Checkbox
-                  id="onlyExpiredCancelled"
-                  checked={onlyExpiredAndCancelled}
-                  onCheckedChange={(checked) => setOnlyExpiredAndCancelled(checked === true)}
-                />
-                <Label htmlFor="onlyExpiredCancelled" className="text-sm text-foreground cursor-pointer">
-                  Nur abgelaufene/stornierte Buchungen löschen
-                </Label>
-              </div>
+            <AlertDialogDescription className="text-sm leading-relaxed text-[hsl(0_0%_68%)]">
+              Es werden alle zugehörigen Daten gelöscht:
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          <div className="flex flex-col gap-2 rounded-[13px] border border-[hsl(0_100%_71%/0.18)] bg-[hsl(0_100%_71%/0.05)] p-3.5">
+            {[
+              "Alle Buchungen",
+              "Alle Teilnehmer-Einladungen",
+              "Alle Spieler-Zuordnungen",
+              "Alle Zahlungsdaten",
+            ].map((item) => (
+              <span key={item} className="flex items-center gap-2.5 text-[13px] text-[hsl(0_0%_72%)]">
+                <span className="h-1 w-1 flex-none rounded-full bg-[#FF6B6B]" />
+                {item}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex w-fit items-center gap-2.5 rounded-full border border-[hsl(0_0%_15%)] bg-white/[0.04] py-[7px] pl-2.5 pr-3.5">
+            <Checkbox
+              id="onlyExpiredCancelled"
+              checked={onlyExpiredAndCancelled}
+              onCheckedChange={(checked) => setOnlyExpiredAndCancelled(checked === true)}
+              className="h-[17px] w-[17px] rounded-[5px] border-[hsl(0_0%_30%)]"
+            />
+            <Label
+              htmlFor="onlyExpiredCancelled"
+              className="cursor-pointer text-[13px] font-semibold text-foreground"
+            >
+              Nur abgelaufene/stornierte Buchungen löschen
+            </Label>
+          </div>
+
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-border">Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="rounded-[11px] bg-[#FF6B6B] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
               onClick={() => resetBookingsMutation.mutate(onlyExpiredAndCancelled)}
               disabled={resetBookingsMutation.isPending}
             >

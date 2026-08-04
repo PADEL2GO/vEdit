@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +17,12 @@ import { LocationForm, QUERY_KEY, Location, AdminLocationCard } from "@/componen
 import { AdminCourtCard } from "@/components/admin/courts/AdminCourtCard";
 import { LocationAnalyticsTab } from "@/components/admin/courts/LocationAnalyticsTab";
 import { CameraApiKeysTab, CameraSessionsTab, CameraTestSimulator } from "@/components/admin/cameras";
+
+const TAB_TRIGGER_CLASSES =
+  "-mb-px gap-2 rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-[11px] pt-0 text-sm font-bold text-[hsl(0_0%_60%)] shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none";
+
+const TAB_COUNT_CLASSES =
+  "rounded-full bg-white/[0.07] px-[7px] py-[2px] font-mono text-[10.5px] font-normal leading-none";
 
 export default function AdminCourts() {
   const queryClient = useQueryClient();
@@ -58,7 +64,7 @@ export default function AdminCourts() {
   });
 
   // Flatten all courts with their location info
-  const allCourts = locations?.flatMap(location => 
+  const allCourts = locations?.flatMap(location =>
     (location.courts || []).map(court => ({
       court,
       location: {
@@ -77,25 +83,31 @@ export default function AdminCourts() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground">Courts & Standorte</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {totalLocations} Standorte ({onlineLocations} online) • {totalCourts} Courts ({activeCourts} aktiv)
-            </p>
-          </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        {/* Kopfzeile: Zähler + Neuer Standort */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            <span className="font-bold text-foreground">{totalLocations} Standorte</span>{" "}
+            ({onlineLocations} online)
+            <span className="mx-1.5">•</span>
+            <span className="font-bold text-foreground">{totalCourts} Courts</span>{" "}
+            ({activeCourts} aktiv)
+          </p>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 w-full sm:w-auto">
-                <Plus className="h-4 w-4 mr-2" />
+              <Button className="h-9 w-full gap-[7px] rounded-[10px] bg-gradient-lime px-[15px] text-[13px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.28)] transition-opacity hover:opacity-90 sm:w-auto">
+                <Plus className="h-[15px] w-[15px]" />
                 Neuer Standort
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-card border-border max-w-3xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-foreground">Neuer Standort</DialogTitle>
+            <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))]">
+              <DialogHeader className="gap-[5px] space-y-0 text-left">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
+                  Standort
+                </span>
+                <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-foreground">
+                  Neuer Standort
+                </DialogTitle>
               </DialogHeader>
               <LocationForm
                 onSuccess={() => {
@@ -109,83 +121,81 @@ export default function AdminCourts() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-secondary/50 w-full sm:w-auto flex">
-            <TabsTrigger value="standorte" className="flex-1 sm:flex-initial data-[state=active]:bg-background">
-              <MapPin className="h-4 w-4 mr-1 sm:mr-2" />
-              <span className="hidden xs:inline">Standorte</span>
-              <span className="xs:hidden">Std.</span>
-              <span className="ml-1">({totalLocations})</span>
+          <TabsList className="h-auto w-full justify-start gap-5 overflow-x-auto rounded-none border-b border-[hsl(0_0%_12%)] bg-transparent p-0 sm:gap-[22px]">
+            <TabsTrigger value="standorte" className={TAB_TRIGGER_CLASSES}>
+              <MapPin className="h-4 w-4" />
+              <span className="hidden sm:inline">Standorte</span>
+              <span className="sm:hidden">Std.</span>
+              <span className={TAB_COUNT_CLASSES}>{totalLocations}</span>
             </TabsTrigger>
-            <TabsTrigger value="courts" className="flex-1 sm:flex-initial data-[state=active]:bg-background">
-              <Building2 className="h-4 w-4 mr-1 sm:mr-2" />
-              <span className="hidden xs:inline">Courts</span>
-              <span className="xs:hidden">Cts.</span>
-              <span className="ml-1">({totalCourts})</span>
+            <TabsTrigger value="courts" className={TAB_TRIGGER_CLASSES}>
+              <Building2 className="h-4 w-4" />
+              <span className="hidden sm:inline">Courts</span>
+              <span className="sm:hidden">Cts.</span>
+              <span className={TAB_COUNT_CLASSES}>{totalCourts}</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex-1 sm:flex-initial data-[state=active]:bg-background">
-              <BarChart3 className="h-4 w-4 mr-1 sm:mr-2" />
-              <span className="hidden xs:inline">Analytics</span>
-              <span className="xs:hidden">Stats</span>
+            <TabsTrigger value="analytics" className={TAB_TRIGGER_CLASSES}>
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Stats</span>
             </TabsTrigger>
-            <TabsTrigger value="cameras" className="flex-1 sm:flex-initial data-[state=active]:bg-background">
-              <Video className="h-4 w-4 mr-1 sm:mr-2" />
-              <span className="hidden xs:inline">KI-Kameras</span>
-              <span className="xs:hidden">Cam</span>
+            <TabsTrigger value="cameras" className={TAB_TRIGGER_CLASSES}>
+              <Video className="h-4 w-4" />
+              <span className="hidden sm:inline">KI-Kameras</span>
+              <span className="sm:hidden">Cam</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Standorte Tab */}
-          <TabsContent value="standorte" className="mt-6">
+          <TabsContent value="standorte" className="mt-5">
             {isLoading ? (
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(370px,100%),1fr))] items-start gap-[18px]">
                 {[...Array(2)].map((_, i) => (
-                  <Card key={i} className="bg-card border-border animate-pulse">
-                    <div className="p-4 sm:p-6 space-y-4">
-                      <div className="flex gap-4">
-                        <div className="h-12 w-12 sm:h-16 sm:w-16 bg-muted rounded-lg" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-5 bg-muted rounded w-3/4" />
-                          <div className="h-4 bg-muted rounded w-1/2" />
-                        </div>
-                      </div>
-                      <div className="h-20 bg-muted rounded" />
+                  <Card key={i} className="animate-pulse overflow-hidden rounded-2xl border-border bg-gradient-card">
+                    <div className="h-[150px] bg-muted/60" />
+                    <div className="space-y-4 p-5">
+                      <div className="h-5 w-3/4 rounded bg-muted" />
+                      <div className="h-4 w-1/2 rounded bg-muted" />
+                      <div className="h-20 rounded-xl bg-muted" />
                     </div>
                   </Card>
                 ))}
               </div>
             ) : locations && locations.length > 0 ? (
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(370px,100%),1fr))] items-start gap-[18px]">
                 {locations.map((location) => (
                   <AdminLocationCard key={location.id} location={location} />
                 ))}
               </div>
             ) : (
-              <Card className="bg-card border-border">
-                <CardContent className="py-12 text-center">
-                  <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Keine Standorte konfiguriert</p>
-                </CardContent>
+              <Card className="rounded-2xl border-border bg-gradient-card">
+                <div className="flex flex-col items-center py-12 text-center">
+                  <span className="mb-4 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
+                    <MapPin className="h-4 w-4" />
+                  </span>
+                  <p className="text-sm text-muted-foreground">Keine Standorte konfiguriert</p>
+                </div>
               </Card>
             )}
           </TabsContent>
 
           {/* Courts Tab */}
-          <TabsContent value="courts" className="mt-6">
+          <TabsContent value="courts" className="mt-5">
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(290px,100%),1fr))] items-start gap-[18px]">
                 {[...Array(4)].map((_, i) => (
-                  <Card key={i} className="bg-card border-border animate-pulse">
-                    <div className="aspect-[21/9] bg-muted" />
-                    <div className="p-4 space-y-3">
-                      <div className="h-5 bg-muted rounded w-3/4" />
-                      <div className="h-4 bg-muted rounded w-1/2" />
-                      <div className="h-8 bg-muted rounded" />
+                  <Card key={i} className="animate-pulse overflow-hidden rounded-2xl border-border bg-gradient-card">
+                    <div className="aspect-[21/9] bg-muted/60" />
+                    <div className="space-y-3 p-4">
+                      <div className="h-5 w-3/4 rounded bg-muted" />
+                      <div className="h-4 w-1/2 rounded bg-muted" />
+                      <div className="h-8 rounded-[10px] bg-muted" />
                     </div>
                   </Card>
                 ))}
               </div>
             ) : allCourts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(290px,100%),1fr))] items-start gap-[18px]">
                 {allCourts.map(({ court, location }, index) => (
                   <AdminCourtCard
                     key={court.id}
@@ -196,24 +206,26 @@ export default function AdminCourts() {
                 ))}
               </div>
             ) : (
-              <Card className="bg-card border-border">
-                <CardContent className="py-12 text-center">
-                  <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Keine Courts konfiguriert</p>
-                </CardContent>
+              <Card className="rounded-2xl border-border bg-gradient-card">
+                <div className="flex flex-col items-center py-12 text-center">
+                  <span className="mb-4 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
+                    <Building2 className="h-4 w-4" />
+                  </span>
+                  <p className="text-sm text-muted-foreground">Keine Courts konfiguriert</p>
+                </div>
               </Card>
             )}
           </TabsContent>
 
           {/* Analytics Tab */}
-          <TabsContent value="analytics" className="mt-6">
+          <TabsContent value="analytics" className="mt-5">
             {isLoading ? (
-              <Card className="bg-card border-border animate-pulse">
-                <div className="p-6 space-y-4">
-                  <div className="h-10 bg-muted rounded w-1/3" />
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              <Card className="animate-pulse rounded-2xl border-border bg-gradient-card">
+                <div className="space-y-4 p-5 sm:p-6">
+                  <div className="h-10 w-1/3 rounded-[10px] bg-muted" />
+                  <div className="grid grid-cols-2 gap-[14px] sm:grid-cols-3 lg:grid-cols-6">
                     {[...Array(6)].map((_, i) => (
-                      <div key={i} className="h-24 bg-muted rounded" />
+                      <div key={i} className="h-24 rounded-xl bg-muted" />
                     ))}
                   </div>
                 </div>
@@ -224,10 +236,17 @@ export default function AdminCourts() {
           </TabsContent>
 
           {/* KI-Kameras Tab */}
-          <TabsContent value="cameras" className="mt-6 space-y-8">
-            <CameraSessionsTab />
-            <CameraApiKeysTab />
-            <CameraTestSimulator />
+          <TabsContent
+            value="cameras"
+            className="mt-5 grid grid-cols-1 items-start gap-[18px] xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"
+          >
+            <div className="flex min-w-0 flex-col gap-[18px]">
+              <CameraSessionsTab />
+              <CameraTestSimulator />
+            </div>
+            <div className="min-w-0">
+              <CameraApiKeysTab />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

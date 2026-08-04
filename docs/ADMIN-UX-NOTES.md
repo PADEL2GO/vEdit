@@ -20,7 +20,21 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 ## Bugs / Inkonsistenzen
 
 1. **AdminSettings: Platzhalter ohne Backend** — „Allgemeine Einstellungen" (App Name, Zeitzone), „Wartungsmodus", „Benachrichtigungen" (3 Schalter) und „Sicherheit" (2FA, Session-Timeout) haben **kein** Backend: kein `app_name`-/Maintenance-Flag in Migrationen oder Code gefunden, die Schalter sind unkontrolliert (Zustand geht beim Reload verloren). Seit dem Redesign sichtbar als „UI-Platzhalter · ohne Backend" markiert. **Entscheidung nötig:** verdrahten (in `site_settings`) oder entfernen — sonst entsteht falsches Vertrauen (v. a. bei „Zwei-Faktor-Authentifizierung").
-2. *(wird bei den nächsten Admin-Seiten ergänzt)*
+2. **AdminOverview:** „Buchungen heute/Woche" zählen nur `status=confirmed`, die Liste „Letzte Buchungen" zeigt alle Status — Zahlen wirken inkonsistent zueinander. Court-Filter wechselt zudem das Limit (10 gefiltert vs. 5 ungefiltert). Kontingent-Minuten ohne Tausenderpunkt („8160 / 12000 Min").
+3. **AdminBookings:** Status-Filter-Default „Bestätigt" versteckt stornierte/ausstehende Buchungen beim ersten Öffnen. Suchfeld ist nur in der Listenansicht sichtbar, filtert aber unsichtbar auch den Kalender mit. Club-Farbe inkonsistent (Kalender violett, Design blau, alte Tabelle lime) → plattformweit vereinheitlichen. Nebenbei behoben: invalides nested-`<p>` im Reset-Dialog (React-Hydration-Warnung).
+4. **AdminCourts:** Toter `xs:`-Breakpoint — `xs` ist in tailwind.config.ts nicht definiert, `hidden xs:inline`-Labels wurden nie angezeigt (auf `sm:` korrigiert). Projekt-weiter Grep nach `xs:` lohnt.
+5. **AdminUtilization:** Kapazitätsfarben doppelt gepflegt (lib/utilization.ts `capacityHex` vs. Design-Palette) → konsolidieren. KPI „Netzwerk-Auslastung" cappt Anzeige bei 100 %, Rohdaten können >100 % liefern (Datenqualität im View prüfen).
+
+## Backend-Wiring offen (Design zeigt es, Seite hat kein Gegenstück)
+
+- **Sidebar:** Live-Counts an „Buchungen" und „Marketplace" (Design-Dummies weggelassen)
+- **Overview:** Zeitraum-Umschalter (Heute/Woche/Monat), Umsatz-KPI, Trend-Badges, Spieler-/Betrag-Spalten in „Letzte Buchungen", „Alle →"-Links, „Neuer Standort"-CTA
+- **Bookings:** Court-Filter, Spalten Dauer/Betrag/Zahlung/Lobby-Herkunft, „LÖSCHEN"-Tipp-Bestätigung im Reset-Dialog (sinnvolles Sicherheits-Upgrade), Teilnehmer-Sektion im Detail-Drawer
+
+## Folge-Pass: Kind-Komponenten (Design da, Komponente noch alt)
+
+- `BookingWeekCalendar.tsx`, `BookingDetailDrawer.tsx` (aus Admin 02)
+- `AdminLocationCard.tsx`, `AdminCourtCard.tsx`, `LocationAnalyticsTab.tsx`, Camera-Komponenten, `CourtPriceDialog` (aus Admin 03)
 
 ## Erledigt
 
