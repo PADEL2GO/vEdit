@@ -562,28 +562,32 @@ Masken:
 
 > **Umgesetzt 2026-08-04** aus `Admin 03 Courts.dc.html` (Seiten-Datei). Nebenbei: toter `xs:`-Breakpoint in Tab-Labels auf `sm:` korrigiert.
 
-### ⬜ AdminEvents — `/admin/events`
+### ✅ AdminEvents — `/admin/events`
 `src/pages/admin/AdminEvents.tsx` · Events erstellen, filtern und verwalten
 
 Masken:
-- [ ] Kopf mit Zählern und Neues-Event-Button
-- [ ] Filterleiste (Suche und Status)
-- [ ] Events-Tabelle
-- [ ] Event-Formular-Dialog (Erstellen/Bearbeiten)
-- [ ] Event-Löschen-Bestätigung
-- [ ] Empty- und Loading-State
+- [x] Kopf mit Zählern und Neues-Event-Button
+- [x] Filterleiste (Suche und Status)
+- [x] Events-Tabelle
+- [x] Event-Formular-Dialog (Erstellen/Bearbeiten)
+- [x] Event-Löschen-Bestätigung
+- [x] Empty- und Loading-State
 
-### ⬜ AdminMarketplace — `/admin/marketplace`
+> **Umgesetzt 2026-08-04** aus `Admin 07 Events.dc.html`. Dialog-RAHMEN neu; `EventForm.tsx` + ArtistManager/BrandManager/HighlightsInput = Folge-Pass. Nebenbei behoben: toter Ticket-Link bei Events ohne URL (jetzt konditional „über P2G"). Bekannter Bug notiert: Edit-Dialog schließt nach Speichern nicht (unkontrolliert).
+
+### ✅ AdminMarketplace — `/admin/marketplace`
 `src/pages/admin/AdminMarketplace.tsx` · Marktplatz-Produkte und Umsätze verwalten
 
 Masken:
-- [ ] Kopf mit Neues-Produkt-Button
-- [ ] Analytics-KPI-Kacheln
-- [ ] Empfehlungen-Referral-Tabelle
-- [ ] Filter-Panel (Kategorie/Status)
-- [ ] Produkte-Tabelle
-- [ ] Produkt-Formular-Dialog mit Bild-Upload
-- [ ] Produkt-Löschen-Bestätigung
+- [x] Kopf mit Neues-Produkt-Button
+- [x] Analytics-KPI-Kacheln
+- [x] Empfehlungen-Referral-Tabelle
+- [x] Filter-Panel (Kategorie/Status)
+- [x] Produkte-Tabelle
+- [x] Produkt-Formular-Dialog mit Bild-Upload
+- [x] Produkt-Löschen-Bestätigung
+
+> **Umgesetzt 2026-08-04** aus `Admin 08 Marketplace.dc.html` (inkl. komplettem Produkt-Dialog mit GPSR/SEO). Folge-Pass: `MarketplaceOrdersSection.tsx` + `CatalogManagerDialog.tsx` (noch alter Stil). Backend-Wiring offen: KPI-Trends, Tab-Counts Bestellungen/Retouren.
 
 ### ⬜ AdminP2GPoints — `/admin/p2g-points`
 `src/pages/admin/AdminP2GPoints.tsx` · P2G-Punkte, Wallets und Rewards verwalten
@@ -661,27 +665,31 @@ Masken:
 - [ ] Info-Karte zur Zustandserklärung
 - [ ] Loading-Spinner
 
-### ⬜ AdminClubOwners — `/admin/club-owners`
+### ✅ AdminClubOwners — `/admin/club-owners`
 `src/pages/admin/AdminClubOwners.tsx` · Verwaltung von Club-Owner-Zuweisungen und Monatskontingenten
 
 Masken:
-- [ ] Kopfbereich mit Titel und Aktion
-- [ ] Dialog Neue Zuweisung
-- [ ] Suchleiste
-- [ ] Zuweisungen-Tabelle inkl. Lade-/Leerzustand
-- [ ] Hilfe-Karte Einrichtung
+- [x] Kopfbereich mit Titel und Aktion
+- [x] Dialog Neue Zuweisung
+- [x] Suchleiste
+- [x] Zuweisungen-Tabelle inkl. Lade-/Leerzustand
+- [x] Hilfe-Karte Einrichtung
 
-### ⬜ AdminClubs — `/admin/clubs`
+> **Umgesetzt 2026-08-04** aus `Admin 06 Club Owners.dc.html`. Nebenbei behoben: Spaltenversatz (7 Zellen bei 6 Headern). Backend-Wiring offen: Kontingent-Nutzungsanzeige (Progressbar, genutzte Stunden).
+
+### ✅ AdminClubs — `/admin/clubs`
 `src/pages/admin/AdminClubs.tsx` · Clubs, Court-Zuweisungen und Mitglieder verwalten
 
 Masken:
-- [ ] Kopfbereich mit Suchleiste
-- [ ] Dialog Club erstellen/bearbeiten
-- [ ] Club-Liste (linke Spalte)
-- [ ] Detail-Panel mit Empty-State
-- [ ] Tab Courts inkl. Court-Dialog
-- [ ] Tab Mitglieder inkl. Benutzer-Dialog
-- [ ] Hilfe-Karte Einrichtung
+- [x] Kopfbereich mit Suchleiste
+- [x] Dialog Club erstellen/bearbeiten
+- [x] Club-Liste (linke Spalte)
+- [x] Detail-Panel mit Empty-State
+- [x] Tab Courts inkl. Court-Dialog
+- [x] Tab Mitglieder inkl. Benutzer-Dialog
+- [x] Hilfe-Karte Einrichtung
+
+> **Umgesetzt 2026-08-04** aus `Admin 05 Clubs.dc.html`. Offen (Logik, nicht Design): `window.confirm()`-Löschdialoge durch AlertDialog ersetzen; Stale-State von `selectedClub` nach Mutationen (siehe ADMIN-UX-NOTES).
 
 ### ⬜ AdminVouchers — `/admin/vouchers`
 `src/pages/admin/AdminVouchers.tsx` · Gutscheincodes erstellen und verwalten

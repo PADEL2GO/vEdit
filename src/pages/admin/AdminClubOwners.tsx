@@ -1,38 +1,38 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
 } from "@/components/ui/dialog";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Trash2, CircleDot, Search, Building2 } from "lucide-react";
+import { Plus, Trash2, Search } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -61,11 +61,27 @@ const WEEKDAYS_LEGACY = [
   { value: 1, label: "Montag" },
 ];
 
+const SETUP_STEPS = [
+  'Gehen Sie zu "Benutzer" und weisen Sie einem Account die Rolle "club_owner" zu',
+  'Kommen Sie hierher und klicken Sie auf "Neue Zuweisung"',
+  "Wählen Sie den Club Owner und den zugehörigen Court",
+  "Legen Sie das Monatskontingent fest (z.B. 40 Stunden)",
+  "Der Club Owner kann sich nun einloggen und das Club Panel nutzen",
+];
+
+const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "?";
+
 export default function AdminClubOwners() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   // Form state
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedCourtId, setSelectedCourtId] = useState("");
@@ -213,36 +229,43 @@ export default function AdminClubOwners() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <CircleDot className="h-6 w-6 text-yellow-500" />
-              Club Owners
-            </h1>
-            <p className="text-muted-foreground">
-              Verwalten Sie Club-Owner-Zuweisungen und Kontingente
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        {/* Kopfzeile: Beschreibung + Legacy-Badge + Neue Zuweisung */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+            <p className="text-sm text-muted-foreground">
+              Club-Owner-Zuweisungen und Kontingente verwalten
             </p>
+            <span className="inline-flex items-center whitespace-nowrap rounded-full border border-[hsl(41_100%_65%/0.28)] bg-[hsl(41_100%_65%/0.09)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[#FFC44D]">
+              Legacy-Modell
+            </span>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
+              <Button className="h-9 w-full gap-[7px] rounded-[10px] bg-gradient-lime px-[15px] text-[13px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.28)] transition-opacity hover:opacity-90 sm:w-auto">
+                <Plus className="h-[15px] w-[15px]" />
                 Neue Zuweisung
               </Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Club Owner Zuweisung</DialogTitle>
-                <DialogDescription>
+            <DialogContent className="max-w-[470px] rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))]">
+              <DialogHeader className="gap-[5px] space-y-0 text-left">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
+                  Zuweisung
+                </span>
+                <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-foreground">
+                  Club Owner Zuweisung
+                </DialogTitle>
+                <DialogDescription className="text-[13px] leading-relaxed text-muted-foreground">
                   Weisen Sie einem Club Owner einen Court zu und legen Sie das Kontingent fest.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Club Owner</Label>
+              <div className="flex flex-col gap-[18px] py-2">
+                <div className="flex flex-col gap-[7px]">
+                  <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Club Owner<span className="text-primary"> *</span>
+                  </Label>
                   <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
                       <SelectValue placeholder="Benutzer auswählen..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -254,17 +277,19 @@ export default function AdminClubOwners() {
                     </SelectContent>
                   </Select>
                   {clubOwners?.length === 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      Keine Benutzer mit der Rolle "club_owner" gefunden. 
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      Keine Benutzer mit der Rolle "club_owner" gefunden.
                       Weisen Sie zuerst einem Benutzer die Rolle zu.
                     </p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Court</Label>
+                <div className="flex flex-col gap-[7px]">
+                  <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Court<span className="text-primary"> *</span>
+                  </Label>
                   <Select value={selectedCourtId} onValueChange={setSelectedCourtId}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
                       <SelectValue placeholder="Court auswählen..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -277,27 +302,35 @@ export default function AdminClubOwners() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Monatskontingent (Stunden)</Label>
+                <div className="flex flex-col gap-[7px]">
+                  <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Monatskontingent (Stunden)<span className="text-primary"> *</span>
+                  </Label>
                   <Input
                     type="number"
                     value={weeklyMinutes / 60}
                     onChange={(e) => setWeeklyMinutes(Number(e.target.value) * 60)}
                     min={0}
                     max={200}
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-sm font-bold"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    = {weeklyMinutes} Minuten pro Monat
+                  <p className="font-mono text-[11.5px] text-muted-foreground">
+                    = {weeklyMinutes.toLocaleString("de-DE")} Minuten pro Monat · max. 200 h
                   </p>
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <DialogFooter className="gap-2.5 sm:gap-2.5">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                  className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-[17px] text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground"
+                >
                   Abbrechen
                 </Button>
-                <Button 
+                <Button
                   onClick={() => createMutation.mutate()}
                   disabled={createMutation.isPending}
+                  className="h-10 rounded-[11px] bg-gradient-lime px-5 text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition-opacity hover:opacity-90"
                 >
                   {createMutation.isPending ? "Erstelle..." : "Erstellen"}
                 </Button>
@@ -306,114 +339,164 @@ export default function AdminClubOwners() {
           </Dialog>
         </div>
 
-        {/* Search */}
-        <Card>
-          <CardContent className="py-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Suchen nach Name, Court oder Standort..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
+        {/* Zuweisungen: Suche + Tabelle */}
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3.5">
+              <span className="font-display text-base font-bold tracking-tight text-foreground">
+                Zuweisungen{" "}
+                <span className="font-mono text-sm font-normal text-muted-foreground">
+                  ({filteredAssignments?.length ?? 0})
+                </span>
+              </span>
+              <div className="relative flex w-full items-center sm:w-[280px]">
+                <Search className="pointer-events-none absolute left-3 h-[15px] w-[15px] text-muted-foreground" />
+                <Input
+                  placeholder="Suchen nach Name, Court oder Standort..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] pl-9 text-[13.5px]"
+                />
+              </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Assignments Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
-              Zuweisungen
-            </CardTitle>
-            <CardDescription>
-              {filteredAssignments?.length ?? 0} Zuweisung(en)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Club Owner</TableHead>
-                  <TableHead>Court</TableHead>
-                  <TableHead>Standort</TableHead>
-                  <TableHead>Kontingent</TableHead>
-                  <TableHead>Erstellt</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      Laden...
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table className="min-w-[820px]">
+                <TableHeader>
+                  <TableRow className="border-0 hover:bg-transparent">
+                    <TableHead className="h-auto px-0 pb-3 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                      Club Owner
+                    </TableHead>
+                    <TableHead className="h-auto whitespace-nowrap px-0 pb-3 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                      Court
+                    </TableHead>
+                    <TableHead className="h-auto whitespace-nowrap px-0 pb-3 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                      Standort
+                    </TableHead>
+                    <TableHead className="h-auto whitespace-nowrap px-0 pb-3 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                      Kontingent
+                    </TableHead>
+                    <TableHead className="h-auto whitespace-nowrap px-0 pb-3 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                      Erstellt
+                    </TableHead>
+                    <TableHead className="h-auto whitespace-nowrap px-0 pb-3 text-right font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]">
+                      Aktion
+                    </TableHead>
                   </TableRow>
-                ) : filteredAssignments?.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      Keine Zuweisungen gefunden
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredAssignments?.map((assignment) => (
-                    <TableRow key={assignment.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                            <CircleDot className="h-3 w-3 mr-1" />
-                            Club
-                          </Badge>
-                          <span className="font-medium">
-                            {assignment.user?.profile?.display_name || 
-                             assignment.user?.profile?.username || 
-                             assignment.user_id.slice(0, 8)}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{assignment.court?.name}</TableCell>
-                      <TableCell>{assignment.court?.location?.name}</TableCell>
-                      <TableCell>
-                        {assignment.monthly_free_minutes / 60}h / Monat
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {format(new Date(assignment.created_at), "dd.MM.yyyy", { locale: de })}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => deleteMutation.mutate(assignment.id)}
-                          disabled={deleteMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow className="border-0 border-t border-[hsl(0_0%_12%)] hover:bg-transparent">
+                      <TableCell colSpan={6} className="px-0 py-8 text-center text-[13.5px] text-muted-foreground">
+                        Laden...
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
+                  ) : filteredAssignments?.length === 0 ? (
+                    <TableRow className="border-0 border-t border-[hsl(0_0%_12%)] hover:bg-transparent">
+                      <TableCell colSpan={6} className="px-0 py-8 text-center text-[13.5px] text-muted-foreground">
+                        Keine Zuweisungen gefunden
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredAssignments?.map((assignment) => {
+                      const ownerName =
+                        assignment.user?.profile?.display_name ||
+                        assignment.user?.profile?.username ||
+                        assignment.user_id.slice(0, 8);
+                      return (
+                        <TableRow
+                          key={assignment.id}
+                          className="border-0 border-t border-[hsl(0_0%_12%)] hover:bg-white/[0.02]"
+                        >
+                          <TableCell className="px-0 py-[13px] pr-3.5">
+                            <div className="flex items-center gap-[11px]">
+                              <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full border border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] font-display text-[11px] font-extrabold text-[#FFC44D]">
+                                {getInitials(ownerName)}
+                              </span>
+                              <div className="flex min-w-0 flex-col gap-0.5">
+                                <div className="flex items-center gap-2">
+                                  <span className="whitespace-nowrap text-[13.5px] font-semibold text-foreground">
+                                    {ownerName}
+                                  </span>
+                                  <Badge
+                                    variant="outline"
+                                    className="rounded-full border-[hsl(41_100%_65%/0.28)] bg-[hsl(41_100%_65%/0.1)] px-2 py-px text-[10px] font-bold uppercase tracking-[0.08em] text-[#FFC44D]"
+                                  >
+                                    Club
+                                  </Badge>
+                                </div>
+                                <span className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
+                                  {assignment.user?.profile?.username
+                                    ? `@${assignment.user.profile.username} · `
+                                    : ""}
+                                  {assignment.user_id.slice(0, 8)}
+                                </span>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap px-0 py-[13px] pr-3.5 text-[13.5px] font-semibold text-foreground">
+                            {assignment.court?.name}
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap px-0 py-[13px] pr-3.5 text-[13.5px] text-[hsl(0_0%_78%)]">
+                            {assignment.court?.location?.name}
+                          </TableCell>
+                          <TableCell className="px-0 py-[13px] pr-3.5">
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="font-mono text-sm font-bold text-primary">
+                                {(assignment.monthly_free_minutes / 60).toLocaleString("de-DE")}
+                              </span>
+                              <span className="whitespace-nowrap font-mono text-[11px] text-muted-foreground">
+                                h / Monat
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap px-0 py-[13px] pr-3.5 font-mono text-[12.5px] text-[hsl(0_0%_78%)]">
+                            {format(new Date(assignment.created_at), "dd.MM.yyyy", { locale: de })}
+                          </TableCell>
+                          <TableCell className="px-0 py-[13px]">
+                            <div className="flex justify-end">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title="Zuweisung löschen"
+                                className="h-[30px] w-[30px] rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+                                onClick={() => deleteMutation.mutate(assignment.id)}
+                                disabled={deleteMutation.isPending}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </Card>
 
-        {/* Help Card */}
-        <Card className="border-muted bg-muted/30">
-          <CardContent className="py-4">
-            <h3 className="font-medium mb-2">So richten Sie einen Club Owner ein:</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Gehen Sie zu "Benutzer" und weisen Sie einem Account die Rolle "club_owner" zu</li>
-              <li>Kommen Sie hierher und klicken Sie auf "Neue Zuweisung"</li>
-              <li>Wählen Sie den Club Owner und den zugehörigen Court</li>
-              <li>Legen Sie das Monatskontingent fest (z.B. 40 Stunden)</li>
-              <li>Der Club Owner kann sich nun einloggen und das Club Panel nutzen</li>
-            </ol>
-          </CardContent>
+        {/* Hilfe-Karte */}
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-3.5">
+            <span className="font-display text-[15px] font-bold tracking-tight text-foreground">
+              So richten Sie einen Club Owner ein
+            </span>
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-3">
+              {SETUP_STEPS.map((step, index) => (
+                <div
+                  key={step}
+                  className="flex items-start gap-[11px] rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-3.5 py-[13px]"
+                >
+                  <span className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full border border-primary/30 bg-primary/10 font-mono text-[11px] font-bold text-primary">
+                    {index + 1}
+                  </span>
+                  <span className="text-[13px] leading-relaxed text-[hsl(0_0%_72%)]">{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </Card>
       </div>
     </AdminLayout>

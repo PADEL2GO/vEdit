@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,19 +39,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import {
   Plus,
   Pencil,
   Trash2,
   Loader2,
-  ShoppingCart,
   Image as ImageIcon,
   Euro,
   Coins,
   Users,
   Tag,
-  Award,
+  FolderTree,
+  Package,
+  Truck,
+  ShoppingBag,
   ArrowUp,
   ArrowDown,
   X,
@@ -60,6 +62,7 @@ import {
   Languages,
   Download,
   Sparkles,
+  AlertTriangle,
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -92,6 +95,30 @@ const CATEGORY_LABELS: Record<MarketplaceCategory, string> = {
   other: "Sonstiges",
   events: "Events",
 };
+
+// ── Wiederkehrende Styling-Tokens des neuen Designs ──
+const TAB_TRIGGER_CLASSES =
+  "-mb-px gap-2 rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-[11px] pt-0 text-sm font-bold text-[hsl(0_0%_60%)] shadow-none transition-colors hover:text-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none";
+const TAB_COUNT_CLASSES =
+  "rounded-full bg-white/[0.07] px-[7px] py-[2px] font-mono text-[10.5px] font-normal leading-none";
+const BTN_NEUTRAL =
+  "h-9 gap-1.5 rounded-[10px] border-[hsl(0_0%_16%)] bg-white/[0.05] px-3.5 text-[12.5px] font-bold text-[hsl(0_0%_85%)] hover:border-primary/40 hover:bg-white/[0.05] hover:text-primary";
+const BTN_LIME =
+  "h-9 gap-[7px] rounded-[10px] bg-gradient-lime px-[15px] text-[13px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.28)] transition-opacity hover:opacity-90";
+const FIELD_LABEL = "font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground";
+const FIELD_INPUT = "h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]";
+const FIELD_FILE = "rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]";
+const FIELD_AREA = "rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]";
+const SUB_BOX = "flex flex-col gap-3 rounded-[15px] border border-[hsl(0_0%_12%)] bg-white/[0.025] p-4";
+const TH = "h-auto whitespace-nowrap pb-3 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-[hsl(0_0%_65%)]";
+const PILL_LIVE =
+  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-bold text-primary";
+const PILL_DRAFT =
+  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] px-2.5 py-1 text-[11px] font-bold text-[#FFC44D]";
+const ICON_BTN_NEUTRAL =
+  "h-[30px] w-[30px] rounded-lg border border-[hsl(0_0%_16%)] bg-white/[0.05] text-[hsl(0_0%_82%)] hover:border-primary/40 hover:bg-white/[0.05] hover:text-primary";
+const ICON_BTN_DANGER =
+  "h-[30px] w-[30px] rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]";
 
 interface GalleryImage {
   url: string;
@@ -213,6 +240,7 @@ const AdminMarketplace = () => {
     },
   });
 
+  const [activeTab, setActiveTab] = useState<"products" | "orders">("products");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MarketplaceItem | null>(null);
@@ -608,359 +636,441 @@ const AdminMarketplace = () => {
       return true;
     }) || [];
 
+  const kpiCards = [
+    { icon: Euro, label: "Umsatz (bezahlt)", value: formatEuro(analytics?.revenue_cents ?? 0) },
+    { icon: ShoppingBag, label: "Bestellungen", value: String(analytics?.order_count ?? 0) },
+    { icon: Coins, label: "Eingelöste Punkte", value: (analytics?.points_redeemed ?? 0).toLocaleString("de-DE") },
+  ];
+
   return (
     <AdminLayout>
       <Helmet>
         <title>Marketplace | Admin</title>
       </Helmet>
 
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <ShoppingCart className="w-6 h-6" />
-              Marketplace Verwaltung
-            </h1>
-            <p className="text-muted-foreground">Produkte, Kategorien und Marken verwalten</p>
-          </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        {/* Kopfzeile: Beschreibung + Aktionen */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">Produkte, Kategorien und Marken verwalten</p>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={() => setCatManagerOpen(true)}>
-              <Tag className="w-4 h-4 mr-2" />
+            <Button variant="outline" className={BTN_NEUTRAL} onClick={() => setCatManagerOpen(true)}>
+              <FolderTree className="h-3.5 w-3.5" />
               Kategorien
             </Button>
-            <Button variant="outline" onClick={() => setBrandManagerOpen(true)}>
-              <Award className="w-4 h-4 mr-2" />
+            <Button variant="outline" className={BTN_NEUTRAL} onClick={() => setBrandManagerOpen(true)}>
+              <Tag className="h-3.5 w-3.5" />
               Marken
             </Button>
             {(!!items?.length || !!categories?.length) && (
-              <Button variant="outline" onClick={translateAll} disabled={!!bulk}>
+              <Button variant="outline" className={BTN_NEUTRAL} onClick={translateAll} disabled={!!bulk}>
                 {bulk ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     {t("admin.translateAllRunning", { done: bulk.done, total: bulk.total })}
                   </>
                 ) : (
                   <>
-                    <Languages className="w-4 h-4 mr-2" /> {t("admin.translateAll")}
+                    <Languages className="h-3.5 w-3.5" /> {t("admin.translateAll")}
                   </>
                 )}
               </Button>
             )}
-            <Button onClick={openCreateDialog} className="shrink-0">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button onClick={openCreateDialog} className={`shrink-0 ${BTN_LIME}`}>
+              <Plus className="h-[15px] w-[15px]" />
               Neues Produkt
             </Button>
           </div>
         </div>
 
-        {/* Analytics */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Umsätze & Analytics</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Euro className="w-4 h-4" />
-                  Umsatz (bezahlt)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {analyticsLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                ) : (
-                  <div className="text-2xl font-bold">{formatEuro(analytics?.revenue_cents ?? 0)}</div>
-                )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <ShoppingCart className="w-4 h-4" />
-                  Bestellungen
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {analyticsLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                ) : (
-                  <div className="text-2xl font-bold">{analytics?.order_count ?? 0}</div>
-                )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Coins className="w-4 h-4" />
-                  Eingelöste Punkte
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {analyticsLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                ) : (
-                  <div className="text-2xl font-bold">
-                    {(analytics?.points_redeemed ?? 0).toLocaleString("de-DE")}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Empfehlungen (Referrals)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {analyticsLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        {/* KPI-Karten */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-3.5">
+          {kpiCards.map((card) => (
+            <Card key={card.label} className="rounded-2xl border-border bg-gradient-card p-5">
+              <div className="flex flex-col gap-3.5">
+                <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[11px] border border-primary/30 bg-primary/10 text-primary">
+                  <card.icon className="h-[18px] w-[18px]" />
+                </span>
+                <div className="flex flex-col gap-1">
+                  {analyticsLoading ? (
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  ) : (
+                    <span className="font-mono text-[28px] font-bold leading-none text-foreground">
+                      {card.value}
+                    </span>
+                  )}
+                  <span className="text-[13px] text-muted-foreground">{card.label}</span>
                 </div>
-              ) : !analytics?.referrers.length ? (
-                <div className="text-center py-8 text-muted-foreground">Noch keine Empfehlungen.</div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {/* Tabs: Produkte / Bestellungen & Retouren */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "products" | "orders")}>
+          <TabsList className="h-auto w-full justify-start gap-5 overflow-x-auto rounded-none border-b border-[hsl(0_0%_12%)] bg-transparent p-0 sm:gap-[22px]">
+            <TabsTrigger value="products" className={TAB_TRIGGER_CLASSES}>
+              <Package className="h-4 w-4" />
+              Produkte
+              <span className={TAB_COUNT_CLASSES}>{items?.length ?? 0}</span>
+            </TabsTrigger>
+            <TabsTrigger value="orders" className={TAB_TRIGGER_CLASSES}>
+              <Truck className="h-4 w-4" />
+              <span className="hidden sm:inline">Bestellungen &amp; Retouren</span>
+              <span className="sm:hidden">Bestellungen</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* ═══ Produkte ═══ */}
+        <div className={activeTab === "products" ? "flex flex-col gap-[18px]" : "hidden"}>
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                  Produkte{" "}
+                  <span className="font-mono text-sm font-normal text-muted-foreground">
+                    ({filteredItems.length})
+                  </span>
+                </h2>
+                <div className="flex flex-wrap gap-2.5">
+                  <Select value={filterCategory} onValueChange={setFilterCategory}>
+                    <SelectTrigger
+                      aria-label="Kategorie filtern"
+                      className="h-9 w-auto min-w-[150px] gap-2 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px] font-semibold"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle Kategorien</SelectItem>
+                      {categories?.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterActive} onValueChange={setFilterActive}>
+                    <SelectTrigger
+                      aria-label="Status filtern"
+                      className="h-9 w-auto min-w-[110px] gap-2 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px] font-semibold"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle</SelectItem>
+                      <SelectItem value="active">Aktiv</SelectItem>
+                      <SelectItem value="inactive">Inaktiv</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {isLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : filteredItems.length === 0 ? (
+                <div className="py-12 text-center text-sm text-muted-foreground">Keine Produkte gefunden.</div>
               ) : (
                 <div className="overflow-x-auto">
-                  <Table>
+                  <Table className="min-w-[880px]">
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Nutzer</TableHead>
-                        <TableHead className="text-right">Geworben</TableHead>
-                        <TableHead className="text-right">Punkte</TableHead>
-                        <TableHead className="text-right">Wert (€)</TableHead>
+                      <TableRow className="border-[hsl(0_0%_12%)] hover:bg-transparent">
+                        <TableHead className={TH}>Produkt</TableHead>
+                        <TableHead className={TH}>Kategorie</TableHead>
+                        <TableHead className={TH}>Marke</TableHead>
+                        <TableHead className={`${TH} text-right`}>Preis</TableHead>
+                        <TableHead className={`${TH} text-right`}>Points</TableHead>
+                        <TableHead className={TH}>Status</TableHead>
+                        <TableHead className={TH}>Aktiv</TableHead>
+                        <TableHead className={`${TH} text-right`}>Aktionen</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {analytics.referrers.map((r) => (
-                        <TableRow key={r.user_id}>
-                          <TableCell className="font-medium">
-                            {r.display_name || r.username || r.user_id.slice(0, 8)}
+                      {filteredItems.map((item) => (
+                        <TableRow key={item.id} className="border-[hsl(0_0%_12%)] hover:bg-white/[0.022]">
+                          <TableCell className="py-3 pr-3.5">
+                            <div className="flex items-center gap-3">
+                              <div className="h-11 w-11 flex-none overflow-hidden rounded-[10px] border border-[hsl(0_0%_15%)] bg-muted">
+                                {item.image_url ? (
+                                  <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center">
+                                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex min-w-0 flex-col gap-0.5">
+                                <div className="flex items-center gap-1.5">
+                                  {item.is_featured && (
+                                    <Star className="h-3.5 w-3.5 flex-none fill-primary text-primary" />
+                                  )}
+                                  <span className="max-w-[240px] truncate text-[13.5px] font-bold text-foreground">
+                                    {item.name}
+                                  </span>
+                                </div>
+                                {item.subtitle && (
+                                  <span className="max-w-[240px] truncate text-[11.5px] text-muted-foreground">
+                                    {item.subtitle}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </TableCell>
-                          <TableCell className="text-right">{r.referred_count}</TableCell>
-                          <TableCell className="text-right font-mono">
-                            {r.points.toLocaleString("de-DE")}
+                          <TableCell className="py-3 pr-3.5">
+                            <span className="inline-flex whitespace-nowrap rounded-full border border-[hsl(0_0%_16%)] bg-white/5 px-2.5 py-1 text-[11.5px] font-semibold text-[hsl(0_0%_82%)]">
+                              {categoryName(item.category_id) || CATEGORY_LABELS[item.category] || item.category}
+                            </span>
                           </TableCell>
-                          <TableCell className="text-right font-mono">{formatEuro(r.eur_value_cents)}</TableCell>
+                          <TableCell className="whitespace-nowrap py-3 pr-3.5 text-[13.5px] text-[hsl(0_0%_78%)]">
+                            {brandName(item.brand_id) || item.partner_name || "-"}
+                          </TableCell>
+                          <TableCell className="py-3 pr-3.5 text-right">
+                            <span className="whitespace-nowrap font-mono text-[13px] font-bold text-foreground">
+                              {formatEuro(item.price_cents ?? 0)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="py-3 pr-3.5 text-right">
+                            <span
+                              className={`whitespace-nowrap font-mono text-[12.5px] ${
+                                item.credit_cost > 0 ? "text-primary" : "text-[hsl(0_0%_55%)]"
+                              }`}
+                            >
+                              {(item.credit_cost ?? 0).toLocaleString("de-DE")}
+                            </span>
+                          </TableCell>
+                          <TableCell className="py-3 pr-3.5">
+                            <span className={item.status === "draft" ? PILL_DRAFT : PILL_LIVE}>
+                              <span className="h-[5px] w-[5px] rounded-full bg-current" />
+                              {item.status === "draft" ? "Entwurf" : "Live"}
+                            </span>
+                          </TableCell>
+                          <TableCell className="py-3 pr-3.5">
+                            <Switch
+                              checked={item.is_active}
+                              onCheckedChange={(checked) =>
+                                toggleStatusMutation.mutate({ id: item.id, is_active: checked })
+                              }
+                            />
+                          </TableCell>
+                          <TableCell className="py-3 text-right">
+                            <div className="flex justify-end gap-[7px]">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={ICON_BTN_NEUTRAL}
+                                onClick={() => openEditDialog(item)}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={ICON_BTN_DANGER}
+                                onClick={() => {
+                                  setItemToDelete(item);
+                                  setDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
                 </div>
               )}
-            </CardContent>
+            </div>
+          </Card>
+
+          {/* Empfehlungen (Referrals) */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
+                  <Users className="h-[15px] w-[15px]" />
+                </span>
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <h2 className="font-display text-[15px] font-bold tracking-tight text-foreground">
+                    Empfehlungen (Referrals)
+                  </h2>
+                  <span className="text-xs text-muted-foreground">
+                    Punkte-Gutschriften aus Weiterempfehlungen
+                  </span>
+                </div>
+              </div>
+              {analyticsLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : !analytics?.referrers.length ? (
+                <div className="py-8 text-center text-sm text-muted-foreground">Noch keine Empfehlungen.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table className="min-w-[480px]">
+                    <TableHeader>
+                      <TableRow className="border-[hsl(0_0%_12%)] hover:bg-transparent">
+                        <TableHead className={TH}>Nutzer</TableHead>
+                        <TableHead className={`${TH} text-right`}>Geworben</TableHead>
+                        <TableHead className={`${TH} text-right`}>Punkte</TableHead>
+                        <TableHead className={`${TH} text-right`}>Wert (€)</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {analytics.referrers.map((r) => {
+                        const refName = r.display_name || r.username || r.user_id.slice(0, 8);
+                        const initials = refName
+                          .split(/\s+/)
+                          .map((w) => w[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase();
+                        return (
+                          <TableRow key={r.user_id} className="border-[hsl(0_0%_12%)] hover:bg-white/[0.022]">
+                            <TableCell className="py-3 pr-3.5">
+                              <div className="flex items-center gap-2.5">
+                                <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full border border-primary/[0.26] bg-primary/10 font-display text-[10.5px] font-extrabold text-primary">
+                                  {initials}
+                                </span>
+                                <span className="whitespace-nowrap text-[13px] font-semibold text-foreground">
+                                  {refName}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="py-3 pr-3.5 text-right font-mono text-[12.5px] text-[hsl(0_0%_78%)]">
+                              {r.referred_count}
+                            </TableCell>
+                            <TableCell className="py-3 pr-3.5 text-right font-mono text-[12.5px] text-primary">
+                              {r.points.toLocaleString("de-DE")}
+                            </TableCell>
+                            <TableCell className="py-3 text-right font-mono text-[12.5px] text-foreground">
+                              {formatEuro(r.eur_value_cents)}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <Label>Kategorie</Label>
-                <Select value={filterCategory} onValueChange={setFilterCategory}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle Kategorien</SelectItem>
-                    {categories?.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex-1">
-                <Label>Status</Label>
-                <Select value={filterActive} onValueChange={setFilterActive}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle</SelectItem>
-                    <SelectItem value="active">Aktiv</SelectItem>
-                    <SelectItem value="inactive">Inaktiv</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Items Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Produkte ({filteredItems.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-            ) : filteredItems.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">Keine Produkte gefunden.</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[60px]">Bild</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Kategorie</TableHead>
-                      <TableHead>Marke</TableHead>
-                      <TableHead className="text-right">Preis</TableHead>
-                      <TableHead className="text-center">Status</TableHead>
-                      <TableHead className="text-center">Aktiv</TableHead>
-                      <TableHead className="text-right">Aktionen</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredItems.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>
-                          <div className="w-12 h-12 rounded overflow-hidden bg-muted">
-                            {item.image_url ? (
-                              <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <ImageIcon className="w-6 h-6 text-muted-foreground" />
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-1.5">
-                            {item.is_featured && <Star className="w-3.5 h-3.5 text-primary fill-primary" />}
-                            {item.name}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {categoryName(item.category_id) || CATEGORY_LABELS[item.category] || item.category}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{brandName(item.brand_id) || item.partner_name || "-"}</TableCell>
-                        <TableCell className="text-right font-mono">{formatEuro(item.price_cents ?? 0)}</TableCell>
-                        <TableCell className="text-center">
-                          <Badge variant={item.status === "draft" ? "secondary" : "default"}>
-                            {item.status === "draft" ? "Entwurf" : "Live"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Switch
-                            checked={item.is_active}
-                            onCheckedChange={(checked) =>
-                              toggleStatusMutation.mutate({ id: item.id, is_active: checked })
-                            }
-                          />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => openEditDialog(item)}>
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => {
-                                setItemToDelete(item);
-                                setDeleteDialogOpen(true);
-                              }}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Orders & fulfillment */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <h2 className="text-lg font-semibold">Bestellungen</h2>
-          <Button variant="outline" size="sm" onClick={exportReceipts} disabled={exportingReceipts}>
-            {exportingReceipts ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4 mr-2" />
-            )}
-            Belege exportieren (CSV)
-          </Button>
+        {/* ═══ Bestellungen & Retouren ═══ */}
+        <div className={activeTab === "orders" ? "flex flex-col gap-[18px]" : "hidden"}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-display text-base font-bold tracking-tight text-foreground">Bestellungen</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              className={BTN_NEUTRAL}
+              onClick={exportReceipts}
+              disabled={exportingReceipts}
+            >
+              {exportingReceipts ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Download className="h-3.5 w-3.5" />
+              )}
+              Belege exportieren (CSV)
+            </Button>
+          </div>
+          <MarketplaceOrdersSection />
         </div>
-        <MarketplaceOrdersSection />
       </div>
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingItem ? "Produkt bearbeiten" : "Neues Produkt erstellen"}</DialogTitle>
-            <DialogDescription>Alle Felder mit * sind Pflichtfelder.</DialogDescription>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))]">
+          <DialogHeader className="gap-[5px] space-y-0 text-left">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">Produkt</span>
+            <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-foreground">
+              {editingItem ? "Produkt bearbeiten" : "Neues Produkt erstellen"}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Alle Felder mit * sind Pflichtfelder.
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-5 py-4">
+          <div className="flex flex-col gap-5 py-2">
             {/* AI import via product URL — beim Bearbeiten als Neu-Generierung nutzbar */}
-            {(
-              <div className="space-y-2 rounded-lg border border-primary/30 bg-primary/5 p-4">
-                <Label className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
+            <div className="flex flex-col gap-3 rounded-[15px] border border-primary/25 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.07),hsl(71_91%_51%/0.01))] p-4">
+              <Label className="flex items-center gap-2.5">
+                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-primary/[0.32] bg-primary/[0.12] text-primary">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+                <span className="font-display text-sm font-bold tracking-tight text-foreground">
                   {editingItem ? "Per URL oder Datei neu generieren (AI)" : "Per URL oder Datei ausfüllen (AI)"}
-                </Label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="https://… Produktseite (Hersteller oder Shop)"
-                    value={aiUrl}
-                    onChange={(e) => setAiUrl(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        importFromUrl();
-                      }
-                    }}
-                    disabled={aiLoading}
-                  />
-                  <Button type="button" onClick={importFromUrl} disabled={aiLoading || !aiUrl.trim()}>
-                    {aiLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Ausfüllen
-                      </>
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">Oder Produkt-Datei hochladen (PDF-Datenblatt / HTML-Seite):</p>
-                <Input type="file" accept=".pdf,.html,.htm" onChange={importFromFile} disabled={aiLoading} />
-                <p className="text-xs text-muted-foreground">
-                  {editingItem
-                    ? "Überschreibt die Felder mit den neuen Daten aus der Quelle (Slug, Titelbild und vorhandene Galerie bleiben erhalten — Galerie wird nur gefüllt, wenn sie leer ist). Nichts wird gespeichert, bis du unten speicherst."
-                    : "Zieht Name, Beschreibung, Specs, Preis, Marke & Bilder automatisch aus der Produktseite bzw. dem Dokument. Alle Felder bleiben danach manuell anpassbar."}
-                </p>
+                </span>
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                <Input
+                  placeholder="https://… Produktseite (Hersteller oder Shop)"
+                  value={aiUrl}
+                  onChange={(e) => setAiUrl(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      importFromUrl();
+                    }
+                  }}
+                  disabled={aiLoading}
+                  className={`min-w-[min(240px,100%)] flex-1 ${FIELD_INPUT}`}
+                />
+                <Button
+                  type="button"
+                  onClick={importFromUrl}
+                  disabled={aiLoading || !aiUrl.trim()}
+                  className={BTN_LIME}
+                >
+                  {aiLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Ausfüllen
+                    </>
+                  )}
+                </Button>
               </div>
-            )}
+              <p className="text-xs text-muted-foreground">Oder Produkt-Datei hochladen (PDF-Datenblatt / HTML-Seite):</p>
+              <Input
+                type="file"
+                accept=".pdf,.html,.htm"
+                onChange={importFromFile}
+                disabled={aiLoading}
+                className={FIELD_FILE}
+              />
+              <p className="text-[11.5px] leading-relaxed text-muted-foreground">
+                {editingItem
+                  ? "Überschreibt die Felder mit den neuen Daten aus der Quelle (Slug, Titelbild und vorhandene Galerie bleiben erhalten — Galerie wird nur gefüllt, wenn sie leer ist). Nichts wird gespeichert, bis du unten speicherst."
+                  : "Zieht Name, Beschreibung, Specs, Preis, Marke & Bilder automatisch aus der Produktseite bzw. dem Dokument. Alle Felder bleiben danach manuell anpassbar."}
+              </p>
+            </div>
 
             {/* Title image */}
-            <div className="space-y-2">
-              <Label>Titelbild *</Label>
-              <div className="flex gap-4 items-start">
+            <div className="flex flex-col gap-2">
+              <Label className={FIELD_LABEL}>
+                Titelbild<span className="text-primary"> *</span>
+              </Label>
+              <div className="flex items-start gap-4">
                 {formData.image_url && (
-                  <div className="w-24 aspect-[2/3] rounded overflow-hidden bg-muted shrink-0">
-                    <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="w-24 shrink-0 overflow-hidden rounded-[13px] border border-[hsl(0_0%_15%)] bg-muted aspect-[2/3]">
+                    <img src={formData.image_url} alt="Preview" className="h-full w-full object-cover" />
                   </div>
                 )}
-                <div className="flex-1 space-y-2">
-                  <Input type="file" accept="image/*" onChange={handleTitleImageUpload} disabled={uploading} />
-                  <p className="text-xs text-muted-foreground">
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleTitleImageUpload}
+                    disabled={uploading}
+                    className={FIELD_FILE}
+                  />
+                  <p className="text-[11.5px] leading-relaxed text-muted-foreground">
                     Empfohlenes Format: Hochformat 2:3 (z. B. 1200 × 1800 px) — Bilder werden im Shop in 2:3 zugeschnitten.
                   </p>
                   <p className="text-xs text-muted-foreground">Oder URL direkt eingeben:</p>
@@ -968,63 +1078,81 @@ const AdminMarketplace = () => {
                     placeholder="https://..."
                     value={formData.image_url}
                     onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    className={FIELD_INPUT}
                   />
                 </div>
               </div>
             </div>
 
             {/* Gallery */}
-            <div className="space-y-2">
-              <Label>Weitere Bilder (Galerie)</Label>
+            <div className="flex flex-col gap-2">
+              <Label className={FIELD_LABEL}>Weitere Bilder (Galerie)</Label>
               {gallery.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {gallery.map((img, i) => (
-                    <div key={i} className="relative w-20 aspect-[2/3] rounded overflow-hidden bg-muted group border border-border/60">
-                      <img src={img.url} alt={img.alt} className="w-full h-full object-cover" />
+                    <div
+                      key={i}
+                      className="group relative w-20 overflow-hidden rounded-[9px] border border-[hsl(0_0%_15%)] bg-muted aspect-[2/3]"
+                    >
+                      <img src={img.url} alt={img.alt} className="h-full w-full object-cover" />
                       <button
                         type="button"
                         onClick={() => setGallery((g) => g.filter((_, idx) => idx !== i))}
-                        className="absolute top-0.5 right-0.5 bg-black/70 rounded p-0.5 opacity-0 group-hover:opacity-100 transition"
+                        className="absolute right-0.5 top-0.5 rounded bg-black/70 p-0.5 opacity-0 transition group-hover:opacity-100"
                         title="Entfernen"
                       >
-                        <X className="w-3 h-3 text-white" />
+                        <X className="h-3 w-3 text-white" />
                       </button>
-                      <div className="absolute bottom-0.5 left-0.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition">
+                      <div className="absolute bottom-0.5 left-0.5 flex gap-0.5 opacity-0 transition group-hover:opacity-100">
                         <button
                           type="button"
                           onClick={() => moveGallery(i, -1)}
-                          className="bg-black/70 rounded p-0.5"
+                          className="rounded bg-black/70 p-0.5"
                           title="Nach vorne"
                         >
-                          <ArrowUp className="w-3 h-3 text-white" />
+                          <ArrowUp className="h-3 w-3 text-white" />
                         </button>
                         <button
                           type="button"
                           onClick={() => moveGallery(i, 1)}
-                          className="bg-black/70 rounded p-0.5"
+                          className="rounded bg-black/70 p-0.5"
                           title="Nach hinten"
                         >
-                          <ArrowDown className="w-3 h-3 text-white" />
+                          <ArrowDown className="h-3 w-3 text-white" />
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-              <Input type="file" accept="image/*" multiple onChange={handleGalleryUpload} disabled={uploading} />
-              <p className="text-xs text-muted-foreground">
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleGalleryUpload}
+                disabled={uploading}
+                className={FIELD_FILE}
+              />
+              <p className="text-[11.5px] leading-relaxed text-muted-foreground">
                 Mehrere Bilder möglich. Reihenfolge steuert die Galerie auf der Produktseite (Titelbild zuerst).
                 Empfohlenes Format: Hochformat 2:3.
               </p>
             </div>
 
             {/* Name + slug */}
-            <div className="space-y-2">
-              <Label>Name *</Label>
-              <Input value={formData.name} onChange={(e) => setName(e.target.value)} placeholder="Produktname" />
+            <div className="flex flex-col gap-2">
+              <Label className={FIELD_LABEL}>
+                Name<span className="text-primary"> *</span>
+              </Label>
+              <Input
+                value={formData.name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Produktname"
+                className={FIELD_INPUT}
+              />
             </div>
-            <div className="space-y-2">
-              <Label>Slug (URL)</Label>
+            <div className="flex flex-col gap-2">
+              <Label className={FIELD_LABEL}>Slug (URL)</Label>
               <Input
                 value={formData.slug ?? ""}
                 onChange={(e) => {
@@ -1032,29 +1160,33 @@ const AdminMarketplace = () => {
                   setFormData({ ...formData, slug: slugify(e.target.value) });
                 }}
                 placeholder="produktname"
+                className={FIELD_INPUT}
               />
-              <p className="text-xs text-muted-foreground font-mono">/marketplace/{formData.slug || "…"}</p>
+              <p className="font-mono text-[11px] tracking-[0.02em] text-muted-foreground">
+                /marketplace/{formData.slug || "…"}
+              </p>
             </div>
 
             {/* Subtitle */}
-            <div className="space-y-2">
-              <Label>Untertitel</Label>
+            <div className="flex flex-col gap-2">
+              <Label className={FIELD_LABEL}>Untertitel</Label>
               <Input
                 value={formData.subtitle ?? ""}
                 onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
                 placeholder="Kurzer Zusatz, z.B. „Kontrolle & Power für Fortgeschrittene“"
+                className={FIELD_INPUT}
               />
             </div>
 
             {/* Category + brand */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Produktkategorie</Label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Produktkategorie</Label>
                 <Select
                   value={formData.category_id ?? "none"}
                   onValueChange={(v) => setFormData({ ...formData, category_id: v === "none" ? null : v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={FIELD_INPUT}>
                     <SelectValue placeholder="Kategorie wählen" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1068,8 +1200,8 @@ const AdminMarketplace = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Marke</Label>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Marke</Label>
                 <Select
                   value={formData.brand_id ?? "none"}
                   onValueChange={(v) => {
@@ -1077,7 +1209,7 @@ const AdminMarketplace = () => {
                     setFormData({ ...formData, brand_id: id, partner_name: brandName(id) ?? formData.partner_name });
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={FIELD_INPUT}>
                     <SelectValue placeholder="Marke wählen" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1094,9 +1226,11 @@ const AdminMarketplace = () => {
             </div>
 
             {/* Price + compare + credits */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Preis (€) *</Label>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>
+                  Preis (€)<span className="text-primary"> *</span>
+                </Label>
                 <Input
                   type="number"
                   min={0.01}
@@ -1109,10 +1243,11 @@ const AdminMarketplace = () => {
                     })
                   }
                   placeholder="0.00"
+                  className={FIELD_INPUT}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>UVP (€)</Label>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>UVP (€)</Label>
                 <Input
                   type="number"
                   min={0}
@@ -1125,17 +1260,19 @@ const AdminMarketplace = () => {
                     })
                   }
                   placeholder="Streichpreis"
+                  className={FIELD_INPUT}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Punkte-Rabatt (max. Points)</Label>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Punkte-Rabatt (max. Points)</Label>
                 <Input
                   type="number"
                   min={0}
                   value={formData.credit_cost ?? 0}
                   onChange={(e) => setFormData({ ...formData, credit_cost: parseInt(e.target.value) || 0 })}
+                  className={FIELD_INPUT}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[11px] leading-relaxed text-muted-foreground">
                   Fixer Betrag an Points, den jeder Käufer bei diesem Produkt als Rabatt einlösen kann
                   {(formData.credit_cost ?? 0) > 0 && ` (= ${formatEuro(Math.floor((formData.credit_cost ?? 0)))} bei 100 Points/€ — genauer Wert laut P2G-Einstellung)`}
                   . 0 = kein Punkterabatt.
@@ -1144,35 +1281,39 @@ const AdminMarketplace = () => {
             </div>
 
             {/* Short description */}
-            <div className="space-y-2">
-              <Label>Kurzbeschreibung *</Label>
+            <div className="flex flex-col gap-2">
+              <Label className={FIELD_LABEL}>
+                Kurzbeschreibung<span className="text-primary"> *</span>
+              </Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Kurze Beschreibung für Produktkarten..."
                 rows={2}
+                className={FIELD_AREA}
               />
             </div>
 
             {/* Long description */}
-            <div className="space-y-2">
-              <Label>Langbeschreibung</Label>
+            <div className="flex flex-col gap-2">
+              <Label className={FIELD_LABEL}>Langbeschreibung</Label>
               <Textarea
                 value={formData.long_description ?? ""}
                 onChange={(e) => setFormData({ ...formData, long_description: e.target.value })}
                 placeholder="Ausführliche Produktbeschreibung für die Produktseite..."
                 rows={4}
+                className={FIELD_AREA}
               />
             </div>
 
             {/* Specs */}
-            <div className="space-y-2">
-              <Label>Spezifikationen</Label>
-              <div className="space-y-2">
+            <div className={SUB_BOX}>
+              <span className="font-display text-sm font-bold tracking-tight text-foreground">Spezifikationen</span>
+              <div className="flex flex-col gap-2">
                 {specs.map((spec, i) => (
-                  <div key={i} className="flex gap-2">
+                  <div key={i} className="flex items-center gap-2">
                     <Input
-                      className="flex-1"
+                      className={`flex-1 ${FIELD_INPUT} h-9`}
                       placeholder="Merkmal (z.B. Gewicht)"
                       value={spec.label}
                       onChange={(e) =>
@@ -1180,7 +1321,7 @@ const AdminMarketplace = () => {
                       }
                     />
                     <Input
-                      className="flex-1"
+                      className={`flex-1 ${FIELD_INPUT} h-9 font-mono text-[12.5px]`}
                       placeholder="Wert (z.B. 365 g)"
                       value={spec.value}
                       onChange={(e) =>
@@ -1191,34 +1332,41 @@ const AdminMarketplace = () => {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="shrink-0 text-destructive hover:text-destructive"
+                      className={`shrink-0 ${ICON_BTN_DANGER}`}
                       onClick={() => setSpecs((s) => s.filter((_, idx) => idx !== i))}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 ))}
-                <Button type="button" variant="outline" size="sm" onClick={() => setSpecs((s) => [...s, { label: "", value: "" }])}>
-                  <Plus className="w-4 h-4 mr-2" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 self-start gap-1.5 rounded-[9px] border-primary/30 bg-primary/[0.09] px-3 text-[12.5px] font-bold text-primary hover:bg-primary/[0.18] hover:text-primary"
+                  onClick={() => setSpecs((s) => [...s, { label: "", value: "" }])}
+                >
+                  <Plus className="h-3.5 w-3.5" />
                   Merkmal hinzufügen
                 </Button>
               </div>
             </div>
 
             {/* Partner name (legacy free-text, prefilled from brand) */}
-            <div className="space-y-2">
-              <Label>Marken-/Partner-Text (Anzeige)</Label>
+            <div className="flex flex-col gap-2">
+              <Label className={FIELD_LABEL}>Marken-/Partner-Text (Anzeige)</Label>
               <Input
                 value={formData.partner_name}
                 onChange={(e) => setFormData({ ...formData, partner_name: e.target.value })}
                 placeholder="z.B. Adidas, Babolat"
+                className={FIELD_INPUT}
               />
             </div>
 
-            {/* Stock + sort + featured */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Bestand (optional)</Label>
+            {/* Stock + sort + status */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Bestand (optional)</Label>
                 <Input
                   type="number"
                   min={0}
@@ -1227,23 +1375,25 @@ const AdminMarketplace = () => {
                     setFormData({ ...formData, stock_quantity: e.target.value ? parseInt(e.target.value) : null })
                   }
                   placeholder="Unbegrenzt"
+                  className={FIELD_INPUT}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Sortierung</Label>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Sortierung</Label>
                 <Input
                   type="number"
                   value={formData.sort_order}
                   onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                  className={FIELD_INPUT}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Status</Label>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Status</Label>
                 <Select
                   value={formData.status ?? "published"}
                   onValueChange={(v) => setFormData({ ...formData, status: v as "draft" | "published" })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={FIELD_INPUT}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1254,9 +1404,12 @@ const AdminMarketplace = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2">
-              <div>
-                <Label className="cursor-pointer">Featured (hervorheben)</Label>
+            {/* Featured */}
+            <div className="flex items-center gap-3.5 rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-[15px] py-3.5">
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <Label className="cursor-pointer text-[13.5px] font-bold text-foreground">
+                  Featured (hervorheben)
+                </Label>
                 <p className="text-xs text-muted-foreground">Zeigt das Produkt prominent im Shop.</p>
               </div>
               <Switch
@@ -1266,94 +1419,107 @@ const AdminMarketplace = () => {
             </div>
 
             {/* GPSR / Kennzeichnung */}
-            <div className="space-y-3 rounded-lg border border-border/60 p-3">
-              <p className="text-sm font-medium">Produktsicherheit &amp; Kennzeichnung (GPSR)</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Hersteller Name</Label>
+            <div className={SUB_BOX}>
+              <div className="flex flex-col gap-0.5">
+                <span className="font-display text-sm font-bold tracking-tight text-foreground">
+                  Produktsicherheit &amp; Kennzeichnung (GPSR)
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <Label className={FIELD_LABEL}>Hersteller Name</Label>
                   <Input
                     value={formData.manufacturer_name ?? ""}
                     onChange={(e) => setFormData({ ...formData, manufacturer_name: e.target.value })}
                     placeholder="z.B. Babolat VS S.A."
+                    className={FIELD_INPUT}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Hersteller E-Mail</Label>
+                <div className="flex flex-col gap-2">
+                  <Label className={FIELD_LABEL}>Hersteller E-Mail</Label>
                   <Input
                     type="email"
                     value={formData.manufacturer_email ?? ""}
                     onChange={(e) => setFormData({ ...formData, manufacturer_email: e.target.value })}
                     placeholder="kontakt@hersteller.de"
+                    className={FIELD_INPUT}
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Hersteller Anschrift</Label>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Hersteller Anschrift</Label>
                 <Input
                   value={formData.manufacturer_address ?? ""}
                   onChange={(e) => setFormData({ ...formData, manufacturer_address: e.target.value })}
                   placeholder="Straße, PLZ Ort, Land"
+                  className={FIELD_INPUT}
                 />
               </div>
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">
+              <div className="flex flex-col gap-2.5">
+                <p className="text-[11.5px] text-muted-foreground">
                   EU-Verantwortlicher: Nur nötig, wenn der Hersteller außerhalb der EU sitzt.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>EU-Verantwortlicher Name</Label>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="flex flex-col gap-2">
+                    <Label className={FIELD_LABEL}>EU-Verantwortlicher Name</Label>
                     <Input
                       value={formData.eu_responsible_name ?? ""}
                       onChange={(e) => setFormData({ ...formData, eu_responsible_name: e.target.value })}
+                      className={FIELD_INPUT}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>EU-Verantwortlicher E-Mail</Label>
+                  <div className="flex flex-col gap-2">
+                    <Label className={FIELD_LABEL}>EU-Verantwortlicher E-Mail</Label>
                     <Input
                       type="email"
                       value={formData.eu_responsible_email ?? ""}
                       onChange={(e) => setFormData({ ...formData, eu_responsible_email: e.target.value })}
+                      className={FIELD_INPUT}
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>EU-Verantwortlicher Anschrift</Label>
+                <div className="flex flex-col gap-2">
+                  <Label className={FIELD_LABEL}>EU-Verantwortlicher Anschrift</Label>
                   <Input
                     value={formData.eu_responsible_address ?? ""}
                     onChange={(e) => setFormData({ ...formData, eu_responsible_address: e.target.value })}
                     placeholder="Straße, PLZ Ort, Land"
+                    className={FIELD_INPUT}
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Produkt-ID / Charge</Label>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Produkt-ID / Charge</Label>
                 <Input
                   value={formData.product_identifier ?? ""}
                   onChange={(e) => setFormData({ ...formData, product_identifier: e.target.value })}
                   placeholder="z.B. Artikelnummer, GTIN oder Chargennummer"
+                  className={FIELD_INPUT}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Warnhinweise</Label>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Warnhinweise</Label>
                 <Textarea
                   value={formData.safety_warnings ?? ""}
                   onChange={(e) => setFormData({ ...formData, safety_warnings: e.target.value })}
                   placeholder="Sicherheits- und Warnhinweise zum Produkt..."
                   rows={2}
+                  className={FIELD_AREA}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Materialzusammensetzung</Label>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Materialzusammensetzung</Label>
                 <Input
                   value={formData.textile_composition ?? ""}
                   onChange={(e) => setFormData({ ...formData, textile_composition: e.target.value })}
                   placeholder="z.B. 90 % Polyester, 10 % Elasthan"
+                  className={FIELD_INPUT}
                 />
-                <p className="text-xs text-muted-foreground">Pflicht bei Textilien.</p>
+                <p className="text-[11px] text-muted-foreground">Pflicht bei Textilien.</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Lieferzeit min (Werktage)</Label>
+                <div className="flex flex-col gap-2">
+                  <Label className={FIELD_LABEL}>Lieferzeit min (Werktage)</Label>
                   <Input
                     type="number"
                     min={0}
@@ -1361,10 +1527,11 @@ const AdminMarketplace = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, delivery_days_min: e.target.value ? parseInt(e.target.value) : 2 })
                     }
+                    className={FIELD_INPUT}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Lieferzeit max (Werktage)</Label>
+                <div className="flex flex-col gap-2">
+                  <Label className={FIELD_LABEL}>Lieferzeit max (Werktage)</Label>
                   <Input
                     type="number"
                     min={0}
@@ -1372,12 +1539,13 @@ const AdminMarketplace = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, delivery_days_max: e.target.value ? parseInt(e.target.value) : 4 })
                     }
+                    className={FIELD_INPUT}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Grundpreis-Menge</Label>
+                <div className="flex flex-col gap-2">
+                  <Label className={FIELD_LABEL}>Grundpreis-Menge</Label>
                   <Input
                     type="number"
                     min={0}
@@ -1389,48 +1557,60 @@ const AdminMarketplace = () => {
                         base_price_quantity: e.target.value ? parseFloat(e.target.value) : null,
                       })
                     }
+                    className={FIELD_INPUT}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Grundpreis-Einheit</Label>
+                <div className="flex flex-col gap-2">
+                  <Label className={FIELD_LABEL}>Grundpreis-Einheit</Label>
                   <Input
                     value={formData.base_price_unit ?? ""}
                     onChange={(e) => setFormData({ ...formData, base_price_unit: e.target.value })}
                     placeholder="z.B. m, kg"
+                    className={FIELD_INPUT}
                   />
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">Grundpreis: Nur bei Ware nach Maß/Gewicht.</p>
+              <p className="text-[11px] text-muted-foreground">Grundpreis: Nur bei Ware nach Maß/Gewicht.</p>
             </div>
 
             {/* SEO */}
-            <div className="space-y-3 rounded-lg border border-border/60 p-3">
-              <p className="text-sm font-medium">SEO (optional)</p>
-              <div className="space-y-2">
-                <Label>Meta-Titel</Label>
+            <div className={SUB_BOX}>
+              <span className="font-display text-sm font-bold tracking-tight text-foreground">SEO (optional)</span>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Meta-Titel</Label>
                 <Input
                   value={formData.meta_title ?? ""}
                   onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })}
                   placeholder="Wird für Suchmaschinen/Teilen genutzt"
+                  className={FIELD_INPUT}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Meta-Beschreibung</Label>
+              <div className="flex flex-col gap-2">
+                <Label className={FIELD_LABEL}>Meta-Beschreibung</Label>
                 <Textarea
                   value={formData.meta_description ?? ""}
                   onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
                   rows={2}
+                  className={FIELD_AREA}
                 />
               </div>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+          <DialogFooter className="gap-2 border-t border-[hsl(0_0%_12%)] pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setDialogOpen(false)}
+              className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/[0.05] px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/[0.08] hover:text-foreground"
+            >
               Abbrechen
             </Button>
-            <Button onClick={handleSubmit} disabled={saving || uploading}>
-              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            <Button
+              onClick={handleSubmit}
+              disabled={saving || uploading}
+              className="h-10 gap-2 rounded-[11px] bg-gradient-lime px-5 text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition-opacity hover:opacity-90"
+            >
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingItem ? "Speichern" : "Erstellen"}
             </Button>
           </DialogFooter>
@@ -1439,22 +1619,29 @@ const AdminMarketplace = () => {
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Produkt löschen?</AlertDialogTitle>
-            <AlertDialogDescription>
+        <AlertDialogContent className="rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))]">
+          <AlertDialogHeader className="gap-3 space-y-0 text-left">
+            <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+              <AlertTriangle className="h-5 w-5" />
+            </span>
+            <AlertDialogTitle className="font-display text-lg font-extrabold tracking-tight text-foreground">
+              Produkt löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[13.5px] leading-relaxed text-[hsl(0_0%_68%)]">
               Möchtest du "{itemToDelete?.name}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
               Hat das Produkt bereits Bestellungen, wird es stattdessen nur deaktiviert – Bestellhistorie und
               Belege bleiben erhalten.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/[0.05] px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/[0.08] hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
             >
-              {deleteMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Löschen
             </AlertDialogAction>
           </AlertDialogFooter>

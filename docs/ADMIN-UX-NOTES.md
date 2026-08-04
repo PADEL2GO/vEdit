@@ -25,16 +25,25 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 4. **AdminCourts:** Toter `xs:`-Breakpoint — `xs` ist in tailwind.config.ts nicht definiert, `hidden xs:inline`-Labels wurden nie angezeigt (auf `sm:` korrigiert). Projekt-weiter Grep nach `xs:` lohnt.
 5. **AdminUtilization:** Kapazitätsfarben doppelt gepflegt (lib/utilization.ts `capacityHex` vs. Design-Palette) → konsolidieren. KPI „Netzwerk-Auslastung" cappt Anzeige bei 100 %, Rohdaten können >100 % liefern (Datenqualität im View prüfen).
 
+6. **AdminEvents:** Edit-Dialog schließt nach dem Speichern nicht (unkontrollierter Dialog, `onSuccess` setzt nur `editingEvent`, das nie gelesen wird) → kontrolliert machen. Nebenbei behoben: toter Ticket-Link bei Events ohne URL (jetzt konditional „über P2G").
+7. **AdminClubOwners:** Löschen einer Zuweisung OHNE Bestätigungsdialog (sofortiges Delete) → AlertDialog nachrüsten. Variable `weeklyMinutes` speichert Monatsminuten (irreführend). Nebenbei behoben: Spaltenversatz in der Tabelle (7 Zellen bei 6 Headern).
+8. **AdminClubs:** `selectedClub` ist eine Kopie aus der Query — nach Mutationen (Aktiv-Toggle, Court/Mitglied ändern) zeigt der Detailbereich veraltete Daten bis zur erneuten Club-Auswahl (Stale-State-Bug). `window.confirm()` für Club-Löschen/Mitglied-Entfernen wirkt im neuen Design fremd → AlertDialog. Mitglieder-Zähler zählt nur aktive, Tabelle zeigt alle.
+9. **AdminMarketplace:** Punkte-Rabatt-Hinweis rechnet unleserlich (`formatEuro(Math.floor(credit_cost))` — Ergebnis stimmt zufällig, `Math.floor` wirkungslos). Produktfilter „Status" filtert `is_active`, die Status-Spalte zeigt aber Live/Entwurf — begrifflich verwirrend. SEO-Felder ohne Zeichenlimits/Zähler (Design: 60/155).
+
 ## Backend-Wiring offen (Design zeigt es, Seite hat kein Gegenstück)
 
 - **Sidebar:** Live-Counts an „Buchungen" und „Marketplace" (Design-Dummies weggelassen)
 - **Overview:** Zeitraum-Umschalter (Heute/Woche/Monat), Umsatz-KPI, Trend-Badges, Spieler-/Betrag-Spalten in „Letzte Buchungen", „Alle →"-Links, „Neuer Standort"-CTA
 - **Bookings:** Court-Filter, Spalten Dauer/Betrag/Zahlung/Lobby-Herkunft, „LÖSCHEN"-Tipp-Bestätigung im Reset-Dialog (sinnvolles Sicherheits-Upgrade), Teilnehmer-Sektion im Detail-Drawer
+- **Club Owners:** Kontingent-Nutzungsanzeige (Progressbar „X h genutzt" + Prozent) — braucht Aggregation der genutzten Freiminuten pro Owner/Monat
+- **Marketplace:** KPI-Trend-Badges, Tab-Counts „X offen" für Bestellungen/Retouren
 
 ## Folge-Pass: Kind-Komponenten (Design da, Komponente noch alt)
 
 - `BookingWeekCalendar.tsx`, `BookingDetailDrawer.tsx` (aus Admin 02)
 - `AdminLocationCard.tsx`, `AdminCourtCard.tsx`, `LocationAnalyticsTab.tsx`, Camera-Komponenten, `CourtPriceDialog` (aus Admin 03)
+- `EventForm.tsx` + ArtistManager/BrandManager/HighlightsInput (aus Admin 07)
+- `MarketplaceOrdersSection.tsx`, `CatalogManagerDialog.tsx` (aus Admin 08 — sonst Stilbruch im Bestellungen-Tab)
 
 ## Erledigt
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,16 +35,16 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { 
-  Plus, 
+import {
+  Plus,
   Minus,
-  Trash2, 
-  Search, 
-  Building2, 
-  Users, 
-  MapPin, 
-  Edit, 
-  Clock, 
+  Trash2,
+  Search,
+  Building2,
+  Users,
+  LayoutGrid,
+  Edit,
+  Mail,
   UserPlus,
   UserMinus,
   X
@@ -493,72 +493,79 @@ export default function AdminClubs() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <Building2 className="h-6 w-6 text-primary" />
-              Clubs
-            </h1>
-            <p className="text-muted-foreground">
-              Verwalten Sie Clubs, Court-Zuweisungen und Mitglieder
-            </p>
-          </div>
+      <div className="flex animate-fade-up flex-col gap-[18px]">
+        {/* Beschreibung + Neuer Club */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Clubs, Court-Zuweisungen und Mitglieder verwalten
+          </p>
           <Dialog open={isClubDialogOpen} onOpenChange={(open) => {
             setIsClubDialogOpen(open);
             if (!open) resetClubForm();
           }}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
+              <Button className="h-9 gap-[7px] rounded-[10px] bg-gradient-lime px-[15px] text-[13px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.28)] transition hover:brightness-110">
+                <Plus className="h-[15px] w-[15px]" />
                 Neuer Club
               </Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{editingClub ? "Club bearbeiten" : "Neuer Club"}</DialogTitle>
-                <DialogDescription>
-                  {editingClub 
-                    ? "Aktualisieren Sie die Club-Informationen." 
+            <DialogContent className="rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))] p-6 sm:max-w-[480px]">
+              <DialogHeader className="space-y-[5px] text-left">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">Club</span>
+                <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-foreground">
+                  {editingClub ? "Club bearbeiten" : "Neuer Club"}
+                </DialogTitle>
+                <DialogDescription className="text-[13px] leading-relaxed text-muted-foreground">
+                  {editingClub
+                    ? "Aktualisieren Sie die Club-Informationen."
                     : "Erstellen Sie einen neuen Club für Vereinsmitglieder."}
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Club Name *</Label>
+              <div className="space-y-4 py-2">
+                <div className="space-y-[7px]">
+                  <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Club Name <span className="text-primary">*</span>
+                  </Label>
                   <Input
                     value={clubName}
                     onChange={(e) => setClubName(e.target.value)}
                     placeholder="z.B. TC Musterstadt"
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Beschreibung</Label>
+                <div className="space-y-[7px]">
+                  <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Beschreibung</Label>
                   <Textarea
                     value={clubDescription}
                     onChange={(e) => setClubDescription(e.target.value)}
                     placeholder="Kurze Beschreibung des Clubs..."
                     rows={3}
+                    className="rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>Kontakt-Email</Label>
+                <div className="space-y-[7px]">
+                  <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Kontakt-Email</Label>
                   <Input
                     type="email"
                     value={clubEmail}
                     onChange={(e) => setClubEmail(e.target.value)}
                     placeholder="kontakt@tennisclub.de"
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]"
                   />
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsClubDialogOpen(false)}>
+              <DialogFooter className="gap-2.5 sm:gap-2.5">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsClubDialogOpen(false)}
+                  className="h-[42px] rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-[17px] text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground"
+                >
                   Abbrechen
                 </Button>
-                <Button 
+                <Button
                   onClick={() => clubMutation.mutate()}
                   disabled={clubMutation.isPending}
+                  className="h-[42px] rounded-[11px] bg-gradient-lime px-5 text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition hover:brightness-110"
                 >
                   {clubMutation.isPending ? "Speichern..." : (editingClub ? "Aktualisieren" : "Erstellen")}
                 </Button>
@@ -567,111 +574,108 @@ export default function AdminClubs() {
           </Dialog>
         </div>
 
-        {/* Search */}
-        <Card>
-          <CardContent className="py-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Suchen nach Club-Name, Beschreibung oder Email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 items-start gap-[18px] xl:grid-cols-[320px_minmax(0,1fr)]">
           {/* Clubs List */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                Clubs ({filteredClubs?.length ?? 0})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-3.5">
+              <h2 className="font-display text-[15px] font-bold tracking-tight text-foreground">
+                Clubs{" "}
+                <span className="font-mono text-[13px] font-normal text-muted-foreground">
+                  ({filteredClubs?.length ?? 0})
+                </span>
+              </h2>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Club, Beschreibung oder Email…"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] pl-9 text-[13px]"
+                />
+              </div>
               {isLoading ? (
-                <div className="p-6 text-center text-muted-foreground">Laden...</div>
+                <div className="py-4 text-center text-[13px] text-muted-foreground">Laden...</div>
               ) : filteredClubs?.length === 0 ? (
-                <div className="p-6 text-center text-muted-foreground">
+                <div className="py-4 text-center text-[13px] text-muted-foreground">
                   Keine Clubs gefunden
                 </div>
               ) : (
-                <div className="divide-y">
+                <div className="flex flex-col gap-2">
                   {filteredClubs?.map((club) => (
                     <div
                       key={club.id}
-                      className={`p-4 cursor-pointer hover:bg-muted/50 transition-colors ${
-                        selectedClub?.id === club.id ? "bg-muted" : ""
+                      className={`flex cursor-pointer flex-col items-start gap-1.5 rounded-[13px] border p-[13px] transition-colors ${
+                        selectedClub?.id === club.id
+                          ? "border-primary/45 bg-primary/[0.07]"
+                          : "border-[hsl(0_0%_12%)] bg-white/[0.028] hover:border-[hsl(0_0%_20%)]"
                       }`}
                       onClick={() => setSelectedClub(club)}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium truncate">{club.name}</span>
-                            {!club.is_active && (
-                              <Badge variant="secondary" className="text-xs">Inaktiv</Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {club.court_assignments?.length ?? 0} Courts
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Users className="h-3 w-3" />
-                              {club.club_users?.filter(u => u.is_active)?.length ?? 0} User
-                            </span>
-                          </div>
-                        </div>
+                      <div className="flex w-full items-center gap-2">
+                        <span className="min-w-0 flex-1 truncate text-sm font-bold text-foreground">{club.name}</span>
+                        {!club.is_active && (
+                          <Badge className="flex-none rounded-full border-0 bg-[hsl(0_100%_71%/0.1)] px-2 py-[3px] text-[10.5px] font-bold text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.1)]">Inaktiv</Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 font-mono text-[11px] text-muted-foreground">
+                        <span className="flex items-center gap-[5px]">
+                          <LayoutGrid className="h-3 w-3" />
+                          {club.court_assignments?.length ?? 0} Courts
+                        </span>
+                        <span className="flex items-center gap-[5px]">
+                          <Users className="h-3 w-3" />
+                          {club.club_users?.filter(u => u.is_active)?.length ?? 0} User
+                        </span>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </CardContent>
+            </div>
           </Card>
 
-          {/* Club Details */}
-          <Card className="lg:col-span-2">
+          {/* Club Details + Hilfe */}
+          <div className="flex min-w-0 flex-col gap-[18px]">
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
             {selectedClub ? (
-              <>
-                <CardHeader className="flex flex-row items-start justify-between space-y-0">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <CardTitle>{selectedClub.name}</CardTitle>
+              <div className="flex flex-col gap-[18px]">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex min-w-0 flex-col gap-[7px]">
+                    <div className="flex items-center gap-3">
+                      <h2 className="font-display text-[22px] font-extrabold tracking-tight text-foreground">
+                        {selectedClub.name}
+                      </h2>
                       <Switch
                         checked={selectedClub.is_active}
-                        onCheckedChange={(checked) => 
+                        onCheckedChange={(checked) =>
                           toggleClubMutation.mutate({ clubId: selectedClub.id, isActive: checked })
                         }
                       />
                     </div>
-                    <CardDescription>
+                    <p className="max-w-[560px] text-[13.5px] leading-relaxed text-muted-foreground">
                       {selectedClub.description || "Keine Beschreibung"}
-                    </CardDescription>
+                    </p>
                     {selectedClub.primary_contact_email && (
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <span className="inline-flex items-center gap-[7px] font-mono text-xs text-muted-foreground">
+                        <Mail className="h-[13px] w-[13px] flex-none" />
                         {selectedClub.primary_contact_email}
-                      </p>
+                      </span>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-none gap-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => openEditClubDialog(selectedClub)}
+                      className="h-9 rounded-[10px] border-[hsl(0_0%_16%)] bg-white/5 px-3.5 text-[12.5px] font-bold text-[hsl(0_0%_85%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
                     >
-                      <Edit className="h-4 w-4 mr-1" />
+                      <Edit className="h-3.5 w-3.5 mr-1" />
                       Bearbeiten
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-destructive hover:text-destructive"
+                      className="h-9 w-9 rounded-[10px] border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] p-0 text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
                       onClick={() => {
                         if (confirm("Club wirklich löschen? Alle Zuweisungen werden entfernt.")) {
                           deleteClubMutation.mutate(selectedClub.id);
@@ -681,46 +685,60 @@ export default function AdminClubs() {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div>
                   <Tabs defaultValue="courts" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="courts" className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
+                    <TabsList className="h-auto w-full justify-start gap-6 rounded-none border-b border-[hsl(0_0%_12%)] bg-transparent p-0">
+                      <TabsTrigger
+                        value="courts"
+                        className="gap-2 rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-[11px] pt-0 text-[13.5px] font-bold text-muted-foreground shadow-none data-[state=active]:-mb-px data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                      >
+                        <LayoutGrid className="h-[15px] w-[15px]" />
                         Courts ({selectedClub.court_assignments?.length ?? 0})
                       </TabsTrigger>
-                      <TabsTrigger value="users" className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
+                      <TabsTrigger
+                        value="users"
+                        className="gap-2 rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-[11px] pt-0 text-[13.5px] font-bold text-muted-foreground shadow-none data-[state=active]:-mb-px data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                      >
+                        <Users className="h-[15px] w-[15px]" />
                         Mitglieder ({selectedClub.club_users?.filter(u => u.is_active)?.length ?? 0})
                       </TabsTrigger>
                     </TabsList>
 
                     {/* Courts Tab */}
-                    <TabsContent value="courts" className="space-y-4 mt-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">Court-Zuweisungen & Kontingente</h3>
+                    <TabsContent value="courts" className="mt-4 space-y-3.5">
+                      <div className="flex flex-wrap items-center justify-between gap-3.5">
+                        <div className="flex flex-col gap-0.5">
+                          <h3 className="text-[13.5px] font-bold text-foreground">Court-Zuweisungen & Kontingente</h3>
+                          <span className="text-xs text-muted-foreground">Freie Minuten pro Monat je Court</span>
+                        </div>
                         <Dialog open={isCourtDialogOpen} onOpenChange={(open) => {
                           setIsCourtDialogOpen(open);
                           if (!open) resetCourtForm();
                         }}>
                           <DialogTrigger asChild>
-                            <Button size="sm">
-                              <Plus className="h-4 w-4 mr-1" />
+                            <Button
+                              size="sm"
+                              className="h-[34px] gap-1.5 whitespace-nowrap rounded-[9px] border border-primary/30 bg-primary/[0.09] px-[13px] text-[12.5px] font-bold text-primary shadow-none hover:bg-primary/[0.18]"
+                            >
+                              <Plus className="h-3.5 w-3.5" />
                               Court hinzufügen
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Court zuweisen</DialogTitle>
-                              <DialogDescription>
+                          <DialogContent className="rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))] p-6 sm:max-w-[460px]">
+                            <DialogHeader className="space-y-1.5 text-left">
+                              <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-foreground">Court zuweisen</DialogTitle>
+                              <DialogDescription className="text-[13px] leading-relaxed text-muted-foreground">
                                 Weisen Sie dem Club "{selectedClub.name}" einen Court mit Monatskontingent zu.
                               </DialogDescription>
                             </DialogHeader>
-                            <div className="space-y-4 py-4">
-                              <div className="space-y-2">
-                                <Label>Court</Label>
+                            <div className="space-y-4 py-2">
+                              <div className="space-y-[7px]">
+                                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                                  Court <span className="text-primary">*</span>
+                                </Label>
                                 <Select value={selectedCourtId} onValueChange={setSelectedCourtId}>
-                                  <SelectTrigger>
+                                  <SelectTrigger className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
                                     <SelectValue placeholder="Court auswählen..." />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -737,27 +755,35 @@ export default function AdminClubs() {
                                   </p>
                                 )}
                               </div>
-                              <div className="space-y-2">
-                                <Label>Monatskontingent (Stunden)</Label>
+                              <div className="space-y-[7px]">
+                                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                                  Monatskontingent (Stunden) <span className="text-primary">*</span>
+                                </Label>
                                 <Input
                                   type="number"
                                   value={weeklyMinutes / 60}
                                   onChange={(e) => setWeeklyMinutes(Number(e.target.value) * 60)}
                                   min={0}
                                   max={120}
+                                  className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-sm font-bold"
                                 />
-                                <p className="text-xs text-muted-foreground">
-                                  = {weeklyMinutes} Minuten pro Monat
+                                <p className="font-mono text-[11.5px] text-muted-foreground">
+                                  = {weeklyMinutes.toLocaleString("de-DE")} Minuten pro Monat
                                 </p>
                               </div>
                             </div>
-                            <DialogFooter>
-                              <Button variant="outline" onClick={() => setIsCourtDialogOpen(false)}>
+                            <DialogFooter className="gap-2.5 sm:gap-2.5">
+                              <Button
+                                variant="outline"
+                                onClick={() => setIsCourtDialogOpen(false)}
+                                className="h-[42px] rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-[17px] text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground"
+                              >
                                 Abbrechen
                               </Button>
-                              <Button 
+                              <Button
                                 onClick={() => addCourtMutation.mutate()}
                                 disabled={addCourtMutation.isPending || !selectedCourtId}
+                                className="h-[42px] rounded-[11px] bg-gradient-lime px-5 text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition hover:brightness-110"
                               >
                                 {addCourtMutation.isPending ? "Hinzufügen..." : "Hinzufügen"}
                               </Button>
@@ -767,48 +793,49 @@ export default function AdminClubs() {
                       </div>
 
                       {selectedClub.court_assignments?.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground border rounded-lg">
+                        <div className="rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.03] py-8 text-center text-sm text-muted-foreground">
                           Noch keine Courts zugewiesen
                         </div>
                       ) : (
-                        <Table>
+                        <div className="overflow-x-auto">
+                        <Table className="min-w-[620px]">
                           <TableHeader>
-                            <TableRow>
-                              <TableHead>Court</TableHead>
-                              <TableHead>Standort</TableHead>
-                              <TableHead>Kontingent</TableHead>
-                              <TableHead className="w-[80px]"></TableHead>
+                            <TableRow className="border-0 hover:bg-transparent">
+                              <TableHead className="h-auto whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Court</TableHead>
+                              <TableHead className="h-auto whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Standort</TableHead>
+                              <TableHead className="h-auto min-w-[210px] whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Kontingent</TableHead>
+                              <TableHead className="h-auto w-[80px] whitespace-nowrap pb-3 pl-0 pr-0 text-right font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Aktion</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {selectedClub.court_assignments?.map((assignment) => (
-                              <TableRow key={assignment.id}>
-                                <TableCell className="font-medium">
+                              <TableRow key={assignment.id} className="border-[hsl(0_0%_12%)] hover:bg-white/[0.022]">
+                                <TableCell className="whitespace-nowrap py-3 pl-0 pr-3.5 text-[13.5px] font-semibold text-foreground">
                                   {assignment.court?.name}
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="whitespace-nowrap py-3 pl-0 pr-3.5 text-[13.5px] text-[hsl(0_0%_78%)]">
                                   {assignment.court?.location?.name}
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="py-3 pl-0 pr-3.5">
                                   <div className="flex items-center gap-2">
-                                    <Clock className="h-4 w-4 text-muted-foreground" />
+                                    <div className="flex items-center gap-0.5 rounded-[9px] border border-[hsl(0_0%_15%)] bg-white/[0.04] p-0.5">
                                     <Button
-                                      variant="outline"
+                                      variant="ghost"
                                       size="icon"
-                                      className="h-8 w-8"
+                                      className="h-[26px] w-[26px] rounded-[7px] text-muted-foreground hover:bg-[hsl(0_100%_71%/0.1)] hover:text-[#FF6B6B]"
                                       disabled={assignment.monthly_free_minutes <= 0 || updateCourtMutation.isPending}
-                                      onClick={() => 
+                                      onClick={() =>
                                         updateCourtMutation.mutate({
                                           assignmentId: assignment.id,
                                           monthlyMinutes: Math.max(0, assignment.monthly_free_minutes - 60),
                                         })
                                       }
                                     >
-                                      <Minus className="h-4 w-4" />
+                                      <Minus className="h-3.5 w-3.5" />
                                     </Button>
                                     <Input
                                       type="number"
-                                      className="w-16 h-8 text-center"
+                                      className="h-[26px] w-12 border-0 bg-transparent p-0 text-center font-mono text-[13px] font-bold shadow-none [appearance:textfield] focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                       defaultValue={assignment.monthly_free_minutes / 60}
                                       key={assignment.monthly_free_minutes}
                                       onBlur={(e) => {
@@ -829,98 +856,124 @@ export default function AdminClubs() {
                                       max={120}
                                     />
                                     <Button
-                                      variant="outline"
+                                      variant="ghost"
                                       size="icon"
-                                      className="h-8 w-8"
+                                      className="h-[26px] w-[26px] rounded-[7px] text-muted-foreground hover:bg-primary/10 hover:text-primary"
                                       disabled={assignment.monthly_free_minutes >= 120 * 60 || updateCourtMutation.isPending}
-                                      onClick={() => 
+                                      onClick={() =>
                                         updateCourtMutation.mutate({
                                           assignmentId: assignment.id,
                                           monthlyMinutes: Math.min(120 * 60, assignment.monthly_free_minutes + 60),
                                         })
                                       }
                                     >
-                                      <Plus className="h-4 w-4" />
+                                      <Plus className="h-3.5 w-3.5" />
                                     </Button>
-                                    <span className="text-sm text-muted-foreground">h/Monat</span>
+                                    </div>
+                                    <span className="whitespace-nowrap font-mono text-xs text-muted-foreground">h/Monat</span>
+                                    <span className="whitespace-nowrap font-mono text-[11px] text-muted-foreground/70">
+                                      = {assignment.monthly_free_minutes.toLocaleString("de-DE")} Min.
+                                    </span>
                                   </div>
                                 </TableCell>
-                                <TableCell>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-destructive hover:text-destructive"
-                                    onClick={() => deleteCourtMutation.mutate(assignment.id)}
-                                    disabled={deleteCourtMutation.isPending}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
+                                <TableCell className="py-3 pl-0 pr-0">
+                                  <div className="flex justify-end">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-[30px] w-[30px] rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+                                      onClick={() => deleteCourtMutation.mutate(assignment.id)}
+                                      disabled={deleteCourtMutation.isPending}
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ))}
                           </TableBody>
                         </Table>
+                        </div>
                       )}
                     </TabsContent>
 
                     {/* Users Tab */}
-                    <TabsContent value="users" className="space-y-4 mt-4">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">Club-Mitglieder</h3>
+                    <TabsContent value="users" className="mt-4 space-y-3.5">
+                      <div className="flex flex-wrap items-center justify-between gap-3.5">
+                        <h3 className="text-[13.5px] font-bold text-foreground">Club-Mitglieder</h3>
                         <Dialog open={isUserDialogOpen} onOpenChange={(open) => {
                           setIsUserDialogOpen(open);
                           if (!open) resetUserForm();
                         }}>
                           <DialogTrigger asChild>
-                            <Button size="sm">
-                              <UserPlus className="h-4 w-4 mr-1" />
+                            <Button
+                              size="sm"
+                              className="h-[34px] gap-1.5 whitespace-nowrap rounded-[9px] border border-primary/30 bg-primary/[0.09] px-[13px] text-[12.5px] font-bold text-primary shadow-none hover:bg-primary/[0.18]"
+                            >
+                              <UserPlus className="h-3.5 w-3.5" />
                               Benutzer hinzufügen
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Benutzer zu Club hinzufügen</DialogTitle>
-                              <DialogDescription>
+                          <DialogContent className="rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))] p-6 sm:max-w-[460px]">
+                            <DialogHeader className="space-y-1.5 text-left">
+                              <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-foreground">Benutzer zu Club hinzufügen</DialogTitle>
+                              <DialogDescription className="text-[13px] leading-relaxed text-muted-foreground">
                                 Fügen Sie einen Benutzer zu "{selectedClub.name}" hinzu.
                               </DialogDescription>
                             </DialogHeader>
-                            <div className="space-y-4 py-4">
-                              <div className="space-y-2">
-                                <Label>Benutzer suchen</Label>
-                                <Input
-                                  value={userSearchTerm}
-                                  onChange={(e) => {
-                                    setUserSearchTerm(e.target.value);
-                                    setSelectedUserId("");
-                                  }}
-                                  placeholder="Username oder Name eingeben..."
-                                />
+                            <div className="space-y-4 py-2">
+                              <div className="space-y-[7px]">
+                                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                                  Benutzer suchen <span className="text-primary">*</span>
+                                </Label>
+                                <div className="relative">
+                                  <Search className="absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-muted-foreground" />
+                                  <Input
+                                    value={userSearchTerm}
+                                    onChange={(e) => {
+                                      setUserSearchTerm(e.target.value);
+                                      setSelectedUserId("");
+                                    }}
+                                    placeholder="Username oder Name eingeben..."
+                                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] pl-9"
+                                  />
+                                </div>
                                 {searchedUsers && searchedUsers.length > 0 && !selectedUserId && (
-                                  <div className="border rounded-md max-h-40 overflow-y-auto">
+                                  <div className="flex max-h-40 flex-col gap-2 overflow-y-auto">
                                     {searchedUsers.map((user) => (
                                       <div
                                         key={user.user_id}
-                                        className="p-2 hover:bg-muted cursor-pointer flex items-center justify-between"
+                                        className="flex cursor-pointer items-center gap-2.5 rounded-[11px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-3 py-2.5 transition-colors hover:border-primary/40"
                                         onClick={() => {
                                           setSelectedUserId(user.user_id);
                                           setUserSearchTerm(user.display_name || user.username || "");
                                         }}
                                       >
-                                        <span>{user.display_name || user.username}</span>
+                                        <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full border border-[hsl(0_0%_18%)] bg-white/[0.06] font-display text-[10.5px] font-extrabold text-[hsl(0_0%_82%)]">
+                                          {(user.display_name || user.username || "?")
+                                            .split(" ")
+                                            .map((p) => p[0])
+                                            .join("")
+                                            .slice(0, 2)
+                                            .toUpperCase()}
+                                        </span>
+                                        <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
+                                          {user.display_name || user.username}
+                                        </span>
                                         {user.username && user.display_name && (
-                                          <span className="text-xs text-muted-foreground">@{user.username}</span>
+                                          <span className="flex-none font-mono text-[11px] text-muted-foreground">@{user.username}</span>
                                         )}
                                       </div>
                                     ))}
                                   </div>
                                 )}
                                 {selectedUserId && (
-                                  <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
-                                    <span className="flex-1">{userSearchTerm}</span>
+                                  <div className="flex items-center gap-2 rounded-[11px] border border-primary/[0.28] bg-primary/[0.09] px-3 py-2">
+                                    <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">{userSearchTerm}</span>
                                     <Button
                                       variant="ghost"
                                       size="icon"
-                                      className="h-6 w-6"
+                                      className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground"
                                       onClick={() => {
                                         setSelectedUserId("");
                                         setUserSearchTerm("");
@@ -931,13 +984,15 @@ export default function AdminClubs() {
                                   </div>
                                 )}
                               </div>
-                              <div className="space-y-2">
-                                <Label>Rolle im Club</Label>
-                                <Select 
-                                  value={userRoleInClub} 
+                              <div className="space-y-[7px]">
+                                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                                  Rolle im Club <span className="text-primary">*</span>
+                                </Label>
+                                <Select
+                                  value={userRoleInClub}
                                   onValueChange={(v) => setUserRoleInClub(v as "manager" | "staff")}
                                 >
-                                  <SelectTrigger>
+                                  <SelectTrigger className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -947,13 +1002,18 @@ export default function AdminClubs() {
                                 </Select>
                               </div>
                             </div>
-                            <DialogFooter>
-                              <Button variant="outline" onClick={() => setIsUserDialogOpen(false)}>
+                            <DialogFooter className="gap-2.5 sm:gap-2.5">
+                              <Button
+                                variant="outline"
+                                onClick={() => setIsUserDialogOpen(false)}
+                                className="h-[42px] rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-[17px] text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground"
+                              >
                                 Abbrechen
                               </Button>
-                              <Button 
+                              <Button
                                 onClick={() => addUserMutation.mutate()}
                                 disabled={addUserMutation.isPending || !selectedUserId}
+                                className="h-[42px] rounded-[11px] bg-gradient-lime px-5 text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition hover:brightness-110"
                               >
                                 {addUserMutation.isPending ? "Hinzufügen..." : "Hinzufügen"}
                               </Button>
@@ -963,41 +1023,58 @@ export default function AdminClubs() {
                       </div>
 
                       {selectedClub.club_users?.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground border rounded-lg">
+                        <div className="rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.03] py-8 text-center text-sm text-muted-foreground">
                           Noch keine Mitglieder hinzugefügt
                         </div>
                       ) : (
-                        <Table>
+                        <div className="overflow-x-auto">
+                        <Table className="min-w-[620px]">
                           <TableHeader>
-                            <TableRow>
-                              <TableHead>Benutzer</TableHead>
-                              <TableHead>Rolle</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead>Hinzugefügt</TableHead>
-                              <TableHead className="w-[80px]"></TableHead>
+                            <TableRow className="border-0 hover:bg-transparent">
+                              <TableHead className="h-auto whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Benutzer</TableHead>
+                              <TableHead className="h-auto whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Rolle</TableHead>
+                              <TableHead className="h-auto whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Status</TableHead>
+                              <TableHead className="h-auto whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Hinzugefügt</TableHead>
+                              <TableHead className="h-auto w-[80px] whitespace-nowrap pb-3 pl-0 pr-0 text-right font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Aktion</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {selectedClub.club_users?.map((clubUser) => (
-                              <TableRow key={clubUser.id}>
-                                <TableCell>
-                                  <div>
-                                    <span className="font-medium">
-                                      {clubUser.profile?.display_name || clubUser.profile?.username || "Unbekannt"}
+                              <TableRow key={clubUser.id} className="border-[hsl(0_0%_12%)] hover:bg-white/[0.022]">
+                                <TableCell className="py-3 pl-0 pr-3.5">
+                                  <div className="flex items-center gap-2.5">
+                                    <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full border border-primary/[0.26] bg-primary/10 font-display text-[11px] font-extrabold text-primary">
+                                      {(clubUser.profile?.display_name || clubUser.profile?.username || "?")
+                                        .split(" ")
+                                        .map((p) => p[0])
+                                        .join("")
+                                        .slice(0, 2)
+                                        .toUpperCase()}
                                     </span>
-                                    {clubUser.profile?.username && clubUser.profile?.display_name && (
-                                      <span className="text-sm text-muted-foreground ml-2">
-                                        @{clubUser.profile.username}
+                                    <div className="flex min-w-0 flex-col gap-px">
+                                      <span className="truncate text-[13px] font-semibold text-foreground">
+                                        {clubUser.profile?.display_name || clubUser.profile?.username || "Unbekannt"}
                                       </span>
-                                    )}
+                                      {clubUser.profile?.username && clubUser.profile?.display_name && (
+                                        <span className="truncate font-mono text-[11px] text-muted-foreground">
+                                          @{clubUser.profile.username}
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
                                 </TableCell>
-                                <TableCell>
-                                  <Badge variant={clubUser.role_in_club === "manager" ? "default" : "secondary"}>
+                                <TableCell className="py-3 pl-0 pr-3.5">
+                                  <Badge
+                                    className={
+                                      clubUser.role_in_club === "manager"
+                                        ? "whitespace-nowrap rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-bold text-primary hover:bg-primary/10"
+                                        : "whitespace-nowrap rounded-full border border-[hsl(0_0%_18%)] bg-white/5 px-2.5 py-1 text-[11px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/5"
+                                    }
+                                  >
                                     {clubUser.role_in_club === "manager" ? "Manager" : "Staff"}
                                   </Badge>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="py-3 pl-0 pr-3.5">
                                   <Switch
                                     checked={clubUser.is_active}
                                     onCheckedChange={(checked) =>
@@ -1005,55 +1082,72 @@ export default function AdminClubs() {
                                     }
                                   />
                                 </TableCell>
-                                <TableCell className="text-muted-foreground">
+                                <TableCell className="whitespace-nowrap py-3 pl-0 pr-3.5 font-mono text-[12.5px] text-[hsl(0_0%_78%)]">
                                   {format(new Date(clubUser.created_at), "dd.MM.yyyy", { locale: de })}
                                 </TableCell>
-                                <TableCell>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-destructive hover:text-destructive"
-                                    onClick={() => {
-                                      if (confirm("Benutzer wirklich aus dem Club entfernen?")) {
-                                        removeUserMutation.mutate(clubUser.id);
-                                      }
-                                    }}
-                                    disabled={removeUserMutation.isPending}
-                                  >
-                                    <UserMinus className="h-4 w-4" />
-                                  </Button>
+                                <TableCell className="py-3 pl-0 pr-0">
+                                  <div className="flex justify-end">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-[30px] w-[30px] rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+                                      onClick={() => {
+                                        if (confirm("Benutzer wirklich aus dem Club entfernen?")) {
+                                          removeUserMutation.mutate(clubUser.id);
+                                        }
+                                      }}
+                                      disabled={removeUserMutation.isPending}
+                                    >
+                                      <UserMinus className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ))}
                           </TableBody>
                         </Table>
+                        </div>
                       )}
                     </TabsContent>
                   </Tabs>
-                </CardContent>
-              </>
+                </div>
+              </div>
             ) : (
-              <CardContent className="py-16 text-center text-muted-foreground">
-                <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Wählen Sie einen Club aus der Liste aus</p>
-              </CardContent>
+              <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                <span className="flex h-12 w-12 items-center justify-center rounded-[14px] border border-[hsl(0_0%_16%)] bg-white/5 text-muted-foreground">
+                  <Building2 className="h-6 w-6" />
+                </span>
+                <p className="text-sm text-muted-foreground">Wählen Sie einen Club aus der Liste aus</p>
+              </div>
             )}
           </Card>
-        </div>
 
-        {/* Help Card */}
-        <Card className="border-muted bg-muted/30">
-          <CardContent className="py-4">
-            <h3 className="font-medium mb-2">So richten Sie einen Club ein:</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Klicken Sie auf "Neuer Club" und geben Sie den Club-Namen ein</li>
-              <li>Wählen Sie den erstellten Club aus der Liste aus</li>
-              <li>Fügen Sie unter "Courts" die gewünschten Courts mit Monatskontingent hinzu</li>
-              <li>Fügen Sie unter "Mitglieder" die Benutzer hinzu, die das Club-Portal nutzen sollen</li>
-              <li>Die Club-Mitglieder können sich einloggen und werden zum Club-Portal weitergeleitet</li>
-            </ol>
-          </CardContent>
-        </Card>
+          {/* Help Card */}
+          <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+            <div className="flex flex-col gap-3.5">
+              <span className="font-display text-[15px] font-bold tracking-tight text-foreground">
+                So richten Sie einen Club ein:
+              </span>
+              <div className="flex flex-col gap-[11px]">
+                {[
+                  'Klicken Sie auf "Neuer Club" und geben Sie den Club-Namen ein',
+                  "Wählen Sie den erstellten Club aus der Liste aus",
+                  'Fügen Sie unter "Courts" die gewünschten Courts mit Monatskontingent hinzu',
+                  'Fügen Sie unter "Mitglieder" die Benutzer hinzu, die das Club-Portal nutzen sollen',
+                  "Die Club-Mitglieder können sich einloggen und werden zum Club-Portal weitergeleitet",
+                ].map((text, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full border border-primary/30 bg-primary/10 font-mono text-[11px] font-bold text-primary">
+                      {i + 1}
+                    </span>
+                    <span className="text-[13.5px] leading-normal text-[hsl(0_0%_72%)]">{text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );
