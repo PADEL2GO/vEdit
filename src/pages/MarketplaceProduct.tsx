@@ -108,7 +108,7 @@ const MarketplaceProduct = () => {
   const low = !soldOut && product.stock_quantity !== null && (product.stock_quantity ?? 0) <= 5;
   const qtyMax = Math.min(product.stock_quantity ?? 5, 5);
 
-  const balance = summary?.play_credits ?? 0;
+  const balance = summary?.redeemable_balance ?? 0;
   const productPointsCap = product.credit_cost ?? 0;
   const maxRedeem = maxRedeemablePoints(price * qty, balance, centsPerPoint, productPointsCap);
   const maxSaveCents = Math.floor(maxRedeem * centsPerPoint);

@@ -44,7 +44,7 @@ const Marketplace = () => {
   const { enabled: pointsEnabled } = usePointsValue();
 
   const loggedIn = !!user;
-  const balance = summary?.play_credits ?? 0;
+  const balance = summary?.redeemable_balance ?? 0;
 
   const [catId, setCatId] = useState<string>("all");
   const [selBrands, setSelBrands] = useState<string[]>([]);

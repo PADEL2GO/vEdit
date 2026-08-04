@@ -51,7 +51,7 @@ const MarketplaceCheckout = () => {
 
   const price = product?.price_cents ?? 0;
   const subtotal = price * qty;
-  const balance = summary?.play_credits ?? 0;
+  const balance = summary?.redeemable_balance ?? 0;
   const canUsePoints = !!user && pointsEnabled;
   const productPointsCap = product?.credit_cost ?? 0;
   const maxRedeem = canUsePoints ? maxRedeemablePoints(subtotal, balance, centsPerPoint, productPointsCap) : 0;
