@@ -79,6 +79,10 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 - Mitteilungen-Suche: Treffer erst ab 2 Zeichen; Sonderzeichen `% _ , ( )` werden aus dem Suchbegriff entfernt.
 - Buchungen-Reset erfordert jetzt zwingend das Tippen von „LÖSCHEN"; Standortwechsel resettet den Court-Filter.
 
+## Visuals-Audit (2026-08-07)
+
+Voller Abgleich aller `site_visuals`-Einträge gegen echte Nutzung (Web-Code-Grep + **Live-Tabellen-Abgleich** via Management-API): Web zeigt genau **10 Keys** (fuer-spieler.hero.image/video, home.network.courts/events, home.verein-steps.step-1..6). **Wichtige Erkenntnis:** Die iOS-App besitzt 8 eigene `app.*`-Visuals (app.auth.backdrop, app.booking.header, app.events.header, app.home.*, app.market.header, app.news.header), die NUR live existieren (nie in Migrationen) — bei künftigen Cleanups immer ganz `app.%` ausnehmen! **✅ AUSGEFÜHRT 2026-08-07 (live):** 4 Web-Waisen gelöscht — fuer-spieler.ki.video-1, fuer-spieler.marketplace.banner, home.fuer-wen.background, fuer-spieler.wingfield.action (dessen Lösch-Migration 20260414110000 lief live nie). Endstand: 15 app-Zeilen + 10 Web-Zeilen. Migration `20260807120000_cleanup_unused_site_visuals.sql` liegt fürs Repo/andere Umgebungen bei (idempotent). Storage-Dateien gelöschter Einträge bleiben liegen (nur Speicher, unkritisch).
+
 ## Folge-Pass: Kind-Komponenten (Design da, Komponente noch alt)
 
 - `BookingWeekCalendar.tsx`, `BookingDetailDrawer.tsx` (aus Admin 02)
