@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    .pt-row { display: grid; grid-template-columns: 80px minmax(0, 1.1fr) 176px minmax(0, 1fr) 96px 74px auto; gap: 14px; align-items: center; }
+    .pt-desc { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1200px) { .pt-row { grid-template-columns: 80px minmax(0, 1fr) 176px; } }
+    @media (max-width: 700px) { .pt-row { grid-template-columns: 80px minmax(0, 1fr); } .pt-desc { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Partner-Kacheln">
+  <dc-import name="AdminSidebar" active="partners" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/partner-tiles</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Partner-Kacheln</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px;flex:none">
+        <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Partner-Logos und Hintergrundfarben auf der Homepage verwalten — alle Felder speichern sofort.</span>
+
+      <!-- Neuen Partner hinzufügen -->
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,140px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA">Neuen Partner hinzufügen</span>
+          <div style="display:flex;gap:11px;align-items:flex-end;flex-wrap:wrap">
+            <label style="display:flex;flex-direction:column;gap:7px;flex:1;min-width:min(180px, 100%)">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Name<span style="color:#C7F011"> *</span></span>
+              <input type="text" placeholder="z. B. Red Bull" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:7px;flex:1;min-width:min(180px, 100%)">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Slug<span style="color:#C7F011"> *</span></span>
+              <input type="text" placeholder="z. B. redbull" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:7px;min-width:176px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Typ</span>
+              <span style="position:relative;display:flex;align-items:center">
+                <select style="appearance:none;width:100%;height:40px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                  <option>Equipment-Partner</option><option>Standortpartner</option>
+                </select>
+                <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+              </span>
+            </label>
+            <button style="height:40px;padding:0 17px;display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;white-space:nowrap"><p2g-icon name="plus" size="15"></p2g-icon>Hinzufügen</button>
+          </div>
+        </div>
+      </x-import>
+
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <sc-for list="{{ partners }}" as="p" hint-placeholder-count="6">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,190px">
+            <div style="display:flex;flex-direction:column;gap:15px">
+              <div class="pt-row">
+                <div style="width:80px;height:80px;border-radius:14px;background:{{ p.bg }};display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;flex:none">
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;letter-spacing:-0.02em;color:{{ p.logoFg }};text-align:center;padding:0 6px">{{ p.short }}</span>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.slug }}</span>
+                  <button style="align-self:flex-start;margin-top:5px;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer;white-space:nowrap" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="upload" size="12"></p2g-icon>Logo</button>
+                </div>
+
+                <label style="display:flex;flex-direction:column;gap:6px;min-width:0">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Typ</span>
+                  <span style="position:relative;display:flex;align-items:center">
+                    <select style="appearance:none;width:100%;height:36px;padding:0 30px 0 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;cursor:pointer">
+                      <option selected="{{ p.isEquipment }}">Equipment-Partner</option><option selected="{{ p.isLocal }}">Standortpartner</option>
+                    </select>
+                    <span style="position:absolute;right:10px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="12"></p2g-icon></span>
+                  </span>
+                </label>
+
+                <label style="display:flex;flex-direction:column;gap:6px;min-width:0">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Website-URL</span>
+                  <input type="text" value="{{ p.url }}" placeholder="https://…" style="height:36px;padding:0 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                </label>
+
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">BG-Farbe</span>
+                  <div style="display:flex;align-items:center;gap:7px;height:36px;padding:0 8px;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px">
+                    <span style="width:20px;height:20px;flex:none;border-radius:5px;background:{{ p.bg }};border:1px solid hsl(0 0% 100% / 0.18)"></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 78%);white-space:nowrap">{{ p.bg }}</span>
+                  </div>
+                </label>
+
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Sort</span>
+                  <input type="text" value="{{ p.order }}" style="width:64px;height:36px;padding:0 10px;box-sizing:border-box;text-align:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                </label>
+
+                <div style="display:flex;align-items:center;gap:11px;flex:none">
+                  <button onClick="{{ p.noop }}" title="Aktiv" style="width:40px;height:23px;flex:none;position:relative;padding:0;background:{{ p.swBg }};border:1px solid {{ p.swBrd }};border-radius:999px;cursor:pointer;transition:background 0.2s">
+                    <span style="position:absolute;top:2px;left:{{ p.knobX }};width:17px;height:17px;border-radius:50%;background:{{ p.knobBg }};transition:left 0.2s"></span>
+                  </button>
+                  <button onClick="{{ p.del }}" style="width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:9px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:10px;padding-top:14px;border-top:1px solid hsl(0 0% 12%)">
+                <sc-if value="{{ p.isLocal }}" hint-placeholder-val="{{ false }}">
+                  <label style="display:flex;flex-direction:column;gap:6px;max-width:280px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Region</span>
+                    <input type="text" value="{{ p.region }}" placeholder="z. B. Bamberg" style="height:36px;padding:0 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                  </label>
+                </sc-if>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Beschreibung</span>
+                  <sc-if value="{{ p.dirty }}" hint-placeholder-val="{{ false }}">
+                    <button style="height:28px;padding:0 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:8px;cursor:pointer;white-space:nowrap">Speichern</button>
+                  </sc-if>
+                </div>
+                <div class="pt-desc">
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#C7F011">DE</span>
+                    <textarea rows="2" placeholder="Beschreibung des Partners…" style="padding:9px 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;resize:vertical;transition:border-color 0.2s" value="{{ p.descDe }}" style-focus="border-color:#C7F011"></textarea>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#7FD4FF">EN · DeepL</span>
+                      <button title="EN-Wert sperren" style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;color:hsl(0 0% 65%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:2px 8px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="lock-open" size="10"></p2g-icon>frei</button>
+                    </div>
+                    <textarea rows="2" placeholder="wird automatisch übersetzt" style="padding:9px 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 82%);background:hsl(200 100% 75% / 0.04);border:1px solid hsl(200 100% 75% / 0.16);border-radius:9px;outline:none;resize:vertical;transition:border-color 0.2s" value="{{ p.descEn }}" style-focus="border-color:#7FD4FF"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </x-import>
+        </sc-for>
+      </div>
+    </main>
+  </div>
+
+  <div ref="{{ delRef }}" style="display:none;position:fixed;inset:0;z-index:95;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(420px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Partner wirklich löschen?</h3>
+        <p ref="{{ delTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 68%);margin:0">Die Kachel verschwindet von der Homepage.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:0;border-radius:11px;cursor:pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const ON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '19px', '#0A0A0A'];
+const OFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+
+const PARTNERS = [
+  { name: 'SkyPadel', slug: 'skypadel', short: 'SKY\nPADEL', type: 'equipment', url: 'https://skypadel.com', bg: '#FFFFFF', order: '1', active: true, region: '', descDe: 'Hersteller unserer mobilen Padel Courts — Premium-Qualität aus Europa.', descEn: 'Manufacturer of our mobile padel courts — premium quality from Europe.', dirty: false },
+  { name: 'Wingfield', slug: 'wingfield', short: 'WING\nFIELD', type: 'equipment', url: 'https://wingfield.io', bg: '#0A2540', order: '2', active: true, region: '', descDe: 'KI-Kameratechnik für Match-Analysen und automatische Highlights.', descEn: 'AI camera technology for match analysis and automatic highlights.', dirty: true },
+  { name: 'Head', slug: 'head', short: 'HEAD', type: 'equipment', url: 'https://head.com', bg: '#FFFFFF', order: '3', active: true, region: '', descDe: 'Offizieller Ball- und Ausrüstungspartner der P2G Liga.', descEn: 'Official ball and equipment partner of the P2G league.', dirty: false },
+  { name: 'Bullpadel', slug: 'bullpadel', short: 'BULL\nPADEL', type: 'equipment', url: 'https://bullpadel.com', bg: '#111111', order: '4', active: true, region: '', descDe: 'Schläger-Partner im P2G Marketplace.', descEn: 'Racket partner in the P2G marketplace.', dirty: false },
+  { name: 'TSV München-Ost', slug: 'tsv-muenchen-ost', short: 'TSV\nMÜO', type: 'local', url: 'https://tsv-muenchen-ost.de', bg: '#C7F011', order: '5', active: true, region: 'München', descDe: 'Erster Standortpartner im Süden — zwei Courts ab Sommer 2026.', descEn: 'First location partner in the south — two courts from summer 2026.', dirty: false },
+  { name: 'SV Rheinaue Köln', slug: 'sv-rheinaue', short: 'SV\nRA', type: 'local', url: '', bg: '#FFFFFF', order: '6', active: false, region: 'Köln', descDe: 'Court-Aufbau läuft — Community-Events ab Herbst geplant.', descEn: '', dirty: false },
+];
+
+const light = (hex) => {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 150;
+};
+
+class Component extends DCLogic {
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    return {
+      partners: PARTNERS.map((p) => {
+        const s = p.active ? ON : OFF;
+        return {
+          ...p,
+          isEquipment: p.type === 'equipment',
+          isLocal: p.type === 'local',
+          logoFg: light(p.bg) ? '#111111' : '#FAFAFA',
+          swBg: s[0], swBrd: s[1], knobX: s[2], knobBg: s[3],
+          noop: () => {},
+          del: () => {
+            if (this._delText) this._delText.textContent = '„' + p.name + '“ verschwindet von der Homepage.';
+            this._show(this._del, true);
+          },
+        };
+      }),
+      delRef: (el) => { this._del = el; },
+      delTextRef: (el) => { this._delText = el; },
+      closeDel: () => this._show(this._del, false),
+    };
+  }
+}
+</script>
+</body>
+</html>

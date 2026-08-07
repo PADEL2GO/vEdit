@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #tr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 620px) { #tr-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Location Teasers">
+  <dc-import name="AdminSidebar" active="teasers" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/location-teasers</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Location Teasers</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <button onClick="{{ openNew }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.28);white-space:nowrap"><p2g-icon name="plus" size="15"></p2g-icon>Neuer Teaser</button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Kommende Standorte („Bald bei dir“) auf der Homepage verwalten — Sortierung über das Zahlenfeld im Dialog.</span>
+
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <sc-for list="{{ teasers }}" as="t" hint-placeholder-count="5">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,116px">
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:hsl(0 0% 58%);width:22px;flex:none;text-align:center">{{ t.order }}</span>
+              <img src="{{ t.img }}" alt="" style="width:80px;height:56px;flex:none;object-fit:cover;border-radius:9px;border:1px solid hsl(0 0% 15%);display:block">
+              <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:190px">
+                <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">{{ t.title }}</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%)">· {{ t.city }}</span>
+                  <sc-if value="{{ t.inactive }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;color:#FF6B6B;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);border-radius:999px;padding:3px 9px;white-space:nowrap">Inaktiv</span>
+                  </sc-if>
+                  <sc-if value="{{ t.translated }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#7FD4FF;background:hsl(200 100% 75% / 0.1);border:1px solid hsl(200 100% 75% / 0.28);border-radius:999px;padding:3px 8px;white-space:nowrap">EN</span>
+                  </sc-if>
+                </div>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 65%)"><p2g-icon name="calendar-clock" size="13"></p2g-icon>{{ t.expected }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 65%);max-width:520px">{{ t.desc }}</span>
+              </div>
+              <div style="display:flex;gap:9px;flex:none">
+                <button onClick="{{ t.edit }}" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="pencil" size="15"></p2g-icon></button>
+                <button onClick="{{ t.del }}" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:10px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="15"></p2g-icon></button>
+              </div>
+            </div>
+          </x-import>
+        </sc-for>
+      </div>
+    </main>
+  </div>
+
+  <div ref="{{ dlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDlg }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.78);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(680px, 100%);max-height:88vh;overflow-y:auto;background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Teaser</span>
+          <h3 ref="{{ dlgTitleRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Neuer Teaser</h3>
+        </div>
+        <button onClick="{{ closeDlg }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer" style-hover="color:#FAFAFA"><p2g-icon name="x" size="16"></p2g-icon></button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Bild</span>
+        <div style="display:flex;align-items:center;justify-content:center;gap:11px;height:120px;background:hsl(0 0% 100% / 0.028);border:1px dashed hsl(0 0% 20%);border-radius:14px;cursor:pointer;transition:border-color 0.2s" style-hover="border-color:hsl(71 91% 51% / 0.5)">
+          <span style="color:hsl(0 0% 58%);display:flex"><p2g-icon name="image-plus" size="19"></p2g-icon></span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%)">Bild auswählen — lädt sofort hoch</span>
+        </div>
+      </div>
+
+      <sc-for list="{{ fields }}" as="f" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:9px;padding:15px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ f.label }}<sc-if value="{{ f.req }}" hint-placeholder-val="{{ false }}"><span style="color:#C7F011"> *</span></sc-if></span>
+            <sc-if value="{{ f.hasHint }}" hint-placeholder-val="{{ false }}">
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 58%)">{{ f.hint }}</span>
+            </sc-if>
+          </div>
+          <div id="tr-grid">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#C7F011">DE · Quelle</span>
+              <sc-if value="{{ f.isArea }}" hint-placeholder-val="{{ false }}">
+                <textarea rows="3" placeholder="{{ f.ph }}" style="padding:10px 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;outline:none;resize:vertical;transition:border-color 0.2s" value="{{ f.de }}" style-focus="border-color:#C7F011"></textarea>
+              </sc-if>
+              <sc-if value="{{ f.isInput }}" hint-placeholder-val="{{ true }}">
+                <input type="text" value="{{ f.de }}" placeholder="{{ f.ph }}" style="height:38px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              </sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#7FD4FF">EN · DeepL</span>
+                <button title="EN-Wert sperren" style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:600;color:hsl(0 0% 65%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:3px 9px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="lock-open" size="11"></p2g-icon>frei</button>
+              </div>
+              <sc-if value="{{ f.isArea }}" hint-placeholder-val="{{ false }}">
+                <textarea rows="3" placeholder="wird automatisch übersetzt" style="padding:10px 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;color:hsl(0 0% 82%);background:hsl(200 100% 75% / 0.04);border:1px solid hsl(200 100% 75% / 0.16);border-radius:10px;outline:none;resize:vertical;transition:border-color 0.2s" value="{{ f.en }}" style-focus="border-color:#7FD4FF"></textarea>
+              </sc-if>
+              <sc-if value="{{ f.isInput }}" hint-placeholder-val="{{ true }}">
+                <input type="text" value="{{ f.en }}" placeholder="wird automatisch übersetzt" style="height:38px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 82%);background:hsl(200 100% 75% / 0.04);border:1px solid hsl(200 100% 75% / 0.16);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#7FD4FF">
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(200px, 100%), 1fr));gap:12px">
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Vereins-Website (URL)</span>
+          <input type="text" placeholder="https://…" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Sortierung</span>
+          <input type="text" value="0" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        </label>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 15px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:14px">
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+          <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FAFAFA">Aktiv</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 65%)">Auf der Homepage sichtbar.</span>
+        </div>
+        <button style="width:42px;height:24px;flex:none;position:relative;padding:0;background:hsl(71 91% 51% / 0.9);border:1px solid hsl(71 91% 51%);border-radius:999px;cursor:pointer">
+          <span style="position:absolute;top:2px;left:20px;width:18px;height:18px;border-radius:50%;background:#0A0A0A"></span>
+        </button>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:16px;border-top:1px solid hsl(0 0% 12%)">
+        <button onClick="{{ closeDlg }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDlg }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25)">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <div ref="{{ delRef }}" style="display:none;position:fixed;inset:0;z-index:95;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(420px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Teaser wirklich löschen?</h3>
+        <p ref="{{ delTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 68%);margin:0">„TSV München-Ost“ verschwindet von der Homepage.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:0;border-radius:11px;cursor:pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const TEASERS = [
+  { order: '1', title: 'TSV München-Ost', city: 'München', expected: 'Sommer 2026', img: 'assets/skypadel-outdoor.jpg', active: true, translated: true, desc: 'Zwei mobile Courts auf dem Vereinsgelände — Eröffnung mit Community-Event.' },
+  { order: '2', title: 'SV Rheinaue Köln', city: 'Köln', expected: 'Herbst 2026', img: 'assets/skypadel-sunset.jpg', active: true, translated: true, desc: 'Court-Aufbau läuft — inklusive KI-Kamera und Flutlicht.' },
+  { order: '3', title: 'TC Hamburg-Alster', city: 'Hamburg', expected: 'Frühjahr 2027', img: 'assets/tennis-padel-aerial.jpg', active: true, translated: false, desc: 'Flächenanalyse abgeschlossen — Bauantrag in Vorbereitung.' },
+  { order: '4', title: 'TSG Stuttgart-Süd', city: 'Stuttgart', expected: 'Sommer 2027', img: 'assets/padel-norway.jpg', active: true, translated: false, desc: 'Vier Courts geplant, Genehmigungsverfahren gestartet.' },
+  { order: '5', title: 'SC Leipzig-Nord', city: 'Leipzig', expected: 'noch offen', img: 'assets/fuer-vereine-hero.jpg', active: false, translated: false, desc: 'Standortcheck durchgeführt — Entscheidung des Vorstands steht aus.' },
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    return {
+      teasers: TEASERS.map((t) => ({
+        ...t,
+        inactive: !t.active,
+        edit: () => {
+          if (this._dlgTitle) this._dlgTitle.textContent = 'Teaser bearbeiten';
+          this._show(this._dlg, true);
+        },
+        del: () => {
+          if (this._delText) this._delText.textContent = '„' + t.title + '“ verschwindet von der Homepage.';
+          this._show(this._del, true);
+        },
+      })),
+      fields: [
+        { label: 'Titel', req: true, isInput: true, de: 'TSV München-Ost', en: 'TSV Munich East', ph: 'Vereinsname' },
+        { label: 'Stadt', isInput: true, de: 'München', en: 'Munich', ph: 'München' },
+        { label: 'Beschreibung', isArea: true, de: 'Zwei mobile Courts auf dem Vereinsgelände — Eröffnung mit Community-Event.', en: 'Two mobile courts on the club grounds — opening with a community event.', ph: 'Kurztext für die Kachel' },
+        { label: 'Erwartetes Datum', isInput: true, de: 'Sommer 2026', en: 'Summer 2026', ph: 'z. B. Sommer 2026', hasHint: true, hint: 'Freitext — kein Datepicker' },
+      ],
+      dlgRef: (el) => { this._dlg = el; },
+      dlgTitleRef: (el) => { this._dlgTitle = el; },
+      delRef: (el) => { this._del = el; },
+      delTextRef: (el) => { this._delText = el; },
+      openNew: () => {
+        if (this._dlgTitle) this._dlgTitle.textContent = 'Neuer Teaser';
+        this._show(this._dlg, true);
+      },
+      closeDlg: () => this._show(this._dlg, false),
+      closeDel: () => this._show(this._del, false),
+    };
+  }
+}
+</script>
+</body>
+</html>

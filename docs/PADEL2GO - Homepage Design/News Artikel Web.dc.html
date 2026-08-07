@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--acc, #C7F011); text-decoration: none; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #aw-root { --acc: #C7F011; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+    #art-body { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 56px; align-items: start; }
+    #art-side { position: sticky; top: 92px; display: flex; flex-direction: column; gap: 16px; }
+    #art-related { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(258px, 100%), 1fr)); gap: 22px; }
+    /* Demo-Leiste: nur zum Durchschalten der 5 Dummy-Artikel */
+    #aw-demo button[data-topic] { color: hsl(0 0% 70%); background: hsl(0 0% 100% / 0.05); border: 1px solid hsl(0 0% 18%); }
+    #aw-demo button[data-topic="Inside P2G"] { --c: #C7F011; }
+    #aw-demo button[data-topic="Events"] { --c: #B06BFF; }
+    #aw-demo button[data-topic="Marketplace"] { --c: #FF8A1F; }
+    #aw-demo button[data-topic="Community"] { --c: #FF4D4D; }
+    #aw-demo button[data-topic="Business"] { --c: #2FE0C0; }
+    #aw-demo button[data-topic] [data-dot] { background: var(--c); }
+    #aw-demo button[data-on] { color: #0A0A0A; background: var(--c); border-color: var(--c); }
+    #aw-demo button[data-on] [data-dot] { background: #0A0A0A; }
+    @media (max-width: 980px) { #art-body { grid-template-columns: minmax(0, 1fr); gap: 40px; } #art-side { position: static; } }
+    @media (max-width: 900px) { #aw-navlinks { display: none !important; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="aw-root" ref="{{ rootRef }}" style="min-height:100vh;background:#000">
+
+  <!-- ═══ NAV ═══ -->
+  <header style="position:sticky;top:0;z-index:60;background:hsl(0 0% 0% / 0.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 15% / 0.5)">
+    <div style="max-width:1280px;margin:0 auto;padding:0 20px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+      <a href="Homepage.dc.html" style="display:flex;align-items:center;gap:10px;flex:none">
+        <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:34px;width:auto;display:block">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.02em;color:#FAFAFA">PADEL<span style="color:#C7F011">2</span>GO</span>
+      </a>
+      <nav id="aw-navlinks" style="display:flex;align-items:center;gap:2px">
+        <a href="Fuer Spieler.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);padding:8px 14px;border-radius:999px" style-hover="color:var(--acc);background:hsl(0 0% 100% / 0.06)">Für Spieler</a>
+        <a href="Homepage.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);padding:8px 14px;border-radius:999px" style-hover="color:var(--acc);background:hsl(0 0% 100% / 0.06)">Für Vereine</a>
+        <a href="Booking.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);padding:8px 14px;border-radius:999px" style-hover="color:var(--acc);background:hsl(0 0% 100% / 0.06)">Standorte</a>
+        <a href="Events.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);padding:8px 14px;border-radius:999px" style-hover="color:var(--acc);background:hsl(0 0% 100% / 0.06)">Events</a>
+        <a href="News Web.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:600;color:var(--acc);background:hsl(0 0% 100% / 0.07);padding:8px 14px;border-radius:999px">News</a>
+        <a href="Marketplace.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);padding:8px 14px;border-radius:999px" style-hover="color:var(--acc);background:hsl(0 0% 100% / 0.06)">Marketplace</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button style="font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 75%);background:none;border:1px solid hsl(0 0% 15%);border-radius:999px;padding:6px 12px;cursor:pointer" style-hover="color:var(--acc);border-color:hsl(0 0% 32%)">DE</button>
+        <a href="Login.dc.html"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="lime" size="sm" pill="{{ true }}" hint-size="76px,36px">Login</x-import></a>
+      </div>
+    </div>
+    <div style="height:2px;background:hsl(0 0% 12%)"><div ref="{{ barRef }}" style="height:100%;width:0%;background:var(--acc);transition:width 0.1s linear"></div></div>
+  </header>
+
+  <article data-screen-label="Web — News Artikel">
+
+    <!-- ═══ HERO ═══ -->
+    <div style="position:relative;min-height:min(78vh, 720px);display:flex;align-items:flex-end;overflow:hidden">
+      <div role="img" aria-label="{{ a.coverAlt }}" style="position:absolute;top:0;left:0;width:100%;height:100%;background-image:url({{ a.cover }});background-size:cover;background-position:center"></div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(195deg, hsl(0 0% 0% / 0.28) 18%, hsl(0 0% 0% / 0.86) 76%, #000)"></div>
+      <div style="position:relative;width:100%;max-width:1280px;margin:0 auto;padding:0 20px 60px;display:flex;flex-direction:column;align-items:flex-start;gap:20px;animation:fadeUp 0.7s cubic-bezier(0.16,1,0.3,1)">
+        <a href="News Web.dc.html" style="display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:hsl(0 0% 72%)" style-hover="color:var(--acc)"><p2g-icon name="arrow-left" size="16"></p2g-icon> Alle News</a>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--acc);background:var(--acc-bg);border:1px solid var(--acc-brd);border-radius:999px;padding:6px 14px;white-space:nowrap">{{ a.topic }}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;color:hsl(0 0% 65%)">{{ a.date }}</span>
+          <span style="width:4px;height:4px;border-radius:50%;background:hsl(0 0% 35%)"></span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;color:hsl(0 0% 65%)">{{ a.read }} Lesezeit</span>
+        </div>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(36px, 6.2vw, 76px);line-height:1.01;letter-spacing:-0.03em;color:#FAFAFA;margin:0;max-width:900px;text-wrap:pretty">{{ a.title }} <span style="font-style:italic;color:var(--acc)">{{ a.titleHighlight }}</span></h1>
+        <p style="font-family:'DM Sans',sans-serif;font-size:clamp(16px, 2vw, 21px);line-height:1.55;color:hsl(0 0% 76%);margin:0;max-width:660px">{{ a.excerpt }}</p>
+      </div>
+    </div>
+
+    <!-- ═══ BODY ═══ -->
+    <div style="max-width:1280px;margin:0 auto;padding:56px 20px 40px">
+      <div id="art-body">
+
+        <div style="display:flex;flex-direction:column;gap:26px;max-width:720px">
+          <p style="font-family:'DM Sans',sans-serif;font-size:20px;line-height:1.62;color:#FAFAFA;font-weight:500;margin:0;text-wrap:pretty">{{ a.lead }}</p>
+
+          <p style="font-family:'DM Sans',sans-serif;font-size:17px;line-height:1.75;color:hsl(0 0% 72%);margin:0;text-wrap:pretty">{{ a.p1 }}</p>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(140px, 100%), 1fr));gap:14px;padding:6px 0">
+            <sc-for list="{{ a.stats }}" as="s" hint-placeholder-count="0">
+              <div style="display:flex;flex-direction:column;gap:4px;padding:20px;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15%);border-radius:18px">
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:30px;line-height:1;color:var(--acc)">{{ s.value }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 60%)">{{ s.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px, 3.2vw, 34px);line-height:1.12;letter-spacing:-0.02em;color:#FAFAFA;margin:14px 0 0">{{ a.h2a }}</h2>
+
+          <p style="font-family:'DM Sans',sans-serif;font-size:17px;line-height:1.75;color:hsl(0 0% 72%);margin:0;text-wrap:pretty">{{ a.p2 }}</p>
+
+          <blockquote style="position:relative;margin:8px 0;padding:26px 28px;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid var(--acc-brd);border-radius:20px;display:flex;flex-direction:column;gap:14px">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:clamp(19px, 2.4vw, 24px);line-height:1.35;letter-spacing:-0.01em;color:#FAFAFA;text-wrap:pretty">„{{ a.quote }}“</span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 58%)">{{ a.quoteBy }}</span>
+          </blockquote>
+
+          <p style="font-family:'DM Sans',sans-serif;font-size:17px;line-height:1.75;color:hsl(0 0% 72%);margin:0;text-wrap:pretty">{{ a.p3 }}</p>
+
+          <div style="position:relative;border-radius:22px;overflow:hidden;border:1px solid hsl(0 0% 15%);margin:8px 0;aspect-ratio:16 / 9">
+            <div role="img" aria-label="{{ a.figureCaption }}" style="position:absolute;top:0;left:0;width:100%;height:100%;background-image:url({{ a.figure }});background-size:cover;background-position:center"></div>
+            <span style="position:absolute;bottom:0;left:0;right:0;padding:26px 20px 14px;background:linear-gradient(180deg, transparent, hsl(0 0% 0% / 0.85));font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 68%)">{{ a.figureCaption }}</span>
+          </div>
+
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px, 3.2vw, 34px);line-height:1.12;letter-spacing:-0.02em;color:#FAFAFA;margin:14px 0 0">{{ a.h2b }}</h2>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ a.checklist }}" as="ck" hint-placeholder-count="0">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span style="color:var(--acc);display:flex;margin-top:4px"><p2g-icon name="check" size="17"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:16.5px;line-height:1.6;color:hsl(0 0% 74%)"><strong style="color:#FAFAFA;font-weight:600">{{ ck.label }}</strong> — {{ ck.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="position:relative;overflow:hidden;margin-top:20px;padding:clamp(26px, 4vw, 40px);border:1px solid var(--acc-brd);border-radius:24px;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+            <div ref="{{ glowRef }}" style="position:absolute;right:-110px;top:-110px;width:300px;height:300px;border-radius:50%;pointer-events:none"></div>
+            <div style="position:relative;display:flex;flex-direction:column;gap:7px">
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(21px, 2.8vw, 27px);letter-spacing:-0.02em;color:#FAFAFA;margin:0">{{ a.ctaTitle }}</h3>
+              <p style="font-family:'DM Sans',sans-serif;font-size:15px;color:hsl(0 0% 65%);margin:0">{{ a.ctaSub }}</p>
+            </div>
+            <a href="Booking.dc.html" style="position:relative;display:inline-flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;color:#0A0A0A;background:var(--acc);border-radius:14px;padding:15px 26px;white-space:nowrap;transition:transform 0.15s, filter 0.2s" style-hover="transform:translateY(-1px);filter:brightness(1.08)">{{ a.ctaLabel }} <p2g-icon name="arrow-right" size="17"></p2g-icon></a>
+          </div>
+        </div>
+
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside id="art-side">
+          <div style="display:flex;flex-direction:column;gap:14px;padding:22px;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15%);border-radius:20px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:hsl(0 0% 50%)">Geschrieben von</span>
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="width:44px;height:44px;flex:none;border-radius:50%;background:var(--acc);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center">{{ a.authorInitials }}</span>
+              <div style="display:flex;flex-direction:column;gap:1px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:#FAFAFA">{{ a.author }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 55%)">{{ a.authorRole }}</span>
+              </div>
+            </div>
+            <div style="height:1px;background:hsl(0 0% 14%)"></div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:hsl(0 0% 50%)">Teilen</span>
+            <div style="display:flex;gap:9px">
+              <button aria-label="Instagram" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 68%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:12px;cursor:pointer;transition:color 0.2s, border-color 0.2s" style-hover="color:var(--acc);border-color:hsl(0 0% 32%)"><p2g-icon name="instagram" size="17"></p2g-icon></button>
+              <button aria-label="WhatsApp" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 68%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:12px;cursor:pointer;transition:color 0.2s, border-color 0.2s" style-hover="color:#25D366;border-color:hsl(142 70% 49% / 0.4)"><p2g-icon name="message-circle" size="17"></p2g-icon></button>
+              <button aria-label="LinkedIn" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 68%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:12px;cursor:pointer;transition:color 0.2s, border-color 0.2s" style-hover="color:var(--acc);border-color:hsl(0 0% 32%)"><p2g-icon name="linkedin" size="17"></p2g-icon></button>
+              <button onClick="{{ copyLink }}" aria-label="Link kopieren" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 68%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:12px;cursor:pointer;transition:color 0.2s, border-color 0.2s" style-hover="color:var(--acc);border-color:hsl(0 0% 32%)"><p2g-icon name="{{ copyIcon }}" size="17"></p2g-icon></button>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px;padding:22px;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15%);border-radius:20px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:hsl(0 0% 50%)">{{ a.sideLabel }}</span>
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <span style="color:var(--acc);display:flex;margin-top:2px"><p2g-icon name="{{ a.sideIcon }}" size="17"></p2g-icon></span>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:#FAFAFA">{{ a.sideTitle }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5;color:hsl(0 0% 58%)">{{ a.sideText }}</span>
+              </div>
+            </div>
+            <a href="Booking.dc.html" style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;margin-top:2px">{{ a.sideLink }} <p2g-icon name="arrow-right" size="15"></p2g-icon></a>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ═══ RELATED ═══ -->
+    <div style="max-width:1280px;margin:0 auto;padding:20px 20px 96px;display:flex;flex-direction:column;gap:22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:6px;border-bottom:1px solid hsl(0 0% 14%)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Passend dazu</h2>
+        <a href="News Web.dc.html" style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600">Alle News <p2g-icon name="arrow-right" size="15"></p2g-icon></a>
+      </div>
+      <div id="art-related">
+        <sc-for list="{{ related }}" as="r" hint-placeholder-count="0">
+          <a href="#" onClick="{{ r.open }}" style="display:flex;flex-direction:column;gap:13px;text-decoration:none">
+            <div style="position:relative;aspect-ratio:4 / 5;border-radius:20px;overflow:hidden;border:1px solid hsl(0 0% 15%);transition:border-color 0.25s, transform 0.25s" style-hover="border-color:{{ r.accBorder }};transform:translateY(-3px)">
+              <div role="img" aria-label="{{ r.title }}" style="position:absolute;top:0;left:0;width:100%;height:100%;background-image:url({{ r.cover }});background-size:cover;background-position:center"></div>
+              <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(190deg, hsl(0 0% 0% / 0.15) 30%, hsl(0 0% 0% / 0.85) 92%)"></div>
+              <span style="position:absolute;top:14px;left:14px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:{{ r.acc }};background:hsl(0 0% 0% / 0.62);backdrop-filter:blur(10px);border:1px solid {{ r.accBorder }};border-radius:999px;padding:5px 11px;white-space:nowrap">{{ r.topic }}</span>
+              <div style="position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:7px;padding:18px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;color:hsl(0 0% 60%)">{{ r.date }} · {{ r.read }}</span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;line-height:1.18;letter-spacing:-0.01em;color:#FAFAFA;margin:0">{{ r.title }}</h3>
+              </div>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </article>
+
+  <!-- ═══ DEMO-SWITCHER (nicht Teil der Seite) ═══ -->
+  <div id="aw-demo" ref="{{ demoRef }}" style="position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:80;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 32px);padding:9px 12px;background:hsl(0 0% 4% / 0.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid hsl(0 0% 18%);border-radius:999px;box-shadow:0 14px 40px hsl(0 0% 0% / 0.6)">
+    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:hsl(0 0% 42%);padding-left:6px;white-space:nowrap">Demo</span>
+    <sc-for list="{{ switcher }}" as="sw" hint-placeholder-count="0">
+      <button onClick="{{ sw.pick }}" data-topic="{{ sw.topic }}" style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;border-radius:999px;padding:8px 14px;cursor:pointer;white-space:nowrap;transition:color 0.2s, background 0.2s, border-color 0.2s">
+        <span data-dot="1" style="width:6px;height:6px;border-radius:50%;flex:none"></span>{{ sw.topic }}
+      </button>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;topic&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;Inside P2G&quot;, &quot;Events&quot;, &quot;Marketplace&quot;, &quot;Community&quot;, &quot;Business&quot;], &quot;default&quot;: &quot;Inside P2G&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;News-Topic&quot; }
+}">
+const TOPICS = {
+  'Inside P2G': '#C7F011',
+  'Events': '#B06BFF',
+  'Marketplace': '#FF8A1F',
+  'Community': '#FF4D4D',
+  'Business': '#2FE0C0',
+};
+
+/* 5 Dummy-Artikel — je einer pro Topic */
+const ARTICLES = [
+  {
+    topic: 'Inside P2G', date: '28.07.2026', read: '3 Min',
+    cover: 'assets/skypadel-outdoor.jpg', coverAlt: 'Mobiler Padel Court in München-Ost',
+    title: 'München-Ost geht live —', titleHighlight: 'zwei Courts, ein Statement.',
+    excerpt: 'Der erste PADEL2GO-Standort in Bayern ist gebaut, verkabelt und ab August bespielbar. Was Spieler:innen dort erwartet — und wie es weitergeht.',
+    lead: 'Sechs Monate nach dem ersten Vor-Ort-Termin steht der Court. Zwei mobile Padel-Anlagen auf dem Gelände des TSV München-Ost, komplett mit KI-Kamera, Flutlicht und App-Buchung.',
+    p1: 'Der Aufbau selbst dauerte elf Tage. Vom ersten Fundamentcheck bis zum letzten Netz war das Team vor Ort, parallel liefen Beleuchtung und Netzwerk.',
+    stats: [{ value: '2', label: 'Courts' }, { value: '11', label: 'Tage Aufbau' }, { value: '22h', label: 'Öffnung täglich' }, { value: '€0', label: 'Invest für den Club' }],
+    h2a: 'Was am Court anders ist',
+    p2: 'Jeder Court hat eine KI-Kamera. Sie schneidet Highlights automatisch, zeichnet Laufwege als Heatmap und rechnet daraus einen Match-Score. Kein Setup, kein Abo — läuft mit der Buchung mit.',
+    quote: 'Wir hatten die Fläche, aber nie das Budget für Padel. Jetzt haben wir beides — und eine Warteliste.',
+    quoteBy: 'Michael Berger · Vorstand TSV München-Ost',
+    p3: 'Für Spieler:innen heißt das: buchen ab 9 € pro Person, Points sammeln bei jeder Buchung, einlösen im Marketplace.',
+    figure: 'assets/skypadel-sunset.jpg', figureCaption: 'Flutlicht bis 23 Uhr — Sunset-Slots sind zuerst weg.',
+    h2b: 'Wie es weitergeht',
+    checklist: [
+      { label: 'Ab 01.08.', text: 'Courts online buchbar in der P2G App.' },
+      { label: '09.08.', text: 'Opening-Event mit Schnupperkursen und DJ.' },
+      { label: 'September', text: 'Start der ersten Liga-Saison am Standort.' },
+    ],
+    ctaTitle: 'Slot in München sichern.', ctaSub: 'Buchung ab 9 € p. P. — Points inklusive.', ctaLabel: 'Court buchen',
+    author: 'Florian Steinfelder', authorRole: 'Founder, PADEL2GO', authorInitials: 'FS',
+    sideLabel: 'Standort', sideIcon: 'map-pin', sideTitle: 'TSV München-Ost', sideText: 'Sportpark Ost, 81829 München', sideLink: 'Verfügbarkeit ansehen',
+  },
+  {
+    topic: 'Events', date: '24.07.2026', read: '2 Min',
+    cover: 'assets/events-hero.jpg', coverAlt: 'Padel Night Turnier bei Flutlicht',
+    title: 'Padel Night —', titleHighlight: 'die Serie, die nie leer bleibt.',
+    excerpt: 'Ein Format, sechs Standorte, jeden Monat. Offen für alle Level, Anmeldung in 30 Sekunden über die App.',
+    lead: 'Freitagabend, Flutlicht an, Musik läuft: Padel Night ist unser monatliches Turnierformat — locker im Ton, ernst im Score.',
+    p1: 'Gespielt wird in Vierergruppen nach Level, jedes Match zählt für die Monatswertung. Wer keinen Partner hat, wird vor Ort gematcht.',
+    stats: [{ value: '6', label: 'Standorte' }, { value: '64', label: 'Plätze pro Night' }, { value: '3h', label: 'Spielzeit' }, { value: '500', label: 'Points fürs Finale' }],
+    h2a: 'So läuft der Abend',
+    p2: 'Check-in per QR-Code, Gruppen werden automatisch ausgelost, jedes Match wird von der Court-Kamera erfasst. Ergebnisse landen direkt im Profil.',
+    quote: 'Ich kam allein, bin mit vier neuen Spielpartnern und einem Sonnenbrand raus.',
+    quoteBy: 'Lena K. · Padel Night Köln',
+    p3: 'Teilnahme kostet 15 € — Getränk und Points inklusive. Plätze sind meist innerhalb von zwei Tagen weg.',
+    figure: 'assets/league-hero.jpg', figureCaption: 'Finalrunde in Köln — entschieden im Golden Point.',
+    h2b: 'Nächste Termine',
+    checklist: [
+      { label: '09.08.', text: 'Padel Night Köln — Anmeldung offen.' },
+      { label: '16.08.', text: 'Padel Night Hamburg — Warteliste.' },
+      { label: '30.08.', text: 'Season Final München — Qualifikation nötig.' },
+    ],
+    ctaTitle: 'Platz für die nächste Night.', ctaSub: '15 € inkl. Getränk und 500 Points.', ctaLabel: 'Jetzt anmelden',
+    author: 'Jana Weiss', authorRole: 'Community Lead, PADEL2GO', authorInitials: 'JW',
+    sideLabel: 'Nächstes Event', sideIcon: 'calendar', sideTitle: 'Padel Night Köln', sideText: '09.08.2026, 18:00 Uhr · SV Rheinaue', sideLink: 'Zum Event',
+  },
+  {
+    topic: 'Marketplace', date: '15.07.2026', read: '2 Min',
+    cover: 'assets/rewards-hero.jpg', coverAlt: 'Neue Rackets im P2G Marketplace',
+    title: 'Neue Rackets —', titleHighlight: 'jetzt komplett mit Points.',
+    excerpt: 'Zwölf neue Modelle im Marketplace, dazu die Option, den vollen Preis in P2G Points zu zahlen.',
+    lead: 'Der Marketplace bekommt sein größtes Update seit dem Start: zwölf neue Rackets, drei Bag-Serien — und eine Zahlart, die es so vorher nicht gab.',
+    p1: 'Bisher konntest du Points nur anteilig einsetzen. Ab sofort gilt: Wenn dein Kontostand reicht, geht der ganze Kauf über Points.',
+    stats: [{ value: '12', label: 'Neue Rackets' }, { value: '100%', label: 'Points zahlbar' }, { value: '30%', label: 'Member-Rabatt' }, { value: '48h', label: 'Lieferzeit' }],
+    h2a: 'Was neu ist',
+    p2: 'Jedes Racket hat jetzt eine Level-Empfehlung, die sich an deinem Match-Score orientiert. Wer regelmäßig spielt, bekommt passendere Vorschläge.',
+    quote: 'Drei Monate spielen, dann das Racket für null Euro — das fühlt sich falsch gut an.',
+    quoteBy: 'Tobias M. · P2G Member seit 2026',
+    p3: 'Points verfallen nicht. Rückgabe innerhalb von 14 Tagen, Points werden dann vollständig gutgeschrieben.',
+    figure: 'assets/tennis-padel-aerial.jpg', figureCaption: 'Getestet auf unseren eigenen Courts, bevor es in den Shop geht.',
+    h2b: 'Gut zu wissen',
+    checklist: [
+      { label: 'Ab sofort', text: 'Voller Warenkorb mit Points zahlbar.' },
+      { label: 'Jeden Monat', text: 'Neue Member-Deals mit bis zu 30%.' },
+      { label: 'Immer', text: '14 Tage Rückgabe, Points kommen zurück.' },
+    ],
+    ctaTitle: 'Punktestand checken.', ctaSub: 'Vielleicht reicht es schon fürs neue Racket.', ctaLabel: 'Zum Marketplace',
+    author: 'Nina Falk', authorRole: 'Product, PADEL2GO', authorInitials: 'NF',
+    sideLabel: 'Dein Guthaben', sideIcon: 'coins', sideTitle: '2.480 P2G Points', sideText: 'Entspricht rund 124 € im Marketplace.', sideLink: 'Punkte einlösen',
+  },
+  {
+    topic: 'Community', date: '19.07.2026', read: '2 Min',
+    cover: 'assets/skypadel-sunset.jpg', coverAlt: 'Golden Hour Session auf dem Court',
+    title: 'Golden Hour —', titleHighlight: 'freitags macht niemand pünktlich Feierabend.',
+    excerpt: 'Die letzte Stunde vor Sonnenuntergang gehört der Community. Offene Sessions, kein Anmeldedruck, jedes Level willkommen.',
+    lead: 'Es hat als Zufall angefangen: ein paar Spieler, die freitags einfach blieben. Heute ist Golden Hour das beliebteste Format im Netzwerk.',
+    p1: 'Keine Gruppen, keine Wertung — wer da ist, spielt. Alle 15 Minuten wird durchgewechselt, damit jeder mit jedem spielt.',
+    stats: [{ value: '9', label: 'Courts dabei' }, { value: '120+', label: 'Spieler pro Woche' }, { value: '0 €', label: 'Teilnahme' }, { value: '18:30', label: 'Startzeit' }],
+    h2a: 'Warum das funktioniert',
+    p2: 'Padel lebt vom Wechsel. Wer jede Woche mit denselben drei Leuten spielt, wird nicht besser — Golden Hour mischt das automatisch auf.',
+    quote: 'Ich habe hier mehr Leute kennengelernt als in fünf Jahren Fitnessstudio.',
+    quoteBy: 'Sarah D. · Golden Hour Hamburg',
+    p3: 'Getränke gibt es zum Selbstkostenpreis, den Rest übernimmt der Standort. Einfach auftauchen reicht.',
+    figure: 'assets/events-hero.jpg', figureCaption: 'Letzter Ballwechsel, bevor das Flutlicht angeht.',
+    h2b: 'Mitmachen',
+    checklist: [
+      { label: 'Jeden Freitag', text: '18:30 Uhr an allen teilnehmenden Standorten.' },
+      { label: 'Ohne Anmeldung', text: 'Einfach hinkommen, Schläger gibt es vor Ort.' },
+      { label: 'Jedes Level', text: 'Von erstem Match bis Turnierspieler.' },
+    ],
+    ctaTitle: 'Freitag schon was vor?', ctaSub: 'Golden Hour läuft an neun Standorten.', ctaLabel: 'Standort finden',
+    author: 'Jana Weiss', authorRole: 'Community Lead, PADEL2GO', authorInitials: 'JW',
+    sideLabel: 'Community', sideIcon: 'users', sideTitle: '4.200 Mitglieder', sideText: 'Aktive Spieler:innen im P2G Network.', sideLink: 'Community entdecken',
+  },
+  {
+    topic: 'Business', date: '02.07.2026', read: '4 Min',
+    cover: 'assets/fuer-vereine-hero.jpg', coverAlt: 'Vereinsgelände mit neuem Padel Court',
+    title: 'Padel ohne Investment —', titleHighlight: 'so rechnet sich das Modell.',
+    excerpt: 'Wir bringen Courts, Technik und Betrieb, der Verein bringt die Fläche. Was Revenue-Share konkret bedeutet.',
+    lead: 'Die meisten Vereine scheitern nicht am Interesse, sondern am Kapital. Unser Modell dreht die Rechnung um: kein Eigenkapital, keine Kreditaufnahme, keine Betriebslast.',
+    p1: 'PADEL2GO finanziert Courts, Beleuchtung, Kameras und Buchungssystem. Der Verein stellt die Fläche und bekommt einen festen Anteil an jeder gebuchten Stunde.',
+    stats: [{ value: '€0', label: 'Eigenkapital' }, { value: '15J', label: 'Vertragslaufzeit' }, { value: '11', label: 'Tage Aufbau' }, { value: '24/7', label: 'Buchbar' }],
+    h2a: 'Was der Verein übernimmt',
+    p2: 'Wenig. Fläche bereitstellen, Zugang ermöglichen, mitkommunizieren. Wartung, Support, Abrechnung und Marketing laufen über uns.',
+    quote: 'Wir haben keinen Cent investiert und trotzdem eine neue Einnahmequelle im Jahresabschluss.',
+    quoteBy: 'Andreas Roth · Geschäftsführer SV Rheinaue',
+    p3: 'Nach Ablauf der Laufzeit kann der Verein die Anlage übernehmen oder verlängern — beides ohne Nachzahlung.',
+    figure: 'assets/skypadel-outdoor.jpg', figureCaption: 'Zwei Courts auf einer ungenutzten Tennisfläche.',
+    h2b: 'Der Weg zum Court',
+    checklist: [
+      { label: 'Schritt 1', text: 'Vor-Ort-Termin mit Flächenanalyse und Drohnenaufnahme.' },
+      { label: 'Schritt 2', text: 'Bauantrag und Genehmigung — wir übernehmen die Behörden.' },
+      { label: 'Schritt 3', text: 'Aufbau, digitales Setup, Eröffnung.' },
+    ],
+    ctaTitle: 'Fläche prüfen lassen.', ctaSub: 'Kostenlos und unverbindlich, Rückmeldung in 48 Stunden.', ctaLabel: 'Termin anfragen',
+    author: 'Florian Steinfelder', authorRole: 'Founder, PADEL2GO', authorInitials: 'FS',
+    sideLabel: 'Für Vereine', sideIcon: 'building-2', sideTitle: 'Plug-and-Play Paket', sideText: 'Courts, Technik, Betrieb und Marketing aus einer Hand.', sideLink: 'Modell ansehen',
+  },
+];
+
+class Component extends DCLogic {
+  state = { idx: 0, copied: false };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      this._sync();
+      if ((window.lucide && n > 2) || n > 20) clearInterval(this._iv);
+    }, 350);
+    this._onScroll = () => {
+      if (!this._bar) return;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0;
+      this._bar.style.width = pct + '%';
+    };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    this._onScroll();
+  }
+  componentWillUnmount() {
+    clearInterval(this._iv);
+    clearTimeout(this._ct);
+    window.removeEventListener('scroll', this._onScroll);
+  }
+  componentDidUpdate() { this._sync(); }
+
+  _index() {
+    const byProp = ARTICLES.findIndex((a) => a.topic === this.props.topic);
+    return this.state.touched || byProp < 0 ? this.state.idx : byProp;
+  }
+
+  _sync() {
+    if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    const acc = TOPICS[ARTICLES[this._index()].topic];
+    if (this._root) {
+      this._root.style.setProperty('--acc', acc);
+      this._root.style.setProperty('--acc-bg', acc + '1F');
+      this._root.style.setProperty('--acc-brd', acc + '66');
+    }
+    if (this._glow) this._glow.style.background = 'radial-gradient(circle, ' + acc + '26, transparent 70%)';
+    this._paintSwitcher(ARTICLES[this._index()].topic);
+  }
+
+  /* the runtime owns template-declared inline styles — toggle an attribute instead */
+  _paintSwitcher(topic, scope) {
+    const box = scope || this._demo || document.getElementById('aw-demo');
+    if (!box) return;
+    box.querySelectorAll('button[data-topic]').forEach((b) => {
+      b.toggleAttribute('data-on', b.dataset.topic === topic);
+    });
+  }
+
+  _select(i, scope) {
+    const a = ARTICLES[i];
+    this._paintSwitcher(a.topic, scope);
+    if (this._root) {
+      const acc = TOPICS[a.topic];
+      this._root.style.setProperty('--acc', acc);
+      this._root.style.setProperty('--acc-bg', acc + '1F');
+      this._root.style.setProperty('--acc-brd', acc + '66');
+    }
+    this.setState({ idx: i, touched: true });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  renderVals() {
+    const i = this._index();
+    const a = ARTICLES[i];
+    return {
+      a,
+      rootRef: (el) => { this._root = el; this._sync(); },
+      barRef: (el) => { this._bar = el; },
+      glowRef: (el) => { this._glow = el; },
+      demoRef: (el) => { this._demo = el; this._sync(); },
+      copyIcon: this.state.copied ? 'check' : 'link',
+      copyLink: () => {
+        this.setState({ copied: true });
+        this._ct = setTimeout(() => this.setState({ copied: false }), 1600);
+      },
+      switcher: ARTICLES.map((art, n) => ({
+        topic: art.topic,
+        pick: (e) => this._select(n, e.currentTarget.parentElement),
+      })),
+      related: ARTICLES.filter((_, n) => n !== i).map((r) => ({
+        topic: r.topic, date: r.date, read: r.read, cover: r.cover,
+        title: r.title.replace(/\s*—\s*$/, ''),
+        acc: TOPICS[r.topic], accBorder: TOPICS[r.topic] + '66',
+        open: (e) => { e.preventDefault(); this._select(ARTICLES.indexOf(r)); },
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

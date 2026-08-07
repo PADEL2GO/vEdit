@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    input::placeholder { color: hsl(0 0% 40%); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes bgGlow { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;background:radial-gradient(ellipse 60% 36% at 50% 0%, hsl(71 91% 51% / 0.07), transparent), #000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:44px 24px">
+
+  <div style="display:flex;align-items:center;gap:10px">
+    <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:26px;width:auto;display:block">
+    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;letter-spacing:-0.02em;color:#FAFAFA">PADEL<span style="color:#C7F011">2</span>GO <span style="color:hsl(0 0% 45%);font-weight:600">· Login</span></span>
+  </div>
+
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+    <div data-screen-label="App — Login" style="height:100%;position:relative;background:#000;overflow:hidden;font-family:'DM Sans',sans-serif">
+
+      <!-- ── animated lime background ── -->
+      <x-import component-from-global-scope="p2g-fx-orbs" from="./hero-fx.js" style="position:absolute;top:0;left:0;width:100%;height:100%" hint-size="100%,100%"></x-import>
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse 95% 55% at 50% 12%, hsl(71 91% 51% / 0.18), transparent 62%);animation:bgGlow 5s ease-in-out infinite;pointer-events:none"></div>
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, hsl(0 0% 0% / 0.38), hsl(0 0% 0% / 0.74) 55%, #000);pointer-events:none"></div>
+
+      <!-- ── content ── -->
+      <div data-scroll="" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;gap:26px;padding:64px 26px 40px">
+
+        <!-- brand lockup -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:18px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1)">
+          <div style="position:relative;display:flex;align-items:center;justify-content:center">
+            <img src="assets/p2g-icon-clean.png" alt="P2G" style="position:relative;height:84px;width:auto;filter:drop-shadow(0 0 34px hsl(71 91% 51% / 0.45))">
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">
+            <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:29px;line-height:1.08;letter-spacing:-0.02em;color:#FAFAFA;margin:0">{{ headline }}</h1>
+            <p style="font-family:'DM Sans',sans-serif;font-size:14.5px;line-height:1.5;color:hsl(0 0% 62%);margin:0;max-width:250px">{{ subline }}</p>
+          </div>
+        </div>
+
+        <!-- ══ AUTH (Login / Registrieren) ══ -->
+        <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:26px">
+
+        <!-- segmented Login / Registrieren -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:14px;backdrop-filter:blur(12px);animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.06s backwards">
+          <button onClick="{{ setLogin }}" style="{{ tabLoginStyle }}">Anmelden</button>
+          <button onClick="{{ setRegister }}" style="{{ tabRegStyle }}">Registrieren</button>
+        </div>
+
+        <!-- form -->
+        <div style="display:flex;flex-direction:column;gap:13px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.12s backwards">
+          <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+            <label style="position:relative;display:flex;align-items:center">
+              <span style="position:absolute;left:14px;display:flex;color:hsl(0 0% 45%)"><p2g-icon name="user" size="18"></p2g-icon></span>
+              <input type="text" placeholder="Vor- &amp; Nachname" style="width:100%;height:50px;padding:0 14px 0 44px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:13px;outline:none;transition:border-color 0.2s, box-shadow 0.2s" style-focus="border-color:#C7F011;box-shadow:0 0 0 3px hsl(71 91% 51% / 0.15)">
+            </label>
+          </sc-if>
+
+          <label style="position:relative;display:flex;align-items:center">
+            <span style="position:absolute;left:14px;display:flex;color:hsl(0 0% 45%)"><p2g-icon name="mail" size="18"></p2g-icon></span>
+            <input type="email" placeholder="deine@email.de" style="width:100%;height:50px;padding:0 14px 0 44px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:13px;outline:none;transition:border-color 0.2s, box-shadow 0.2s" style-focus="border-color:#C7F011;box-shadow:0 0 0 3px hsl(71 91% 51% / 0.15)">
+          </label>
+
+          <label style="position:relative;display:flex;align-items:center">
+            <span style="position:absolute;left:14px;display:flex;color:hsl(0 0% 45%)"><p2g-icon name="lock" size="18"></p2g-icon></span>
+            <input type="{{ pwType }}" placeholder="Passwort" style="width:100%;height:50px;padding:0 46px 0 44px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:13px;outline:none;transition:border-color 0.2s, box-shadow 0.2s" style-focus="border-color:#C7F011;box-shadow:0 0 0 3px hsl(71 91% 51% / 0.15)">
+            <button onClick="{{ togglePw }}" aria-label="Passwort anzeigen" style="position:absolute;right:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:hsl(0 0% 50%);cursor:pointer" style-hover="color:#C7F011"><p2g-icon name="{{ pwIcon }}" size="18"></p2g-icon></button>
+          </label>
+
+          <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;justify-content:flex-end;margin-top:-2px">
+              <a href="#" onClick="{{ goForgot }}" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600">Passwort vergessen?</a>
+            </div>
+          </sc-if>
+
+          <button onClick="{{ submit }}" style="position: relative; height: 52px; margin-top: 2px; display: flex; align-items: center; justify-content: center; gap: 9px; font-family: 'DM Sans',sans-serif; font-size: 16px; font-weight: 700; color: #0A0A0A; background: linear-gradient(135deg, #C7F011, #A9D40E); border: none; border-radius: 13px; cursor: pointer; box-shadow: 0 0 34px hsl(71 91% 51% / 0.32); transition: transform 0.15s, box-shadow 0.2s; overflow: hidden" style-hover="transform:translateY(-1px);box-shadow:0 0 44px hsl(71 91% 51% / 0.45)" style-active="transform:translateY(0)">
+            <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+              <span style="display:flex;animation:spin 0.8s linear infinite"><p2g-icon name="loader-2" size="20"></p2g-icon></span>
+            </sc-if>
+            <sc-if value="{{ notLoading }}" hint-placeholder-val="{{ true }}">
+              <span style="display:flex;align-items:center;gap:9px">{{ ctaLabel }} <p2g-icon name="arrow-right" size="18"></p2g-icon></span>
+            </sc-if>
+          </button>
+        </div>
+
+        <!-- divider -->
+        <div style="display:flex;align-items:center;gap:14px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.18s backwards">
+          <span style="flex:1;height:1px;background:hsl(0 0% 18%)"></span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 45%)">oder weiter mit</span>
+          <span style="flex:1;height:1px;background:hsl(0 0% 18%)"></span>
+        </div>
+
+        <!-- social -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.24s backwards">
+          <button style="height:50px;display:flex;align-items:center;justify-content:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:13px;cursor:pointer;transition:border-color 0.2s, background 0.2s" style-hover="border-color:hsl(0 0% 30%);background:hsl(0 0% 100% / 0.07)">
+            <p2g-icon name="apple" size="18"></p2g-icon> Apple
+          </button>
+          <button style="height:50px;display:flex;align-items:center;justify-content:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:13px;cursor:pointer;transition:border-color 0.2s, background 0.2s" style-hover="border-color:hsl(0 0% 30%);background:hsl(0 0% 100% / 0.07)">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#C7F011">G</span> Google
+          </button>
+        </div>
+
+        </div>
+        </sc-if>
+
+        <!-- ══ PASSWORT VERGESSEN ══ -->
+        <sc-if value="{{ isForgot }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.06s backwards">
+          <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <label style="position:relative;display:flex;align-items:center">
+                <span style="position:absolute;left:14px;display:flex;color:hsl(0 0% 45%)"><p2g-icon name="mail" size="18"></p2g-icon></span>
+                <input type="email" placeholder="deine@email.de" style="width:100%;height:50px;padding:0 14px 0 44px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:13px;outline:none;transition:border-color 0.2s, box-shadow 0.2s" style-focus="border-color:#C7F011;box-shadow:0 0 0 3px hsl(71 91% 51% / 0.15)">
+              </label>
+              <button onClick="{{ submitForgot }}" style="position:relative;height:52px;display:flex;align-items:center;justify-content:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;color:#0A0A0A;background:linear-gradient(135deg, #C7F011, #A9D40E);border:none;border-radius:13px;cursor:pointer;box-shadow:0 0 34px hsl(71 91% 51% / 0.32);transition:transform 0.15s, box-shadow 0.2s;overflow:hidden" style-hover="transform:translateY(-1px);box-shadow:0 0 44px hsl(71 91% 51% / 0.45)" style-active="transform:translateY(0)">
+                <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+                  <span style="display:flex;animation:spin 0.8s linear infinite"><p2g-icon name="loader-2" size="20"></p2g-icon></span>
+                </sc-if>
+                <sc-if value="{{ notLoading }}" hint-placeholder-val="{{ true }}">
+                  <span style="display:flex;align-items:center;gap:9px">Reset-Link senden <p2g-icon name="arrow-right" size="18"></p2g-icon></span>
+                </sc-if>
+              </button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:13px;padding:24px 22px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(71 91% 51% / 0.3);border-radius:16px;text-align:center">
+              <div style="width:56px;height:56px;border-radius:50%;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.4);display:flex;align-items:center;justify-content:center;color:#C7F011;box-shadow:0 0 26px hsl(71 91% 51% / 0.25)"><p2g-icon name="mail-check" size="26"></p2g-icon></div>
+              <span style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 70%)">Falls ein Account existiert, ist der Link zu deiner E-Mail unterwegs.</span>
+            </div>
+          </sc-if>
+          <button onClick="{{ setLogin }}" style="height:46px;display:flex;align-items:center;justify-content:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:600;color:hsl(0 0% 70%);background:none;border:none;cursor:pointer;transition:color 0.2s" style-hover="color:#C7F011"><p2g-icon name="arrow-left" size="17"></p2g-icon> Zurück zum Login</button>
+        </div>
+        </sc-if>
+
+        <!-- footer -->
+        <p style="font-family:'DM Sans',sans-serif;font-size:11.5px;line-height:1.55;color:hsl(0 0% 45%);text-align:center;margin:6px 0 0;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.3s backwards">
+          Mit dem Fortfahren stimmst du unseren <a href="#">AGB</a> &amp; der <a href="#">Datenschutzerklärung</a> zu.
+        </p>
+      </div>
+    </div>
+  </x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { mode: 'login', showPw: false, loading: false, sent: false };
+
+  componentDidMount() {
+    this._icons = setInterval(() => {
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    }, 400);
+    setTimeout(() => clearInterval(this._icons), 4000);
+  }
+  componentWillUnmount() {
+    clearInterval(this._icons);
+    clearTimeout(this._to);
+  }
+
+  renderVals() {
+    const mode = this.state.mode;
+    const isLogin = mode === 'login';
+    const isRegister = mode === 'register';
+    const isForgot = mode === 'forgot';
+    const isAuth = isLogin || isRegister;
+    const sent = this.state.sent;
+    const tabBase =
+      "height:38px;border:none;border-radius:11px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;transition:color 0.2s, background 0.2s;";
+    const tabOn = tabBase + 'color:#0A0A0A;background:#C7F011;';
+    const tabOff = tabBase + 'color:hsl(0 0% 62%);background:transparent;';
+    let headline, subline;
+    if (isForgot) {
+      headline = sent ? 'Check deine Mails.' : 'Passwort vergessen?';
+      subline = sent
+        ? 'Wir haben dir einen Link zum Zurücksetzen geschickt.'
+        : 'Kein Stress — gib deine Mail ein, wir schicken dir einen Reset-Link.';
+    } else if (isLogin) {
+      headline = 'Willkommen zurück.';
+      subline = 'Melde dich an und starte dein nächstes Match.';
+    } else {
+      headline = 'Werde Teil des Networks.';
+      subline = 'Erstelle deinen Account in unter einer Minute.';
+    }
+    return {
+      isLogin,
+      isRegister,
+      isForgot,
+      isAuth,
+      sent,
+      notSent: !sent,
+      loading: this.state.loading,
+      notLoading: !this.state.loading,
+      headline,
+      subline,
+      ctaLabel: isLogin ? 'Anmelden' : 'Account erstellen',
+      pwType: this.state.showPw ? 'text' : 'password',
+      pwIcon: this.state.showPw ? 'eye-off' : 'eye',
+      tabLoginStyle: isLogin ? tabOn : tabOff,
+      tabRegStyle: isRegister ? tabOn : tabOff,
+      setLogin: () => this.setState({ mode: 'login', sent: false, loading: false }),
+      setRegister: () => this.setState({ mode: 'register', sent: false }),
+      goForgot: (e) => { e.preventDefault(); this.setState({ mode: 'forgot', sent: false, loading: false }); },
+      togglePw: (e) => { e.preventDefault(); this.setState((s) => ({ showPw: !s.showPw })); },
+      submit: (e) => {
+        e.preventDefault();
+        if (this.state.loading) return;
+        this.setState({ loading: true });
+        this._to = setTimeout(() => this.setState({ loading: false }), 1800);
+      },
+      submitForgot: (e) => {
+        e.preventDefault();
+        if (this.state.loading) return;
+        this.setState({ loading: true });
+        this._to = setTimeout(() => this.setState({ loading: false, sent: true }), 1600);
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

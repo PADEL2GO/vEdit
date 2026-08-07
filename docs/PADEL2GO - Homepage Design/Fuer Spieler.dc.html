@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; overflow-anchor: none; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes wordIn { from { opacity: 0; filter: blur(8px); transform: translateY(14px); } to { opacity: 1; filter: blur(0); transform: translateY(0); } }
+    @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-4px); } }
+    /* responsive layout (ids only — media queries can't be inline) */
+    #fs-pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    #fs-pay { display: grid; grid-template-columns: 1fr 40px 1fr 40px 1fr; align-items: start; gap: 16px 0; }
+    #fs-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    #fs-levels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    input::placeholder { color: hsl(0 0% 38%); }
+    @media (max-width: 980px) { #fs-pillars { grid-template-columns: 1fr; } }
+    @media (max-width: 860px) { #fs-pay { grid-template-columns: 1fr; } .fs-pay-arrow { transform: rotate(90deg); height: 34px !important; } }
+    @media (max-width: 900px) { #fs-navlinks { display: none !important; } #fs-burger { display: flex !important; } #fs-levels { grid-template-columns: repeat(2, 1fr); } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } html { scroll-behavior: auto; } }
+  </style>
+</helmet>
+
+<!-- ═══════════ NAV ═══════════ -->
+<header style="position:fixed;top:0;left:0;right:0;z-index:60;background:hsl(0 0% 0% / 0.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 15% / 0.5)">
+  <div style="max-width:1280px;margin:0 auto;padding:0 20px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+    <a href="Homepage.dc.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex:none">
+      <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:34px;width:auto;display:block">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.02em;color:#FAFAFA">PADEL<span style="color:#C7F011">2</span>GO</span>
+    </a>
+    <nav id="fs-navlinks" style="display:flex;align-items:center;gap:2px">
+      <a href="Booking.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);text-decoration:none;padding:8px 14px;border-radius:999px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">Court buchen</a>
+      <span style="font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);padding:8px 14px;border-radius:999px">Für Spieler</span>
+      <a href="Events.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);text-decoration:none;padding:8px 14px;border-radius:999px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">Events</a>
+      <a href="Homepage.dc.html#vereine" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);text-decoration:none;padding:8px 14px;border-radius:999px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">Für Vereine</a>
+      <a href="Homepage.dc.html#news" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);text-decoration:none;padding:8px 14px;border-radius:999px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">News</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="#" style="text-decoration:none"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="lime" size="sm" pill="{{ true }}" hint-size="76px,36px">Login</x-import></a>
+      <button id="fs-burger" onClick="{{ toggleMenu }}" style="display:none;align-items:center;justify-content:center;width:40px;height:40px;background:none;border:1px solid hsl(0 0% 15%);border-radius:12px;color:#FAFAFA;cursor:pointer">
+        <p2g-icon name="menu" size="20"></p2g-icon>
+      </button>
+    </div>
+  </div>
+  <div ref="{{ menuRef }}" style="display:none;flex-direction:column;gap:2px;padding:12px 20px 20px;background:hsl(0 0% 0% / 0.92);backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 15% / 0.5)">
+    <a href="Booking.dc.html" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;text-decoration:none;padding:12px 14px;border-radius:12px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">Court buchen</a>
+    <a href="Events.dc.html" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;text-decoration:none;padding:12px 14px;border-radius:12px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">Events</a>
+    <a href="Homepage.dc.html#vereine" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;text-decoration:none;padding:12px 14px;border-radius:12px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">Für Vereine</a>
+    <a href="Homepage.dc.html#news" style="font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;text-decoration:none;padding:12px 14px;border-radius:12px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">News</a>
+  </div>
+</header>
+
+<!-- ═══════════ ① HERO — SiteVisual: fuer-spieler.hero.video | fuer-spieler.hero.image (admin-verwaltet) ═══════════ -->
+<section id="hero" data-screen-label="① Hero" style="position:relative;min-height:92vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#000">
+  <img src="assets/league-hero.jpg" alt="Padel-Spieler:innen auf dem Court" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse 70% 55% at 50% 15%, hsl(71 91% 51% / 0.12), transparent), linear-gradient(180deg, hsl(0 0% 0% / 0.6), hsl(0 0% 0% / 0.72) 55%, #000)"></div>
+
+  <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:26px;text-align:center;max-width:900px;margin:0 auto;padding:120px 20px 80px">
+    <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Badge" variant="lime" hint-size="110px,26px"><p2g-icon name="user" size="13"></p2g-icon>Für Spieler</x-import>
+
+    <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(38px, 7.6vw, 76px);line-height:1.06;letter-spacing:-0.02em;color:#FAFAFA;margin:0">
+      <span style="display:inline-block;opacity:0;animation:wordIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s forwards">Dein Spiel.&nbsp;</span><span style="display:inline-block;opacity:0;color:#C7F011;animation:wordIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.26s forwards">Deine Points.</span><br><span style="display:inline-block;opacity:0;font-style:italic;animation:wordIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.42s forwards">Dein Network.</span>
+    </h1>
+
+    <p style="font-family:'DM Sans',sans-serif;font-size:clamp(15px, 2.3vw, 19px);line-height:1.6;color:hsl(0 0% 75%);margin:0;max-width:560px;opacity:0;animation:fadeUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.6s forwards">Courts in ganz Deutschland, Events &amp; Community — und Payback-Points bei jeder Buchung.</p>
+
+    <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;opacity:0;animation:fadeUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.78s forwards">
+      <!-- Route: /booking -->
+      <a href="Booking.dc.html" style="text-decoration:none"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="hero" size="xl" hint-size="220px,60px"><p2g-icon name="calendar" size="18"></p2g-icon>Court buchen</x-import></a>
+      <!-- Route: /app-booking -->
+      <a href="#" style="text-decoration:none"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="heroOutline" size="xl" hint-size="250px,60px"><p2g-icon name="smartphone" size="18"></p2g-icon>App herunterladen</x-import></a>
+    </div>
+
+    <!-- Fakten-Chips -->
+    <div id="fs-chips" style="opacity:0;animation:fadeUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.95s forwards">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.06em;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);backdrop-filter:blur(12px);border:1px solid hsl(0 0% 100% / 0.14);border-radius:999px;padding:9px 16px;white-space:nowrap">Launch <span style="color:#C7F011;font-weight:700">01.07.2026</span></span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.06em;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);backdrop-filter:blur(12px);border:1px solid hsl(0 0% 100% / 0.14);border-radius:999px;padding:9px 16px;white-space:nowrap">Registrierung <span style="color:#C7F011;font-weight:700">0 €</span></span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.06em;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);backdrop-filter:blur(12px);border:1px solid hsl(0 0% 100% / 0.14);border-radius:999px;padding:9px 16px;white-space:nowrap">Buchung <span style="color:#C7F011;font-weight:700">&lt;30 Sek</span></span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.06em;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);backdrop-filter:blur(12px);border:1px solid hsl(0 0% 100% / 0.14);border-radius:999px;padding:9px 16px;white-space:nowrap"><span style="color:#C7F011;font-weight:700">{{ ptsChip }}</span> pro Buchung</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ ② DAS P2G NETWORK — 3 PFEILER ═══════════ -->
+<section id="network" data-screen-label="② Network — 3 Pfeiler" style="position:relative;padding:clamp(72px, 10vw, 116px) 20px;background:#000">
+  <div style="max-width:1200px;margin:0 auto">
+    <div data-reveal style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;margin-bottom:48px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#C7F011;white-space:nowrap">Das P2G Network</span>
+      <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(30px, 4.6vw, 52px);line-height:1.1;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Spielen. Connecten. <span style="background:var(--gradient-lime-text);-webkit-background-clip:text;background-clip:text;color:transparent">Einlösen.</span></h2>
+    </div>
+
+    <div id="fs-pillars">
+      <!-- Courts -->
+      <div data-reveal><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" padding="{{ 0 }}" hint-size="100%,380px">
+        <div style="display:flex;flex-direction:column;height:100%">
+          <div style="position:relative">
+            <img src="assets/skypadel-outdoor.jpg" alt="P2G Court" style="display:block;width:100%;height:180px;object-fit:cover;border-radius:15px 15px 0 0">
+            <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, transparent 40%, hsl(0 0% 0% / 0.7));border-radius:15px 15px 0 0"></div>
+            <span style="position:absolute;top:14px;left:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#C7F011;background:hsl(0 0% 0% / 0.7);backdrop-filter:blur(8px);border:1px solid hsl(71 91% 51% / 0.35);border-radius:999px;padding:5px 12px;white-space:nowrap">3 Standorte zum Start</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;padding:20px 22px 22px;flex:1">
+            <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:21px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Courts in ganz Deutschland</h3>
+            <p style="font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;color:hsl(0 0% 65%);margin:0">SkyPadel-Courts auf Vereinsgeländen — München, Köln und Hamburg machen den Anfang, weitere folgen.</p>
+            <a href="Booking.dc.html" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#C7F011;text-decoration:none;margin-top:auto;padding-top:6px" style-hover="gap:10px">Court buchen <p2g-icon name="arrow-right" size="15"></p2g-icon></a>
+          </div>
+        </div>
+      </x-import></div>
+
+      <!-- Events & Netzwerk -->
+      <div data-reveal><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" padding="{{ 0 }}" hint-size="100%,380px">
+        <div style="display:flex;flex-direction:column;height:100%">
+          <div style="position:relative">
+            <img src="assets/events-hero.jpg" alt="P2G Event" style="display:block;width:100%;height:180px;object-fit:cover;border-radius:15px 15px 0 0">
+            <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, transparent 40%, hsl(0 0% 0% / 0.7));border-radius:15px 15px 0 0"></div>
+            <span style="position:absolute;top:14px;left:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#C7F011;background:hsl(0 0% 0% / 0.7);backdrop-filter:blur(8px);border:1px solid hsl(71 91% 51% / 0.35);border-radius:999px;padding:5px 12px;white-space:nowrap">Open Play ab 0 €</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;padding:20px 22px 22px;flex:1">
+            <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:21px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Events &amp; Netzwerk</h3>
+            <p style="font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;color:hsl(0 0% 65%);margin:0">Night Sessions, Turniere, Open Play — komm allein oder mit Crew, gematcht wird vor Ort. Dein Level zählt EU-weit in der P2G Liga.</p>
+            <a href="Events.dc.html" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#C7F011;text-decoration:none;margin-top:auto;padding-top:6px" style-hover="gap:10px">Zu den Events <p2g-icon name="arrow-right" size="15"></p2g-icon></a>
+          </div>
+        </div>
+      </x-import></div>
+
+      <!-- Marketplace & Points -->
+      <div data-reveal><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" padding="{{ 0 }}" hint-size="100%,380px">
+        <div style="display:flex;flex-direction:column;height:100%">
+          <div style="position:relative">
+            <img src="assets/rewards-hero.jpg" alt="P2G Points" style="display:block;width:100%;height:180px;object-fit:cover;border-radius:15px 15px 0 0">
+            <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, transparent 40%, hsl(0 0% 0% / 0.7));border-radius:15px 15px 0 0"></div>
+            <span style="position:absolute;top:14px;left:14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.08em;color:#C7F011;background:hsl(0 0% 0% / 0.7);backdrop-filter:blur(8px);border:1px solid hsl(71 91% 51% / 0.35);border-radius:999px;padding:5px 12px;white-space:nowrap">Payback bei jeder Buchung</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;padding:20px 22px 22px;flex:1">
+            <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:21px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Marketplace &amp; P2G Points</h3>
+            <p style="font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;color:hsl(0 0% 65%);margin:0">Points sammelst du automatisch bei jeder Buchung — und löst sie im Marketplace gegen Equipment ein: als Rabatt oder für den vollen Preis.</p>
+            <!-- Route: /marketplace -->
+            <a href="#" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#C7F011;text-decoration:none;margin-top:auto;padding-top:6px" style-hover="gap:10px">Zum Marketplace <p2g-icon name="arrow-right" size="15"></p2g-icon></a>
+          </div>
+        </div>
+      </x-import></div>
+    </div>
+  </div>
+</section>
+
+<div style="max-width:1100px;margin:0 auto;height:1px;background:linear-gradient(90deg, transparent, hsl(71 91% 51% / 0.45) 50%, transparent)"></div>
+
+<!-- ═══════════ ③ SO FUNKTIONIERT PAYBACK ═══════════ -->
+<section id="payback" data-screen-label="③ Payback" style="position:relative;padding:clamp(72px, 10vw, 116px) 20px;background:radial-gradient(ellipse at 50% 0%, hsl(71 91% 51% / 0.06), transparent 55%), #000">
+  <div style="max-width:1100px;margin:0 auto;display:flex;flex-direction:column">
+    <div data-reveal style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;margin-bottom:44px">
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Badge" variant="lime" hint-size="110px,26px"><p2g-icon name="coins" size="13"></p2g-icon>P2G Points</x-import>
+      <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(30px, 4.6vw, 52px);line-height:1.1;letter-spacing:-0.02em;color:#FAFAFA;margin:0">So funktioniert <span style="background:var(--gradient-lime-text);-webkit-background-clip:text;background-clip:text;color:transparent">Payback.</span></h2>
+    </div>
+
+    <div id="fs-pay" data-reveal>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15% / 0.5);border-radius:18px;padding:26px 20px">
+        <div style="width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;animation:floatY 5s ease-in-out infinite">
+          <p2g-icon name="calendar-check" size="22" style="color:#C7F011"></p2g-icon>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:28px;color:#C7F011">{{ ptsStep }}</span>
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;color:#FAFAFA;margin:0">Buchen</h3>
+        <p style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 65%);margin:0">Fixe Points je Buchung — 1 h oder 2 h Court-Zeit.</p>
+      </div>
+
+      <div class="fs-pay-arrow" style="display:flex;align-items:center;justify-content:center;align-self:center;color:hsl(71 91% 51% / 0.55)"><p2g-icon name="arrow-right" size="20"></p2g-icon></div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15% / 0.5);border-radius:18px;padding:26px 20px">
+        <div style="width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;animation:floatY 5s ease-in-out infinite 0.4s">
+          <p2g-icon name="gem" size="22" style="color:#C7F011"></p2g-icon>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:28px;color:#C7F011">{{ multChip }}</span>
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;color:#FAFAFA;margin:0">Multiplikator</h3>
+        <p style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 65%);margin:0">Dein Tier-Level legt obendrauf — je höher dein Level, desto mehr Payback.</p>
+      </div>
+
+      <div class="fs-pay-arrow" style="display:flex;align-items:center;justify-content:center;align-self:center;color:hsl(71 91% 51% / 0.55)"><p2g-icon name="arrow-right" size="20"></p2g-icon></div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15% / 0.5);border-radius:18px;padding:26px 20px">
+        <div style="width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;animation:floatY 5s ease-in-out infinite 0.8s">
+          <p2g-icon name="shopping-bag" size="22" style="color:#C7F011"></p2g-icon>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:28px;color:#C7F011">bis 100 %</span>
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;color:#FAFAFA;margin:0">Einlösen</h3>
+        <p style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 65%);margin:0">Im Marketplace gegen Equipment — als Rabatt oder für den vollen Preis.</p>
+      </div>
+    </div>
+
+    <!-- Tier-Level (aus EXPERT_LEVELS, Backend) -->
+    <div data-reveal style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:52px 0 20px">
+      <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:clamp(19px, 2.6vw, 24px);letter-spacing:-0.01em;color:#FAFAFA;margin:0">Dein Tier-Level = <span style="color:#C7F011">dein Multiplikator</span></h3>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:hsl(0 0% 50%)">8 Tiers · EU-weites Ranking</span>
+    </div>
+    <div id="fs-levels" data-reveal>
+      <sc-for list="{{ levels }}" as="lv" hint-placeholder-count="8">
+        <div style="{{ lv.tileStyle }}">
+          <span style="font-size:24px;line-height:1">{{ lv.emo }}</span>
+          <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;color:#FAFAFA">{{ lv.name }}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 55%);letter-spacing:0.02em">{{ lv.range }}</span>
+          <span style="{{ lv.multStyle }}">{{ lv.mult }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ ④ KI-ANALYSE TEASER (Coming Soon) — SiteVisual: fuer-spieler.ki.video-1 (admin-verwaltet) ═══════════ -->
+<section id="ki" data-screen-label="④ KI-Teaser" style="position:relative;padding:clamp(64px, 9vw, 104px) 20px 0;background:#000">
+  <div data-reveal style="position:relative;max-width:1100px;margin:0 auto;border-radius:22px;overflow:hidden;border:1px solid hsl(199 89% 60% / 0.25)">
+    <img src="assets/fuer-vereine-hero.jpg" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;opacity:0.22">
+    <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse 70% 80% at 50% 0%, hsl(199 89% 60% / 0.14), transparent 60%), linear-gradient(180deg, hsl(210 60% 3% / 0.82), hsl(0 0% 0% / 0.94))"></div>
+    <div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:clamp(36px, 6vw, 60px) clamp(20px, 4vw, 48px)">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Badge" variant="soft" hint-size="110px,26px">Coming Soon</x-import>
+        <!-- Partner-Badge aus partner_tiles (Backend) -->
+        <span style="display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:hsl(199 89% 70%);background:hsl(199 89% 60% / 0.08);backdrop-filter:blur(12px);border:1px solid hsl(199 89% 60% / 0.3);border-radius:999px;padding:7px 14px;white-space:nowrap"><p2g-icon name="video" size="13"></p2g-icon>Powered by Wingfield</span>
+      </div>
+      <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(26px, 4vw, 42px);line-height:1.1;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Als Nächstes: <span style="background:linear-gradient(90deg, hsl(199 89% 62%), hsl(190 90% 70%));-webkit-background-clip:text;background-clip:text;color:transparent">KI-Matchanalyse.</span></h2>
+      <p style="font-family:'DM Sans',sans-serif;font-size:clamp(14.5px, 2vw, 16.5px);line-height:1.6;color:hsl(0 0% 70%);margin:0;max-width:560px">Die Court-Kamera erfasst dein Spiel automatisch — 40+ Metriken, Auto-Clips und ein objektives Skill-Rating nach jedem Match.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.06em;color:hsl(199 89% 70%);border:1px solid hsl(199 89% 60% / 0.28);border-radius:999px;padding:6px 13px;white-space:nowrap">Match IQ</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.06em;color:hsl(199 89% 70%);border:1px solid hsl(199 89% 60% / 0.28);border-radius:999px;padding:6px 13px;white-space:nowrap">Speed &amp; Placement</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.06em;color:hsl(199 89% 70%);border:1px solid hsl(199 89% 60% / 0.28);border-radius:999px;padding:6px 13px;white-space:nowrap">Auto-Clips</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.06em;color:hsl(199 89% 70%);border:1px solid hsl(199 89% 60% / 0.28);border-radius:999px;padding:6px 13px;white-space:nowrap">Skill-Rating</span>
+      </div>
+      <sc-if value="{{ nlPending }}" hint-placeholder-val="{{ true }}">
+        <div style="width:100%;max-width:440px;display:flex;flex-direction:column;gap:8px;margin-top:6px">
+          <div style="{{ nlRowStyle }}">
+            <input value="{{ nlMail }}" onChange="{{ setNlMail }}" type="email" placeholder="deine@email.de" style="flex:1;min-width:0;box-sizing:border-box;height:46px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 22%);border-radius:12px;outline:none" style-focus="border-color:#C7F011;box-shadow:0 0 0 3px hsl(71 91% 51% / 0.15)">
+            <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="lime" size="default" onClick="{{ nlSubmit }}" hint-size="200px,46px"><p2g-icon name="bell" size="15"></p2g-icon>Benachrichtigt werden</x-import>
+          </div>
+          <span style="{{ nlErrStyle }}">Bitte gib eine gültige E-Mail-Adresse ein.</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ nlDone }}" hint-placeholder-val="{{ false }}">
+        <div style="display:inline-flex;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:12px 22px;margin-top:6px">
+          <p2g-icon name="check" size="17"></p2g-icon>Du stehst auf der Liste — wir melden uns zum Start!
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ ⑤ CTA ═══════════ -->
+<section id="cta" data-screen-label="⑤ CTA" style="position:relative;padding:clamp(72px, 10vw, 116px) 20px clamp(80px, 11vw, 128px);background:radial-gradient(ellipse 55% 45% at 50% 100%, hsl(71 91% 51% / 0.09), transparent), #000">
+  <div data-reveal style="max-width:760px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center">
+    <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(30px, 4.6vw, 50px);line-height:1.1;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Ready fürs <span style="font-style:italic;color:#C7F011">erste Match?</span></h2>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center">
+      <!-- Route: /booking -->
+      <a href="Booking.dc.html" style="text-decoration:none"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="hero" size="xl" hint-size="220px,60px"><p2g-icon name="calendar" size="18"></p2g-icon>Court buchen</x-import></a>
+      <!-- Route: /app-booking -->
+      <a href="#" style="text-decoration:none"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="heroOutline" size="xl" hint-size="250px,60px"><p2g-icon name="smartphone" size="18"></p2g-icon>App herunterladen</x-import></a>
+    </div>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.06em;color:hsl(0 0% 55%)">Launch 01.07.2026 · Registrierung kostenlos</span>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer style="border-top:1px solid hsl(0 0% 15% / 0.6);background:linear-gradient(180deg, #000, hsl(0 0% 3%));padding:26px 20px">
+  <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:9px">
+      <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:24px;width:auto">
+      <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%)">© 2026 PADEL2GO</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <a href="#" style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%);text-decoration:none" style-hover="color:#C7F011">Impressum</a>
+      <a href="#" style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%);text-decoration:none" style-hover="color:#C7F011">Datenschutz</a>
+      <a href="#" style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%);text-decoration:none" style-hover="color:#C7F011">AGB</a>
+      <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%)">Made with 💚 in Deutschland</span>
+    </div>
+  </div>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;punkte1h&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:50,&quot;min&quot;:10,&quot;max&quot;:500,&quot;step&quot;:10,&quot;unit&quot;:&quot;P&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;P2G Payback&quot;},&quot;punkte2h&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:100,&quot;min&quot;:10,&quot;max&quot;:1000,&quot;step&quot;:10,&quot;unit&quot;:&quot;P&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;P2G Payback&quot;},&quot;tierMultiplikatorMax&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:2,&quot;min&quot;:1,&quot;max&quot;:5,&quot;step&quot;:0.5,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;P2G Payback&quot;}}">
+class Component extends DCLogic {
+  state = { nlMail: '', nlDone: false, nlErr: false };
+
+  componentDidMount() {
+    // Scroll reveal (fade-up) — rect-based check on scroll/rAF, plus force-reveal safety net.
+    setTimeout(() => {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const pending = new Set();
+      document.querySelectorAll('[data-reveal]').forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight * 0.9) return; // already visible — don't hide
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(28px)';
+        el.style.transition =
+          'opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1)';
+        pending.add(el);
+      });
+      const show = (el) => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+        pending.delete(el);
+      };
+      const check = () => {
+        if (!pending.size) return;
+        const limit = window.innerHeight * 0.92;
+        pending.forEach((el) => {
+          if (el.getBoundingClientRect().top < limit) show(el);
+        });
+      };
+      this._onScroll = () => requestAnimationFrame(check);
+      window.addEventListener('scroll', this._onScroll, { passive: true });
+      window.addEventListener('resize', this._onScroll);
+      check();
+      this._revealTimeout = setTimeout(() => pending.forEach(show), 6000);
+    }, 250);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._revealTimeout);
+    if (this._onScroll) {
+      window.removeEventListener('scroll', this._onScroll);
+      window.removeEventListener('resize', this._onScroll);
+    }
+  }
+
+  renderVals() {
+    const p1 = this.props.punkte1h ?? 50;
+    const p2 = this.props.punkte2h ?? 100;
+    const mult = this.props.tierMultiplikatorMax ?? 2;
+    const st = this.state;
+    const emailOk = /.+@.+\..+/.test(st.nlMail.trim());
+
+    // 8 Tier-Level — Quelle: EXPERT_LEVELS (Backend). Multiplikator skaliert linear bis tierMultiplikatorMax.
+    const TIERS = [
+      { emo: '🌱', name: 'Beginner', range: '0 – 499 P', h: '140 40% 55%' },
+      { emo: '🎾', name: 'Rookie', range: '500 – 1.499 P', h: '100 60% 55%' },
+      { emo: '⚡', name: 'Amateur', range: '1.500 – 2.999 P', h: '71 91% 51%' },
+      { emo: '🎯', name: 'Advanced', range: '3.000 – 4.999 P', h: '180 70% 50%' },
+      { emo: '💎', name: 'Pro', range: '5.000 – 7.999 P', h: '199 89% 60%' },
+      { emo: '🏆', name: 'Champion', range: '8.000 – 11.999 P', h: '262 80% 66%' },
+      { emo: '👑', name: 'Master', range: '12.000 – 19.999 P', h: '25 95% 58%' },
+      { emo: '🌟', name: 'Legend', range: '20.000+ P', h: '45 95% 58%' },
+    ];
+    const levels = TIERS.map((l, i) => ({
+      emo: l.emo, name: l.name, range: l.range,
+      mult: '×' + (1 + ((mult - 1) * i) / 7).toFixed(1).replace('.', ','),
+      tileStyle: {
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+        textAlign: 'center', padding: '18px 10px 14px', borderRadius: 16,
+        background: 'linear-gradient(160deg, hsl(' + l.h + ' / 0.13), hsl(' + l.h + ' / 0.02))',
+        border: '1px solid hsl(' + l.h + ' / 0.32)',
+      },
+      multStyle: {
+        fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700,
+        color: 'hsl(' + l.h + ')', background: 'hsl(' + l.h + ' / 0.1)',
+        border: '1px solid hsl(' + l.h + ' / 0.3)', borderRadius: 999, padding: '3px 10px', marginTop: 2,
+      },
+    }));
+
+    return {
+      menuRef: (el) => { this._menu = el; },
+      toggleMenu: () => { if (this._menu) this._menu.style.display = this._menu.style.display === 'flex' ? 'none' : 'flex'; },
+      ptsChip: '+' + p1 + '/+' + p2 + ' P',
+      ptsStep: '+' + p1 + ' / +' + p2 + ' P',
+      multChip: 'bis ×' + mult,
+      levels,
+      nlMail: st.nlMail, nlPending: !st.nlDone, nlDone: st.nlDone,
+      setNlMail: (e) => this.setState({ nlMail: e.target.value, nlErr: false }),
+      nlSubmit: () => { if (emailOk) this.setState({ nlDone: true }); else this.setState({ nlErr: true }); },
+      nlRowStyle: { display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', animation: st.nlErr ? 'shake 0.4s' : 'none' },
+      nlErrStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, color: 'hsl(0 72% 62%)', display: st.nlErr ? 'block' : 'none' },
+    };
+  }
+}
+</script>
+</body>
+</html>

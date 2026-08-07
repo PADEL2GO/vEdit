@@ -1,0 +1,51 @@
+/* PADEL2GO color system — dark-first. Values mirror src/index.css (HSL).
+   Brand color is lime green #C7F011. Surfaces are near-black.
+   Tokens are bare HSL triples, used as `hsl(var(--x))`. */
+:root {
+  /* ---- Brand: Lime (#C7F011) ---- */
+  --lime: 71 91% 51%; /* @kind color */
+  --lime-glow: 71 91% 61%; /* @kind color */
+  --lime-dark: 71 70% 41%; /* @kind color */
+  --lime-hex: #C7F011; /* @kind color */
+
+  /* ---- Neutrals (near-black surfaces, near-white text) ---- */
+  --background: 0 0% 0%; /* @kind color */
+  --foreground: 0 0% 98%; /* @kind color */
+  --card: 0 0% 0%; /* @kind color */
+  --card-foreground: 0 0% 98%; /* @kind color */
+  --popover: 0 0% 0%; /* @kind color */
+  --popover-foreground: 0 0% 98%; /* @kind color */
+  --muted: 0 0% 10%; /* @kind color */
+  --muted-foreground: 0 0% 65%; /* @kind color */
+  --border: 0 0% 15%; /* @kind color */
+  --input: 0 0% 15%; /* @kind color */
+  --ring: 71 91% 51%; /* @kind color */
+
+  /* ---- Semantic ---- */
+  --primary: 71 91% 51%; /* @kind color */
+  --primary-foreground: 0 0% 0%; /* @kind color */
+  --secondary: 0 0% 0%; /* @kind color */
+  --secondary-foreground: 0 0% 98%; /* @kind color */
+  --accent: 71 91% 51%; /* @kind color */
+  --accent-foreground: 0 0% 0%; /* @kind color */
+  --destructive: 0 84% 60%; /* @kind color */
+  --destructive-foreground: 210 40% 98%; /* @kind color */
+  --whatsapp: 145 63% 49%; /* @kind color */
+
+  /* ---- Semantic aliases (author against these) ---- */
+  --surface-page: hsl(var(--background));
+  --surface-card: hsl(var(--card));
+  --surface-muted: hsl(var(--muted));
+  --text-body: hsl(var(--foreground));
+  --text-muted: hsl(var(--muted-foreground));
+  --text-on-lime: hsl(var(--primary-foreground));
+  --border-hairline: hsl(var(--border));
+  --brand: hsl(var(--lime));
+
+  /* ---- Sidebar (app/dashboard chrome) ---- */
+  --sidebar-background: 0 0% 0%; /* @kind color */
+  --sidebar-foreground: 0 0% 98%; /* @kind color */
+  --sidebar-primary: 71 91% 51%; /* @kind color */
+  --sidebar-accent: 0 0% 8%; /* @kind color */
+  --sidebar-border: 0 0% 15%; /* @kind color */
+}

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    .alt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 760px) { .alt-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — SkyPadel Galerie">
+  <dc-import name="AdminSidebar" active="gallery" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/skypadel-gallery</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">SkyPadel Galerie</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <button style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.28);white-space:nowrap"><p2g-icon name="upload" size="15"></p2g-icon>Bilder hochladen</button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Bilder für die „Für Vereine“-Seite verwalten — <span style="color:#FAFAFA;font-weight:700">6 Bilder</span>, 5 aktiv</span>
+        <a href="Fuer Spieler.dc.html" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;white-space:nowrap">Live-Seite öffnen <p2g-icon name="external-link" size="13"></p2g-icon></a>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <sc-for list="{{ images }}" as="i" hint-placeholder-count="6">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,150px">
+            <div style="display:flex;align-items:flex-start;gap:15px;flex-wrap:wrap">
+              <span style="color:hsl(0 0% 40%);display:flex;cursor:grab;padding-top:32px;flex:none"><p2g-icon name="grip-vertical" size="16"></p2g-icon></span>
+              <img src="{{ i.img }}" alt="" style="width:112px;height:80px;flex:none;object-fit:cover;border-radius:10px;border:1px solid hsl(0 0% 15%);display:block">
+
+              <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:240px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Alt-Text (optional)</span>
+                  <sc-if value="{{ i.dirty }}" hint-placeholder-val="{{ false }}">
+                    <button style="height:28px;padding:0 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:8px;cursor:pointer;white-space:nowrap">Speichern</button>
+                  </sc-if>
+                </div>
+                <div class="alt-grid">
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#C7F011">DE</span>
+                    <input type="text" value="{{ i.altDe }}" placeholder="Bildbeschreibung…" style="height:36px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#7FD4FF">EN · DeepL</span>
+                      <button title="EN-Wert sperren" style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;color:{{ i.lockFg }};background:{{ i.lockBg }};border:1px solid {{ i.lockBrd }};border-radius:999px;padding:2px 8px;cursor:pointer"><p2g-icon name="{{ i.lockIcon }}" size="10"></p2g-icon>{{ i.lockLabel }}</button>
+                    </div>
+                    <input type="text" value="{{ i.altEn }}" placeholder="wird automatisch übersetzt" style="height:36px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 82%);background:hsl(200 100% 75% / 0.04);border:1px solid hsl(200 100% 75% / 0.16);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#7FD4FF">
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:14px;flex:none;padding-top:22px;flex-wrap:wrap">
+                <label style="display:flex;flex-direction:column;gap:5px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Reihenfolge</span>
+                  <input type="text" value="{{ i.order }}" style="width:60px;height:34px;padding:0 10px;box-sizing:border-box;text-align:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                </label>
+                <div style="display:flex;flex-direction:column;gap:5px;align-items:center">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Aktiv</span>
+                  <button onClick="{{ i.noop }}" style="width:40px;height:23px;position:relative;padding:0;background:{{ i.swBg }};border:1px solid {{ i.swBrd }};border-radius:999px;cursor:pointer;transition:background 0.2s;margin-top:5px">
+                    <span style="position:absolute;top:2px;left:{{ i.knobX }};width:17px;height:17px;border-radius:50%;background:{{ i.knobBg }};transition:left 0.2s"></span>
+                  </button>
+                </div>
+                <button onClick="{{ i.del }}" title="Bild löschen" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:9px;cursor:pointer;margin-top:18px" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+              </div>
+            </div>
+          </x-import>
+        </sc-for>
+      </div>
+    </main>
+  </div>
+
+  <div ref="{{ delRef }}" style="display:none;position:fixed;inset:0;z-index:95;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(430px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Bild wirklich löschen?</h3>
+        <p style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 68%);margin:0">Das Bild verschwindet aus der Galerie. Die Datei bleibt im Storage erhalten.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:0;border-radius:11px;cursor:pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const ON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '19px', '#0A0A0A'];
+const OFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+
+const IMAGES = [
+  { order: '1', img: 'assets/skypadel-outdoor.jpg', altDe: 'SkyPadel Court bei Tageslicht', altEn: 'SkyPadel court in daylight', active: true, locked: false, dirty: false },
+  { order: '2', img: 'assets/skypadel-sunset.jpg', altDe: 'Padel Court im Sonnenuntergang', altEn: 'Padel court at sunset', active: true, locked: true, dirty: false },
+  { order: '3', img: 'assets/tennis-padel-aerial.jpg', altDe: 'Luftaufnahme Tennis- und Padel-Anlage', altEn: 'Aerial view of tennis and padel facility', active: true, locked: false, dirty: true },
+  { order: '4', img: 'assets/padel-norway.jpg', altDe: 'Outdoor Padel Court im Grünen', altEn: '', active: true, locked: false, dirty: false },
+  { order: '5', img: 'assets/fuer-vereine-hero.jpg', altDe: 'Vereinsgelände mit mobilen Courts', altEn: 'Club grounds with mobile courts', active: true, locked: false, dirty: false },
+  { order: '6', img: 'assets/events-hero.jpg', altDe: '', altEn: '', active: false, locked: false, dirty: false },
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    return {
+      images: IMAGES.map((i) => {
+        const s = i.active ? ON : OFF;
+        return {
+          ...i,
+          swBg: s[0], swBrd: s[1], knobX: s[2], knobBg: s[3],
+          lockIcon: i.locked ? 'lock' : 'lock-open',
+          lockLabel: i.locked ? 'gesperrt' : 'frei',
+          lockFg: i.locked ? '#C7F011' : 'hsl(0 0% 65%)',
+          lockBg: i.locked ? 'hsl(71 91% 51% / 0.1)' : 'hsl(0 0% 100% / 0.05)',
+          lockBrd: i.locked ? 'hsl(71 91% 51% / 0.3)' : 'hsl(0 0% 16%)',
+          noop: () => {},
+          del: () => this._show(this._del, true),
+        };
+      }),
+      delRef: (el) => { this._del = el; },
+      closeDel: () => this._show(this._del, false),
+    };
+  }
+}
+</script>
+</body>
+</html>

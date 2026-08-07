@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    [data-tab] { color: hsl(0 0% 60%); border-bottom: 2px solid transparent; }
+    [data-tab]:hover { color: #FAFAFA; }
+    [data-tab][data-on] { color: #C7F011; border-bottom-color: #C7F011; }
+    [data-seg] button { color: hsl(0 0% 62%); background: transparent; border: 1px solid transparent; }
+    [data-seg] button[data-on] { color: #0A0A0A; background: #C7F011; border-color: #C7F011; }
+    #loc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(370px, 100%), 1fr)); gap: 18px; }
+    #court-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr)); gap: 18px; }
+    #an-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); gap: 14px; }
+    #cam-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+    @media (max-width: 1100px) { #cam-grid { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Courts & Standorte">
+  <dc-import name="AdminSidebar" active="courts" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/courts</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Courts &amp; Standorte</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <button onClick="{{ openLoc }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.28)">
+          <p2g-icon name="plus" size="15"></p2g-icon>Neuer Standort
+        </button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:20px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)"><span style="color:#FAFAFA;font-weight:700">5 Standorte</span> (4 online) &nbsp;•&nbsp; <span style="color:#FAFAFA;font-weight:700">14 Courts</span> (14 aktiv)</span>
+        <div ref="{{ tabRef }}" style="display:flex;gap:22px;border-bottom:1px solid hsl(0 0% 12%);overflow-x:auto">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+            <button onClick="{{ t.pick }}" data-tab="1" data-key="{{ t.key }}" style="display:inline-flex;align-items:center;gap:8px;padding:0 2px 11px;background:none;border-top:0;border-left:0;border-right:0;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:color 0.2s">
+              <p2g-icon name="{{ t.icon }}" size="16"></p2g-icon>{{ t.label }}
+              <sc-if value="{{ t.hasCount }}" hint-placeholder-val="{{ false }}">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:inherit;background:hsl(0 0% 100% / 0.07);border-radius:999px;padding:2px 7px">{{ t.count }}</span>
+              </sc-if>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- ═══ TAB: STANDORTE ═══ -->
+      <div ref="{{ v1Ref }}" id="loc-grid">
+        <sc-for list="{{ locations }}" as="l" hint-placeholder-count="4">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" padding="{{ 0 }}" hint-size="100%,470px">
+            <div style="display:flex;flex-direction:column">
+              <div style="position:relative;height:150px">
+                <img src="{{ l.img }}" alt="{{ l.name }}" style="width:100%;height:100%;object-fit:cover;border-radius:15px 15px 0 0;display:block">
+                <div style="position:absolute;inset:0;background:linear-gradient(180deg, hsl(0 0% 0% / 0.15), hsl(0 0% 0% / 0.85));border-radius:15px 15px 0 0"></div>
+                <div style="position:absolute;top:13px;left:13px;right:13px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ l.stateFg }};background:hsl(0 0% 0% / 0.65);backdrop-filter:blur(10px);border:1px solid {{ l.stateBrd }};border-radius:999px;padding:5px 11px;white-space:nowrap">
+                    <span style="width:5px;height:5px;border-radius:50%;background:{{ l.stateFg }}"></span>{{ l.state }}
+                  </span>
+                  <sc-if value="{{ l.is247 }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;color:#FAFAFA;background:hsl(0 0% 0% / 0.65);backdrop-filter:blur(10px);border:1px solid hsl(0 0% 100% / 0.2);border-radius:999px;padding:5px 10px;white-space:nowrap">24/7</span>
+                  </sc-if>
+                </div>
+                <div style="position:absolute;left:15px;right:15px;bottom:13px;display:flex;flex-direction:column;gap:3px">
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.02em;color:#FAFAFA">{{ l.name }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 78%)"><p2g-icon name="map-pin" size="12"></p2g-icon>{{ l.address }}</span>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:15px;padding:16px 18px 18px">
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ l.features }}" as="f" hint-placeholder-count="6">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:{{ f.fg }};background:{{ f.bg }};border:1px solid {{ f.brd }};border-radius:7px;padding:4px 9px;white-space:nowrap">{{ f.label }}</span>
+                  </sc-for>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:9px;padding-top:13px;border-top:1px solid hsl(0 0% 12%)">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Courts ({{ l.courtCount }})</span>
+                    <div style="display:flex;align-items:center;gap:2px;padding:2px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:9px">
+                      <button style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 75%);background:none;border:0;border-radius:7px;cursor:pointer" style-hover="color:#FF6B6B;background:hsl(0 100% 71% / 0.1)"><p2g-icon name="minus" size="13"></p2g-icon></button>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#FAFAFA;min-width:18px;text-align:center">{{ l.courtCount }}</span>
+                      <button style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 75%);background:none;border:0;border-radius:7px;cursor:pointer" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.1)"><p2g-icon name="plus" size="13"></p2g-icon></button>
+                    </div>
+                  </div>
+
+                  <sc-for list="{{ l.courts }}" as="c" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:11px">
+                      <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span>
+                      <sc-if value="{{ c.inactive }}" hint-placeholder-val="{{ false }}">
+                        <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;color:#FF6B6B;background:hsl(0 100% 71% / 0.1);border-radius:999px;padding:3px 8px;white-space:nowrap">Inaktiv</span>
+                      </sc-if>
+                      <button onClick="{{ c.openPrice }}" title="Preise" style="width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.28);border-radius:8px;cursor:pointer" style-hover="background:hsl(71 91% 51% / 0.18)">€</button>
+                      <button onClick="{{ c.toggle }}" data-sw="{{ c.on }}" style="width:38px;height:22px;flex:none;position:relative;padding:0;background:{{ c.swBg }};border:1px solid {{ c.swBrd }};border-radius:999px;cursor:pointer;transition:background 0.2s">
+                        <span style="position:absolute;top:2px;left:{{ c.knobX }};width:16px;height:16px;border-radius:50%;background:{{ c.knobBg }};transition:left 0.2s"></span>
+                      </button>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="display:flex;gap:9px">
+                  <button onClick="{{ l.edit }}" style="flex:1;height:36px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="pencil" size="14"></p2g-icon>Bearbeiten</button>
+                  <button onClick="{{ l.del }}" title="Löschen" style="width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:10px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                </div>
+              </div>
+            </div>
+          </x-import>
+        </sc-for>
+      </div>
+
+      <!-- ═══ TAB: COURTS ═══ -->
+      <div ref="{{ v2Ref }}" id="court-grid" style="display:none">
+        <sc-for list="{{ courts }}" as="c" hint-placeholder-count="6">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" padding="{{ 0 }}" hint-size="100%,270px">
+            <div style="display:flex;flex-direction:column">
+              <div style="position:relative;aspect-ratio:21/9">
+                <img src="{{ c.img }}" alt="{{ c.name }}" style="width:100%;height:100%;object-fit:cover;border-radius:15px 15px 0 0;display:block">
+                <div style="position:absolute;inset:0;background:linear-gradient(180deg, hsl(0 0% 0% / 0.1), hsl(0 0% 0% / 0.7));border-radius:15px 15px 0 0"></div>
+                <span style="position:absolute;top:11px;left:11px;display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;color:{{ c.stateFg }};background:hsl(0 0% 0% / 0.65);backdrop-filter:blur(10px);border:1px solid {{ c.stateBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap">
+                  <span style="width:5px;height:5px;border-radius:50%;background:{{ c.stateFg }}"></span>{{ c.state }}
+                </span>
+                <span style="position:absolute;top:11px;right:11px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:{{ c.priceFg }};background:hsl(0 0% 0% / 0.65);backdrop-filter:blur(10px);border:1px solid {{ c.priceBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap">{{ c.price }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:13px;padding:15px 17px 17px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                  <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 65%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.sub }}</span>
+                  </div>
+                  <button onClick="{{ c.toggle }}" style="width:38px;height:22px;flex:none;position:relative;padding:0;background:{{ c.swBg }};border:1px solid {{ c.swBrd }};border-radius:999px;cursor:pointer;transition:background 0.2s">
+                    <span style="position:absolute;top:2px;left:{{ c.knobX }};width:16px;height:16px;border-radius:50%;background:{{ c.knobBg }};transition:left 0.2s"></span>
+                  </button>
+                </div>
+                <div style="display:flex;gap:9px">
+                  <button onClick="{{ c.edit }}" style="flex:1;height:34px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="pencil" size="14"></p2g-icon>Bearbeiten</button>
+                  <button onClick="{{ c.del }}" title="Löschen" style="width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:10px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                </div>
+              </div>
+            </div>
+          </x-import>
+        </sc-for>
+      </div>
+
+      <!-- ═══ TAB: ANALYTICS ═══ -->
+      <div ref="{{ v3Ref }}" style="display:none;flex-direction:column;gap:18px">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,96px">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+            <label style="display:flex;flex-direction:column;gap:7px;min-width:min(230px, 100%)">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Standort</span>
+              <span style="position:relative;display:flex;align-items:center">
+                <select style="appearance:none;width:100%;height:38px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                  <option>Alle Standorte</option><option>TSV München-Ost</option><option>SV Rheinaue Köln</option><option>TC Hamburg-Alster</option><option>TSG Stuttgart-Süd</option>
+                </select>
+                <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+              </span>
+            </label>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Zeitraum</span>
+              <div data-seg="1" ref="{{ rangeRef }}" style="display:flex;gap:3px;padding:3px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:11px">
+                <sc-for list="{{ ranges }}" as="r" hint-placeholder-count="4">
+                  <button onClick="{{ r.pick }}" data-key="{{ r.label }}" style="padding:6px 15px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;transition:color 0.2s, background 0.2s">{{ r.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </x-import>
+
+        <div id="an-kpi">
+          <sc-for list="{{ anKpis }}" as="k" hint-placeholder-count="6">
+            <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,110px">
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <span style="color:hsl(0 0% 58%);display:flex"><p2g-icon name="{{ k.icon }}" size="16"></p2g-icon></span>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:24px;line-height:1;color:{{ k.color }}">{{ k.value }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">{{ k.label }}</span>
+              </div>
+            </x-import>
+          </sc-for>
+        </div>
+
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,300px">
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Buchungen pro Standort</h2>
+            <div style="display:flex;align-items:flex-end;gap:clamp(10px, 3vw, 30px);height:190px;padding:0 4px">
+              <sc-for list="{{ bars }}" as="b" hint-placeholder-count="5">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:9px;height:100%;justify-content:flex-end;min-width:0">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:{{ b.color }}">{{ b.value }}</span>
+                  <div style="width:100%;max-width:64px;height:{{ b.h }};border-radius:8px 8px 0 0;background:linear-gradient(180deg, {{ b.color }}, {{ b.colorDim }})"></div>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 65%);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">{{ b.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <!-- ═══ TAB: KI-KAMERAS ═══ -->
+      <div ref="{{ v4Ref }}" id="cam-grid" style="display:none">
+        <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,340px">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+                <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Kamera Sessions</h2>
+                <div data-seg="1" ref="{{ camSegRef }}" style="display:flex;gap:3px;padding:3px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:11px">
+                  <sc-for list="{{ camTabs }}" as="ct" hint-placeholder-count="2">
+                    <button onClick="{{ ct.pick }}" data-key="{{ ct.key }}" style="padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;white-space:nowrap;transition:color 0.2s, background 0.2s">{{ ct.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:hsl(0 0% 65%)">
+                <span style="width:6px;height:6px;border-radius:50%;background:#C7F011;animation:livePulse 1.8s ease-in-out infinite"></span>Auto-Refresh 10 s
+              </span>
+              <div ref="{{ camListRef }}" style="display:flex;flex-direction:column;gap:9px">
+                <sc-for list="{{ sessions }}" as="s" hint-placeholder-count="4">
+                  <div data-camtab="{{ s.group }}" style="display:flex;align-items:center;gap:13px;padding:13px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:13px">
+                    <span style="width:34px;height:34px;flex:none;border-radius:10px;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);display:flex;align-items:center;justify-content:center;color:{{ s.fg }}"><p2g-icon name="video" size="15"></p2g-icon></span>
+                    <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                      <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.court }}</span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.meta }}</span>
+                    </div>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ s.fg }};background:{{ s.bg }};border:1px solid {{ s.brd }};border-radius:999px;padding:4px 10px;white-space:nowrap;flex:none">{{ s.status }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </x-import>
+
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,300px">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Match-Simulation</h2>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">Test-Modus — erzeugt Mock-Analysen und vergibt Credits.</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(190px, 100%), 1fr));gap:12px">
+                <sc-for list="{{ simFields }}" as="sf" hint-placeholder-count="4">
+                  <label style="display:flex;flex-direction:column;gap:7px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ sf.label }}</span>
+                    <input type="text" placeholder="{{ sf.ph }}" style="height:38px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                  </label>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:11px;padding:13px 15px;background:hsl(41 100% 65% / 0.06);border:1px solid hsl(41 100% 65% / 0.22);border-radius:13px">
+                <span style="color:#FFC44D;display:flex"><p2g-icon name="alert-triangle" size="16"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 78%)">Credits werden echt vergeben — nur mit Test-Accounts verwenden.</span>
+              </div>
+              <button style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25)">
+                <p2g-icon name="play" size="15"></p2g-icon>Match simulieren
+              </button>
+            </div>
+          </x-import>
+        </div>
+
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,380px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">API Keys</h2>
+              <button onClick="{{ openKey }}" style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.3);border-radius:9px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(71 91% 51% / 0.18)"><p2g-icon name="plus" size="14"></p2g-icon>Neu</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ keys }}" as="k" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:8px;padding:13px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:13px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ k.name }}</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;color:{{ k.fg }};background:{{ k.bg }};border-radius:999px;padding:3px 9px;white-space:nowrap;flex:none">{{ k.state }}</span>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 65%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ k.key }}</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 58%)">{{ k.meta }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </x-import>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── Dialog: Standort ── -->
+  <div ref="{{ locDlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeLoc }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(620px, 100%);max-height:88vh;overflow-y:auto;background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Standort</span>
+          <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Neuer Standort</h3>
+        </div>
+        <button onClick="{{ closeLoc }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer" style-hover="color:#FAFAFA"><p2g-icon name="x" size="16"></p2g-icon></button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(240px, 100%), 1fr));gap:13px">
+        <sc-for list="{{ locFields }}" as="lf" hint-placeholder-count="8">
+          <label style="display:flex;flex-direction:column;gap:7px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ lf.label }}<sc-if value="{{ lf.req }}" hint-placeholder-val="{{ false }}"><span style="color:#C7F011"> *</span></sc-if></span>
+            <input type="text" placeholder="{{ lf.ph }}" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+          </label>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;padding-top:15px;border-top:1px solid hsl(0 0% 12%)">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Merkmale</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ allFeatures }}" as="af" hint-placeholder-count="10">
+            <button style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:hsl(0 0% 78%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;padding:7px 12px;cursor:pointer;white-space:nowrap;transition:all 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4);background:hsl(71 91% 51% / 0.08)">{{ af }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:15px;border-top:1px solid hsl(0 0% 12%)">
+        <button onClick="{{ closeLoc }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeLoc }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25)">Erstellen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: Preise ── -->
+  <div ref="{{ priceDlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closePrice }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(430px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Preise</span>
+        <h3 ref="{{ priceTitleRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Court 1 · TSV München-Ost</h3>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <sc-for list="{{ priceRows }}" as="pr" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:13px;padding:12px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:12px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;flex:1">{{ pr.label }}</span>
+            <span style="position:relative;display:flex;align-items:center">
+              <input type="text" value="{{ pr.value }}" style="width:88px;height:36px;padding:0 30px 0 12px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              <span style="position:absolute;right:11px;font-family:'JetBrains Mono',monospace;font-size:13px;color:hsl(0 0% 65%);pointer-events:none">€</span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:12px 14px;background:hsl(41 100% 65% / 0.06);border:1px solid hsl(41 100% 65% / 0.22);border-radius:12px">
+        <span style="color:#FFC44D;display:flex"><p2g-icon name="info" size="15"></p2g-icon></span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 78%)">Alle drei Preise müssen gesetzt sein, damit der Court buchbar ist.</span>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closePrice }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closePrice }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer">Speichern</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: löschen ── -->
+  <div ref="{{ delDlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(430px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 ref="{{ delTitleRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Standort löschen?</h3>
+        <p ref="{{ delTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 68%);margin:0">„TSV München-Ost“ und alle zugehörigen Courts werden unwiderruflich gelöscht.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:0;border-radius:11px;cursor:pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: API Key ── -->
+  <div ref="{{ keyDlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeKey }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(470px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Kamera</span>
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Neuen API Key erstellen</h3>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Name<span style="color:#C7F011"> *</span></span>
+        <input type="text" placeholder="z. B. Bamberg Court 1 Cam" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Standort<span style="color:#C7F011"> *</span></span>
+        <span style="position:relative;display:flex;align-items:center">
+          <select style="appearance:none;width:100%;height:40px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+            <option>Standort wählen…</option><option>TSV München-Ost</option><option>SV Rheinaue Köln</option><option>TC Hamburg-Alster</option>
+          </select>
+          <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+        </span>
+      </label>
+      <div style="display:flex;flex-direction:column;gap:9px;padding:14px;background:hsl(0 0% 100% / 0.03);border:1px dashed hsl(0 0% 18%);border-radius:13px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%)">Nach dem Erstellen — nur einmal sichtbar</span>
+        <div style="display:flex;align-items:center;gap:9px">
+          <span style="flex:1;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#C7F011;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">p2g_cam_•••••••••••••••••••••</span>
+          <button style="width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 75%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer" style-hover="color:#C7F011"><p2g-icon name="eye" size="14"></p2g-icon></button>
+          <button style="width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 75%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer" style-hover="color:#C7F011"><p2g-icon name="copy" size="14"></p2g-icon></button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeKey }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeKey }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer">Key erstellen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const ON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '18px', '#0A0A0A'];
+const OFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+
+const FEAT = {
+  Rewards: ['#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)'],
+  KI: ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)'],
+  Automat: ['#C7A6FF', 'hsl(263 100% 82% / 0.1)', 'hsl(263 100% 82% / 0.3)'],
+};
+const feat = (label) => {
+  const c = FEAT[label] || ['hsl(0 0% 78%)', 'hsl(0 0% 100% / 0.05)', 'hsl(0 0% 16%)'];
+  return { label, fg: c[0], bg: c[1], brd: c[2] };
+};
+
+const LOCS = [
+  { name: 'TSV München-Ost', address: 'Sportpark Ost, 81829 München', img: 'assets/skypadel-outdoor.jpg', online: true, is247: true, courtCount: 4, features: ['Rewards', 'KI', 'Automat', 'WC', 'Dusche', 'Umkleide', 'Flutlicht', 'Parkplätze', 'WLAN'], courts: [
+    { name: 'Court 1', on: true }, { name: 'Court 2', on: true }, { name: 'Court 3', on: true }, { name: 'Court 4', on: true },
+  ] },
+  { name: 'SV Rheinaue Köln', address: 'Rheinauer Weg 12, 50999 Köln', img: 'assets/skypadel-sunset.jpg', online: true, is247: false, courtCount: 3, features: ['Rewards', 'KI', 'WC', 'Umkleide', 'Flutlicht', 'Schlägerverleih'], courts: [
+    { name: 'Court 1', on: true }, { name: 'Court 2', on: true }, { name: 'Court 3', on: true },
+  ] },
+  { name: 'TC Hamburg-Alster', address: 'Alsterufer 40, 22085 Hamburg', img: 'assets/tennis-padel-aerial.jpg', online: true, is247: true, courtCount: 3, features: ['Rewards', 'Automat', 'WC', 'Dusche', 'Flutlicht', 'Ballverleih', 'Barrierefrei'], courts: [
+    { name: 'Court 1', on: true }, { name: 'Court 2', on: true }, { name: 'Court 3', on: true },
+  ] },
+  { name: 'TSG Stuttgart-Süd', address: 'Karl-Kloss-Str. 8, 70180 Stuttgart', img: 'assets/padel-norway.jpg', online: true, is247: false, courtCount: 4, features: ['Rewards', 'KI', 'WC', 'Umkleide', 'Parkplätze', 'WLAN'], courts: [
+    { name: 'Court 1', on: true }, { name: 'Court 2', on: true }, { name: 'Court 3', on: true }, { name: 'Court 4', on: false },
+  ] },
+  { name: 'SC Leipzig-Nord', address: 'Delitzscher Str. 90, 04129 Leipzig', img: 'assets/fuer-vereine-hero.jpg', online: false, is247: false, courtCount: 0, features: ['WC', 'Parkplätze'], courts: [] },
+];
+
+const COURTS = [
+  { name: 'Court 1', sub: 'TSV München-Ost • München', img: 'assets/skypadel-outdoor.jpg', on: true, price: 'ab 24 €' },
+  { name: 'Court 2', sub: 'TSV München-Ost • München', img: 'assets/skypadel-outdoor.jpg', on: true, price: 'ab 24 €' },
+  { name: 'Court 3', sub: 'TSV München-Ost • München', img: 'assets/skypadel-outdoor.jpg', on: true, price: 'ab 24 €' },
+  { name: 'Court 1', sub: 'SV Rheinaue Köln • Köln', img: 'assets/skypadel-sunset.jpg', on: true, price: 'ab 22 €' },
+  { name: 'Court 2', sub: 'SV Rheinaue Köln • Köln', img: 'assets/skypadel-sunset.jpg', on: true, price: 'Preise fehlen' },
+  { name: 'Court 1', sub: 'TC Hamburg-Alster • Hamburg', img: 'assets/tennis-padel-aerial.jpg', on: false, price: 'ab 26 €' },
+];
+
+const SESSIONS = [
+  { court: 'München-Ost · Court 1', meta: 'sess_8f21 · gestartet 18:04 · 42 Min.', status: 'Aktiv', group: 'active', kind: 'ok' },
+  { court: 'Köln · Court 2', meta: 'sess_7c09 · in Warteschlange', status: 'Wartet', group: 'active', kind: 'pending' },
+  { court: 'Hamburg · Court 1', meta: 'sess_6b55 · Analyse läuft · 78 %', status: 'Verarbeitung', group: 'active', kind: 'info' },
+  { court: 'München-Ost · Court 2', meta: 'sess_5a12 · 90 Min. · 4 Clips', status: 'Fertig', group: 'history', kind: 'ok' },
+  { court: 'Stuttgart · Court 3', meta: 'sess_4d88 · Abbruch: Kameraverbindung', status: 'Fehler', group: 'history', kind: 'err' },
+];
+const SK = {
+  ok: ['#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)'],
+  pending: ['#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)'],
+  info: ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)'],
+  err: ['#FF6B6B', 'hsl(0 100% 71% / 0.1)', 'hsl(0 100% 71% / 0.3)'],
+};
+
+class Component extends DCLogic {
+  state = { tab: 'locs', range: '7T', camTab: 'active' };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 14) clearInterval(this._iv);
+    }, 350);
+    this._paint();
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  componentDidUpdate() { this._paint(); }
+
+  _paint() {
+    const t = this.state.tab;
+    if (this._tabs) {
+      this._tabs.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === t);
+      });
+    }
+    const views = [['locs', this._v1, 'grid'], ['courts', this._v2, 'grid'], ['an', this._v3, 'flex'], ['cam', this._v4, 'grid']];
+    views.forEach(([key, el, disp]) => { if (el) el.style.display = t === key ? disp : 'none'; });
+
+    if (this._rangeBox) {
+      this._rangeBox.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === this.state.range);
+      });
+    }
+    if (this._camSeg) {
+      this._camSeg.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === this.state.camTab);
+      });
+    }
+    if (this._camList) {
+      this._camList.querySelectorAll('[data-camtab]').forEach((el) => {
+        el.style.display = el.dataset.camtab === this.state.camTab ? '' : 'none';
+      });
+    }
+  }
+
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  _sw(on) {
+    const s = on ? ON : OFF;
+    return { swBg: s[0], swBrd: s[1], knobX: s[2], knobBg: s[3] };
+  }
+
+  renderVals() {
+    const anSets = {
+      '7T': [['calendar-check', '241', 'Buchungen gesamt', '#FAFAFA'], ['clock', '241', 'Letzte 7 Tage', '#FAFAFA'], ['activity', '96', 'Letzte 3 Tage', '#FAFAFA'], ['euro', '7.612 €', 'Umsatz gesamt', '#C7F011'], ['gauge', '68 %', 'Auslastung', '#C7F011'], ['x-circle', '3,2 %', 'Storno-Rate', '#FFC44D']],
+      '30T': [['calendar-check', '1.042', 'Buchungen gesamt', '#FAFAFA'], ['clock', '241', 'Letzte 7 Tage', '#FAFAFA'], ['activity', '96', 'Letzte 3 Tage', '#FAFAFA'], ['euro', '32.480 €', 'Umsatz gesamt', '#C7F011'], ['gauge', '64 %', 'Auslastung', '#C7F011'], ['x-circle', '4,1 %', 'Storno-Rate', '#FFC44D']],
+      '90T': [['calendar-check', '2.918', 'Buchungen gesamt', '#FAFAFA'], ['clock', '241', 'Letzte 7 Tage', '#FAFAFA'], ['activity', '96', 'Letzte 3 Tage', '#FAFAFA'], ['euro', '91.240 €', 'Umsatz gesamt', '#C7F011'], ['gauge', '59 %', 'Auslastung', '#C7F011'], ['x-circle', '4,6 %', 'Storno-Rate', '#FFC44D']],
+      Alle: [['calendar-check', '4.106', 'Buchungen gesamt', '#FAFAFA'], ['clock', '241', 'Letzte 7 Tage', '#FAFAFA'], ['activity', '96', 'Letzte 3 Tage', '#FAFAFA'], ['euro', '128.900 €', 'Umsatz gesamt', '#C7F011'], ['gauge', '57 %', 'Auslastung', '#C7F011'], ['x-circle', '4,9 %', 'Storno-Rate', '#FFC44D']],
+    };
+
+    return {
+      tabs: [
+        { key: 'locs', label: 'Standorte', icon: 'map-pin', hasCount: true, count: '5', pick: () => this.setState({ tab: 'locs' }) },
+        { key: 'courts', label: 'Courts', icon: 'layout-grid', hasCount: true, count: '14', pick: () => this.setState({ tab: 'courts' }) },
+        { key: 'an', label: 'Analytics', icon: 'chart-line', pick: () => this.setState({ tab: 'an' }) },
+        { key: 'cam', label: 'KI-Kameras', icon: 'video', pick: () => this.setState({ tab: 'cam' }) },
+      ],
+
+      locations: LOCS.map((l) => ({
+        ...l,
+        state: l.online ? 'Online' : 'Offline',
+        stateFg: l.online ? '#C7F011' : '#FF6B6B',
+        stateBrd: l.online ? 'hsl(71 91% 51% / 0.4)' : 'hsl(0 100% 71% / 0.4)',
+        features: l.features.map(feat),
+        courts: l.courts.map((c) => ({
+          ...c,
+          inactive: !c.on,
+          ...this._sw(c.on),
+          openPrice: () => {
+            if (this._priceTitle) this._priceTitle.textContent = c.name + ' · ' + l.name;
+            this._show(this._priceDlg, true);
+          },
+          toggle: () => {},
+        })),
+        edit: () => this._show(this._locDlg, true),
+        del: () => {
+          if (this._delTitle) this._delTitle.textContent = 'Standort löschen?';
+          if (this._delText) this._delText.textContent = '„' + l.name + '“ und alle zugehörigen Courts werden unwiderruflich gelöscht.';
+          this._show(this._delDlg, true);
+        },
+      })),
+
+      courts: COURTS.map((c) => {
+        const missing = c.price === 'Preise fehlen';
+        return {
+          ...c,
+          state: c.on ? 'Online' : 'Offline',
+          stateFg: c.on ? '#C7F011' : '#FF6B6B',
+          stateBrd: c.on ? 'hsl(71 91% 51% / 0.4)' : 'hsl(0 100% 71% / 0.4)',
+          priceFg: missing ? '#FFC44D' : '#FAFAFA',
+          priceBrd: missing ? 'hsl(41 100% 65% / 0.45)' : 'hsl(0 0% 100% / 0.2)',
+          ...this._sw(c.on),
+          edit: () => this._show(this._priceDlg, true),
+          del: () => {
+            if (this._delTitle) this._delTitle.textContent = 'Court löschen?';
+            if (this._delText) this._delText.textContent = '„' + c.name + '“ (' + c.sub + ') wird unwiderruflich gelöscht.';
+            this._show(this._delDlg, true);
+          },
+          toggle: () => {},
+        };
+      }),
+
+      ranges: ['7T', '30T', '90T', 'Alle'].map((label) => ({
+        label, pick: () => this.setState({ range: label }),
+      })),
+      anKpis: anSets[this.state.range].map((k) => ({ icon: k[0], value: k[1], label: k[2], color: k[3] })),
+
+      bars: [
+        { label: 'München-Ost', value: '86', h: '160px', color: '#C7F011', colorDim: 'hsl(71 91% 51% / 0.25)' },
+        { label: 'Köln', value: '61', h: '113px', color: '#C7F011', colorDim: 'hsl(71 91% 51% / 0.25)' },
+        { label: 'Hamburg', value: '54', h: '100px', color: '#C7F011', colorDim: 'hsl(71 91% 51% / 0.25)' },
+        { label: 'Stuttgart', value: '40', h: '74px', color: '#FFC44D', colorDim: 'hsl(41 100% 65% / 0.25)' },
+        { label: 'Leipzig', value: '0', h: '4px', color: 'hsl(0 0% 45%)', colorDim: 'hsl(0 0% 20%)' },
+      ],
+
+      camTabs: [
+        { key: 'active', label: 'Aktiv (3)', pick: () => this.setState({ camTab: 'active' }) },
+        { key: 'history', label: 'Historie', pick: () => this.setState({ camTab: 'history' }) },
+      ],
+      sessions: SESSIONS.map((s) => {
+        const k = SK[s.kind];
+        return { ...s, fg: k[0], bg: k[1], brd: k[2] };
+      }),
+
+      keys: [
+        { name: 'München Court 1 Cam', key: 'p2g_cam_9f4b…c21a', state: 'Aktiv', fg: '#C7F011', bg: 'hsl(71 91% 51% / 0.12)', meta: 'Zuletzt: heute 18:04 · 412 Requests' },
+        { name: 'Köln Court 2 Cam', key: 'p2g_cam_2ad7…8e04', state: 'Aktiv', fg: '#C7F011', bg: 'hsl(71 91% 51% / 0.12)', meta: 'Zuletzt: heute 16:22 · 289 Requests' },
+        { name: 'Stuttgart Testkey', key: 'p2g_cam_71cc…04f9', state: 'Widerrufen', fg: '#FF6B6B', bg: 'hsl(0 100% 71% / 0.12)', meta: 'Widerrufen am 12.07.2026' },
+      ],
+
+      simFields: [
+        { label: 'Court', ph: 'Court wählen…' },
+        { label: 'Spieler 1', ph: 'test@padel2go.de' },
+        { label: 'Spieler 2', ph: 'test2@padel2go.de' },
+        { label: 'Dauer (Min.)', ph: '90' },
+      ],
+
+      locFields: [
+        { label: 'Name', ph: 'TSV München-Ost', req: true },
+        { label: 'Slug', ph: 'tsv-muenchen-ost', req: true },
+        { label: 'Straße & Nr.', ph: 'Sportpark Ost 4' },
+        { label: 'PLZ', ph: '81829' },
+        { label: 'Stadt', ph: 'München' },
+        { label: 'Bundesland', ph: 'Bayern' },
+        { label: 'Öffnungszeiten', ph: '07:00 – 23:00' },
+        { label: 'Hauptbild-URL', ph: 'https://…' },
+      ],
+      allFeatures: ['Rewards', 'KI-Kamera', 'Automat', 'WC', 'Dusche', 'Umkleide', 'Flutlicht', 'Parkplätze', 'Schlägerverleih', 'Ballverleih', 'WLAN', 'Barrierefrei', '24/7 Zugang'],
+      priceRows: [
+        { label: '60 Minuten', value: '24,00' },
+        { label: '90 Minuten', value: '36,00' },
+        { label: '120 Minuten', value: '40,00' },
+      ],
+
+      tabRef: (el) => { this._tabs = el; this._paint(); },
+      v1Ref: (el) => { this._v1 = el; },
+      v2Ref: (el) => { this._v2 = el; },
+      v3Ref: (el) => { this._v3 = el; },
+      v4Ref: (el) => { this._v4 = el; },
+      rangeRef: (el) => { this._rangeBox = el; this._paint(); },
+      camSegRef: (el) => { this._camSeg = el; this._paint(); },
+      camListRef: (el) => { this._camList = el; this._paint(); },
+      locDlgRef: (el) => { this._locDlg = el; },
+      priceDlgRef: (el) => { this._priceDlg = el; },
+      priceTitleRef: (el) => { this._priceTitle = el; },
+      delDlgRef: (el) => { this._delDlg = el; },
+      delTitleRef: (el) => { this._delTitle = el; },
+      delTextRef: (el) => { this._delText = el; },
+      keyDlgRef: (el) => { this._keyDlg = el; },
+
+      openLoc: () => this._show(this._locDlg, true),
+      closeLoc: () => this._show(this._locDlg, false),
+      closePrice: () => this._show(this._priceDlg, false),
+      closeDel: () => this._show(this._delDlg, false),
+      openKey: () => this._show(this._keyDlg, true),
+      closeKey: () => this._show(this._keyDlg, false),
+    };
+  }
+}
+</script>
+</body>
+</html>

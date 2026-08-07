@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #int-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr)); gap: 18px; align-items: start; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Integrationen">
+  <dc-import name="AdminSidebar" active="integrations" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/integrations</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Integrationen</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px;flex:none">
+        <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 65%);max-width:720px">API-Schlüssel und Konfiguration aller externen Dienste. Geheime Schlüssel werden serverseitig gespeichert und sind nach dem Speichern im Browser nicht mehr lesbar.</span>
+
+      <div id="int-grid">
+        <sc-for list="{{ services }}" as="s" hint-placeholder-count="6">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,340px">
+            <div style="display:flex;flex-direction:column;gap:16px;opacity:{{ s.opacity }}">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+                <div style="display:flex;align-items:center;gap:12px;min-width:0">
+                  <span style="width:38px;height:38px;flex:none;border-radius:11px;background:{{ s.iconBg }};border:1px solid {{ s.iconBrd }};display:flex;align-items:center;justify-content:center;color:{{ s.iconFg }}"><p2g-icon name="{{ s.icon }}" size="17"></p2g-icon></span>
+                  <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">{{ s.name }}</span>
+                      <sc-if value="{{ s.soon }}" hint-placeholder-val="{{ false }}">
+                        <span style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#FFC44D;background:hsl(41 100% 65% / 0.1);border:1px solid hsl(41 100% 65% / 0.28);border-radius:999px;padding:2px 8px;white-space:nowrap">Demnächst</span>
+                      </sc-if>
+                    </div>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.45;color:hsl(0 0% 65%)">{{ s.desc }}</span>
+                  </div>
+                </div>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;color:{{ s.stFg }};background:{{ s.stBg }};border:1px solid {{ s.stBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap;flex:none">
+                  <span style="width:5px;height:5px;border-radius:50%;background:{{ s.stFg }}"></span>{{ s.status }}
+                </span>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:13px">
+                <sc-for list="{{ s.fields }}" as="f" hint-placeholder-count="3">
+                  <label style="display:flex;flex-direction:column;gap:7px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ f.label }}<sc-if value="{{ f.secret }}" hint-placeholder-val="{{ false }}"><span style="color:hsl(0 0% 50%);letter-spacing:0.06em"> · geheim</span></sc-if></span>
+
+                    <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
+                      <span style="position:relative;display:flex;align-items:center">
+                        <select disabled="{{ f.disabled }}" style="appearance:none;width:100%;height:40px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:{{ f.cursor }}" style-focus="border-color:#C7F011">
+                          <sc-for list="{{ f.options }}" as="o" hint-placeholder-count="2">
+                            <option value="{{ o }}">{{ o }}</option>
+                          </sc-for>
+                        </select>
+                        <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+                      </span>
+                    </sc-if>
+
+                    <sc-if value="{{ f.isSecret }}" hint-placeholder-val="{{ false }}">
+                      <span style="position:relative;display:flex;align-items:center">
+                        <input ref="{{ f.ref }}" type="password" placeholder="{{ f.ph }}" disabled="{{ f.disabled }}" style="width:100%;height:40px;padding:0 42px 0 13px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                        <button onClick="{{ f.toggle }}" title="Anzeigen" style="position:absolute;right:8px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 65%);background:none;border:0;border-radius:7px;cursor:pointer" style-hover="color:#C7F011"><p2g-icon name="eye" size="14"></p2g-icon></button>
+                      </span>
+                    </sc-if>
+
+                    <sc-if value="{{ f.isInput }}" hint-placeholder-val="{{ false }}">
+                      <input type="text" value="{{ f.value }}" placeholder="{{ f.ph }}" disabled="{{ f.disabled }}" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                    </sc-if>
+
+                    <sc-if value="{{ f.hasHint }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-family:'DM Sans',sans-serif;font-size:11px;line-height:1.45;color:{{ f.hintFg }}">{{ f.hint }}</span>
+                    </sc-if>
+                  </label>
+                </sc-for>
+              </div>
+
+              <button onClick="{{ s.save }}" style="align-self:flex-start;height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:{{ s.btnFg }};background:{{ s.btnBg }};border:0;border-radius:11px;cursor:{{ s.btnCursor }};white-space:nowrap">Speichern</button>
+            </div>
+          </x-import>
+        </sc-for>
+      </div>
+
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,170px">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:11px">
+            <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(41 100% 65% / 0.1);border:1px solid hsl(41 100% 65% / 0.3);display:flex;align-items:center;justify-content:center;color:#FFC44D"><p2g-icon name="shield-check" size="15"></p2g-icon></span>
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA">Sicherheitshinweis</span>
+          </div>
+          <p style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;color:hsl(0 0% 68%);margin:0;max-width:760px">Secrets werden serverseitig gespeichert; im Browser gibt es nur eine maskierte Vorschau (•••• + letzte 4 Zeichen). Beim erneuten Speichern müssen geheime Felder neu eingegeben werden — sonst werden sie entfernt.</p>
+          <p style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;color:hsl(0 0% 68%);margin:0;max-width:760px">Alternativ lassen sich die Schlüssel als <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C7F011">Supabase Edge Function Secrets</span> hinterlegen — diese haben Vorrang gegenüber den hier gespeicherten Werten.</p>
+        </div>
+      </x-import>
+    </main>
+  </div>
+
+  <div ref="{{ toastRef }}" style="display:none;position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:99;align-items:center;gap:10px;padding:12px 18px;background:hsl(0 0% 8% / 0.96);backdrop-filter:blur(18px);border:1px solid hsl(41 100% 65% / 0.4);border-radius:14px;box-shadow:0 12px 40px hsl(0 0% 0% / 0.6);max-width:min(420px, calc(100vw - 40px))">
+    <span ref="{{ toastIconRef }}" style="color:#FFC44D;display:flex;flex:none"><p2g-icon name="alert-triangle" size="16"></p2g-icon></span>
+    <span ref="{{ toastTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;line-height:1.4;color:#FAFAFA">Geheime Felder wurden entfernt</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const SERVICES = [
+  {
+    name: 'Stripe', icon: 'credit-card', desc: 'Zahlungsabwicklung für Courtbuchungen', connected: true,
+    accent: ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)'],
+    fields: [
+      { label: 'Secret Key', secret: true, isSecret: true, ph: '••••…c21a', hasHint: true, hint: 'Schlüssel hinterlegt — beim Speichern neu eingeben, sonst wird er entfernt.', hintFg: '#FFC44D' },
+      { label: 'Webhook Secret', secret: true, isSecret: true, ph: 'whsec_…', hasHint: true, hint: 'Beim Speichern neu eingeben.', hintFg: 'hsl(0 0% 58%)' },
+      { label: 'Publishable Key (öffentlich)', isInput: true, value: 'pk_live_51Nx8fQ2eZvKYlo2C', ph: 'pk_live_… oder pk_test_…' },
+      { label: 'Modus', isSelect: true, options: ['Test (Testmodus)', 'Live (Echtbetrieb)'] },
+    ],
+  },
+  {
+    name: 'Resend', icon: 'mail', desc: 'Buchungsbestätigungen, Einladungen und Kontaktmails', connected: true,
+    accent: ['#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)'],
+    fields: [
+      { label: 'API Key', secret: true, isSecret: true, ph: '••••…7f9c' },
+      { label: 'Absender-E-Mail', isInput: true, value: 'info@padel2go-official.de', ph: 'info@…', hasHint: true, hint: 'Versand läuft zentral über info@padel2go-official.de — API-Key eintragen genügt.', hintFg: 'hsl(0 0% 58%)' },
+    ],
+  },
+  {
+    name: 'Anthropic (KI)', icon: 'sparkles', desc: 'KI-Texterstellung für News-Artikel (Voice-In im News-Editor)', connected: true,
+    accent: ['#C7A6FF', 'hsl(263 100% 82% / 0.1)', 'hsl(263 100% 82% / 0.3)'],
+    fields: [
+      { label: 'API Key', secret: true, isSecret: true, ph: '••••…04b2', hasHint: true, hint: 'sk-ant-… · beim Speichern neu eingeben.', hintFg: 'hsl(0 0% 58%)' },
+    ],
+  },
+  {
+    name: 'DeepL', icon: 'languages', desc: 'Automatische DE→EN Übersetzung von Admin-Inhalten', connected: true,
+    accent: ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)'],
+    fields: [
+      { label: 'API Key', secret: true, isSecret: true, ph: '••••…:fx', hasHint: true, hint: 'Endung :fx = Free-Plan, ohne :fx = Pro. Übersetzt Partner-Tiles, Vereine, Galerie und Touchpoints beim Speichern automatisch.', hintFg: 'hsl(0 0% 58%)' },
+    ],
+  },
+  {
+    name: 'App-Konfiguration', icon: 'globe', desc: 'Basis-URL und allgemeine Einstellungen', connected: true,
+    accent: ['hsl(0 0% 82%)', 'hsl(0 0% 100% / 0.05)', 'hsl(0 0% 18%)'],
+    fields: [
+      { label: 'App URL', isInput: true, value: 'https://padel2go.de', ph: 'https://…', hasHint: true, hint: 'Wird für Weiterleitungen nach der Zahlung und in E-Mails verwendet.', hintFg: 'hsl(0 0% 58%)' },
+    ],
+  },
+  {
+    name: 'PayPal', icon: 'wallet', desc: 'Alternative Zahlungsmethode', connected: false, soon: true, disabled: true,
+    accent: ['hsl(0 0% 72%)', 'hsl(0 0% 100% / 0.05)', 'hsl(0 0% 18%)'],
+    fields: [
+      { label: 'Client ID', isInput: true, value: '', ph: 'Noch nicht verfügbar' },
+      { label: 'Client Secret', secret: true, isSecret: true, ph: 'Noch nicht verfügbar' },
+      { label: 'Modus', isSelect: true, options: ['Sandbox', 'Live'] },
+    ],
+  },
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); clearTimeout(this._toastT); }
+
+  _toast(msg, warn) {
+    if (!this._toastEl) return;
+    if (this._toastText) this._toastText.textContent = msg;
+    this._toastEl.style.borderColor = warn ? 'hsl(41 100% 65% / 0.4)' : 'hsl(71 91% 51% / 0.35)';
+    if (this._toastIcon) this._toastIcon.style.color = warn ? '#FFC44D' : '#C7F011';
+    this._toastEl.style.display = 'flex';
+    clearTimeout(this._toastT);
+    this._toastT = setTimeout(() => { this._toastEl.style.display = 'none'; }, 2600);
+  }
+
+  renderVals() {
+    return {
+      services: SERVICES.map((s) => {
+        const dis = !!s.disabled;
+        const secretRefs = [];
+        return {
+          ...s,
+          opacity: dis ? '0.6' : '1',
+          iconFg: s.accent[0], iconBg: s.accent[1], iconBrd: s.accent[2],
+          status: s.connected ? 'Verbunden' : 'Nicht konfiguriert',
+          stFg: s.connected ? '#C7F011' : '#FF6B6B',
+          stBg: s.connected ? 'hsl(71 91% 51% / 0.1)' : 'hsl(0 100% 71% / 0.1)',
+          stBrd: s.connected ? 'hsl(71 91% 51% / 0.3)' : 'hsl(0 100% 71% / 0.3)',
+          btnFg: dis ? 'hsl(0 0% 45%)' : '#0A0A0A',
+          btnBg: dis ? 'hsl(0 0% 14%)' : 'var(--gradient-lime)',
+          btnCursor: dis ? 'not-allowed' : 'pointer',
+          fields: s.fields.map((f) => ({
+            ...f,
+            disabled: dis,
+            cursor: dis ? 'not-allowed' : 'pointer',
+            ref: (el) => { if (el) secretRefs.push(el); },
+            toggle: (e) => {
+              const inp = e.currentTarget.parentElement.querySelector('input');
+              if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
+            },
+          })),
+          save: () => {
+            if (dis) return;
+            const empty = secretRefs.filter((el) => el && !el.value);
+            if (!empty.length) { this._toast(s.name + ': Gespeichert'); return; }
+            const names = s.fields.filter((f) => f.isSecret).map((f) => f.label).join(', ');
+            this._toast('Geheime Felder wurden entfernt: ' + names, true);
+          },
+        };
+      }),
+      toastRef: (el) => { this._toastEl = el; },
+      toastTextRef: (el) => { this._toastText = el; },
+      toastIconRef: (el) => { this._toastIcon = el; },
+    };
+  }
+}
+</script>
+</body>
+</html>

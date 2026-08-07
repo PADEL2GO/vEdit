@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #an-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1080px) { #an-grid { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Analytics">
+  <dc-import name="AdminSidebar" active="analytics" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/analytics</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Analytics</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px;flex:none">
+        <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Vier feste Auswertungen zu Buchungen und Nutzerwachstum — reine Lese-Ansicht.</span>
+
+      <div id="an-grid">
+        <!-- Buchungen 7 Tage -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,330px">
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="chart-column" size="15"></p2g-icon></span>
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Buchungen (letzte 7 Tage)</h2>
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:clamp(8px, 2.4vw, 22px);height:200px;padding:20px 2px 0">
+              <sc-for list="{{ week }}" as="d" hint-placeholder-count="7">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:9px;height:100%;justify-content:flex-end;min-width:0">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:{{ d.fg }}">{{ d.value }}</span>
+                  <div style="width:100%;max-width:44px;height:{{ d.h }};border-radius:8px 8px 0 0;background:{{ d.bg }}"></div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:{{ d.labelFg }};white-space:nowrap">{{ d.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </x-import>
+
+        <!-- Donut -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,330px">
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="chart-pie" size="15"></p2g-icon></span>
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Buchungen nach Status</h2>
+            </div>
+            <div style="display:flex;align-items:center;gap:26px;flex-wrap:wrap;justify-content:center">
+              <div style="position:relative;width:170px;height:170px;flex:none;border-radius:50%;background:{{ donut }}">
+                <div style="position:absolute;inset:30px;border-radius:50%;background:hsl(0 0% 5%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:24px;line-height:1;color:#FAFAFA">1.042</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 65%)">gesamt</span>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <sc-for list="{{ statuses }}" as="s" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="width:11px;height:11px;flex:none;border-radius:4px;background:{{ s.color }}"></span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 78%);white-space:nowrap">{{ s.label }}:</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAFAFA;white-space:nowrap">{{ s.value }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 58%);white-space:nowrap">{{ s.pct }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </x-import>
+
+        <!-- Standorte horizontal -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,330px">
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="map-pin" size="15"></p2g-icon></span>
+              <div style="display:flex;flex-direction:column;gap:1px">
+                <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Buchungen pro Standort</h2>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">nur bestätigte Buchungen</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ locations }}" as="l" hint-placeholder-count="5">
+                <div style="display:grid;grid-template-columns:106px minmax(0, 1fr) 46px;gap:11px;align-items:center">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:hsl(0 0% 82%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.label }}</span>
+                  <div style="height:20px;border-radius:6px;background:hsl(0 0% 10%);overflow:hidden">
+                    <div style="height:100%;width:{{ l.pct }};border-radius:6px;background:linear-gradient(90deg, hsl(71 91% 51% / 0.4), #C7F011)"></div>
+                  </div>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#C7F011;text-align:right;white-space:nowrap">{{ l.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </x-import>
+
+        <!-- Neue Benutzer -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,330px">
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="trending-up" size="15"></p2g-icon></span>
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Neue Benutzer pro Woche</h2>
+            </div>
+            <div style="position:relative;height:200px;padding-bottom:24px;box-sizing:content-box">
+              <svg viewBox="0 0 400 200" preserveAspectRatio="none" style="position:absolute;top:0;left:0;right:0;height:200px;width:100%;overflow:visible">
+                <line x1="0" y1="55" x2="400" y2="55" stroke="hsl(0 0% 14%)" stroke-width="1"></line>
+                <line x1="0" y1="103" x2="400" y2="103" stroke="hsl(0 0% 14%)" stroke-width="1"></line>
+                <line x1="0" y1="151" x2="400" y2="151" stroke="hsl(0 0% 14%)" stroke-width="1"></line>
+                <line x1="0" y1="200" x2="400" y2="200" stroke="hsl(0 0% 18%)" stroke-width="1"></line>
+                <polyline points="{{ linePoints }}" fill="none" stroke="#C7F011" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                <polygon points="{{ areaPoints }}" fill="rgba(199,240,17,0.12)"></polygon>
+              </svg>
+              <div style="position:absolute;top:0;left:0;right:0;height:200px;display:flex;align-items:flex-end;justify-content:space-between;pointer-events:none">
+                <sc-for list="{{ weeks }}" as="w" hint-placeholder-count="4">
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%;position:relative">
+                    <span style="position:absolute;bottom:{{ w.bottom }};font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:#C7F011;white-space:nowrap">{{ w.value }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 65%);white-space:nowrap;transform:translateY(20px)">{{ w.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </x-import>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const WEEK = [
+  ['Do', 28], ['Fr', 41], ['Sa', 52], ['So', 47], ['Mo', 34], ['Di', 39], ['Mi', 38],
+];
+const LOCS = [
+  ['München-Ost', 312], ['Rheinaue Köln', 224], ['Hamburg-Alster', 198], ['Stuttgart-Süd', 146], ['Leipzig-Nord', 0],
+];
+const WEEKS = [['KW 28', 96], ['KW 29', 128], ['KW 30', 154], ['KW 31', 167]];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+
+  renderVals() {
+    const maxW = Math.max.apply(null, WEEK.map((d) => d[1]));
+    const maxL = Math.max.apply(null, LOCS.map((l) => l[1]));
+    const maxU = 200;
+
+    // donut via conic-gradient
+    const total = 1042;
+    const conf = 848;
+    const pend = 132;
+    const a1 = (conf / total) * 360;
+    const a2 = a1 + (pend / total) * 360;
+    const donut = 'conic-gradient(#C7F011 0deg ' + a1.toFixed(1) + 'deg, hsl(0 0% 38%) ' + a1.toFixed(1) + 'deg ' + a2.toFixed(1) + 'deg, #FF6B6B ' + a2.toFixed(1) + 'deg 360deg)';
+
+    const pts = WEEKS.map((w, i) => {
+      const x = (i / (WEEKS.length - 1)) * 380 + 10;
+      const y = 200 - (w[1] / maxU) * 165;
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    });
+
+    return {
+      week: WEEK.map(([label, value], i) => {
+        const today = i === WEEK.length - 1;
+        return {
+          label, value: String(value),
+          h: Math.round((value / maxW) * 155) + 'px',
+          bg: today ? 'linear-gradient(180deg, #C7F011, hsl(71 91% 51% / 0.35))' : 'linear-gradient(180deg, hsl(71 91% 51% / 0.75), hsl(71 91% 51% / 0.2))',
+          fg: today ? '#C7F011' : 'hsl(0 0% 82%)',
+          labelFg: today ? '#C7F011' : 'hsl(0 0% 65%)',
+        };
+      }),
+      donut,
+      statuses: [
+        { label: 'Bestätigt', value: '848', pct: '81,4 %', color: '#C7F011' },
+        { label: 'Ausstehend', value: '132', pct: '12,7 %', color: 'hsl(0 0% 38%)' },
+        { label: 'Storniert', value: '62', pct: '5,9 %', color: '#FF6B6B' },
+      ],
+      locations: LOCS.map(([label, value]) => ({
+        label,
+        value: String(value),
+        pct: Math.max(1, Math.round((value / maxL) * 100)) + '%',
+      })),
+      linePoints: pts.join(' '),
+      areaPoints: ('10,200 ' + pts.join(' ') + ' 390,200'),
+      weeks: WEEKS.map(([label, value]) => ({
+        label,
+        value: '+' + value,
+        bottom: Math.round((value / maxU) * 165) + 14 + 'px',
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #se-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr)); gap: 18px; align-items: start; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Einstellungen">
+  <dc-import name="AdminSidebar" active="settings" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/settings</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Einstellungen</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px;flex:none">
+        <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">PIN-Sperren der B2B-Seiten und allgemeine Systemeinstellungen.</span>
+
+      <!-- Inhalts-Sperre — persistiert -->
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,280px">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:11px;min-width:0">
+              <span style="width:34px;height:34px;flex:none;border-radius:10px;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="lock" size="16"></p2g-icon></span>
+              <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">Inhalts-Sperre</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.45;color:hsl(0 0% 65%)">B2B-Seiten für nicht autorisierte Besucher sperren (PIN erforderlich).</span>
+              </div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.28);border-radius:999px;padding:4px 10px;white-space:nowrap;flex:none">
+              <span style="width:5px;height:5px;border-radius:50%;background:#C7F011"></span>Persistiert
+            </span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <sc-for list="{{ locks }}" as="l" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:14px;padding:15px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:14px;flex-wrap:wrap">
+                <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:180px">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FAFAFA">{{ l.label }}</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 65%)">{{ l.hint }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:hsl(0 0% 50%)">site_settings.{{ l.column }}</span>
+                </div>
+                <button onClick="{{ l.toggle }}" ref="{{ l.swRef }}" style="width:46px;height:26px;flex:none;position:relative;padding:0;background:hsl(71 91% 51% / 0.9);border:1px solid hsl(71 91% 51%);border-radius:999px;cursor:pointer;transition:background 0.2s">
+                  <span ref="{{ l.knobRef }}" style="position:absolute;top:2px;left:22px;width:20px;height:20px;border-radius:50%;background:#0A0A0A;transition:left 0.2s"></span>
+                </button>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:11px;padding:13px 15px;background:hsl(41 100% 65% / 0.06);border:1px solid hsl(41 100% 65% / 0.22);border-radius:13px">
+            <span style="color:#FFC44D;display:flex;flex:none;margin-top:1px"><p2g-icon name="alert-triangle" size="15"></p2g-icon></span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.55;color:hsl(0 0% 78%)">Beim Aktivieren einer Sperre werden <span style="color:#FAFAFA;font-weight:600">alle bisherigen Entsperrungen ungültig</span> — Besucher müssen die PIN erneut eingeben.</span>
+          </div>
+        </div>
+      </x-import>
+
+      <div style="display:flex;align-items:center;gap:11px;margin-top:6px;flex-wrap:wrap">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">Weitere Einstellungen</span>
+        <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:hsl(0 0% 65%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:4px 10px;white-space:nowrap">UI-Platzhalter · ohne Backend</span>
+      </div>
+
+      <div id="se-grid">
+        <!-- Allgemein -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,300px">
+          <div style="display:flex;flex-direction:column;gap:16px;opacity:0.72">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);display:flex;align-items:center;justify-content:center;color:hsl(0 0% 72%)"><p2g-icon name="settings" size="15"></p2g-icon></span>
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA">Allgemeine Einstellungen</span>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:7px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">App Name</span>
+              <input type="text" value="PADEL2GO" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:7px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Standard Zeitzone</span>
+              <span style="position:relative;display:flex;align-items:center">
+                <select disabled="{{ true }}" style="appearance:none;width:100%;height:40px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:hsl(0 0% 68%);background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 13%);border-radius:10px;outline:none;cursor:not-allowed">
+                  <option>Europe/Berlin</option>
+                </select>
+                <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 45%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+              </span>
+            </label>
+            <div style="display:flex;align-items:center;gap:14px;padding:13px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:13px">
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#FAFAFA">Wartungsmodus</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">Zeigt eine Wartungsseite für alle Besucher.</span>
+              </div>
+              <span style="width:42px;height:24px;flex:none;position:relative;display:block;background:hsl(0 0% 16%);border:1px solid hsl(0 0% 22%);border-radius:999px">
+                <span style="position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:hsl(0 0% 55%)"></span>
+              </span>
+            </div>
+          </div>
+        </x-import>
+
+        <!-- Benachrichtigungen + Sicherheit -->
+        <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+          <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+            <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,240px">
+              <div style="display:flex;flex-direction:column;gap:15px;opacity:0.72">
+                <div style="display:flex;align-items:center;gap:11px">
+                  <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);display:flex;align-items:center;justify-content:center;color:hsl(0 0% 72%)"><p2g-icon name="{{ g.icon }}" size="15"></p2g-icon></span>
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA">{{ g.title }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:12px">
+                      <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;flex:1;min-width:0">{{ i.label }}</span>
+                      <span style="width:42px;height:24px;flex:none;position:relative;display:block;background:{{ i.bg }};border:1px solid {{ i.brd }};border-radius:999px">
+                        <span style="position:absolute;top:2px;left:{{ i.x }};width:18px;height:18px;border-radius:50%;background:{{ i.knob }}"></span>
+                      </span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </x-import>
+          </sc-for>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div ref="{{ toastRef }}" style="display:none;position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:99;align-items:center;gap:10px;padding:12px 18px;background:hsl(0 0% 8% / 0.96);backdrop-filter:blur(18px);border:1px solid hsl(71 91% 51% / 0.35);border-radius:14px;box-shadow:0 12px 40px hsl(0 0% 0% / 0.6);max-width:min(480px, calc(100vw - 40px))">
+    <span ref="{{ toastIconRef }}" style="color:#C7F011;display:flex;flex:none"><p2g-icon name="check" size="16"></p2g-icon></span>
+    <span ref="{{ toastTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;line-height:1.4;color:#FAFAFA">Gespeichert</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const ON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '20px', '#0A0A0A'];
+const OFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+
+const LOCKS = [
+  { key: 'vereine', label: 'Sperre für „Für Vereine“', hint: 'PIN-Eingabe für /fuer-vereine erforderlich', column: 'pin_lock_vereine' },
+  { key: 'partner', label: 'Sperre für „Für Partner“', hint: 'PIN-Eingabe für /fuer-partner erforderlich', column: 'pin_lock_partner' },
+];
+
+class Component extends DCLogic {
+  state = { vereine: true, partner: true };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+    this._paint();
+  }
+  componentWillUnmount() { clearInterval(this._iv); clearTimeout(this._toastT); }
+  componentDidUpdate() { this._paint(); }
+
+  _paint() {
+    LOCKS.forEach((l) => {
+      const e = this._els && this._els[l.key];
+      if (!e) return;
+      const on = this.state[l.key];
+      const s = on ? ON : OFF;
+      if (e.sw) { e.sw.style.background = s[0]; e.sw.style.borderColor = s[1]; }
+      if (e.knob) { e.knob.style.left = s[2]; e.knob.style.background = s[3]; }
+    });
+  }
+
+  _toast(msg, warn) {
+    if (!this._toastEl) return;
+    if (this._toastText) this._toastText.textContent = msg;
+    this._toastEl.style.borderColor = warn ? 'hsl(41 100% 65% / 0.4)' : 'hsl(71 91% 51% / 0.35)';
+    if (this._toastIcon) this._toastIcon.style.color = warn ? '#FFC44D' : '#C7F011';
+    this._toastEl.style.display = 'flex';
+    clearTimeout(this._toastT);
+    this._toastT = setTimeout(() => { this._toastEl.style.display = 'none'; }, 2600);
+  }
+
+  renderVals() {
+    this._els = this._els || {};
+    const sw = (on) => {
+      const s = on ? ON : OFF;
+      return { bg: s[0], brd: s[1], x: s[2], knob: s[3] };
+    };
+
+    return {
+      locks: LOCKS.map((l) => {
+        this._els[l.key] = this._els[l.key] || {};
+        return {
+          ...l,
+          swRef: (el) => { this._els[l.key].sw = el; this._paint(); },
+          knobRef: (el) => { this._els[l.key].knob = el; this._paint(); },
+          toggle: () => {
+            const next = !this.state[l.key];
+            this.setState({ [l.key]: next });
+            this._toast(
+              next ? 'Sperre aktiviert – alle bisherigen Entsperrungen wurden ungültig' : 'Sperre deaktiviert',
+              next
+            );
+          },
+        };
+      }),
+      groups: [
+        { title: 'Benachrichtigungen', icon: 'bell', items: [
+          { label: 'Buchungsbestätigungen', ...sw(true) },
+          { label: 'Stornierungsbenachrichtigungen', ...sw(true) },
+          { label: 'Admin-Benachrichtigungen', ...sw(true) },
+        ] },
+        { title: 'Sicherheit', icon: 'shield-check', items: [
+          { label: 'Zwei-Faktor-Authentifizierung', ...sw(false) },
+          { label: 'Session-Timeout', ...sw(true) },
+        ] },
+      ],
+      toastRef: (el) => { this._toastEl = el; },
+      toastTextRef: (el) => { this._toastText = el; },
+      toastIconRef: (el) => { this._toastIcon = el; },
+    };
+  }
+}
+</script>
+</body>
+</html>

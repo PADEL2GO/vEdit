@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #cl-split { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; align-items: start; }
+    [data-club] { border: 1px solid hsl(0 0% 12%); background: hsl(0 0% 100% / 0.028); }
+    [data-club]:hover { border-color: hsl(0 0% 20%); }
+    [data-club][data-on] { border-color: hsl(71 91% 51% / 0.45); background: hsl(71 91% 51% / 0.07); }
+    [data-tab] { color: hsl(0 0% 60%); border-bottom: 2px solid transparent; }
+    [data-tab]:hover { color: #FAFAFA; }
+    [data-tab][data-on] { color: #C7F011; border-bottom-color: #C7F011; }
+    .cl-table { width: 100%; border-collapse: collapse; min-width: 620px; }
+    .cl-table th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(0 0% 65%); text-align: left; font-weight: 400; padding: 0 14px 12px 0; white-space: nowrap; }
+    .cl-table td { padding: 12px 14px 12px 0; border-top: 1px solid hsl(0 0% 12%); font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: hsl(0 0% 78%); }
+    .cl-table tbody tr:hover td { background: hsl(0 0% 100% / 0.022); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1080px) { #cl-split { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Clubs">
+  <dc-import name="AdminSidebar" active="clubs" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/clubs</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Clubs</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <button onClick="{{ openClub }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.28)">
+          <p2g-icon name="plus" size="15"></p2g-icon>Neuer Club
+        </button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Clubs, Court-Zuweisungen und Mitglieder verwalten</span>
+
+      <div id="cl-split">
+        <!-- ── Club-Liste ── -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,520px">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Clubs <span ref="{{ clubCountRef }}" style="font-family:'JetBrains Mono',monospace;font-weight:400;font-size:13px;color:hsl(0 0% 65%)">(4)</span></h2>
+            </div>
+            <label style="position:relative;display:flex;align-items:center">
+              <span style="position:absolute;left:11px;display:flex;color:hsl(0 0% 58%)"><p2g-icon name="search" size="15"></p2g-icon></span>
+              <input onInput="{{ onSearch }}" type="text" placeholder="Club, Beschreibung oder Email…" style="width:100%;height:38px;padding:0 12px 0 36px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+            </label>
+            <div ref="{{ listRef }}" style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ clubs }}" as="c" hint-placeholder-count="4">
+                <button onClick="{{ c.pick }}" data-club="1" data-key="{{ c.key }}" data-q="{{ c.q }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:13px 14px;border-radius:13px;cursor:pointer;text-align:left;transition:border-color 0.2s, background 0.2s">
+                  <div style="display:flex;align-items:center;gap:9px;width:100%">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#FAFAFA;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span>
+                    <sc-if value="{{ c.inactive }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;color:#FF6B6B;background:hsl(0 100% 71% / 0.1);border-radius:999px;padding:3px 8px;flex:none">Inaktiv</span>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;gap:12px">
+                    <span style="display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%)"><p2g-icon name="layout-grid" size="12"></p2g-icon>{{ c.courtCount }} Courts</span>
+                    <span style="display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%)"><p2g-icon name="users" size="12"></p2g-icon>{{ c.userCount }} User</span>
+                  </div>
+                </button>
+              </sc-for>
+            </div>
+            <span ref="{{ emptyRef }}" style="display:none;font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%);text-align:center;padding:16px 0">Keine Clubs gefunden</span>
+          </div>
+        </x-import>
+
+        <!-- ── Detail ── -->
+        <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,460px">
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+                <div style="display:flex;flex-direction:column;gap:7px;min-width:0">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <h2 ref="{{ nameRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">TSV München-Ost</h2>
+                    <button onClick="{{ toggleActive }}" ref="{{ swRef }}" style="width:42px;height:24px;flex:none;position:relative;padding:0;background:hsl(71 91% 51% / 0.9);border:1px solid hsl(71 91% 51%);border-radius:999px;cursor:pointer;transition:background 0.2s">
+                      <span ref="{{ knobRef }}" style="position:absolute;top:2px;left:20px;width:18px;height:18px;border-radius:50%;background:#0A0A0A;transition:left 0.2s"></span>
+                    </button>
+                  </div>
+                  <p ref="{{ descRef }}" style="font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.55;color:hsl(0 0% 68%);margin:0;max-width:560px">Traditionsverein im Münchner Osten — vier mobile Padel Courts, aktive Wintersaison.</p>
+                  <span ref="{{ mailRef }}" style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 65%)"><p2g-icon name="mail" size="13"></p2g-icon>vorstand@tsv-muenchen-ost.de</span>
+                </div>
+                <div style="display:flex;gap:9px;flex:none">
+                  <button onClick="{{ openClub }}" style="height:36px;padding:0 14px;display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="pencil" size="14"></p2g-icon>Bearbeiten</button>
+                  <button onClick="{{ openDel }}" title="Löschen" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:10px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                </div>
+              </div>
+
+              <div ref="{{ tabRef }}" style="display:flex;gap:22px;border-bottom:1px solid hsl(0 0% 12%)">
+                <button onClick="{{ pickCourts }}" data-tab="1" data-key="courts" style="display:inline-flex;align-items:center;gap:8px;padding:0 2px 11px;background:none;border-top:0;border-left:0;border-right:0;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:color 0.2s"><p2g-icon name="layout-grid" size="15"></p2g-icon>Courts (4)</button>
+                <button onClick="{{ pickMembers }}" data-tab="1" data-key="members" style="display:inline-flex;align-items:center;gap:8px;padding:0 2px 11px;background:none;border-top:0;border-left:0;border-right:0;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:color 0.2s"><p2g-icon name="users" size="15"></p2g-icon>Mitglieder (6 aktiv)</button>
+              </div>
+
+              <!-- Tab Courts -->
+              <div ref="{{ courtsViewRef }}" style="display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+                  <div style="display:flex;flex-direction:column;gap:2px">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FAFAFA">Court-Zuweisungen &amp; Kontingente</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 65%)">Freie Minuten pro Monat je Court</span>
+                  </div>
+                  <button onClick="{{ openAssign }}" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.3);border-radius:9px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(71 91% 51% / 0.18)"><p2g-icon name="plus" size="14"></p2g-icon>Court hinzufügen</button>
+                </div>
+                <div style="overflow-x:auto">
+                  <table class="cl-table">
+                    <thead>
+                      <tr><th>Court</th><th>Standort</th><th style="min-width:210px">Kontingent</th><th style="text-align:right">Aktion</th></tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ assignments }}" as="a" hint-placeholder-count="4">
+                        <tr>
+                          <td><span style="font-weight:600;color:#FAFAFA;white-space:nowrap">{{ a.court }}</span></td>
+                          <td><span style="white-space:nowrap">{{ a.location }}</span></td>
+                          <td>
+                            <div style="display:flex;align-items:center;gap:9px">
+                              <div style="display:flex;align-items:center;gap:2px;padding:2px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:9px">
+                                <button onClick="{{ a.dec }}" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 75%);background:none;border:0;border-radius:7px;cursor:pointer" style-hover="color:#FF6B6B;background:hsl(0 100% 71% / 0.1)"><p2g-icon name="minus" size="13"></p2g-icon></button>
+                                <input ref="{{ a.ref }}" type="text" value="{{ a.hours }}" style="width:44px;height:26px;padding:0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAFAFA;background:none;border:0;outline:none">
+                                <button onClick="{{ a.inc }}" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 75%);background:none;border:0;border-radius:7px;cursor:pointer" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.1)"><p2g-icon name="plus" size="13"></p2g-icon></button>
+                              </div>
+                              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 65%);white-space:nowrap">h/Monat</span>
+                              <span ref="{{ a.minRef }}" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 55%);white-space:nowrap">= {{ a.minutes }} Min.</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div style="display:flex;justify-content:flex-end">
+                              <button title="Zuweisung löschen" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                            </div>
+                          </td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Tab Mitglieder -->
+              <div ref="{{ membersViewRef }}" style="display:none;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FAFAFA">Club-Mitglieder</span>
+                  <button onClick="{{ openMember }}" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.3);border-radius:9px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(71 91% 51% / 0.18)"><p2g-icon name="user-plus" size="14"></p2g-icon>Benutzer hinzufügen</button>
+                </div>
+                <div style="overflow-x:auto">
+                  <table class="cl-table">
+                    <thead>
+                      <tr><th>Benutzer</th><th>Rolle</th><th>Status</th><th>Hinzugefügt</th><th style="text-align:right">Aktion</th></tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ members }}" as="m" hint-placeholder-count="6">
+                        <tr>
+                          <td>
+                            <div style="display:flex;align-items:center;gap:10px">
+                              <span style="width:30px;height:30px;flex:none;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.26);color:#C7F011;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">{{ m.initials }}</span>
+                              <div style="display:flex;flex-direction:column;gap:1px">
+                                <span style="font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">{{ m.name }}</span>
+                                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap">@{{ m.username }}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span style="display:inline-flex;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ m.roleFg }};background:{{ m.roleBg }};border:1px solid {{ m.roleBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap">{{ m.role }}</span>
+                          </td>
+                          <td>
+                            <button onClick="{{ m.toggle }}" style="width:38px;height:22px;position:relative;padding:0;background:{{ m.swBg }};border:1px solid {{ m.swBrd }};border-radius:999px;cursor:pointer;transition:background 0.2s">
+                              <span style="position:absolute;top:2px;left:{{ m.knobX }};width:16px;height:16px;border-radius:50%;background:{{ m.knobBg }};transition:left 0.2s"></span>
+                            </button>
+                          </td>
+                          <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap">{{ m.added }}</span></td>
+                          <td>
+                            <div style="display:flex;justify-content:flex-end">
+                              <button title="Entfernen" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="user-minus" size="14"></p2g-icon></button>
+                            </div>
+                          </td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </x-import>
+
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,220px">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA">So richtest du einen Club ein</span>
+              <div style="display:flex;flex-direction:column;gap:11px">
+                <sc-for list="{{ steps }}" as="s" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:flex-start;gap:12px">
+                    <span style="width:22px;height:22px;flex:none;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);color:#C7F011;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center">{{ s.n }}</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5;color:hsl(0 0% 72%)">{{ s.text }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </x-import>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── Dialog: Club ── -->
+  <div ref="{{ clubDlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeClub }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(480px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Club</span>
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Neuer Club</h3>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Club Name<span style="color:#C7F011"> *</span></span>
+        <input type="text" placeholder="z. B. TC Musterstadt" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Beschreibung</span>
+        <textarea rows="3" placeholder="Kurze Beschreibung des Clubs…" style="padding:11px 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;resize:vertical;transition:border-color 0.2s" style-focus="border-color:#C7F011"></textarea>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Kontakt-Email</span>
+        <input type="email" placeholder="kontakt@tennisclub.de" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+      </label>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeClub }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeClub }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25)">Erstellen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: Court zuweisen ── -->
+  <div ref="{{ assignDlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeAssign }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(460px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Court zuweisen</h3>
+        <p style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;color:hsl(0 0% 68%);margin:0">Weise dem Club „TSV München-Ost“ einen Court mit Monatskontingent zu.</p>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Court<span style="color:#C7F011"> *</span></span>
+        <span style="position:relative;display:flex;align-items:center">
+          <select style="appearance:none;width:100%;height:40px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+            <option>Court auswählen…</option><option>Court 3 (TSV München-Ost)</option><option>Court 1 (SV Rheinaue Köln)</option><option>Court 2 (TC Hamburg-Alster)</option>
+          </select>
+          <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+        </span>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Monatskontingent (Stunden)<span style="color:#C7F011"> *</span></span>
+        <input type="text" value="40" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 58%)">= 2.400 Minuten pro Monat</span>
+      </label>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeAssign }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeAssign }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer">Zuweisen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: Benutzer hinzufügen ── -->
+  <div ref="{{ memberDlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeMember }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(460px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Benutzer zu Club hinzufügen</h3>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Benutzer suchen<span style="color:#C7F011"> *</span></span>
+        <span style="position:relative;display:flex;align-items:center">
+          <span style="position:absolute;left:11px;display:flex;color:hsl(0 0% 58%)"><p2g-icon name="search" size="15"></p2g-icon></span>
+          <input type="text" placeholder="Ab 2 Zeichen suchen…" style="width:100%;height:40px;padding:0 13px 0 36px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        </span>
+      </label>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ searchHits }}" as="h" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:11px;cursor:pointer;transition:border-color 0.2s" style-hover="border-color:hsl(71 91% 51% / 0.4)">
+            <span style="width:28px;height:28px;flex:none;border-radius:50%;background:hsl(0 0% 100% / 0.06);border:1px solid hsl(0 0% 18%);color:hsl(0 0% 82%);font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:10.5px;display:flex;align-items:center;justify-content:center">{{ h.initials }}</span>
+            <div style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0">
+              <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">{{ h.name }}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap">@{{ h.username }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Rolle im Club<span style="color:#C7F011"> *</span></span>
+        <span style="position:relative;display:flex;align-items:center">
+          <select style="appearance:none;width:100%;height:40px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+            <option>Staff</option><option>Manager</option>
+          </select>
+          <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+        </span>
+      </label>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeMember }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeMember }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer">Hinzufügen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: löschen ── -->
+  <div ref="{{ delDlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(430px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Club wirklich löschen?</h3>
+        <p style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 68%);margin:0">Alle Court-Zuweisungen und Mitgliedschaften werden entfernt.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:0;border-radius:11px;cursor:pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const CLUBS = [
+  { key: 'muc', name: 'TSV München-Ost', courtCount: 4, userCount: 6, active: true,
+    desc: 'Traditionsverein im Münchner Osten — vier mobile Padel Courts, aktive Wintersaison.',
+    mail: 'vorstand@tsv-muenchen-ost.de' },
+  { key: 'koeln', name: 'SV Rheinaue Köln', courtCount: 3, userCount: 4, active: true,
+    desc: 'Erster P2G-Standortpartner in NRW — Court-Aufbau läuft, Community-Events ab Herbst.',
+    mail: 'padel@sv-rheinaue.de' },
+  { key: 'hh', name: 'TC Hamburg-Alster', courtCount: 3, userCount: 5, active: true,
+    desc: 'Tennisclub an der Alster mit drei Padel Courts und KI-Kamera an Court 1.',
+    mail: 'info@tc-alster.de' },
+  { key: 'lej', name: 'SC Leipzig-Nord', courtCount: 0, userCount: 1, active: false,
+    desc: 'Standortcheck abgeschlossen — Bauantrag in Vorbereitung.',
+    mail: 'kontakt@sc-leipzig-nord.de' },
+];
+
+const MEMBERS = [
+  { initials: 'FS', name: 'Florian Steinfelder', username: 'flosteinfelder', role: 'Manager', on: true, added: '12.01.2026' },
+  { initials: 'AB', name: 'Anna Brenner', username: 'annab', role: 'Manager', on: true, added: '18.02.2026' },
+  { initials: 'MK', name: 'Marco Kern', username: 'mkern', role: 'Staff', on: true, added: '02.03.2026' },
+  { initials: 'LK', name: 'Lena Kramer', username: 'lenak', role: 'Staff', on: true, added: '14.04.2026' },
+  { initials: 'TS', name: 'Tim Sauer', username: 'tsauer', role: 'Staff', on: true, added: '30.05.2026' },
+  { initials: 'JW', name: 'Jana Weiss', username: 'janaw', role: 'Staff', on: false, added: '11.06.2026' },
+];
+
+const ASSIGN = {
+  muc: [
+    { court: 'Court 1', location: 'TSV München-Ost', hours: 40 },
+    { court: 'Court 2', location: 'TSV München-Ost', hours: 30 },
+    { court: 'Court 3', location: 'TSV München-Ost', hours: 20 },
+    { court: 'Court 4', location: 'TSV München-Ost', hours: 10 },
+  ],
+  koeln: [
+    { court: 'Court 1', location: 'SV Rheinaue Köln', hours: 35 },
+    { court: 'Court 2', location: 'SV Rheinaue Köln', hours: 25 },
+    { court: 'Court 3', location: 'SV Rheinaue Köln', hours: 15 },
+  ],
+  hh: [
+    { court: 'Court 1', location: 'TC Hamburg-Alster', hours: 40 },
+    { court: 'Court 2', location: 'TC Hamburg-Alster', hours: 30 },
+    { court: 'Court 3', location: 'TC Hamburg-Alster', hours: 12 },
+  ],
+  lej: [],
+};
+
+const ON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '18px', '#0A0A0A'];
+const OFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+
+class Component extends DCLogic {
+  state = { sel: 'muc', tab: 'courts', active: true };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+    this._paint();
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  componentDidUpdate() { this._paint(); }
+
+  _paint() {
+    if (this._list) {
+      this._list.querySelectorAll('[data-club][data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === this.state.sel);
+      });
+    }
+    if (this._tabs) {
+      this._tabs.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === this.state.tab);
+      });
+    }
+    if (this._courtsView) this._courtsView.style.display = this.state.tab === 'courts' ? 'flex' : 'none';
+    if (this._membersView) this._membersView.style.display = this.state.tab === 'members' ? 'flex' : 'none';
+
+    const c = CLUBS.find((x) => x.key === this.state.sel) || CLUBS[0];
+    if (this._name) this._name.textContent = c.name;
+    if (this._desc) this._desc.textContent = c.desc;
+    if (this._mail) this._mail.innerHTML = '<span style="display:flex"></span>' + c.mail;
+    const on = this.state.active;
+    if (this._sw) {
+      this._sw.style.background = on ? 'hsl(71 91% 51% / 0.9)' : 'hsl(0 0% 16%)';
+      this._sw.style.borderColor = on ? 'hsl(71 91% 51%)' : 'hsl(0 0% 22%)';
+    }
+    if (this._knob) {
+      this._knob.style.left = on ? '20px' : '2px';
+      this._knob.style.background = on ? '#0A0A0A' : 'hsl(0 0% 55%)';
+    }
+    this._search();
+  }
+
+  _search() {
+    if (!this._list) return;
+    const q = (this._q || '').toLowerCase();
+    let n = 0;
+    this._list.querySelectorAll('[data-club][data-q]').forEach((b) => {
+      const hit = !q || b.dataset.q.toLowerCase().indexOf(q) >= 0;
+      b.style.display = hit ? '' : 'none';
+      if (hit) n += 1;
+    });
+    if (this._count) this._count.textContent = '(' + n + ')';
+    if (this._empty) this._empty.style.display = n ? 'none' : 'block';
+  }
+
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    const sel = this.state.sel;
+    const rows = ASSIGN[sel] || [];
+    const refs = {};
+
+    return {
+      clubs: CLUBS.map((c) => ({
+        ...c,
+        inactive: !c.active,
+        q: [c.name, c.desc, c.mail].join(' '),
+        pick: () => this.setState({ sel: c.key, active: c.active }),
+      })),
+      assignments: rows.map((a, i) => {
+        const bump = (d) => {
+          const inp = refs['i' + i];
+          const min = refs['m' + i];
+          if (!inp) return;
+          const v = Math.max(0, Math.min(120, (parseInt(inp.value, 10) || 0) + d));
+          inp.value = v;
+          if (min) min.textContent = '= ' + (v * 60).toLocaleString('de-DE') + ' Min.';
+        };
+        return {
+          ...a,
+          minutes: (a.hours * 60).toLocaleString('de-DE'),
+          ref: (el) => { refs['i' + i] = el; },
+          minRef: (el) => { refs['m' + i] = el; },
+          dec: () => bump(-1),
+          inc: () => bump(1),
+        };
+      }),
+      members: MEMBERS.map((m) => {
+        const s = m.on ? ON : OFF;
+        const mgr = m.role === 'Manager';
+        return {
+          ...m,
+          swBg: s[0], swBrd: s[1], knobX: s[2], knobBg: s[3],
+          roleFg: mgr ? '#C7F011' : 'hsl(0 0% 80%)',
+          roleBg: mgr ? 'hsl(71 91% 51% / 0.1)' : 'hsl(0 0% 100% / 0.05)',
+          roleBrd: mgr ? 'hsl(71 91% 51% / 0.3)' : 'hsl(0 0% 18%)',
+          toggle: () => {},
+        };
+      }),
+      searchHits: [
+        { initials: 'SR', name: 'Sarah Roth', username: 'sroth' },
+        { initials: 'PF', name: 'Paul Frank', username: 'pfrank' },
+        { initials: 'ND', name: 'Nina Dörr', username: 'ndoerr' },
+      ],
+      steps: [
+        { n: '1', text: 'Club anlegen — Name, Beschreibung und Kontakt-E-Mail hinterlegen.' },
+        { n: '2', text: 'Club in der Liste auswählen, um Details zu öffnen.' },
+        { n: '3', text: 'Courts zuweisen und je Court das Monatskontingent festlegen.' },
+        { n: '4', text: 'Mitglieder als Manager oder Staff hinzufügen.' },
+        { n: '5', text: 'Mitglieder werden beim Login automatisch ins Club-Portal geleitet.' },
+      ],
+
+      listRef: (el) => { this._list = el; this._paint(); },
+      clubCountRef: (el) => { this._count = el; },
+      emptyRef: (el) => { this._empty = el; },
+      tabRef: (el) => { this._tabs = el; this._paint(); },
+      courtsViewRef: (el) => { this._courtsView = el; },
+      membersViewRef: (el) => { this._membersView = el; },
+      nameRef: (el) => { this._name = el; },
+      descRef: (el) => { this._desc = el; },
+      mailRef: (el) => { this._mail = el; },
+      swRef: (el) => { this._sw = el; },
+      knobRef: (el) => { this._knob = el; },
+      clubDlgRef: (el) => { this._clubDlg = el; },
+      assignDlgRef: (el) => { this._assignDlg = el; },
+      memberDlgRef: (el) => { this._memberDlg = el; },
+      delDlgRef: (el) => { this._delDlg = el; },
+
+      onSearch: (e) => { this._q = e.target.value; this._search(); },
+      pickCourts: () => this.setState({ tab: 'courts' }),
+      pickMembers: () => this.setState({ tab: 'members' }),
+      toggleActive: () => this.setState((s) => ({ active: !s.active })),
+      openClub: () => this._show(this._clubDlg, true),
+      closeClub: () => this._show(this._clubDlg, false),
+      openAssign: () => this._show(this._assignDlg, true),
+      closeAssign: () => this._show(this._assignDlg, false),
+      openMember: () => this._show(this._memberDlg, true),
+      closeMember: () => this._show(this._memberDlg, false),
+      openDel: () => this._show(this._delDlg, true),
+      closeDel: () => this._show(this._delDlg, false),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    .ap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(272px, 100%), 1fr)); gap: 13px; }
+    .ap-card { display: flex; align-items: center; gap: 13px; padding: 15px 16px; background: hsl(0 0% 100% / 0.028); border: 1px solid hsl(0 0% 12%); border-radius: 15px; transition: border-color 0.2s, background 0.2s, transform 0.2s; }
+    .ap-card:hover { border-color: hsl(71 91% 51% / 0.4); background: hsl(71 91% 51% / 0.05); transform: translateY(-2px); }
+    .ap-card:hover .ap-num { color: #C7F011; }
+    .ap-card:hover .ap-arrow { opacity: 1; transform: translateX(0); }
+    .ap-arrow { opacity: 0; transform: translateX(-5px); transition: opacity 0.2s, transform 0.2s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div data-screen-label="Admin Panel — Übersicht" style="min-height:100vh;background:radial-gradient(ellipse at 50% -10%, hsl(71 91% 51% / 0.09), transparent 55%), #000">
+
+  <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 4vw, 40px);height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+    <a href="Homepage.dc.html" style="display:flex;align-items:center;gap:10px;min-width:0">
+      <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:30px;width:auto;display:block">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.02em;color:#FAFAFA">PADEL<span style="color:#C7F011">2</span>GO</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:3px 8px;white-space:nowrap">Admin</span>
+    </a>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 65%);white-space:nowrap">25 Screens</span>
+  </header>
+
+  <main style="max-width:1240px;margin:0 auto;padding:clamp(36px, 6vw, 72px) clamp(18px, 4vw, 40px) 80px;display:flex;flex-direction:column;gap:clamp(32px, 5vw, 48px);animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1)">
+
+    <div style="display:flex;flex-direction:column;gap:16px;max-width:760px">
+      <div style="display:flex">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Badge" variant="lime" dot="{{ true }}" hint-size="150px,26px">Design komplett</x-import>
+      </div>
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(30px, 5vw, 52px);line-height:1.08;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Admin Panel — <span style="background:var(--gradient-lime-text);-webkit-background-clip:text;background-clip:text;color:transparent">alle Screens</span></h1>
+      <p style="font-family:'DM Sans',sans-serif;font-size:clamp(15px, 2vw, 18px);line-height:1.6;color:hsl(0 0% 68%);margin:0">Das komplette Admin-Design in 25 Ansichten — geteilte Sidebar, einheitliche Topbar, Dark Theme mit Lime-Akzent. Jede Karte öffnet den fertigen Screen.</p>
+      <div style="display:flex;gap:11px;flex-wrap:wrap;margin-top:4px">
+        <a href="Admin 01 Overview.dc.html"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="hero" size="lg" hint-size="180px,52px">Mit Overview starten</x-import></a>
+        <a href="Homepage.dc.html"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="heroOutline" size="lg" hint-size="150px,52px">Zur Website</x-import></a>
+      </div>
+    </div>
+
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="6">
+      <section style="display:flex;flex-direction:column;gap:15px">
+        <div style="display:flex;align-items:center;gap:13px;flex-wrap:wrap">
+          <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ g.icon }}" size="15"></p2g-icon></span>
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">{{ g.label }}</h2>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 58%);white-space:nowrap">{{ g.count }}</span>
+          <span style="flex:1;min-width:20px;height:1px;background:linear-gradient(90deg, hsl(0 0% 14%), transparent)"></span>
+        </div>
+
+        <div class="ap-grid">
+          <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="4">
+            <a href="{{ i.href }}" class="ap-card">
+              <span class="ap-num" style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;color:hsl(0 0% 50%);flex:none;transition:color 0.2s;width:22px">{{ i.num }}</span>
+              <span style="width:36px;height:36px;flex:none;border-radius:10px;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 15%);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ i.icon }}" size="16"></p2g-icon></span>
+              <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ i.label }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 58%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ i.route }}</span>
+              </span>
+              <span class="ap-arrow" style="color:#C7F011;display:flex;flex:none"><p2g-icon name="arrow-right" size="15"></p2g-icon></span>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+    </sc-for>
+
+    <section style="display:flex;flex-direction:column;gap:15px">
+      <div style="display:flex;align-items:center;gap:13px;flex-wrap:wrap">
+        <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);display:flex;align-items:center;justify-content:center;color:hsl(0 0% 72%)"><p2g-icon name="component" size="15"></p2g-icon></span>
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Geteilte Bausteine</h2>
+        <span style="flex:1;min-width:20px;height:1px;background:linear-gradient(90deg, hsl(0 0% 14%), transparent)"></span>
+      </div>
+      <div class="ap-grid">
+        <sc-for list="{{ shared }}" as="s" hint-placeholder-count="2">
+          <div class="ap-card" style="cursor:default">
+            <span style="width:36px;height:36px;flex:none;border-radius:10px;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 15%);display:flex;align-items:center;justify-content:center;color:hsl(0 0% 72%)"><p2g-icon name="{{ s.icon }}" size="16"></p2g-icon></span>
+            <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+              <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.label }}</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 62%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.hint }}</span>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 1000 }
+}">
+const GROUPS = [
+  { label: 'Übersicht', icon: 'layout-dashboard', items: [
+    ['01', 'Overview', 'layout-dashboard', '/admin', 'Admin 01 Overview.dc.html'],
+    ['21', 'Analytics', 'chart-line', '/admin/analytics', 'Admin 21 Analytics.dc.html'],
+    ['04', 'Auslastung', 'gauge', '/admin/utilization', 'Admin 04 Auslastung.dc.html'],
+  ] },
+  { label: 'Betrieb', icon: 'calendar', items: [
+    ['02', 'Buchungen', 'calendar', '/admin/bookings', 'Admin 02 Buchungen.dc.html'],
+    ['03', 'Courts & Standorte', 'map-pin', '/admin/courts', 'Admin 03 Courts.dc.html'],
+    ['05', 'Clubs', 'building-2', '/admin/clubs', 'Admin 05 Clubs.dc.html'],
+    ['06', 'Club Owners', 'key-round', '/admin/club-owners', 'Admin 06 Club Owners.dc.html'],
+    ['07', 'Events', 'ticket', '/admin/events', 'Admin 07 Events.dc.html'],
+  ] },
+  { label: 'Commerce', icon: 'shopping-bag', items: [
+    ['08', 'Marketplace', 'shopping-bag', '/admin/marketplace', 'Admin 08 Marketplace.dc.html'],
+    ['09', 'P2G Points', 'coins', '/admin/points', 'Admin 09 P2G Points.dc.html'],
+    ['10', 'Vouchers', 'tag', '/admin/vouchers', 'Admin 10 Vouchers.dc.html'],
+  ] },
+  { label: 'Content', icon: 'newspaper', items: [
+    ['16', 'News / Artikel', 'newspaper', '/admin/news', 'Admin 16 News.dc.html'],
+    ['11', 'Location Teasers', 'megaphone', '/admin/teasers', 'Admin 11 Location Teasers.dc.html'],
+    ['12', 'SkyPadel Galerie', 'images', '/admin/gallery', 'Admin 12 SkyPadel Galerie.dc.html'],
+    ['13', 'Partner-Kacheln', 'handshake', '/admin/partners', 'Admin 13 Partner-Kacheln.dc.html'],
+    ['14', 'Touchpoint Slides', 'gallery-horizontal', '/admin/slides', 'Admin 14 Touchpoint Slides.dc.html'],
+    ['15', 'QR-Panel', 'qr-code', '/admin/qr', 'Admin 15 QR-Panel.dc.html'],
+    ['22', 'Website Visuals', 'image', '/admin/visuals', 'Admin 22 Visuals.dc.html'],
+    ['17', 'Farben', 'palette', '/admin/farben', 'Admin 17 Farben.dc.html'],
+  ] },
+  { label: 'Kommunikation', icon: 'bell', items: [
+    ['19', 'Mitteilungen', 'bell', '/admin/notifications', 'Admin 19 Mitteilungen.dc.html'],
+    ['20', 'Newsletter', 'mail', '/admin/newsletter', 'Admin 20 Newsletter.dc.html'],
+  ] },
+  { label: 'System', icon: 'settings', items: [
+    ['18', 'Benutzer', 'users', '/admin/users', 'Admin 18 Benutzer.dc.html'],
+    ['23', 'Integrationen', 'plug', '/admin/integrations', 'Admin 23 Integrationen.dc.html'],
+    ['24', 'Features', 'toggle-right', '/admin/features', 'Admin 24 Features.dc.html'],
+    ['25', 'Einstellungen', 'settings', '/admin/settings', 'Admin 25 Einstellungen.dc.html'],
+  ] },
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+
+  renderVals() {
+    return {
+      groups: GROUPS.map((g) => ({
+        label: g.label,
+        icon: g.icon,
+        count: g.items.length + (g.items.length === 1 ? ' Screen' : ' Screens'),
+        items: g.items.map(([num, label, icon, route, href]) => ({ num, label, icon, route, href })),
+      })),
+      shared: [
+        { label: 'AdminSidebar', icon: 'panel-left', hint: 'Navigation · in allen 25 Screens eingebunden' },
+        { label: 'p2g-icon', icon: 'shapes', hint: 'Lucide-Wrapper für konsistente Icons' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

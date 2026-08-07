@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    [data-seg] button { color: hsl(0 0% 60%); background: transparent; border: 1px solid transparent; }
+    [data-seg] button[data-on] { color: #0A0A0A; background: #C7F011; border-color: #C7F011; }
+    [data-tab] { color: hsl(0 0% 60%); border-bottom: 2px solid transparent; }
+    [data-tab]:hover { color: #FAFAFA; }
+    [data-tab][data-on] { color: #C7F011; border-bottom-color: #C7F011; }
+    #cal { display: grid; grid-template-columns: 62px repeat(7, minmax(74px, 1fr)); min-width: 780px; }
+    #cal > div { border-right: 1px solid hsl(0 0% 10%); }
+    #cal > div:last-child { border-right: 0; }
+    #bk-table { width: 100%; border-collapse: collapse; min-width: 1080px; }
+    #bk-table th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(0 0% 65%); text-align: left; font-weight: 400; padding: 0 14px 12px 0; white-space: nowrap; }
+    #bk-table td { padding: 12px 14px 12px 0; border-top: 1px solid hsl(0 0% 12%); font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: hsl(0 0% 78%); vertical-align: middle; }
+    #bk-table tbody tr:hover td { background: hsl(0 0% 100% / 0.022); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideIn { from { transform: translateX(28px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Buchungen">
+  <dc-import name="AdminSidebar" active="bookings" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/bookings</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Buchungen</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <button onClick="{{ openReset }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#FF6B6B;background:hsl(0 100% 71% / 0.08);border:1px solid hsl(0 100% 71% / 0.32);border-radius:10px;cursor:pointer;transition:background 0.2s" style-hover="background:hsl(0 100% 71% / 0.16)">
+          <p2g-icon name="trash-2" size="15"></p2g-icon>Buchungen Reset
+        </button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:20px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)"><span style="color:#FAFAFA;font-weight:700">38 Buchungen</span> in dieser Woche <span style="color:#7FD4FF">(9 Club-Buchungen)</span></span>
+          <div ref="{{ tabRef }}" style="display:flex;gap:22px;border-bottom:1px solid hsl(0 0% 12%)">
+            <button onClick="{{ pickCal }}" data-tab="1" data-key="cal" style="display:inline-flex;align-items:center;gap:8px;padding:0 2px 11px;background:none;border-top:0;border-left:0;border-right:0;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:color 0.2s">
+              <p2g-icon name="calendar-days" size="16"></p2g-icon>Kalender
+            </button>
+            <button onClick="{{ pickList }}" data-tab="1" data-key="list" style="display:inline-flex;align-items:center;gap:8px;padding:0 2px 11px;background:none;border-top:0;border-left:0;border-right:0;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:color 0.2s">
+              <p2g-icon name="list" size="16"></p2g-icon>Liste
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Filterkarte ── -->
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,150px">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button onClick="{{ prevWeek }}" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 75%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-left" size="16"></p2g-icon></button>
+            <span ref="{{ weekRef }}" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;min-width:196px;text-align:center">28. Jul - 03. Aug 2026</span>
+            <button onClick="{{ nextWeek }}" style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 75%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-right" size="16"></p2g-icon></button>
+            <button onClick="{{ thisWeek }}" style="height:34px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.3);border-radius:10px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(71 91% 51% / 0.16)">Diese Woche</button>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(190px, 100%), 1fr));gap:12px">
+            <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+              <label style="display:flex;flex-direction:column;gap:7px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ f.label }}</span>
+                <span style="position:relative;display:flex;align-items:center">
+                  <select style="appearance:none;width:100%;height:38px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                    <sc-for list="{{ f.options }}" as="o" hint-placeholder-count="3">
+                      <option value="{{ o }}">{{ o }}</option>
+                    </sc-for>
+                  </select>
+                  <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+                </span>
+              </label>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;padding-top:13px;border-top:1px solid hsl(0 0% 12%)">
+            <button onClick="{{ toggleClub }}" ref="{{ clubBoxRef }}" style="display:inline-flex;align-items:center;gap:9px;padding:7px 13px 7px 9px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:999px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:hsl(0 0% 75%)">
+              <span ref="{{ clubTickRef }}" style="width:17px;height:17px;flex:none;border-radius:5px;border:1.5px solid hsl(0 0% 30%);display:flex;align-items:center;justify-content:center;color:#0A0A0A"></span>
+              Nur Club-Buchungen
+            </button>
+          </div>
+        </div>
+      </x-import>
+
+      <!-- ── Kalenderansicht ── -->
+      <div ref="{{ calViewRef }}">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,600px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Wochenübersicht</h2>
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                <sc-for list="{{ legend }}" as="lg" hint-placeholder-count="4">
+                  <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 65%);white-space:nowrap">
+                    <span style="width:9px;height:9px;border-radius:3px;background:{{ lg.color }}"></span>{{ lg.label }}
+                  </span>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="overflow-x:auto">
+              <div id="cal">
+                <div style="display:flex;flex-direction:column">
+                  <div style="height:34px;border-bottom:1px solid hsl(0 0% 12%)"></div>
+                  <sc-for list="{{ hours }}" as="h" hint-placeholder-count="18">
+                    <div style="height:44px;display:flex;align-items:flex-start;justify-content:flex-end;padding:0 9px 0 0;border-bottom:1px solid hsl(0 0% 8%)">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 58%);transform:translateY(-6px)">{{ h }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+                  <div style="display:flex;flex-direction:column;position:relative">
+                    <div style="height:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-bottom:1px solid hsl(0 0% 12%);background:{{ d.headBg }}">
+                      <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:{{ d.headFg }}">{{ d.name }}</span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:hsl(0 0% 58%)">{{ d.date }}</span>
+                    </div>
+                    <div style="position:relative;height:792px">
+                      <sc-for list="{{ hours }}" as="h2" hint-placeholder-count="18">
+                        <div style="height:44px;border-bottom:1px solid hsl(0 0% 8%)"></div>
+                      </sc-for>
+                      <sc-for list="{{ d.blocks }}" as="bl" hint-placeholder-count="2">
+                        <button onClick="{{ bl.open }}" style="position:absolute;left:3px;right:3px;top:{{ bl.top }};height:{{ bl.h }};display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:5px 7px;text-align:left;border-radius:8px;cursor:pointer;background:{{ bl.bg }};border:1px solid {{ bl.brd }};transition:filter 0.15s" style-hover="filter:brightness(1.35)">
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:{{ bl.fg }};white-space:nowrap">{{ bl.time }}</span>
+                          <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:600;color:{{ bl.fg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">{{ bl.name }}</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <!-- ── Listenansicht ── -->
+      <div ref="{{ listViewRef }}" style="display:none">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,520px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Buchungsliste <span ref="{{ listCountRef }}" style="font-family:'JetBrains Mono',monospace;font-weight:400;font-size:14px;color:hsl(0 0% 65%)">(8)</span></h2>
+              <label style="position:relative;display:flex;align-items:center;min-width:min(260px, 100%)">
+                <span style="position:absolute;left:11px;display:flex;color:hsl(0 0% 58%)"><p2g-icon name="search" size="15"></p2g-icon></span>
+                <input onInput="{{ onSearch }}" type="text" placeholder="Suchen…" style="width:100%;height:38px;padding:0 12px 0 36px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              </label>
+            </div>
+
+            <div style="overflow-x:auto">
+              <table id="bk-table">
+                <thead>
+                  <tr>
+                    <th>Datum</th>
+                    <th>Uhrzeit</th>
+                    <th>Court</th>
+                    <th>Spieler / Club</th>
+                    <th>Herkunft</th>
+                    <th>Dauer</th>
+                    <th>Betrag</th>
+                    <th>Zahlung</th>
+                    <th>Status</th>
+                    <th style="text-align:right">Aktionen</th>
+                  </tr>
+                </thead>
+                <tbody ref="{{ rowsRef }}">
+                  <sc-for list="{{ bookings }}" as="b" hint-placeholder-count="8">
+                    <tr data-q="{{ b.q }}">
+                      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap">{{ b.date }}</span></td>
+                      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#FAFAFA;white-space:nowrap">{{ b.time }}</span></td>
+                      <td>
+                        <div style="display:flex;flex-direction:column;gap:1px">
+                          <span style="font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">{{ b.court }}</span>
+                          <span style="font-size:11.5px;color:hsl(0 0% 65%);white-space:nowrap">{{ b.location }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="display:flex;align-items:center;gap:9px">
+                          <span style="width:28px;height:28px;flex:none;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.26);color:#C7F011;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:10.5px;display:flex;align-items:center;justify-content:center">{{ b.initials }}</span>
+                          <span style="font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">{{ b.name }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ b.originFg }};background:{{ b.originBg }};border:1px solid {{ b.originBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap">{{ b.origin }}</span>
+                      </td>
+                      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap">{{ b.duration }}</span></td>
+                      <td><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#FAFAFA;white-space:nowrap">{{ b.amount }}</span></td>
+                      <td><span style="font-size:12.5px;color:hsl(0 0% 65%);white-space:nowrap">{{ b.payment }}</span></td>
+                      <td>
+                        <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ b.statusFg }};background:{{ b.statusBg }};border:1px solid {{ b.statusBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap">
+                          <span style="width:5px;height:5px;border-radius:50%;background:{{ b.statusFg }}"></span>{{ b.status }}
+                        </span>
+                      </td>
+                      <td>
+                        <div style="display:flex;align-items:center;justify-content:flex-end;gap:7px">
+                          <button onClick="{{ b.open }}" style="height:30px;padding:0 11px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer;white-space:nowrap" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">Details</button>
+                          <sc-if value="{{ b.cancellable }}" hint-placeholder-val="{{ true }}">
+                            <button onClick="{{ b.cancel }}" title="Stornieren" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.08);border:1px solid hsl(0 100% 71% / 0.28);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.18)"><p2g-icon name="x-circle" size="14"></p2g-icon></button>
+                          </sc-if>
+                        </div>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </x-import>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── Detail-Drawer ── -->
+  <div ref="{{ drawerRef }}" style="display:none;position:fixed;inset:0;z-index:80">
+    <div onClick="{{ closeDrawer }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.72);backdrop-filter:blur(4px)"></div>
+    <div style="position:absolute;top:0;right:0;bottom:0;width:min(430px, 100%);background:linear-gradient(180deg, hsl(0 0% 6%), hsl(0 0% 3%));border-left:1px solid hsl(0 0% 14%);display:flex;flex-direction:column;animation:slideIn 0.28s cubic-bezier(0.16,1,0.3,1);overflow-y:auto">
+      <div style="position:sticky;top:0;background:hsl(0 0% 6% / 0.94);backdrop-filter:blur(18px);border-bottom:1px solid hsl(0 0% 14%);padding:18px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:hsl(0 0% 65%)">Buchungsdetails</span>
+          <span ref="{{ drawerTitleRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA">Lena Kramer</span>
+        </div>
+        <button onClick="{{ closeDrawer }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer" style-hover="color:#FAFAFA"><p2g-icon name="x" size="16"></p2g-icon></button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px;padding:20px">
+        <div ref="{{ drawerRowsRef }}" style="display:flex;flex-direction:column;gap:1px">
+          <sc-for list="{{ drawerFields }}" as="df" hint-placeholder-count="8">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:1px solid hsl(0 0% 11%)">
+              <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%);white-space:nowrap">{{ df.label }}</span>
+              <span data-df="{{ df.key }}" style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:#FAFAFA;text-align:right">{{ df.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px;padding:15px;background:hsl(71 91% 51% / 0.05);border:1px solid hsl(71 91% 51% / 0.2);border-radius:14px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Teilnehmer</span>
+          <sc-for list="{{ participants }}" as="p" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="width:26px;height:26px;flex:none;border-radius:50%;background:hsl(0 0% 100% / 0.06);border:1px solid hsl(0 0% 18%);color:hsl(0 0% 82%);font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center">{{ p.initials }}</span>
+              <span style="flex:1;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA">{{ p.name }}</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ p.fg }};background:{{ p.bg }};border-radius:999px;padding:3px 9px;white-space:nowrap">{{ p.state }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <button onClick="{{ openCancel }}" style="display:flex;align-items:center;justify-content:center;gap:8px;height:44px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#FF6B6B;background:hsl(0 100% 71% / 0.08);border:1px solid hsl(0 100% 71% / 0.32);border-radius:12px;cursor:pointer;transition:background 0.2s" style-hover="background:hsl(0 100% 71% / 0.18)">
+          <p2g-icon name="x-circle" size="16"></p2g-icon>Buchung stornieren
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: stornieren ── -->
+  <div ref="{{ cancelRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeCancel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(420px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Buchung stornieren?</h3>
+        <p style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 68%);margin:0">Diese Aktion kann nicht rückgängig gemacht werden. Die Buchung wird als storniert markiert.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeCancel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeCancel }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:1px solid #FF6B6B;border-radius:11px;cursor:pointer">Stornieren</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: Buchungen löschen ── -->
+  <div ref="{{ resetRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeReset }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(460px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 100% 71% / 0.25);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#FF6B6B">Achtung — unwiderruflich</span>
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Buchungen löschen?</h3>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:14px;background:hsl(0 100% 71% / 0.05);border:1px solid hsl(0 100% 71% / 0.18);border-radius:13px">
+        <sc-for list="{{ resetItems }}" as="ri" hint-placeholder-count="4">
+          <span style="display:flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 72%)">
+            <span style="width:4px;height:4px;border-radius:50%;background:#FF6B6B;flex:none"></span>{{ ri }}
+          </span>
+        </sc-for>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Zur Bestätigung „LÖSCHEN“ eingeben</span>
+        <input type="text" placeholder="LÖSCHEN" style="height:42px;padding:0 14px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:0.1em;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:11px;outline:none;transition:border-color 0.2s" style-focus="border-color:#FF6B6B">
+      </label>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeReset }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeReset }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:1px solid #FF6B6B;border-radius:11px;cursor:pointer">Endgültig löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const ST = {
+  Bestätigt: ['#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)'],
+  Ausstehend: ['#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)'],
+  Storniert: ['#FF6B6B', 'hsl(0 100% 71% / 0.1)', 'hsl(0 100% 71% / 0.3)'],
+};
+const OR = {
+  Spieler: ['hsl(0 0% 80%)', 'hsl(0 0% 100% / 0.05)', 'hsl(0 0% 18%)'],
+  Club: ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)'],
+  Lobby: ['#C7A6FF', 'hsl(263 100% 82% / 0.1)', 'hsl(263 100% 82% / 0.3)'],
+};
+
+const ROWS = [
+  { date: '28.07.2026', time: '18:00 – 19:30', court: 'Court 1', location: 'TSV München-Ost', initials: 'LK', name: 'Lena Kramer', origin: 'Spieler', duration: '90 Min.', amount: '36,00 €', payment: 'Karte', status: 'Bestätigt' },
+  { date: '28.07.2026', time: '19:30 – 21:00', court: 'Court 2', location: 'SV Rheinaue Köln', initials: 'TM', name: 'Tobias Meyer', origin: 'Lobby', duration: '90 Min.', amount: '32,00 €', payment: 'P2G Points', status: 'Bestätigt' },
+  { date: '29.07.2026', time: '17:00 – 18:30', court: 'Court 1', location: 'SV Rheinaue Köln', initials: 'SV', name: 'SV Rheinaue', origin: 'Club', duration: '90 Min.', amount: '0,00 €', payment: 'Kontingent', status: 'Bestätigt' },
+  { date: '30.07.2026', time: '08:00 – 09:30', court: 'Court 3', location: 'TC Hamburg-Alster', initials: 'JW', name: 'Jana Weiss', origin: 'Spieler', duration: '90 Min.', amount: '28,00 €', payment: 'Offen', status: 'Ausstehend' },
+  { date: '30.07.2026', time: '12:00 – 13:00', court: 'Court 2', location: 'TSV München-Ost', initials: 'MK', name: 'Marco Kern', origin: 'Spieler', duration: '60 Min.', amount: '24,00 €', payment: 'Karte', status: 'Bestätigt' },
+  { date: '31.07.2026', time: '20:00 – 21:30', court: 'Court 1', location: 'TSG Stuttgart-Süd', initials: 'ND', name: 'Nina Dörr', origin: 'Spieler', duration: '90 Min.', amount: '36,00 €', payment: 'Erstattet', status: 'Storniert' },
+  { date: '01.08.2026', time: '10:00 – 12:00', court: 'Court 4', location: 'TSV München-Ost', initials: 'TS', name: 'TSV München-Ost', origin: 'Club', duration: '120 Min.', amount: '0,00 €', payment: 'Kontingent', status: 'Bestätigt' },
+  { date: '02.08.2026', time: '16:00 – 17:30', court: 'Court 2', location: 'TC Hamburg-Alster', initials: 'PF', name: 'Paul Frank', origin: 'Lobby', duration: '90 Min.', amount: '32,00 €', payment: 'Karte', status: 'Bestätigt' },
+];
+
+const DAYS = [
+  { name: 'Mo', date: '28.07', blocks: [
+    { time: '18:00', name: 'L. Kramer', top: 528, h: 66, kind: 'ok' },
+    { time: '09:00', name: 'M. Kern', top: 132, h: 44, kind: 'ok' },
+  ] },
+  { name: 'Di', date: '29.07', blocks: [
+    { time: '17:00', name: 'SV Rheinaue', top: 484, h: 66, kind: 'club' },
+    { time: '19:30', name: 'T. Meyer', top: 594, h: 66, kind: 'lobby' },
+  ] },
+  { name: 'Mi', date: '30.07', blocks: [
+    { time: '08:00', name: 'J. Weiss', top: 88, h: 66, kind: 'pending' },
+    { time: '12:00', name: 'M. Kern', top: 264, h: 44, kind: 'ok' },
+    { time: '20:00', name: 'A. Stein', top: 616, h: 66, kind: 'ok' },
+  ] },
+  { name: 'Do', date: '31.07', blocks: [
+    { time: '20:00', name: 'N. Dörr', top: 616, h: 66, kind: 'cancel' },
+  ] },
+  { name: 'Fr', date: '01.08', blocks: [
+    { time: '10:00', name: 'TSV München', top: 176, h: 88, kind: 'club' },
+    { time: '18:00', name: 'K. Berg', top: 528, h: 66, kind: 'ok' },
+  ] },
+  { name: 'Sa', date: '02.08', blocks: [
+    { time: '16:00', name: 'P. Frank', top: 440, h: 66, kind: 'lobby' },
+  ] },
+  { name: 'So', date: '03.08', blocks: [
+    { time: '11:00', name: 'S. Roth', top: 220, h: 66, kind: 'ok' },
+  ] },
+];
+
+const KIND = {
+  ok: ['hsl(71 91% 51% / 0.16)', 'hsl(71 91% 51% / 0.42)', '#C7F011'],
+  pending: ['hsl(41 100% 65% / 0.14)', 'hsl(41 100% 65% / 0.4)', '#FFC44D'],
+  club: ['hsl(200 100% 75% / 0.14)', 'hsl(200 100% 75% / 0.4)', '#7FD4FF'],
+  lobby: ['hsl(263 100% 82% / 0.14)', 'hsl(263 100% 82% / 0.4)', '#C7A6FF'],
+  cancel: ['hsl(0 100% 71% / 0.12)', 'hsl(0 100% 71% / 0.36)', '#FF6B6B'],
+};
+
+class Component extends DCLogic {
+  state = { tab: 'cal', club: false };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 14) clearInterval(this._iv);
+    }, 350);
+    this._paint();
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  componentDidUpdate() { this._paint(); }
+
+  _paint() {
+    if (this._tabs) {
+      this._tabs.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === this.state.tab);
+      });
+    }
+    if (this._calView) this._calView.style.display = this.state.tab === 'cal' ? '' : 'none';
+    if (this._listView) this._listView.style.display = this.state.tab === 'list' ? '' : 'none';
+    if (this._tick) {
+      this._tick.style.background = this.state.club ? '#C7F011' : 'transparent';
+      this._tick.style.borderColor = this.state.club ? '#C7F011' : 'hsl(0 0% 30%)';
+      this._tick.innerHTML = this.state.club
+        ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '';
+    }
+    this._filter();
+  }
+
+  _filter() {
+    if (!this._rows) return;
+    const q = (this._q || '').toLowerCase();
+    const clubOnly = this.state.club;
+    let n = 0;
+    this._rows.querySelectorAll('tr[data-q]').forEach((tr) => {
+      const hay = tr.dataset.q.toLowerCase();
+      const hit = (!q || hay.indexOf(q) >= 0) && (!clubOnly || hay.indexOf('club') >= 0);
+      tr.style.display = hit ? '' : 'none';
+      if (hit) n += 1;
+    });
+    if (this._count) this._count.textContent = '(' + n + ')';
+  }
+
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    const hours = [];
+    for (let h = 6; h <= 23; h += 1) hours.push(String(h).padStart(2, '0') + ':00');
+
+    return {
+      hours,
+      legend: [
+        { label: 'Spieler', color: '#C7F011' },
+        { label: 'Club-Kontingent', color: '#7FD4FF' },
+        { label: 'Lobby', color: '#C7A6FF' },
+        { label: 'Ausstehend', color: '#FFC44D' },
+        { label: 'Storniert', color: '#FF6B6B' },
+      ],
+      filters: [
+        { label: 'Standort', options: ['Alle Standorte', 'TSV München-Ost', 'SV Rheinaue Köln', 'TC Hamburg-Alster', 'TSG Stuttgart-Süd'] },
+        { label: 'Court', options: ['Alle Courts', 'Court 1', 'Court 2', 'Court 3', 'Court 4'] },
+        { label: 'Status', options: ['Alle Status', 'Bestätigt', 'Ausstehend', 'Storniert'] },
+        { label: 'Club', options: ['Alle Clubs', 'TSV München-Ost', 'SV Rheinaue Köln'] },
+      ],
+      days: DAYS.map((d, i) => ({
+        name: d.name,
+        date: d.date,
+        headBg: i === 6 ? 'hsl(0 0% 100% / 0.03)' : 'transparent',
+        headFg: i === 6 ? 'hsl(0 0% 65%)' : '#FAFAFA',
+        blocks: d.blocks.map((b) => {
+          const k = KIND[b.kind];
+          return {
+            ...b,
+            top: b.top + 'px',
+            h: b.h + 'px',
+            bg: k[0], brd: k[1], fg: k[2],
+            open: () => this._openDrawer(b.name, b.time),
+          };
+        }),
+      })),
+      bookings: ROWS.map((r) => {
+        const s = ST[r.status];
+        const o = OR[r.origin];
+        return {
+          ...r,
+          q: [r.name, r.court, r.location, r.origin, r.status, r.date].join(' '),
+          statusFg: s[0], statusBg: s[1], statusBrd: s[2],
+          originFg: o[0], originBg: o[1], originBrd: o[2],
+          cancellable: r.status === 'Bestätigt',
+          open: () => this._openDrawer(r.name, r.time),
+          cancel: () => this._show(this._cancel, true),
+        };
+      }),
+      drawerFields: [
+        { key: 'status', label: 'Status', value: 'Bestätigt' },
+        { key: 'date', label: 'Datum', value: '28.07.2026' },
+        { key: 'time', label: 'Uhrzeit', value: '18:00 – 19:30' },
+        { key: 'court', label: 'Court', value: 'Court 1' },
+        { key: 'loc', label: 'Standort', value: 'TSV München-Ost' },
+        { key: 'origin', label: 'Herkunft', value: 'Spieler' },
+        { key: 'amount', label: 'Betrag', value: '36,00 €' },
+        { key: 'pay', label: 'Zahlung', value: 'Karte · bezahlt' },
+        { key: 'id', label: 'Buchungs-ID', value: '#BK-24812' },
+      ],
+      participants: [
+        { initials: 'LK', name: 'Lena Kramer', state: 'Bucher', fg: '#C7F011', bg: 'hsl(71 91% 51% / 0.12)' },
+        { initials: 'MK', name: 'Marco Kern', state: 'Bestätigt', fg: '#C7F011', bg: 'hsl(71 91% 51% / 0.12)' },
+        { initials: 'JW', name: 'Jana Weiss', state: 'Eingeladen', fg: '#FFC44D', bg: 'hsl(41 100% 65% / 0.12)' },
+        { initials: '+1', name: 'Offener Platz', state: 'Frei', fg: 'hsl(0 0% 65%)', bg: 'hsl(0 0% 100% / 0.05)' },
+      ],
+      resetItems: [
+        'Alle Buchungen inkl. Historie',
+        'Teilnehmer-Einladungen',
+        'Spieler-Zuordnungen',
+        'Zahlungs- und Kontingent-Einträge',
+      ],
+
+      tabRef: (el) => { this._tabs = el; this._paint(); },
+      calViewRef: (el) => { this._calView = el; },
+      listViewRef: (el) => { this._listView = el; },
+      rowsRef: (el) => { this._rows = el; this._filter(); },
+      listCountRef: (el) => { this._count = el; },
+      weekRef: (el) => { this._week = el; },
+      clubTickRef: (el) => { this._tick = el; this._paint(); },
+      clubBoxRef: (el) => { this._clubBox = el; },
+      drawerRef: (el) => { this._drawer = el; },
+      drawerTitleRef: (el) => { this._drawerTitle = el; },
+      drawerRowsRef: (el) => { this._drawerRows = el; },
+      cancelRef: (el) => { this._cancel = el; },
+      resetRef: (el) => { this._reset = el; },
+
+      pickCal: () => this.setState({ tab: 'cal' }),
+      pickList: () => this.setState({ tab: 'list' }),
+      toggleClub: () => this.setState((s) => ({ club: !s.club })),
+      prevWeek: () => this._shiftWeek(-1),
+      nextWeek: () => this._shiftWeek(1),
+      thisWeek: () => { if (this._week) this._week.textContent = '28. Jul - 03. Aug 2026'; },
+      closeDrawer: () => this._show(this._drawer, false),
+      openCancel: () => this._show(this._cancel, true),
+      closeCancel: () => this._show(this._cancel, false),
+      openReset: () => this._show(this._reset, true),
+      closeReset: () => this._show(this._reset, false),
+    };
+  }
+
+  _openDrawer(name, time) {
+    if (this._drawerTitle) this._drawerTitle.textContent = name;
+    if (this._drawerRows) {
+      const t = this._drawerRows.querySelector('[data-df="time"]');
+      if (t && time) t.textContent = time + (time.length <= 5 ? ' – +90 Min.' : '');
+    }
+    this._show(this._drawer, true);
+  }
+
+  _shiftWeek(dir) {
+    const weeks = ['21. Jul - 27. Jul 2026', '28. Jul - 03. Aug 2026', '04. Aug - 10. Aug 2026', '11. Aug - 17. Aug 2026'];
+    this._wi = Math.min(weeks.length - 1, Math.max(0, (this._wi == null ? 1 : this._wi) + dir));
+    if (this._week) this._week.textContent = weeks[this._wi];
+  }
+}
+</script>
+</body>
+</html>

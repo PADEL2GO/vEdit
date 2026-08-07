@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #nw-top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+    [data-chip] { cursor: pointer; white-space: nowrap; font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 7px 13px; background: hsl(0 0% 100% / 0.05); border: 1px solid hsl(0 0% 16%); color: hsl(0 0% 70%); transition: all 0.18s; }
+    [data-chip]:hover { color: #FAFAFA; }
+    [data-chip][data-on] { color: #0A0A0A; background: #C7F011; border-color: #C7F011; }
+    [data-topic][data-on] { color: #0A0A0A; }
+    [data-lang] { color: hsl(0 0% 60%); border-bottom: 2px solid transparent; }
+    [data-lang][data-on] { color: #C7F011; border-bottom-color: #C7F011; }
+    #nw-form { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1180px) { #nw-top { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 820px) { #nw-form { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — News / Artikel">
+  <dc-import name="AdminSidebar" active="news" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/news</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">News / Artikel</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;flex:none">
+        <button onClick="{{ startTranslate }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer;white-space:nowrap;transition:color 0.2s, border-color 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">
+          <p2g-icon name="languages" size="14"></p2g-icon><span ref="{{ trLabelRef }}">Alle übersetzen</span>
+        </button>
+        <button onClick="{{ openForm }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.28);white-space:nowrap"><p2g-icon name="plus" size="15"></p2g-icon>Neuer Artikel</button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Artikel für /news, die Startseite und das Dashboard verwalten — Reihenfolge per Drag &amp; Drop.</span>
+
+      <div id="nw-top">
+        <!-- KI-Generator -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,360px">
+          <div style="display:flex;flex-direction:column;gap:15px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:34px;height:34px;flex:none;border-radius:10px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.32);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="sparkles" size="16"></p2g-icon></span>
+              <div style="display:flex;flex-direction:column;gap:1px">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA">Wochen-News-Generator (KI)</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">Pro Quelle ein Entwurf — max. 3 Quellen je Durchlauf.</span>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ sources }}" as="s" hint-placeholder-count="3">
+                <input type="text" placeholder="{{ s.ph }}" style="height:38px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              </sc-for>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;align-items:center;justify-content:center;gap:9px;height:44px;background:hsl(0 0% 100% / 0.03);border:1px dashed hsl(0 0% 20%);border-radius:11px;cursor:pointer;transition:border-color 0.2s" style-hover="border-color:hsl(71 91% 51% / 0.5)">
+                <span style="color:hsl(0 0% 58%);display:flex"><p2g-icon name="file-up" size="15"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%);text-align:center;padding:0 10px">Quell-Dateien (PDF / HTML / TXT, max. 15 MB)</span>
+              </div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap">
+                <sc-for list="{{ sourceFiles }}" as="sf" hint-placeholder-count="2">
+                  <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:5px 11px;white-space:nowrap">
+                    {{ sf }}<span style="display:flex;cursor:pointer;color:hsl(0 0% 55%)"><p2g-icon name="x" size="11"></p2g-icon></span>
+                  </span>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+              <label style="display:flex;flex-direction:column;gap:7px;flex:1;min-width:min(180px, 100%)">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Schreibstil</span>
+                <span style="position:relative;display:flex;align-items:center">
+                  <select style="appearance:none;width:100%;height:38px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                    <option>Standard (kein eigener Stil)</option><option>Locker &amp; direkt</option><option>Sachlich / Pressestil</option>
+                  </select>
+                  <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+                </span>
+              </label>
+              <button onClick="{{ openStyles }}" style="height:38px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer;white-space:nowrap;transition:color 0.2s, border-color 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">Schreibstile verwalten</button>
+            </div>
+
+            <button ref="{{ genBtnRef }}" onClick="{{ generate }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25);white-space:nowrap">
+              <p2g-icon name="wand-sparkles" size="15"></p2g-icon><span ref="{{ genLabelRef }}">Artikel generieren</span>
+            </button>
+          </div>
+        </x-import>
+
+        <!-- Autoren -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,360px">
+          <div style="display:flex;flex-direction:column;gap:15px">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA">Autoren</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;line-height:1.5;color:hsl(0 0% 65%)">Erscheinen als „Geschrieben von“ auf der Artikelseite — Foto anklicken zum Hochladen.</span>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ authors }}" as="a" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:12px;padding:11px 12px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:12px">
+                  <span title="{{ a.avatarTitle }}" style="width:38px;height:38px;flex:none;border-radius:50%;background:{{ a.avatarBg }};border:1px solid {{ a.avatarBrd }};color:{{ a.avatarFg }};font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:{{ a.avatarCursor }}">{{ a.initials }}</span>
+                  <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0">
+                    <input type="text" value="{{ a.name }}" style="height:30px;padding:0 9px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:8px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                    <div style="display:flex;gap:6px">
+                      <input type="text" value="{{ a.role }}" placeholder="Rolle" style="flex:1;min-width:0;height:28px;padding:0 9px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 78%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:8px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                      <input type="text" value="{{ a.roleEn }}" placeholder="Rolle EN" style="flex:1;min-width:0;height:28px;padding:0 9px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 78%);background:hsl(200 100% 75% / 0.04);border:1px solid hsl(200 100% 75% / 0.16);border-radius:8px;outline:none;transition:border-color 0.2s" style-focus="border-color:#7FD4FF">
+                    </div>
+                  </div>
+                  <button style="width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="13"></p2g-icon></button>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;gap:8px;align-items:center;padding-top:13px;border-top:1px solid hsl(0 0% 12%);flex-wrap:wrap">
+              <input type="text" placeholder="Name *" style="flex:1;min-width:110px;height:36px;padding:0 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              <input type="text" placeholder="Rolle" style="flex:1;min-width:110px;height:36px;padding:0 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              <button style="height:36px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:9px;cursor:pointer;white-space:nowrap">Anlegen</button>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <!-- Filter + Liste -->
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,640px">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <div ref="{{ statusRef }}" style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ statusChips }}" as="c" hint-placeholder-count="3">
+                <button onClick="{{ c.pick }}" data-chip="1" data-key="{{ c.key }}">{{ c.label }}</button>
+              </sc-for>
+            </div>
+            <div ref="{{ topicRef }}" style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ topicChips }}" as="t" hint-placeholder-count="6">
+                <button onClick="{{ t.pick }}" data-chip="1" data-topic="1" data-key="{{ t.key }}" data-color="{{ t.color }}">
+                  <sc-if value="{{ t.hasDot }}" hint-placeholder-val="{{ false }}">
+                    <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:{{ t.color }};margin-right:7px;vertical-align:middle"></span>
+                  </sc-if>{{ t.label }}
+                </button>
+              </sc-for>
+            </div>
+            <span ref="{{ dndHintRef }}" style="display:none;font-family:'DM Sans',sans-serif;font-size:11.5px;color:#FFC44D">Sortieren per Drag &amp; Drop nur ohne aktive Filter.</span>
+          </div>
+
+          <div ref="{{ listRef }}" style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ articles }}" as="a" hint-placeholder-count="7">
+              <div data-art="1" data-status="{{ a.statusKey }}" data-topic="{{ a.topic }}" style="display:flex;align-items:center;gap:14px;padding:12px 13px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:14px;flex-wrap:wrap;transition:border-color 0.2s" style-hover="border-color:hsl(0 0% 20%)">
+                <span style="color:hsl(0 0% 40%);display:flex;cursor:grab;flex:none"><p2g-icon name="grip-vertical" size="16"></p2g-icon></span>
+                <img src="{{ a.img }}" alt="" style="width:52px;height:65px;flex:none;object-fit:cover;border-radius:9px;border:1px solid hsl(0 0% 15%);display:block">
+
+                <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:200px">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <sc-if value="{{ a.highlight }}" hint-placeholder-val="{{ false }}">
+                      <span style="color:#FF8A1F;display:flex"><p2g-icon name="flame" size="14"></p2g-icon></span>
+                    </sc-if>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FAFAFA">{{ a.title }}</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:{{ a.topicColor }};background:{{ a.topicBg }};border:1px solid {{ a.topicBrd }};border-radius:999px;padding:3px 9px;white-space:nowrap">{{ a.topic }}</span>
+                    <sc-if value="{{ a.translated }}" hint-placeholder-val="{{ false }}">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#7FD4FF;background:hsl(200 100% 75% / 0.1);border:1px solid hsl(200 100% 75% / 0.28);border-radius:999px;padding:3px 8px;white-space:nowrap">Übersetzt</span>
+                    </sc-if>
+                    <span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap"><p2g-icon name="{{ a.visIcon }}" size="11"></p2g-icon>{{ a.visibility }}</span>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:14px;flex:none">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 65%);white-space:nowrap"><p2g-icon name="heart" size="12"></p2g-icon>{{ a.likes }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 65%);white-space:nowrap"><p2g-icon name="eye" size="12"></p2g-icon>{{ a.views }}</span>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:9px;flex:none">
+                  <button onClick="{{ a.noop }}" style="display:inline-flex;align-items:center;gap:8px;background:none;border:0;padding:0;cursor:pointer">
+                    <span style="width:38px;height:22px;flex:none;position:relative;display:block;background:{{ a.swBg }};border:1px solid {{ a.swBrd }};border-radius:999px;transition:background 0.2s">
+                      <span style="position:absolute;top:2px;left:{{ a.knobX }};width:16px;height:16px;border-radius:50%;background:{{ a.knobBg }};transition:left 0.2s"></span>
+                    </span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:{{ a.statusFg }};white-space:nowrap;min-width:48px;text-align:left">{{ a.status }}</span>
+                  </button>
+                  <button title="Übersetzen" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer" style-hover="color:#7FD4FF;border-color:hsl(200 100% 75% / 0.4)"><p2g-icon name="languages" size="14"></p2g-icon></button>
+                  <button onClick="{{ a.edit }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="pencil" size="14"></p2g-icon></button>
+                  <button onClick="{{ a.del }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <span ref="{{ emptyRef }}" style="display:none;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 65%);text-align:center;padding:20px 0">Keine Artikel gefunden</span>
+        </div>
+      </x-import>
+    </main>
+  </div>
+
+  <!-- ── Artikel-Formular ── -->
+  <div ref="{{ formRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeForm }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.8);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(1080px, 100%);max-height:92vh;overflow-y:auto;background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:22px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="position:sticky;top:0;z-index:3;background:hsl(0 0% 6% / 0.95);backdrop-filter:blur(18px);border-bottom:1px solid hsl(0 0% 14%);padding:20px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Artikel</span>
+          <h3 ref="{{ formTitleRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Neuer Artikel</h3>
+        </div>
+        <button onClick="{{ closeForm }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer" style-hover="color:#FAFAFA"><p2g-icon name="x" size="16"></p2g-icon></button>
+      </div>
+
+      <div id="nw-form" style="padding:24px">
+        <div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+
+          <!-- Diktat -->
+          <div style="display:flex;flex-direction:column;gap:12px;padding:17px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.07), hsl(71 91% 51% / 0.01));border:1px solid hsl(71 91% 51% / 0.24);border-radius:15px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.32);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="mic" size="15"></p2g-icon></span>
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;color:#FAFAFA">Per Sprache diktieren (KI)</span>
+              </div>
+              <button onClick="{{ toggleRec }}" ref="{{ recBtnRef }}" style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.32);border-radius:9px;cursor:pointer;white-space:nowrap">
+                <span ref="{{ recDotRef }}" style="width:8px;height:8px;border-radius:50%;background:#C7F011"></span><span ref="{{ recLabelRef }}">Aufnahme starten</span>
+              </button>
+            </div>
+            <textarea rows="4" placeholder="Transkript — mind. 10 Zeichen, auch manuell editierbar…" style="padding:11px 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.55;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;outline:none;resize:vertical;transition:border-color 0.2s" style-focus="border-color:#C7F011"></textarea>
+            <button style="align-self:flex-start;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;white-space:nowrap">Artikel mit KI erstellen</button>
+          </div>
+
+          <!-- Sprach-Tabs -->
+          <div ref="{{ langRef }}" style="display:flex;gap:22px;border-bottom:1px solid hsl(0 0% 12%)">
+            <button onClick="{{ pickDe }}" data-lang="1" data-key="de" style="padding:0 2px 10px;background:none;border-top:0;border-left:0;border-right:0;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer;transition:color 0.2s">Deutsch</button>
+            <button onClick="{{ pickEn }}" data-lang="1" data-key="en" style="padding:0 2px 10px;background:none;border-top:0;border-left:0;border-right:0;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer;transition:color 0.2s">English</button>
+          </div>
+
+          <span ref="{{ enHintRef }}" style="display:none;font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.5;color:#7FD4FF;background:hsl(200 100% 75% / 0.06);border:1px solid hsl(200 100% 75% / 0.2);border-radius:11px;padding:11px 13px">Leere Felder zeigen automatisch die deutsche Fassung. Von Hand geänderte Felder werden gesperrt und nicht mehr überschrieben.</span>
+
+          <sc-for list="{{ textFields }}" as="f" hint-placeholder-count="4">
+            <label style="display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ f.label }}<sc-if value="{{ f.req }}" hint-placeholder-val="{{ false }}"><span style="color:#C7F011"> *</span></sc-if></span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 58%);white-space:nowrap">{{ f.counter }}</span>
+              </div>
+              <sc-if value="{{ f.isArea }}" hint-placeholder-val="{{ false }}">
+                <textarea rows="{{ f.rows }}" value="{{ f.value }}" placeholder="{{ f.ph }}" style="padding:11px 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.55;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;resize:vertical;transition:border-color 0.2s" style-focus="border-color:#C7F011"></textarea>
+              </sc-if>
+              <sc-if value="{{ f.isInput }}" hint-placeholder-val="{{ true }}">
+                <input type="text" value="{{ f.value }}" placeholder="{{ f.ph }}" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              </sc-if>
+              <sc-if value="{{ f.hasHint }}" hint-placeholder-val="{{ false }}">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 58%)">{{ f.hint }}</span>
+              </sc-if>
+            </label>
+          </sc-for>
+
+          <!-- Tiptap -->
+          <div style="display:flex;flex-direction:column;gap:0">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%);margin-bottom:7px">Inhalt</span>
+            <div style="display:flex;gap:4px;padding:7px 9px;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 15%);border-bottom:0;border-radius:10px 10px 0 0;flex-wrap:wrap">
+              <sc-for list="{{ editorTools }}" as="t" hint-placeholder-count="8">
+                <button title="{{ t.title }}" style="min-width:30px;height:30px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;font-style:{{ t.italic }};color:hsl(0 0% 82%);background:none;border:0;border-radius:7px;cursor:pointer" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.1)">
+                  <sc-if value="{{ t.isIcon }}" hint-placeholder-val="{{ false }}">
+                    <p2g-icon name="{{ t.icon }}" size="14"></p2g-icon>
+                  </sc-if>
+                  <sc-if value="{{ t.isText }}" hint-placeholder-val="{{ true }}">{{ t.label }}</sc-if>
+                </button>
+              </sc-for>
+            </div>
+            <div style="min-height:190px;padding:14px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.65;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:0 0 10px 10px">
+              <p style="margin:0 0 12px">Padel ist Europas am schnellsten wachsender Sport — und Deutschland holt auf. Wir zeigen, welche Zahlen dahinterstecken und was das für Vereine bedeutet.</p>
+              <p style="margin:0;color:hsl(0 0% 55%)">Weiter schreiben…</p>
+            </div>
+          </div>
+
+          <!-- Aufklappbereiche -->
+          <sc-for list="{{ collapsibles }}" as="c" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 15px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:13px;cursor:pointer;transition:border-color 0.2s" style-hover="border-color:hsl(0 0% 20%)">
+              <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FAFAFA">{{ c.label }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">{{ c.hint }}</span>
+              </div>
+              <span style="color:hsl(0 0% 58%);display:flex;flex:none"><p2g-icon name="chevron-down" size="16"></p2g-icon></span>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- Sidebar: Vorschau + Meta -->
+        <div style="display:flex;flex-direction:column;gap:16px;position:sticky;top:0;min-width:0">
+          <div style="display:flex;flex-direction:column;gap:11px;padding:16px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:hsl(0 0% 65%)">Live-Vorschau</span>
+            <div style="position:relative;aspect-ratio:4/5;border-radius:14px;overflow:hidden;border:1px solid hsl(0 0% 15%)">
+              <img src="assets/padel-norway.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block">
+              <div style="position:absolute;inset:0;background:linear-gradient(180deg, hsl(0 0% 0% / 0.1) 35%, hsl(0 0% 0% / 0.9))"></div>
+              <span style="position:absolute;top:13px;left:13px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#0A0A0A;background:#C7F011;border-radius:999px;padding:4px 10px;white-space:nowrap">Inside P2G</span>
+              <div style="position:absolute;left:15px;right:15px;bottom:14px;display:flex;flex-direction:column;gap:6px">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;line-height:1.15;letter-spacing:-0.02em;color:#FAFAFA">Padel boomt: Warum Deutschland jetzt aufholt <span style="color:#C7F011;font-style:italic">Die Zahlen</span></span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 72%)">28. Juni 2026 · 4 Min.</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Titelbild · 4:5, min. 1080 × 1350</span>
+            <div style="display:flex;align-items:center;justify-content:center;gap:9px;height:52px;background:hsl(0 0% 100% / 0.03);border:1px dashed hsl(0 0% 20%);border-radius:11px;cursor:pointer;transition:border-color 0.2s" style-hover="border-color:hsl(71 91% 51% / 0.5)">
+              <span style="color:hsl(0 0% 58%);display:flex"><p2g-icon name="image-plus" size="16"></p2g-icon></span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">Titelbild wählen</span>
+            </div>
+            <span style="font-family:'DM Sans',sans-serif;font-size:11px;line-height:1.45;color:hsl(0 0% 58%)">Wichtige Bildelemente in die obere Hälfte legen — die Artikelseite nutzt einen Farb-Shader als Hero.</span>
+          </div>
+
+          <sc-for list="{{ metaFields }}" as="m" hint-placeholder-count="8">
+            <label style="display:flex;flex-direction:column;gap:7px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ m.label }}<sc-if value="{{ m.req }}" hint-placeholder-val="{{ false }}"><span style="color:#C7F011"> *</span></sc-if></span>
+              <sc-if value="{{ m.isSelect }}" hint-placeholder-val="{{ false }}">
+                <span style="position:relative;display:flex;align-items:center">
+                  <select style="appearance:none;width:100%;height:38px;padding:0 32px 0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                    <sc-for list="{{ m.options }}" as="o" hint-placeholder-count="3">
+                      <option value="{{ o }}">{{ o }}</option>
+                    </sc-for>
+                  </select>
+                  <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+                </span>
+              </sc-if>
+              <sc-if value="{{ m.isInput }}" hint-placeholder-val="{{ true }}">
+                <input type="text" value="{{ m.value }}" placeholder="{{ m.ph }}" style="height:38px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              </sc-if>
+              <sc-if value="{{ m.hasHint }}" hint-placeholder-val="{{ false }}">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11px;line-height:1.45;color:hsl(0 0% 58%)">{{ m.hint }}</span>
+              </sc-if>
+            </label>
+          </sc-for>
+
+          <sc-for list="{{ formSwitches }}" as="s" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:13px;padding:13px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:13px">
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#FAFAFA">{{ s.label }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">{{ s.hint }}</span>
+              </div>
+              <button style="width:40px;height:23px;flex:none;position:relative;padding:0;background:{{ s.bg }};border:1px solid {{ s.brd }};border-radius:999px;cursor:pointer">
+                <span style="position:absolute;top:2px;left:{{ s.x }};width:17px;height:17px;border-radius:50%;background:{{ s.knob }}"></span>
+              </button>
+            </div>
+          </sc-for>
+
+          <button onClick="{{ closeForm }}" style="height:46px;width:100%;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:12px;cursor:pointer;box-shadow:0 0 24px hsl(71 91% 51% / 0.28)">Speichern</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Schreibstil-Dialog ── -->
+  <div ref="{{ styleRef }}" style="display:none;position:fixed;inset:0;z-index:92;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeStyles }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.78);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(560px, 100%);max-height:88vh;overflow-y:auto;background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:17px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Schreibstile für den KI-Generator</h3>
+          <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 65%)">Die KI übernimmt Tonalität, Satzbau und Struktur — nie Inhalte.</span>
+        </div>
+        <button onClick="{{ closeStyles }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer" style-hover="color:#FAFAFA"><p2g-icon name="x" size="16"></p2g-icon></button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <sc-for list="{{ styles }}" as="st" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:12px">
+            <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+              <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ st.name }}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap">{{ st.chars }} Zeichen Beispieltext</span>
+            </div>
+            <button style="height:30px;padding:0 11px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer;white-space:nowrap" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">Bearbeiten</button>
+            <button style="width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="13"></p2g-icon></button>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;padding-top:16px;border-top:1px solid hsl(0 0% 12%)">
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Name<span style="color:#C7F011"> *</span></span>
+          <input type="text" placeholder="z. B. „Locker &amp; direkt“" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Beispieltexte<span style="color:#C7F011"> *</span></span>
+          <textarea rows="8" placeholder="Mehrere Texte einfach durch Leerzeilen trennen…" style="padding:11px 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.55;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;resize:vertical;transition:border-color 0.2s" style-focus="border-color:#C7F011"></textarea>
+          <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 58%)">0 Zeichen — die KI nutzt bis zu 8.000 Zeichen als Stil-Referenz.</span>
+        </label>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button onClick="{{ closeStyles }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+          <button onClick="{{ closeStyles }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer">Stil anlegen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: löschen ── -->
+  <div ref="{{ delRef }}" style="display:none;position:fixed;inset:0;z-index:95;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(430px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Artikel wirklich löschen?</h3>
+        <p ref="{{ delTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 68%);margin:0">Der Artikel wird unwiderruflich gelöscht.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:0;border-radius:11px;cursor:pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const TOPICS = {
+  'Inside P2G': '#C7F011',
+  Events: '#B06BFF',
+  Marketplace: '#FF8A1F',
+  Community: '#FF4D4D',
+  Business: '#2FE0C0',
+};
+const tint = (hex, a) => {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+};
+
+const ON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '18px', '#0A0A0A'];
+const OFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+
+const ARTICLES = [
+  { title: 'Padel boomt: Warum Deutschland jetzt aufholt', topic: 'Inside P2G', img: 'assets/padel-norway.jpg', published: true, highlight: true, translated: true, visibility: 'Alle', likes: '284', views: '4.120' },
+  { title: 'Season Opening München — das Programm', topic: 'Events', img: 'assets/events-hero.jpg', published: true, highlight: true, translated: true, visibility: 'Alle', likes: '196', views: '3.480' },
+  { title: 'Neu im Marketplace: Bullpadel Vertex 04', topic: 'Marketplace', img: 'assets/skypadel-outdoor.jpg', published: true, highlight: false, translated: true, visibility: 'Nur eingeloggte Nutzer', likes: '142', views: '2.190' },
+  { title: 'Recap: Unser erstes Community-Event', topic: 'Community', img: 'assets/skypadel-sunset.jpg', published: true, highlight: false, translated: true, visibility: 'Alle', likes: '318', views: '5.640' },
+  { title: 'Revenue-Share erklärt: So rechnet sich Padel', topic: 'Business', img: 'assets/fuer-vereine-hero.jpg', published: true, highlight: false, translated: false, visibility: 'Nur Besucher', likes: '87', views: '1.740' },
+  { title: 'Court-Aufbau Köln: Woche 1 im Zeitraffer', topic: 'Inside P2G', img: 'assets/tennis-padel-aerial.jpg', published: false, highlight: false, translated: false, visibility: 'Alle', likes: '0', views: '0' },
+  { title: 'Interview: Wingfield über KI am Court', topic: 'Business', img: 'assets/league-hero.jpg', published: false, highlight: false, translated: false, visibility: 'Alle', likes: '0', views: '0' },
+];
+
+class Component extends DCLogic {
+  state = { status: 'all', topic: 'all', lang: 'de', rec: false };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 14) clearInterval(this._iv);
+    }, 350);
+    this._paint();
+  }
+  componentWillUnmount() { clearInterval(this._iv); clearInterval(this._tr); clearInterval(this._gen); }
+  componentDidUpdate() { this._paint(); }
+
+  _paint() {
+    if (this._status) {
+      this._status.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === this.state.status);
+      });
+    }
+    if (this._topic) {
+      this._topic.querySelectorAll('button[data-key]').forEach((b) => {
+        const on = b.dataset.key === this.state.topic;
+        b.toggleAttribute('data-on', on);
+        const c = b.dataset.color;
+        b.style.background = on ? (c && c !== 'none' ? c : '#C7F011') : '';
+        b.style.borderColor = on ? (c && c !== 'none' ? c : '#C7F011') : '';
+      });
+    }
+    if (this._lang) {
+      this._lang.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === this.state.lang);
+      });
+    }
+    if (this._enHint) this._enHint.style.display = this.state.lang === 'en' ? 'block' : 'none';
+
+    const filtered = this.state.status !== 'all' || this.state.topic !== 'all';
+    if (this._dndHint) this._dndHint.style.display = filtered ? 'block' : 'none';
+
+    if (this._rec) {
+      const on = this.state.rec;
+      this._rec.style.color = on ? '#FF6B6B' : '#C7F011';
+      this._rec.style.background = on ? 'hsl(0 100% 71% / 0.1)' : 'hsl(71 91% 51% / 0.1)';
+      this._rec.style.borderColor = on ? 'hsl(0 100% 71% / 0.32)' : 'hsl(71 91% 51% / 0.32)';
+    }
+    if (this._recDot) this._recDot.style.background = this.state.rec ? '#FF6B6B' : '#C7F011';
+    if (this._recLabel) this._recLabel.textContent = this.state.rec ? 'Stopp' : 'Aufnahme starten';
+
+    this._filter();
+  }
+
+  _filter() {
+    if (!this._list) return;
+    let n = 0;
+    this._list.querySelectorAll('[data-art]').forEach((el) => {
+      const okS = this.state.status === 'all' || el.dataset.status === this.state.status;
+      const okT = this.state.topic === 'all' || el.dataset.topic === this.state.topic;
+      const hit = okS && okT;
+      el.style.display = hit ? '' : 'none';
+      if (hit) n += 1;
+    });
+    if (this._empty) this._empty.style.display = n ? 'none' : 'block';
+  }
+
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    return {
+      sources: [
+        { ph: 'https://… (Quelle 1)' },
+        { ph: 'https://… (Quelle 2 – optional)' },
+        { ph: 'https://… (Quelle 3 – optional)' },
+      ],
+      sourceFiles: ['dpv-jahresbericht-2026.pdf', 'padel-markt-de.html'],
+      authors: [
+        { initials: 'FS', name: 'Florian Steinfelder', role: 'Founder', roleEn: 'Founder', linked: true },
+        { initials: 'AB', name: 'Anna Brenner', role: 'Redaktion', roleEn: 'Editorial', linked: false },
+        { initials: 'MK', name: 'Marco Kern', role: 'Community', roleEn: 'Community', linked: false },
+      ].map((a) => ({
+        ...a,
+        avatarTitle: a.linked ? 'Profilbild kommt aus dem verknüpften Account' : 'Foto hochladen',
+        avatarBg: a.linked ? 'var(--gradient-lime)' : 'hsl(0 0% 100% / 0.06)',
+        avatarBrd: a.linked ? 'hsl(71 91% 51%)' : 'hsl(0 0% 18%)',
+        avatarFg: a.linked ? '#0A0A0A' : 'hsl(0 0% 82%)',
+        avatarCursor: a.linked ? 'not-allowed' : 'pointer',
+      })),
+      statusChips: [
+        { key: 'all', label: 'Alle' },
+        { key: 'live', label: 'Live' },
+        { key: 'draft', label: 'Entwurf' },
+      ].map((c) => ({ ...c, pick: () => this.setState({ status: c.key }) })),
+      topicChips: [{ key: 'all', label: 'Alle Topics', color: 'none', hasDot: false }].concat(
+        Object.keys(TOPICS).map((k) => ({ key: k, label: k, color: TOPICS[k], hasDot: true }))
+      ).map((t) => ({ ...t, pick: () => this.setState({ topic: t.key }) })),
+
+      articles: ARTICLES.map((a) => {
+        const c = TOPICS[a.topic] || '#C7F011';
+        const sw = a.published ? ON : OFF;
+        return {
+          ...a,
+          statusKey: a.published ? 'live' : 'draft',
+          status: a.published ? 'Live' : 'Entwurf',
+          statusFg: a.published ? '#C7F011' : '#FFC44D',
+          topicColor: c,
+          topicBg: tint(c, 0.12),
+          topicBrd: tint(c, 0.35),
+          swBg: sw[0], swBrd: sw[1], knobX: sw[2], knobBg: sw[3],
+          visIcon: a.visibility === 'Alle' ? 'globe' : a.visibility.indexOf('eingeloggte') >= 0 ? 'lock' : 'user-x',
+          noop: () => {},
+          edit: () => {
+            if (this._formTitle) this._formTitle.textContent = 'Artikel bearbeiten';
+            this._show(this._form, true);
+          },
+          del: () => {
+            if (this._delText) this._delText.textContent = '„' + a.title + '“ wird unwiderruflich gelöscht.';
+            this._show(this._del, true);
+          },
+        };
+      }),
+
+      textFields: [
+        { label: 'Titel', req: true, isInput: true, counter: '43 / 60', value: 'Padel boomt: Warum Deutschland jetzt aufholt', ph: 'Schlagzeile' },
+        { label: 'Titel-Highlight', isInput: true, counter: '10 / 30', value: 'Die Zahlen', ph: 'wird in Topic-Farbe kursiv angehängt', hasHint: true, hint: 'Wird in der H1 in Topic-Farbe + kursiv angehängt.' },
+        { label: 'Kurzbeschreibung (Vorschau)', isArea: true, rows: '2', counter: '86 / 120', value: 'Europas am schnellsten wachsender Sport erreicht die Vereine — die Zahlen dahinter.', ph: 'Text für Artikelkarten' },
+        { label: 'Lead (Einstiegsabsatz)', isArea: true, rows: '3', counter: '0 / 280', value: '', ph: 'Erster Absatz auf der Artikelseite' },
+      ],
+      editorTools: [
+        { title: 'Fett', isText: true, label: 'B', italic: 'normal' },
+        { title: 'Kursiv', isText: true, label: 'I', italic: 'italic' },
+        { title: 'Überschrift 2', isText: true, label: 'H2', italic: 'normal' },
+        { title: 'Überschrift 3', isText: true, label: 'H3', italic: 'normal' },
+        { title: 'Aufzählung', isIcon: true, icon: 'list', italic: 'normal' },
+        { title: 'Nummerierte Liste', isIcon: true, icon: 'list-ordered', italic: 'normal' },
+        { title: 'Link', isIcon: true, icon: 'link', italic: 'normal' },
+        { title: 'Bild', isIcon: true, icon: 'image', italic: 'normal' },
+      ],
+      collapsibles: [
+        { label: 'Call-to-Action im Artikel (optional)', hint: 'CTA-Titel, Untertitel, Buttontext & Link' },
+        { label: 'SEO (optional)', hint: 'SEO-Titel und SEO-Beschreibung' },
+      ],
+      metaFields: [
+        { label: 'Slug (URL)', isInput: true, value: 'padel-boomt-deutschland', ph: 'wird aus dem Titel erzeugt', hasHint: true, hint: '/news/padel-boomt-deutschland' },
+        { label: 'Quelle / Link (optional)', isInput: true, value: '', ph: 'https://…', hasHint: true, hint: 'Wird als „Zur Quelle“-Link unter dem Artikel angezeigt.' },
+        { label: 'Alt-Text (Barrierefreiheit)', isInput: true, value: '', ph: 'Bildbeschreibung' },
+        { label: 'Topic', req: true, isSelect: true, options: ['Inside P2G', 'Events', 'Marketplace', 'Community', 'Business'] },
+        { label: 'Sichtbar für', req: true, isSelect: true, options: ['Alle', 'Nur eingeloggte Nutzer', 'Nur Besucher'] },
+        { label: 'Autor', isSelect: true, options: ['Kein Autor', 'Florian Steinfelder', 'Anna Brenner', 'Marco Kern'] },
+        { label: 'Lesezeit (Minuten)', req: true, isInput: true, value: '4', ph: '3', hasHint: true, hint: 'Vorschlag aus Wortzahl: 4 Min übernehmen' },
+        { label: 'Standort-Verknüpfung', isSelect: true, options: ['Kein Standort', 'TSV München-Ost', 'SV Rheinaue Köln', 'TC Hamburg-Alster'] },
+      ],
+      formSwitches: [
+        { label: 'Highlight (obere Rail)', hint: 'Position nur bei aktivem Highlight', bg: ON[0], brd: ON[1], x: '19px', knob: ON[3] },
+        { label: 'Veröffentlicht', hint: 'Für Nutzer sichtbar', bg: OFF[0], brd: OFF[1], x: OFF[2], knob: OFF[3] },
+      ],
+      styles: [
+        { name: 'Locker & direkt', chars: '6.240' },
+        { name: 'Sachlich / Pressestil', chars: '4.880' },
+      ],
+
+      statusRef: (el) => { this._status = el; this._paint(); },
+      topicRef: (el) => { this._topic = el; this._paint(); },
+      listRef: (el) => { this._list = el; this._filter(); },
+      emptyRef: (el) => { this._empty = el; },
+      dndHintRef: (el) => { this._dndHint = el; },
+      langRef: (el) => { this._lang = el; this._paint(); },
+      enHintRef: (el) => { this._enHint = el; },
+      recBtnRef: (el) => { this._rec = el; },
+      recDotRef: (el) => { this._recDot = el; },
+      recLabelRef: (el) => { this._recLabel = el; },
+      formRef: (el) => { this._form = el; },
+      formTitleRef: (el) => { this._formTitle = el; },
+      styleRef: (el) => { this._styleDlg = el; },
+      delRef: (el) => { this._del = el; },
+      delTextRef: (el) => { this._delText = el; },
+      trLabelRef: (el) => { this._trLabel = el; },
+      genBtnRef: (el) => { this._genBtn = el; },
+      genLabelRef: (el) => { this._genLabel = el; },
+
+      pickDe: () => this.setState({ lang: 'de' }),
+      pickEn: () => this.setState({ lang: 'en' }),
+      toggleRec: () => this.setState((s) => ({ rec: !s.rec })),
+      openForm: () => {
+        if (this._formTitle) this._formTitle.textContent = 'Neuer Artikel';
+        this._show(this._form, true);
+      },
+      closeForm: () => this._show(this._form, false),
+      openStyles: () => this._show(this._styleDlg, true),
+      closeStyles: () => this._show(this._styleDlg, false),
+      closeDel: () => this._show(this._del, false),
+      startTranslate: () => this._run(this._trLabel, ARTICLES.length, 'Alle übersetzen', 'Übersetze', 'Einträge übersetzt'),
+      generate: () => this._run(this._genLabel, 3, 'Artikel generieren', 'Generiere', 'Entwürfe erstellt'),
+    };
+  }
+
+  _run(label, total, idle, verb, done) {
+    if (!label || this._busy) return;
+    this._busy = true;
+    let i = 0;
+    const step = () => {
+      i += 1;
+      label.textContent = verb + ' ' + i + '/' + total + ' …';
+      if (i >= total) {
+        clearInterval(this._tr);
+        this._busy = false;
+        label.textContent = total + ' ' + done;
+        setTimeout(() => { label.textContent = idle; }, 2200);
+      }
+    };
+    step();
+    this._tr = setInterval(step, 480);
+  }
+}
+</script>
+</body>
+</html>

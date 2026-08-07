@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    .tp-tr { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tp-img:hover .tp-ov { opacity: 1; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 760px) { .tp-tr { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Touchpoint Slides">
+  <dc-import name="AdminSidebar" active="slides" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/touchpoint-slides</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Touchpoint Slides</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px;flex:none">
+        <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;color:hsl(0 0% 65%);max-width:660px">Bilder und Texte für das Karussell auf der Partner-Seite — „Wo deine Marke auf PADEL2GO trifft“.</span>
+
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,180px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA">Neuer Slide</span>
+          <label style="display:flex;flex-direction:column;gap:7px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Titel<span style="color:#C7F011"> *</span></span>
+            <input type="text" placeholder="Titel (z. B. Branding am Court)" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:7px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Beschreibung</span>
+            <textarea rows="2" placeholder="Beschreibung (optional)" style="padding:10px 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;resize:vertical;transition:border-color 0.2s" style-focus="border-color:#C7F011"></textarea>
+          </label>
+          <button style="align-self:flex-start;display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25)"><p2g-icon name="plus" size="15"></p2g-icon>Slide hinzufügen</button>
+        </div>
+      </x-import>
+
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <sc-for list="{{ slides }}" as="s" hint-placeholder-count="5">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,200px">
+            <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+              <div class="tp-img" style="position:relative;width:192px;height:128px;flex:none;border-radius:12px;overflow:hidden;border:1px solid hsl(0 0% 15%);cursor:pointer">
+                <img src="{{ s.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">
+                <div class="tp-ov" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:hsl(0 0% 0% / 0.72);opacity:0;transition:opacity 0.2s">
+                  <span style="color:#C7F011;display:flex"><p2g-icon name="image-plus" size="19"></p2g-icon></span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#FAFAFA">Bild ändern</span>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:12px;flex:1;min-width:260px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Titel<span style="color:#C7F011"> *</span></span>
+                  <sc-if value="{{ s.dirty }}" hint-placeholder-val="{{ false }}">
+                    <button style="height:28px;padding:0 12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:8px;cursor:pointer;white-space:nowrap">Speichern</button>
+                  </sc-if>
+                </div>
+                <div class="tp-tr">
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#C7F011">DE</span>
+                    <input type="text" value="{{ s.titleDe }}" style="height:36px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:5px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#7FD4FF">EN · DeepL</span>
+                      <button title="EN-Wert sperren" style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;color:hsl(0 0% 65%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:2px 8px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="lock-open" size="10"></p2g-icon>frei</button>
+                    </div>
+                    <input type="text" value="{{ s.titleEn }}" placeholder="wird automatisch übersetzt" style="height:36px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 82%);background:hsl(200 100% 75% / 0.04);border:1px solid hsl(200 100% 75% / 0.16);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#7FD4FF">
+                  </div>
+                </div>
+
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Beschreibung</span>
+                <div class="tp-tr">
+                  <textarea rows="2" placeholder="Beschreibung…" style="padding:9px 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;resize:vertical;transition:border-color 0.2s" value="{{ s.descDe }}" style-focus="border-color:#C7F011"></textarea>
+                  <textarea rows="2" placeholder="wird automatisch übersetzt" style="padding:9px 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 82%);background:hsl(200 100% 75% / 0.04);border:1px solid hsl(200 100% 75% / 0.16);border-radius:9px;outline:none;resize:vertical;transition:border-color 0.2s" value="{{ s.descEn }}" style-focus="border-color:#7FD4FF"></textarea>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:13px;flex:none;min-width:120px">
+                <label style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Reihenfolge</span>
+                  <input type="text" value="{{ s.order }}" style="width:64px;height:36px;padding:0 10px;box-sizing:border-box;text-align:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                </label>
+                <button onClick="{{ s.noop }}" style="display:inline-flex;align-items:center;gap:9px;background:none;border:0;padding:0;cursor:pointer">
+                  <span style="width:40px;height:23px;flex:none;position:relative;display:block;background:{{ s.swBg }};border:1px solid {{ s.swBrd }};border-radius:999px;transition:background 0.2s">
+                    <span style="position:absolute;top:2px;left:{{ s.knobX }};width:17px;height:17px;border-radius:50%;background:{{ s.knobBg }};transition:left 0.2s"></span>
+                  </span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:{{ s.stateFg }};white-space:nowrap">{{ s.state }}</span>
+                </button>
+                <button onClick="{{ s.del }}" style="align-self:flex-start;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:9px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+              </div>
+            </div>
+          </x-import>
+        </sc-for>
+      </div>
+    </main>
+  </div>
+
+  <div ref="{{ delRef }}" style="display:none;position:fixed;inset:0;z-index:95;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(420px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Slide wirklich löschen?</h3>
+        <p ref="{{ delTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 68%);margin:0">Der Slide verschwindet aus dem Karussell.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:0;border-radius:11px;cursor:pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const ON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '19px', '#0A0A0A'];
+const OFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+
+const SLIDES = [
+  { order: '1', img: 'assets/skypadel-outdoor.jpg', titleDe: 'Branding am Court', titleEn: 'Branding on court', descDe: 'Bandenwerbung, Netzbanner und Bodenlogos direkt im Spielgeschehen.', descEn: 'Boards, net banners and floor logos right in the action.', active: true, dirty: false },
+  { order: '2', img: 'assets/events-hero.jpg', titleDe: 'Event-Präsenz', titleEn: 'Event presence', descDe: 'Sichtbarkeit bei Turnieren, Open-Play-Nights und Season Openings.', descEn: 'Visibility at tournaments, open play nights and season openings.', active: true, dirty: true },
+  { order: '3', img: 'assets/rewards-hero.jpg', titleDe: 'Marketplace & Rewards', titleEn: 'Marketplace & rewards', descDe: 'Produkte und Deals direkt in der App — einlösbar mit P2G Points.', descEn: 'Products and deals right in the app — redeemable with P2G points.', active: true, dirty: false },
+  { order: '4', img: 'assets/league-hero.jpg', titleDe: 'Liga-Sponsoring', titleEn: 'League sponsoring', descDe: 'Präsenz im EU-weiten Ranking und in Monatswertungen.', descEn: '', active: true, dirty: false },
+  { order: '5', img: 'assets/tennis-padel-aerial.jpg', titleDe: 'Content & Social', titleEn: '', descDe: 'Automatische Match-Clips mit Brand-Overlay für Social Media.', descEn: '', active: false, dirty: false },
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    return {
+      slides: SLIDES.map((s) => {
+        const sw = s.active ? ON : OFF;
+        return {
+          ...s,
+          swBg: sw[0], swBrd: sw[1], knobX: sw[2], knobBg: sw[3],
+          state: s.active ? 'Aktiv' : 'Inaktiv',
+          stateFg: s.active ? '#C7F011' : 'hsl(0 0% 60%)',
+          noop: () => {},
+          del: () => {
+            if (this._delText) this._delText.textContent = '„' + s.titleDe + '“ verschwindet aus dem Karussell.';
+            this._show(this._del, true);
+          },
+        };
+      }),
+      delRef: (el) => { this._del = el; },
+      delTextRef: (el) => { this._delText = el; },
+      closeDel: () => this._show(this._del, false),
+    };
+  }
+}
+</script>
+</body>
+</html>

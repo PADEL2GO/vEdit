@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    input::placeholder { color: hsl(0 0% 38%); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes springIn { 0% { transform: scale(0); opacity: 0; } 55% { transform: scale(1.14); opacity: 1; } 78% { transform: scale(0.94); } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 hsl(71 91% 51% / 0); } 50% { box-shadow: 0 0 24px hsl(71 91% 51% / 0.35); } }
+    @keyframes shimmer { from { background-position: -400px 0; } to { background-position: 400px 0; } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-4px); } }
+    @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    #bk-detail { display: grid; grid-template-columns: minmax(0, 1fr) 384px; gap: 24px; align-items: start; }
+    #bk-checkout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+    @media (max-width: 980px) { #bk-detail, #bk-checkout { grid-template-columns: 1fr; } #bk-summary, #bk-pricecard { position: static !important; } }
+    @media (max-width: 820px) { [data-steplabel] { display: none !important; } #bk-steps { gap: 0 !important; } }
+    @media (max-width: 640px) { #bk-points { display: none !important; } }
+    #bk-dates { scrollbar-width: none; }
+    #bk-dates::-webkit-scrollbar { display: none; }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+</helmet>
+
+<!-- ═══════════ NAV + STEPPER ═══════════ -->
+<header style="position:fixed;top:0;left:0;right:0;z-index:60;background:hsl(0 0% 0% / 0.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 15% / 0.5)">
+  <div style="max-width:1280px;margin:0 auto;padding:0 20px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:14px">
+    <a href="Homepage.dc.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex:none">
+      <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:32px;width:auto;display:block">
+      <span data-steplabel style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;letter-spacing:-0.02em;color:#FAFAFA">PADEL<span style="color:#C7F011">2</span>GO</span>
+    </a>
+
+    <div id="bk-steps" style="display:flex;align-items:center;gap:4px;min-width:0">
+      <sc-for list="{{ navSteps }}" as="st" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;gap:4px;min-width:0">
+          <span style="{{ st.lineStyle }}"></span>
+          <button onClick="{{ st.go }}" style="{{ st.btnStyle }}">
+            <span style="{{ st.circleStyle }}"><p2g-icon name="{{ st.icon }}" size="15"></p2g-icon></span>
+            <span data-steplabel style="{{ st.labelStyle }}">{{ st.label }}</span>
+          </button>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;flex:none">
+      <sc-if value="{{ effLoggedIn }}" hint-placeholder-val="{{ false }}">
+        <span id="bk-points" style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:6px 13px;white-space:nowrap">
+          <p2g-icon name="star" size="13"></p2g-icon>{{ pointsLabel }}
+        </span>
+        <button onClick="{{ toggleBookings }}" title="Meine Buchungen" style="display:flex;align-items:center;gap:8px;background:none;border:1px solid hsl(0 0% 15%);border-radius:999px;padding:7px 13px;color:hsl(0 0% 80%);font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">
+          <p2g-icon name="calendar-days" size="15"></p2g-icon><span data-steplabel>Meine Buchungen</span>
+        </button>
+        <span style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg, hsl(71 91% 51% / 0.25), hsl(71 91% 51% / 0.06));border:1px solid hsl(71 91% 51% / 0.4);display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;color:#C7F011">F</span>
+      </sc-if>
+      <sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ doLogin }}" style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:hsl(0 0% 80%);background:none;border:1px solid hsl(0 0% 15%);border-radius:999px;padding:7px 16px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">Login</button>
+      </sc-if>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ ① STANDORTE ═══════════ -->
+<sc-if value="{{ isLocations }}" hint-placeholder-val="{{ true }}">
+<section data-screen-label="① Booking — Standort-Grid" style="min-height:100vh;background:radial-gradient(ellipse 70% 40% at 50% 0%, hsl(71 91% 51% / 0.06), transparent), #000;padding:108px 20px 90px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:44px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center">
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Badge" variant="lime" dot="{{ true }}" hint-size="120px,26px">Court buchen</x-import>
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(32px, 5vw, 54px);line-height:1.08;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Wähle deinen <span style="background:var(--gradient-lime-text);-webkit-background-clip:text;background-clip:text;color:transparent">Standort</span></h1>
+      <p style="font-family:'DM Sans',sans-serif;font-size:17.5px;line-height:1.6;color:hsl(0 0% 65%);margin:0;max-width:520px">Echtzeit-Verfügbarkeit an allen PADEL<span style="color:#C7F011">2</span>GO Standorten. In Sekunden gebucht.</p>
+      <span style="display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:7px 16px">
+        <p2g-icon name="zap" size="14"></p2g-icon>Ohne Konto buchbar — einfach als Gast
+      </span>
+    </div>
+
+    <sc-if value="{{ locsLoading }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(300px, 100%), 1fr));gap:20px">
+        <div style="height:440px;border-radius:20px;border:1px solid hsl(0 0% 12%);background:linear-gradient(90deg, hsl(0 0% 5%) 25%, hsl(0 0% 8%) 50%, hsl(0 0% 5%) 75%);background-size:800px 100%;animation:shimmer 1.4s linear infinite"></div>
+        <div style="height:440px;border-radius:20px;border:1px solid hsl(0 0% 12%);background:linear-gradient(90deg, hsl(0 0% 5%) 25%, hsl(0 0% 8%) 50%, hsl(0 0% 5%) 75%);background-size:800px 100%;animation:shimmer 1.4s linear infinite 0.15s"></div>
+        <div style="height:440px;border-radius:20px;border:1px solid hsl(0 0% 12%);background:linear-gradient(90deg, hsl(0 0% 5%) 25%, hsl(0 0% 8%) 50%, hsl(0 0% 5%) 75%);background-size:800px 100%;animation:shimmer 1.4s linear infinite 0.3s"></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ locsReady }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(300px, 100%), 1fr));gap:20px">
+      <sc-for list="{{ locCards }}" as="loc" hint-placeholder-count="3">
+        <div onClick="{{ loc.select }}" style="{{ loc.wrapStyle }}">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" padding="{{ 0 }}" hint-size="100%,440px">
+          <div style="display:flex;flex-direction:column;height:100%">
+            <div style="position:relative">
+              <img src="{{ loc.img }}" alt="{{ loc.name }}" style="display:block;width:100%;height:168px;object-fit:cover;border-radius:15px 15px 0 0">
+              <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, transparent 30%, hsl(0 0% 4%));border-radius:15px 15px 0 0"></div>
+              <span style="{{ loc.badgeStyle }}"><span style="{{ loc.badgeDotStyle }}"></span>{{ loc.badgeLabel }}</span>
+              <span style="position:absolute;top:12px;right:12px;display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 0% / 0.72);backdrop-filter:blur(8px);border:1px solid hsl(0 0% 100% / 0.15);border-radius:999px;padding:5px 11px;white-space:nowrap">
+                <p2g-icon name="euro" size="12"></p2g-icon>ab {{ loc.priceFrom }}/h
+              </span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:13px;padding:18px 20px 20px;flex:1">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19.5px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">{{ loc.name }}</h3>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)"><p2g-icon name="map-pin" size="13"></p2g-icon>{{ loc.city }} · <span style="font-family:'JetBrains Mono',monospace">{{ loc.courtCount }}</span> Courts</span>
+              </div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap">
+                <span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:hsl(0 0% 75%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 15%);border-radius:999px;padding:4px 10px"><p2g-icon name="trophy" size="12"></p2g-icon>Turniere</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:hsl(0 0% 75%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 15%);border-radius:999px;padding:4px 10px"><p2g-icon name="brain" size="12"></p2g-icon>KI-Analyse</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:hsl(0 0% 75%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 15%);border-radius:999px;padding:4px 10px"><p2g-icon name="shopping-cart" size="12"></p2g-icon>Shop</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 55%)">Auslastung heute</span>
+                  <span style="{{ loc.slotsStyle }}">Heute {{ loc.slotsToday }} Slots frei</span>
+                </div>
+                <div style="height:6px;border-radius:999px;background:hsl(0 0% 12%);overflow:hidden">
+                  <div style="{{ loc.occBarStyle }}"></div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:4px">
+                <span style="display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 60%)"><p2g-icon name="clock" size="13"></p2g-icon>{{ loc.open }}</span>
+                <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="lime" size="sm" hint-size="120px,36px">Auswählen<p2g-icon name="arrow-right" size="15"></p2g-icon></x-import>
+              </div>
+            </div>
+          </div>
+        </x-import>
+        </div>
+      </sc-for>
+
+      <!-- Bald verfügbar -->
+      <div style="animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.3s backwards">
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" padding="{{ 0 }}" hover="{{ false }}" hint-size="100%,440px">
+        <div style="display:flex;flex-direction:column;height:100%;opacity:0.75">
+          <div style="position:relative">
+            <img src="assets/padel-norway.jpg" alt="P2G Court Berlin-Mitte" style="display:block;width:100%;height:168px;object-fit:cover;border-radius:15px 15px 0 0;filter:grayscale(1) brightness(0.55)">
+            <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, transparent 30%, hsl(0 0% 4%));border-radius:15px 15px 0 0"></div>
+            <span style="position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:hsl(0 0% 70%);background:hsl(0 0% 0% / 0.72);backdrop-filter:blur(8px);border:1px solid hsl(0 0% 25%);border-radius:999px;padding:5px 12px">
+              <p2g-icon name="eye-off" size="12"></p2g-icon>Bald verfügbar
+            </span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:13px;padding:18px 20px 20px;flex:1">
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19.5px;letter-spacing:-0.01em;color:hsl(0 0% 80%);margin:0">P2G Court Berlin-Mitte</h3>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 55%)"><p2g-icon name="map-pin" size="13"></p2g-icon>Berlin</span>
+            </div>
+            <p style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;color:hsl(0 0% 55%);margin:0">Zwei mobile Courts entstehen gerade im Herzen von Berlin.</p>
+            <div style="display:flex;align-items:center;gap:8px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:12px;padding:10px 14px">
+              <p2g-icon name="calendar" size="15" style="color:hsl(0 0% 55%)"></p2g-icon>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:hsl(0 0% 65%)">Eröffnung Herbst 2026</span>
+            </div>
+            <div style="margin-top:auto;padding-top:4px">
+              <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="dark" size="sm" disabled="{{ true }}" hint-size="140px,36px"><p2g-icon name="bell" size="14"></p2g-icon>Benachrichtigen</x-import>
+            </div>
+          </div>
+        </div>
+      </x-import>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+</section>
+</sc-if>
+
+<!-- ═══════════ ② DETAIL + SLOT-PICKER ═══════════ -->
+<sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="② Standort-Detail + Slot-Picker" style="min-height:100vh;background:#000;padding:96px 20px 90px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+    <button onClick="{{ backToLocs }}" style="display:inline-flex;align-items:center;gap:7px;align-self:flex-start;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 60%);padding:6px 0" style-hover="color:#C7F011">
+      <p2g-icon name="arrow-left" size="16"></p2g-icon>Alle Standorte
+    </button>
+
+    <!-- Header -->
+    <div style="position:relative;border-radius:20px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.8)">
+      <img src="{{ selLocImg }}" alt="{{ selLocName }}" style="display:block;width:100%;height:236px;object-fit:cover">
+      <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, hsl(0 0% 0% / 0.15), hsl(0 0% 0% / 0.88) 82%)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;padding:22px 24px">
+        <div style="display:flex;flex-direction:column;gap:9px;min-width:0">
+          <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(24px, 3.6vw, 36px);letter-spacing:-0.02em;line-height:1.1;color:#FAFAFA;margin:0">{{ selLocName }}</h1>
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+            <a href="{{ selLocMaps }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#C7F011;text-decoration:none" style-hover="gap:9px">
+              <p2g-icon name="map-pin" size="14"></p2g-icon>{{ selLocCity }} · Route planen<p2g-icon name="external-link" size="12"></p2g-icon>
+            </a>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 70%)"><p2g-icon name="clock" size="13"></p2g-icon>{{ selLocOpen }}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#C7F011;background:hsl(71 91% 51% / 0.12);backdrop-filter:blur(8px);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:5px 11px"><p2g-icon name="trophy" size="12"></p2g-icon>Turniere</span>
+          <span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#C7F011;background:hsl(71 91% 51% / 0.12);backdrop-filter:blur(8px);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:5px 11px"><p2g-icon name="brain" size="12"></p2g-icon>KI-Analyse</span>
+          <span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#C7F011;background:hsl(71 91% 51% / 0.12);backdrop-filter:blur(8px);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:5px 11px"><p2g-icon name="shopping-cart" size="12"></p2g-icon>Shop</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="bk-detail">
+      <!-- Slot-Picker: 4 Schritte -->
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+
+        <!-- Schritt 1: Court -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 22 }}" hint-size="100%,180px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <div style="display:flex;align-items:center;gap:13px">
+                <span style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="layout-grid" size="19"></p2g-icon></span>
+                <div style="display:flex;flex-direction:column;gap:2px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.16em;color:hsl(0 0% 50%)">SCHRITT 01</span>
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Court wählen</h3>
+                </div>
+              </div>
+              <span style="{{ chk1Style }}"><p2g-icon name="check" size="13" stroke-width="3"></p2g-icon></span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(180px, 100%), 1fr));gap:10px">
+              <sc-for list="{{ courtCards }}" as="c" hint-placeholder-count="2">
+                <button onClick="{{ c.select }}" style="{{ c.style }}" style-hover="border-color:hsl(71 91% 51% / 0.55)">
+                  <span style="{{ c.checkStyle }}"><p2g-icon name="check" size="12" stroke-width="3"></p2g-icon></span>
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15.5px">{{ c.name }}</span>
+                  <span style="{{ c.tagStyle }}">{{ c.tag }}</span>
+                  <span style="{{ c.priceStyle }}">{{ c.price }}/h</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </x-import>
+
+        <!-- Schritt 2: Datum -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 22 }}" hint-size="100%,170px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <div style="display:flex;align-items:center;gap:13px">
+                <span style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="calendar" size="19"></p2g-icon></span>
+                <div style="display:flex;flex-direction:column;gap:2px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.16em;color:hsl(0 0% 50%)">SCHRITT 02</span>
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Datum wählen</h3>
+                </div>
+              </div>
+              <span style="{{ chk2Style }}"><p2g-icon name="check" size="13" stroke-width="3"></p2g-icon></span>
+            </div>
+            <div id="bk-dates" style="display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;margin:-2px">
+              <sc-for list="{{ dateChips }}" as="d" hint-placeholder-count="7">
+                <button onClick="{{ d.select }}" style="{{ d.style }}">
+                  <span style="{{ d.wdStyle }}">{{ d.wd }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px">{{ d.dd }}</span>
+                  <span style="{{ d.monStyle }}">{{ d.mon }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </x-import>
+
+        <!-- Schritt 3: Dauer -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 22 }}" hint-size="100%,160px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <div style="display:flex;align-items:center;gap:13px">
+                <span style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="hourglass" size="19"></p2g-icon></span>
+                <div style="display:flex;flex-direction:column;gap:2px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.16em;color:hsl(0 0% 50%)">SCHRITT 03</span>
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Spieldauer</h3>
+                </div>
+              </div>
+              <span style="{{ chk3Style }}"><p2g-icon name="check" size="13" stroke-width="3"></p2g-icon></span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:10px">
+              <sc-for list="{{ durSegs }}" as="dr" hint-placeholder-count="3">
+                <button onClick="{{ dr.select }}" style="{{ dr.style }}">
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px">{{ dr.label }}</span>
+                  <span style="{{ dr.priceStyle }}">{{ dr.price }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </x-import>
+
+        <!-- Schritt 4: Uhrzeit -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 22 }}" hint-size="100%,260px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <div style="display:flex;align-items:center;gap:13px">
+                <span style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="clock" size="19"></p2g-icon></span>
+                <div style="display:flex;flex-direction:column;gap:2px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.16em;color:hsl(0 0% 50%)">SCHRITT 04</span>
+                  <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Uhrzeit wählen</h3>
+                </div>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.22);border-radius:999px;padding:4px 11px;white-space:nowrap">{{ timesFreeLabel }}</span>
+            </div>
+            <sc-if value="{{ hasSlots }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(80px, 1fr));gap:8px">
+                <sc-for list="{{ timeGrid }}" as="t" hint-placeholder-count="12">
+                  <button onClick="{{ t.select }}" disabled="{{ t.booked }}" style="{{ t.style }}">{{ t.label }}</button>
+                </sc-for>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 50%)"><span style="width:10px;height:10px;border-radius:3px;background:hsl(0 0% 10%);border:1px solid hsl(0 0% 22%);display:inline-block"></span>Belegte Slots sind ausgegraut</span>
+            </sc-if>
+            <sc-if value="{{ noSlots }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:26px 16px;background:hsl(0 0% 100% / 0.03);border:1px dashed hsl(0 0% 20%);border-radius:14px">
+                <span style="width:46px;height:46px;border-radius:50%;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 18%);display:flex;align-items:center;justify-content:center;color:hsl(0 0% 55%)"><p2g-icon name="alert-circle" size="22"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:hsl(0 0% 80%)">Keine freien Slots an diesem Tag</span>
+                <button onClick="{{ jumpNextDay }}" style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:8px 16px;cursor:pointer" style-hover="background:hsl(71 91% 51% / 0.16)">Nächster freier Tag<p2g-icon name="arrow-right" size="14"></p2g-icon></button>
+              </div>
+            </sc-if>
+          </div>
+        </x-import>
+      </div>
+
+      <!-- Zusammenfassung -->
+      <div id="bk-summary" style="position:sticky;top:90px">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 24 }}" hint-size="100%,520px">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;color:#FAFAFA;margin:0">Deine Buchung</h3>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#C7F011"><span style="width:7px;height:7px;border-radius:50%;background:#C7F011;animation:pulseGlow 2s infinite"></span>LIVE</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px;padding:14px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 13%);border-radius:14px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="color:#C7F011;display:flex"><p2g-icon name="map-pin" size="15"></p2g-icon></span><span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 85%)">{{ selLocName }}</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="color:#C7F011;display:flex"><p2g-icon name="layout-grid" size="15"></p2g-icon></span><span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 85%)">{{ sumCourt }}</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="color:#C7F011;display:flex"><p2g-icon name="calendar" size="15"></p2g-icon></span><span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 85%)">{{ sumDate }}</span></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="color:#C7F011;display:flex"><p2g-icon name="clock" size="15"></p2g-icon></span><span style="font-family:'JetBrains Mono',monospace;font-size:13.5px;color:hsl(0 0% 85%)">{{ sumTime }}</span></div>
+            </div>
+
+            <button onClick="{{ toggleLobby }}" style="display:flex;align-items:center;gap:12px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 13%);border-radius:14px;padding:13px 14px;cursor:pointer;text-align:left" style-hover="border-color:hsl(71 91% 51% / 0.4)">
+              <span style="color:#C7F011;display:flex"><p2g-icon name="users" size="17"></p2g-icon></span>
+              <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA">Öffentliche Lobby</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 55%)">Andere Spieler können beitreten</span>
+              </span>
+              <span style="{{ lobbyTrackStyle }}"><span style="{{ lobbyKnobStyle }}"></span></span>
+            </button>
+
+            <div style="display:flex;flex-direction:column;gap:8px;padding-top:2px">
+              <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)"><span>{{ baseLabel }}</span><span style="font-family:'JetBrains Mono',monospace">{{ basePrice }}</span></div>
+              <div style="height:1px;background:hsl(0 0% 13%)"></div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline">
+                <span style="font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;color:#FAFAFA">Gesamt</span>
+                <span style="display:flex;flex-direction:column;align-items:flex-end">
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:28px;color:#C7F011;line-height:1.1">{{ totalPrice }}</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 50%)">inkl. MwSt.</span>
+                </span>
+              </div>
+            </div>
+
+            <div style="{{ bookWrapStyle }}">
+              <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="hero" size="xl" onClick="{{ book }}" style="width:100%" hint-size="100%,56px"><p2g-icon name="zap" size="17"></p2g-icon>Jetzt buchen</x-import>
+            </div>
+            <span style="{{ bookHintStyle }}">{{ bookHint }}</span>
+
+            <div style="display:flex;align-items:flex-start;gap:10px;background:hsl(71 91% 51% / 0.06);border:1px solid hsl(71 91% 51% / 0.22);border-radius:14px;padding:12px 14px">
+              <span style="color:#C7F011;display:flex;margin-top:1px"><p2g-icon name="user-check" size="16"></p2g-icon></span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.55;color:hsl(0 0% 75%)"><span style="color:#C7F011;font-weight:700">Kein Konto nötig.</span> Buche einfach als Gast — Name &amp; E-Mail genügen.</span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ═══════════ ③ CHECKOUT ═══════════ -->
+<sc-if value="{{ isCheckout }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="③ Checkout" style="min-height:100vh;background:radial-gradient(ellipse 60% 34% at 50% 0%, hsl(71 91% 51% / 0.05), transparent), #000;padding:96px 20px 90px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+  <div style="max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:18px">
+    <button onClick="{{ backToDetail }}" style="display:inline-flex;align-items:center;gap:7px;align-self:flex-start;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 60%);padding:6px 0" style-hover="color:#C7F011">
+      <p2g-icon name="arrow-left" size="16"></p2g-icon>Zurück zur Auswahl
+    </button>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(26px, 4vw, 38px);letter-spacing:-0.02em;color:#FAFAFA;margin:0">Fast geschafft!</h1>
+      <p style="font-family:'DM Sans',sans-serif;font-size:15.5px;color:hsl(0 0% 60%);margin:0">Prüfe deine Buchung und bezahle sicher über Stripe.</p>
+    </div>
+
+    <!-- Reservierungs-Timer -->
+    <div style="{{ timerCardStyle }}">
+      <div style="display:flex;align-items:center;gap:13px">
+        <span style="{{ timerIconStyle }}"><p2g-icon name="timer" size="19"></p2g-icon></span>
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+          <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#FAFAFA">{{ timerTitle }}</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 55%)">{{ timerSub }}</span>
+        </div>
+        <span style="{{ timerDigitsStyle }}">{{ timerStr }}</span>
+      </div>
+      <div style="height:5px;border-radius:999px;background:hsl(0 0% 12%);overflow:hidden;margin-top:12px">
+        <div style="{{ timerBarStyle }}"></div>
+      </div>
+    </div>
+
+    <div id="bk-checkout">
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+        <!-- Zusammenfassung -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 22 }}" hint-size="100%,300px">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Zusammenfassung</h3>
+              <button onClick="{{ backToDetail }}" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#C7F011;padding:0" style-hover="opacity:0.8"><p2g-icon name="pencil-line" size="13"></p2g-icon>Ändern</button>
+            </div>
+            <div style="display:flex;gap:14px;align-items:center">
+              <img src="{{ selLocImg }}" alt="" style="width:76px;height:76px;object-fit:cover;border-radius:12px;border:1px solid hsl(0 0% 15%);flex:none">
+              <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;color:#FAFAFA">{{ selLocName }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 60%)">{{ sumCourt }} · {{ selLocCity }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#C7F011">{{ sumDateShort }} · {{ sumTime }}</span>
+              </div>
+            </div>
+            <div style="{{ guestRowStyle }}">
+              <span style="color:#C7F011;display:flex"><p2g-icon name="{{ personIcon }}" size="15"></p2g-icon></span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 80%);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ personLine }}</span>
+              <button onClick="{{ editPerson }}" style="{{ editPersonStyle }}"><p2g-icon name="pencil-line" size="13"></p2g-icon></button>
+            </div>
+          </div>
+        </x-import>
+
+        <!-- Gutschein -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 22 }}" hint-size="100%,90px">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <button onClick="{{ toggleVoucher }}" style="display:flex;align-items:center;gap:12px;background:none;border:none;cursor:pointer;padding:0;text-align:left;width:100%">
+              <span style="width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011;flex:none"><p2g-icon name="ticket" size="17"></p2g-icon></span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;color:#FAFAFA;flex:1">Gutschein einlösen</span>
+              <span style="color:hsl(0 0% 50%);display:flex"><p2g-icon name="{{ voucherChevron }}" size="17"></p2g-icon></span>
+            </button>
+            <sc-if value="{{ voucherOpen }}" hint-placeholder-val="{{ false }}">
+              <sc-if value="{{ voucherNotApplied }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ voucherRowStyle }}">
+                  <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Input" placeholder="Code eingeben — z. B. P2G10" value="{{ voucherVal }}" onChange="{{ setVoucherVal }}" hint-size="100%,44px"></x-import>
+                  <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="outline" size="default" onClick="{{ applyVoucher }}" hint-size="110px,44px">Einlösen</x-import>
+                </div>
+                <span style="{{ voucherErrStyle }}">Code ungültig — probier’s mit P2G10 🙂</span>
+              </sc-if>
+              <sc-if value="{{ voucherApplied }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:10px;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.3);border-radius:12px;padding:11px 14px">
+                  <span style="color:#C7F011;display:flex"><p2g-icon name="check-circle-2" size="16"></p2g-icon></span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#C7F011;flex:1">P2G10 · −10%</span>
+                  <button onClick="{{ removeVoucher }}" style="background:none;border:none;cursor:pointer;color:hsl(0 0% 55%);display:flex;padding:2px" style-hover="color:#FAFAFA"><p2g-icon name="x" size="15"></p2g-icon></button>
+                </div>
+              </sc-if>
+            </sc-if>
+          </div>
+        </x-import>
+
+        <!-- Zahlungsart -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 22 }}" hint-size="100%,200px">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Zahlungsart</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(200px, 100%), 1fr));gap:10px">
+              <sc-for list="{{ payMethods }}" as="pm" hint-placeholder-count="2">
+                <button onClick="{{ pm.select }}" style="{{ pm.style }}" style-hover="border-color:hsl(71 91% 51% / 0.55)">
+                  <span style="{{ pm.checkStyle }}"><p2g-icon name="check" size="12" stroke-width="3"></p2g-icon></span>
+                  <span style="{{ pm.iconStyle }}"><p2g-icon name="{{ pm.icon }}" size="19"></p2g-icon></span>
+                  <span style="display:flex;flex-direction:column;gap:1px;text-align:left">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;color:#FAFAFA">{{ pm.name }}</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 55%)">{{ pm.sub }}</span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <!-- Preis + Pay -->
+      <div id="bk-pricecard" style="position:sticky;top:90px;display:flex;flex-direction:column;gap:16px">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 24 }}" hint-size="100%,380px">
+          <div style="display:flex;flex-direction:column;gap:13px">
+            <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Preis</h3>
+            <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)"><span>{{ baseLabel }}</span><span style="font-family:'JetBrains Mono',monospace">{{ basePrice }}</span></div>
+            <sc-if value="{{ voucherApplied }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#C7F011"><span style="display:inline-flex;align-items:center;gap:6px"><p2g-icon name="ticket" size="13"></p2g-icon>Gutschein P2G10</span><span style="font-family:'JetBrains Mono',monospace">−{{ discountPrice }}</span></div>
+            </sc-if>
+            <div style="height:1px;background:hsl(0 0% 13%)"></div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <span style="font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;color:#FAFAFA">Gesamt</span>
+              <span style="display:flex;flex-direction:column;align-items:flex-end">
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:30px;color:#C7F011;line-height:1.1">{{ totalPrice }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 50%)">inkl. MwSt.</span>
+              </span>
+            </div>
+
+            <sc-if value="{{ effLoggedIn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:11px;background:hsl(71 91% 51% / 0.07);border:1px solid hsl(71 91% 51% / 0.25);border-radius:14px;padding:13px 14px">
+                <span style="color:#C7F011;display:flex;animation:floatY 4s ease-in-out infinite"><p2g-icon name="coins" size="19"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;color:hsl(0 0% 80%)">Du sammelst <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#C7F011">+{{ pointsEarn }} P2G Points</span> mit dieser Buchung.</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:flex-start;gap:11px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:14px;padding:13px 14px">
+                <span style="color:#C7F011;display:flex;margin-top:1px"><p2g-icon name="gift" size="18"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.55;color:hsl(0 0% 65%)">Mit Konto würdest du <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#C7F011">+{{ pointsEarn }} Points</span> sammeln. <button onClick="{{ doLogin }}" style="background:none;border:none;padding:0;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;text-decoration:underline">Kostenlos anmelden</button> — oder einfach als Gast weitermachen.</span>
+              </div>
+            </sc-if>
+
+            <div style="{{ payWrapStyle }}">
+              <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="hero" size="xl" onClick="{{ pay }}" style="width:100%" hint-size="100%,56px"><p2g-icon name="lock" size="16"></p2g-icon>{{ payLabel }}</x-import>
+            </div>
+            <span style="display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 50%)"><p2g-icon name="shield-check" size="13"></p2g-icon>Sichere Zahlung über Stripe · SSL-verschlüsselt</span>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ═══════════ ④ SUCCESS ═══════════ -->
+<sc-if value="{{ isSuccess }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="④ Success — Buchung bestätigt" style="min-height:100vh;background:radial-gradient(ellipse 60% 40% at 50% 0%, hsl(71 91% 51% / 0.09), transparent), #000;padding:120px 20px 90px">
+  <div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center">
+    <span style="width:96px;height:96px;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.45);display:flex;align-items:center;justify-content:center;color:#C7F011;box-shadow:0 0 60px hsl(71 91% 51% / 0.3);animation:springIn 0.7s cubic-bezier(0.16,1,0.3,1)">
+      <p2g-icon name="check" size="46" stroke-width="2.5"></p2g-icon>
+    </span>
+    <div style="display:flex;flex-direction:column;gap:10px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.15s backwards">
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(30px, 5vw, 42px);letter-spacing:-0.02em;color:#FAFAFA;margin:0">Court gebucht! 🎾</h1>
+      <p style="font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;color:hsl(0 0% 65%);margin:0">Deine Bestätigung ist unterwegs an <span style="color:#FAFAFA;font-weight:600">{{ confirmMail }}</span></p>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:hsl(0 0% 50%)">Buchungscode <span style="color:#C7F011">{{ bookingCode }}</span></span>
+    </div>
+
+    <div style="width:100%;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.28s backwards">
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 24 }}" hint-size="100%,250px">
+        <div style="display:flex;flex-direction:column;gap:12px;text-align:left">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)">Standort</span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#FAFAFA;text-align:right">{{ selLocName }}</span>
+          </div>
+          <div style="height:1px;background:hsl(0 0% 12%)"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)">Court</span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#FAFAFA">{{ sumCourt }}</span>
+          </div>
+          <div style="height:1px;background:hsl(0 0% 12%)"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)">Termin</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:600;color:#FAFAFA">{{ sumDateShort }} · {{ sumTime }}</span>
+          </div>
+          <div style="height:1px;background:hsl(0 0% 12%)"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)">Bezahlt</span>
+            <span style="display:inline-flex;align-items:center;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#C7F011">{{ totalPrice }}</span><span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:3px 9px"><span style="width:6px;height:6px;border-radius:50%;background:#C7F011"></span>Bestätigt</span></span>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <sc-if value="{{ effLoggedIn }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.35);border-radius:18px;padding:18px 20px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.4s backwards">
+        <span style="width:46px;height:46px;border-radius:13px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011;flex:none;animation:floatY 4s ease-in-out infinite"><p2g-icon name="coins" size="21"></p2g-icon></span>
+        <span style="display:flex;flex-direction:column;gap:2px;text-align:left">
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:20px;color:#C7F011">+{{ pointsEarn }} P2G Points</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%)">wurden deinem Konto gutgeschrieben 💚</span>
+        </span>
+      </div>
+    </sc-if>
+    <sc-if value="{{ guestNoAccount }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;display:flex;flex-direction:column;gap:14px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.35);border-radius:18px;padding:20px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.4s backwards">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="width:46px;height:46px;border-radius:13px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011;flex:none;animation:floatY 4s ease-in-out infinite"><p2g-icon name="gift" size="21"></p2g-icon></span>
+          <span style="display:flex;flex-direction:column;gap:2px;text-align:left">
+            <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:20px;color:#C7F011">+{{ pointsEarn }} Points warten auf dich</span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;color:hsl(0 0% 65%)">Erstelle jetzt ein kostenloses Konto und sichere dir die Points aus dieser Buchung.</span>
+          </span>
+        </div>
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="lime" size="lg" onClick="{{ createAccount }}" style="width:100%" hint-size="100%,48px"><p2g-icon name="sparkles" size="16"></p2g-icon>Kostenloses Konto erstellen</x-import>
+      </div>
+    </sc-if>
+    <sc-if value="{{ accountCreated }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;display:flex;align-items:center;gap:12px;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.35);border-radius:16px;padding:16px 18px;animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1)">
+        <span style="color:#C7F011;display:flex"><p2g-icon name="check-circle-2" size="20"></p2g-icon></span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#FAFAFA;text-align:left">Konto erstellt — deine <span style="font-family:'JetBrains Mono',monospace;color:#C7F011">+{{ pointsEarn }} Points</span> sind gesichert! 💚</span>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;gap:12px;width:100%;flex-wrap:wrap;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.5s backwards">
+      <div style="flex:1;min-width:200px"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="outline" size="lg" onClick="{{ newBooking }}" style="width:100%" hint-size="100%,48px">Weiteren Court buchen</x-import></div>
+      <sc-if value="{{ effLoggedIn }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-width:200px"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="lime" size="lg" onClick="{{ toggleBookings }}" style="width:100%" hint-size="100%,48px"><p2g-icon name="calendar-days" size="16"></p2g-icon>Meine Buchungen</x-import></div>
+      </sc-if>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ═══════════ ④b CANCEL ═══════════ -->
+<sc-if value="{{ isCancel }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="④b Cancel — Zahlung abgebrochen" style="min-height:100vh;background:#000;padding:140px 20px 90px">
+  <div style="max-width:480px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+    <span style="width:88px;height:88px;border-radius:50%;background:hsl(0 72% 55% / 0.09);border:1px solid hsl(0 72% 55% / 0.4);display:flex;align-items:center;justify-content:center;color:hsl(0 72% 58%);animation:springIn 0.6s cubic-bezier(0.16,1,0.3,1)">
+      <p2g-icon name="x" size="40" stroke-width="2.5"></p2g-icon>
+    </span>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(28px, 4.6vw, 38px);letter-spacing:-0.02em;color:#FAFAFA;margin:0">Zahlung abgebrochen</h1>
+      <p style="font-family:'DM Sans',sans-serif;font-size:15.5px;line-height:1.6;color:hsl(0 0% 65%);margin:0">{{ cancelNote }}</p>
+    </div>
+    <div style="{{ cancelTimerStyle }}">
+      <p2g-icon name="timer" size="15"></p2g-icon>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:700">Slot noch {{ timerStr }} reserviert</span>
+    </div>
+    <div style="display:flex;gap:12px;width:100%;flex-wrap:wrap">
+      <div style="flex:1;min-width:180px"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="hero" size="lg" onClick="{{ retryPay }}" style="width:100%" hint-size="100%,48px"><p2g-icon name="rotate-ccw" size="16"></p2g-icon>Erneut versuchen</x-import></div>
+      <div style="flex:1;min-width:180px"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="outline" size="lg" onClick="{{ backToDetail }}" style="width:100%" hint-size="100%,48px">Zurück zur Auswahl</x-import></div>
+    </div>
+    <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 50%)"><p2g-icon name="shield-check" size="13"></p2g-icon>Es wurde nichts abgebucht.</span>
+  </div>
+</section>
+</sc-if>
+
+<!-- ═══════════ OVERLAY: GAST-CHECKOUT ═══════════ -->
+<sc-if value="{{ guestOpen }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Overlay — Gast-Checkout-Modal" onClick="{{ closeGuestBackdrop }}" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;background:hsl(0 0% 0% / 0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.25s ease-out;overflow-y:auto">
+  <div style="width:min(440px, 100%);background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 18%);border-radius:22px;padding:26px;display:flex;flex-direction:column;gap:18px;animation:scaleIn 0.35s cubic-bezier(0.16,1,0.3,1);box-shadow:0 24px 80px hsl(0 0% 0% / 0.6), 0 0 50px hsl(71 91% 51% / 0.06)">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+      <div style="display:flex;align-items:center;gap:13px">
+        <span style="width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="user" size="20"></p2g-icon></span>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Als Gast buchen</h3>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 60%)">Kein Konto nötig — dauert 30 Sekunden.</span>
+        </div>
+      </div>
+      <button onClick="{{ closeGuest }}" style="background:none;border:1px solid hsl(0 0% 16%);border-radius:10px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:hsl(0 0% 60%);flex:none" style-hover="color:#FAFAFA;border-color:hsl(0 0% 30%)"><p2g-icon name="x" size="16"></p2g-icon></button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 75%)"><span style="color:#C7F011;display:flex"><p2g-icon name="user" size="13"></p2g-icon></span>Name</span>
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Input" placeholder="Vor- und Nachname" value="{{ gName }}" onChange="{{ setGName }}" hint-size="100%,44px"></x-import>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 75%)"><span style="color:#C7F011;display:flex"><p2g-icon name="mail" size="13"></p2g-icon></span>E-Mail</span>
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Input" type="email" placeholder="fuer deine Buchungsbestätigung" value="{{ gMail }}" onChange="{{ setGMail }}" hint-size="100%,44px"></x-import>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 75%)"><span style="color:#C7F011;display:flex"><p2g-icon name="phone" size="13"></p2g-icon></span>Telefon <span style="color:hsl(0 0% 45%);font-weight:500">· optional</span></span>
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Input" type="tel" placeholder="falls wir dich erreichen müssen" value="{{ gPhone }}" onChange="{{ setGPhone }}" hint-size="100%,44px"></x-import>
+      </div>
+      <button onClick="{{ toggleAgb }}" style="display:flex;align-items:flex-start;gap:11px;background:none;border:none;cursor:pointer;padding:4px 0 0;text-align:left">
+        <span style="{{ agbBoxStyle }}"><span style="{{ agbCheckStyle }}"><p2g-icon name="check" size="12" stroke-width="3.5"></p2g-icon></span></span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.55;color:hsl(0 0% 65%)">Ich akzeptiere die <a href="#" style="color:#C7F011;text-decoration:none">AGB</a> und die <a href="#" style="color:#C7F011;text-decoration:none">Datenschutzerklärung</a> von PADEL2GO.</span>
+      </button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="{{ guestSubmitWrapStyle }}">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="hero" size="lg" onClick="{{ guestSubmit }}" style="width:100%" hint-size="100%,50px">Weiter zur Zahlung<p2g-icon name="arrow-right" size="16"></p2g-icon></x-import>
+      </div>
+      <span style="display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 50%)"><p2g-icon name="lock" size="12"></p2g-icon>Deine Daten werden nur für diese Buchung verwendet.</span>
+      <div style="height:1px;background:hsl(0 0% 13%)"></div>
+      <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 55%);text-align:center">Schon ein Konto? <button onClick="{{ guestLogin }}" style="background:none;border:none;padding:0;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#C7F011">Einloggen</button></span>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══════════ OVERLAY: STRIPE-REDIRECT ═══════════ -->
+<sc-if value="{{ paying }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Overlay — Stripe Redirect" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:110;background:hsl(0 0% 0% / 0.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.25s ease-out">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center">
+    <span style="display:flex;animation:spin 1s linear infinite;color:#C7F011"><p2g-icon name="loader-2" size="42"></p2g-icon></span>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:20px;color:#FAFAFA">Weiterleitung zu Stripe …</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:hsl(0 0% 60%)">{{ totalPrice }} · {{ payMethodName }}</span>
+    </div>
+    <button onClick="{{ cancelPay }}" style="background:none;border:1px solid hsl(0 0% 20%);border-radius:999px;padding:8px 18px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:hsl(0 0% 65%)" style-hover="color:#FAFAFA;border-color:hsl(0 0% 35%)">Abbrechen</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══════════ OVERLAY: MEINE BUCHUNGEN ═══════════ -->
+<sc-if value="{{ bookingsOpen }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Overlay — Meine Buchungen" onClick="{{ closeBookingsBackdrop }}" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;background:hsl(0 0% 0% / 0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn 0.25s ease-out">
+  <div style="position:absolute;top:0;right:0;bottom:0;width:min(420px, 100%);background:hsl(0 0% 4%);border-left:1px solid hsl(0 0% 15%);display:flex;flex-direction:column;animation:slideInRight 0.35s cubic-bezier(0.16,1,0.3,1);box-shadow:-30px 0 80px hsl(0 0% 0% / 0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 22px;border-bottom:1px solid hsl(0 0% 12%)">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="color:#C7F011;display:flex"><p2g-icon name="calendar-days" size="19"></p2g-icon></span>
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;color:#FAFAFA;margin:0">Meine Buchungen</h3>
+      </div>
+      <button onClick="{{ closeBookings }}" style="background:none;border:1px solid hsl(0 0% 16%);border-radius:10px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:hsl(0 0% 60%)" style-hover="color:#FAFAFA;border-color:hsl(0 0% 30%)"><p2g-icon name="x" size="16"></p2g-icon></button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ bookingRows }}" as="b" hint-placeholder-count="3">
+        <div style="{{ b.style }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;color:#FAFAFA">{{ b.loc }}</span>
+            <span style="{{ b.pillStyle }}">{{ b.status }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="color:#C7F011;display:flex"><p2g-icon name="{{ b.icon }}" size="13"></p2g-icon></span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:hsl(0 0% 65%)">{{ b.when }}</span>
+          </div>
+          <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 55%)">{{ b.sub }}</span>
+        </div>
+      </sc-for>
+      <div style="display:flex;align-items:center;gap:10px;background:hsl(71 91% 51% / 0.06);border:1px solid hsl(71 91% 51% / 0.2);border-radius:14px;padding:13px 15px;margin-top:4px">
+        <span style="color:#C7F011;display:flex"><p2g-icon name="star" size="15"></p2g-icon></span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 70%)">Dein Punktestand: <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#C7F011">{{ pointsLabel }}</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer style="border-top:1px solid hsl(0 0% 15% / 0.6);background:linear-gradient(180deg, #000, hsl(0 0% 3%));padding:26px 20px">
+  <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:9px">
+      <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:24px;width:auto">
+      <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%)">© 2026 PADEL2GO</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <a href="#" style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%);text-decoration:none" style-hover="color:#C7F011">Impressum</a>
+      <a href="#" style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%);text-decoration:none" style-hover="color:#C7F011">Datenschutz</a>
+      <a href="#" style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%);text-decoration:none" style-hover="color:#C7F011">AGB</a>
+      <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%)">Made with 💚 in Deutschland</span>
+    </div>
+  </div>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;loggedIn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Demo-Zustand&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;standorte&quot;,&quot;options&quot;:[&quot;standorte&quot;,&quot;detail&quot;,&quot;checkout&quot;,&quot;success&quot;,&quot;abbruch&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo-Zustand&quot;},&quot;reserveMinutes&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:10,&quot;min&quot;:3,&quot;max&quot;:15,&quot;unit&quot;:&quot;min&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Checkout&quot;}}">
+const LOCS = [
+  {
+    slug: 'muenchen-ost', name: 'P2G Court München-Ost', city: 'München · Bayern',
+    img: 'assets/skypadel-outdoor.jpg', price: 2400, occ: 38, open: [7, 23], openLabel: '07–23 Uhr',
+    maps: 'https://maps.google.com/?q=P2G+Court+M%C3%BCnchen-Ost',
+    courts: [{ n: 'Court 1', tag: 'Outdoor · Flutlicht' }, { n: 'Court 2', tag: 'Outdoor · Panorama' }],
+  },
+  {
+    slug: 'koeln-rheinaue', name: 'P2G Arena Rheinaue Köln', city: 'Köln · NRW',
+    img: 'assets/skypadel-sunset.jpg', price: 2800, occ: 82, open: [6, 24], openLabel: '06–24 Uhr',
+    maps: 'https://maps.google.com/?q=P2G+Arena+Rheinaue+K%C3%B6ln',
+    courts: [{ n: 'Court 1', tag: 'Outdoor · Flutlicht' }, { n: 'Court 2', tag: 'Outdoor · Flutlicht' }, { n: 'Court 3', tag: 'Center Court' }],
+  },
+  {
+    slug: 'hamburg-alster', name: 'P2G Club Hamburg-Alster', city: 'Hamburg',
+    img: 'assets/tennis-padel-aerial.jpg', price: 2200, occ: 61, open: [8, 22], openLabel: '08–22 Uhr',
+    maps: 'https://maps.google.com/?q=P2G+Club+Hamburg-Alster',
+    courts: [{ n: 'Court 1', tag: 'Outdoor · Flutlicht' }, { n: 'Court 2', tag: 'Outdoor · Alsterblick' }],
+  },
+];
+const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+const WDL = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+const MON = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const MONL = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const eur = (c) => '€' + (c / 100).toFixed(2).replace('.', ',');
+const hh = (h) => String(h).padStart(2, '0') + ':00';
+
+class Component extends DCLogic {
+  state = {
+    screen: 'locations', locsLoading: true,
+    locIdx: 0, courtIdx: 0, dateIdx: 0, dur: 60, time: null, lobby: false,
+    guestOpen: false, gName: '', gMail: '', gPhone: '', gAgb: false,
+    payMethod: 0, voucherOpen: false, voucherVal: '', voucherApplied: false, voucherErr: false,
+    paying: false, timerLeft: 600, bookingsOpen: false,
+    loggedInOverride: null, pointsBalance: 1240, bookingCode: null, accountCreated: false,
+    lastBooking: null,
+  };
+
+  // ── helpers ──────────────────────────────────────────────
+  _loggedIn() { return this.state.loggedInOverride ?? (this.props.loggedIn ?? false); }
+  _loc() { return LOCS[this.state.locIdx]; }
+  _dateOf(i) { const d = new Date(); d.setDate(d.getDate() + i); return d; }
+  _booked(li, ci, di, h) {
+    if (di === 2) return true; // Vereinsturnier — komplett belegt (Demo für "keine Slots")
+    if (di === 0 && h <= new Date().getHours()) return true; // vergangene Slots heute
+    const x = ((li + 1) * 131 + (ci + 1) * 37 + (di + 1) * 53 + h * 17) % 100;
+    return x < LOCS[li].occ * 0.8;
+  }
+  _hours(li, di, dur) {
+    const [o, c] = LOCS[li].open;
+    const last = Math.floor(c - dur / 60);
+    const out = [];
+    for (let h = o; h <= last; h++) out.push(h);
+    return out;
+  }
+  _freeToday(li) {
+    let n = 0;
+    LOCS[li].courts.forEach((_, ci) => this._hours(li, 0, 60).forEach((h) => { if (!this._booked(li, ci, 0, h)) n++; }));
+    return n;
+  }
+  _totalCents() {
+    const base = Math.round(this._loc().price * this.state.dur / 60);
+    return this.state.voucherApplied ? Math.round(base * 0.9) : base;
+  }
+  _pts() { return Math.round(this._totalCents() / 10); }
+  _fixTime(patch) {
+    const s = { ...this.state, ...patch };
+    if (s.time != null) {
+      const hrs = this._hours(s.locIdx, s.dateIdx, s.dur);
+      if (!hrs.includes(s.time) || this._booked(s.locIdx, s.courtIdx, s.dateIdx, s.time)) patch.time = null;
+    }
+    this.setState(patch);
+  }
+  _startTimer() {
+    clearInterval(this._t);
+    const mins = this.props.reserveMinutes ?? 10;
+    this.setState({ timerLeft: mins * 60 });
+    this._t = setInterval(() => {
+      this.setState((s) => {
+        if (s.timerLeft <= 1) { clearInterval(this._t); return { timerLeft: 0 }; }
+        return { timerLeft: s.timerLeft - 1 };
+      });
+    }, 1000);
+  }
+  _stopTimer() { clearInterval(this._t); }
+  _go(screen, extra) { this.setState({ screen, ...(extra || {}) }); window.scrollTo(0, 0); }
+  _finishPay() {
+    this._stopTimer();
+    const code = 'P2G-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    this.setState((s) => ({
+      paying: false, screen: 'success', bookingCode: code,
+      pointsBalance: this._loggedIn() ? s.pointsBalance + this._pts() : s.pointsBalance,
+      lastBooking: { loc: this._loc().name, when: this._whenShort(), price: eur(this._totalCents()) },
+    }));
+    window.scrollTo(0, 0);
+  }
+  _whenShort() {
+    const d = this._dateOf(this.state.dateIdx);
+    return WD[d.getDay()] + ', ' + d.getDate() + '. ' + MON[d.getMonth()] + ' · ' + hh(this.state.time ?? 18);
+  }
+
+  componentDidMount() {
+    setTimeout(() => this.setState({ locsLoading: false }), 750);
+    const s = this.props.startScreen ?? 'standorte';
+    if (s !== 'standorte') {
+      const demo = { locIdx: 0, courtIdx: 0, dateIdx: 1, dur: 90, time: 18, gName: 'Alex Weber', gMail: 'alex.weber@mail.de', gAgb: true, locsLoading: false };
+      if (s === 'detail') this.setState({ ...demo, screen: 'detail' });
+      if (s === 'checkout') { this.setState({ ...demo, screen: 'checkout' }); this._startTimer(); }
+      if (s === 'success') this.setState({ ...demo, screen: 'success', bookingCode: 'P2G-8F3K' });
+      if (s === 'abbruch') { this.setState({ ...demo, screen: 'cancel' }); this._startTimer(); }
+    }
+  }
+  componentWillUnmount() { clearInterval(this._t); clearTimeout(this._payT); }
+
+  // ── style factories ──────────────────────────────────────
+  _chk(done) {
+    return {
+      width: 24, height: 24, borderRadius: '50%', flex: 'none',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: done ? '#C7F011' : 'hsl(0 0% 10%)', color: done ? '#000' : 'hsl(0 0% 35%)',
+      border: done ? '1px solid transparent' : '1px solid hsl(0 0% 20%)',
+      boxShadow: done ? '0 0 16px hsl(71 91% 51% / 0.4)' : 'none', transition: 'all 0.25s',
+    };
+  }
+
+  renderVals() {
+    const st = this.state;
+    const logged = this._loggedIn();
+    const loc = this._loc();
+    const screen = st.screen;
+
+    // ── nav stepper ──
+    const stepIdx = { locations: 0, detail: 1, checkout: 2, cancel: 2, success: 3 }[screen];
+    const navSteps = [
+      { icon: 'map-pin', label: 'Standort' },
+      { icon: 'calendar-days', label: 'Termin' },
+      { icon: 'credit-card', label: 'Bezahlen' },
+      { icon: 'party-popper', label: 'Fertig' },
+    ].map((d, i) => {
+      const done = i < stepIdx || screen === 'success';
+      const active = i === stepIdx && screen !== 'success';
+      const canGo = done && screen !== 'success' && (i === 0 || i === 1);
+      return {
+        icon: done ? 'check' : d.icon, label: d.label,
+        go: canGo ? () => this._go(i === 0 ? 'locations' : 'detail') : undefined,
+        btnStyle: { display: 'flex', alignItems: 'center', gap: 7, background: 'none', border: 'none', padding: '4px 5px', cursor: canGo ? 'pointer' : 'default', minWidth: 0 },
+        circleStyle: {
+          width: 30, height: 30, borderRadius: '50%', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s',
+          background: done ? '#C7F011' : active ? 'hsl(71 91% 51% / 0.12)' : 'hsl(0 0% 7%)',
+          color: done ? '#000' : active ? '#C7F011' : 'hsl(0 0% 45%)',
+          border: done ? '1px solid transparent' : active ? '1px solid hsl(71 91% 51% / 0.6)' : '1px solid hsl(0 0% 18%)',
+          boxShadow: active ? '0 0 18px hsl(71 91% 51% / 0.3)' : 'none',
+        },
+        labelStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', color: active ? '#FAFAFA' : done ? 'hsl(0 0% 70%)' : 'hsl(0 0% 45%)' },
+        lineStyle: i === 0 ? { display: 'none' } : { width: 'clamp(10px, 2.6vw, 34px)', height: 2, borderRadius: 2, flex: 'none', background: (i <= stepIdx || screen === 'success') ? 'hsl(71 91% 51% / 0.55)' : 'hsl(0 0% 16%)' },
+      };
+    });
+
+    // ── ① locations ──
+    const locCards = LOCS.map((l, i) => {
+      const free = this._freeToday(i);
+      const busy = l.occ >= 75;
+      const mid = l.occ >= 55 && !busy;
+      const col = busy ? 'hsl(0 72% 55%)' : mid ? 'hsl(45 90% 55%)' : '#C7F011';
+      return {
+        img: l.img, name: l.name, city: l.city.split(' · ')[0], courtCount: String(l.courts.length),
+        priceFrom: '€' + Math.round(l.price / 100), open: l.openLabel,
+        slotsToday: String(free),
+        badgeLabel: busy ? 'Fast ausgebucht' : mid ? 'Gut gebucht' : 'Verfügbar',
+        badgeStyle: {
+          position: 'absolute', top: 12, left: 12, display: 'inline-flex', alignItems: 'center', gap: 6,
+          fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap',
+          color: busy ? 'hsl(0 72% 70%)' : mid ? 'hsl(45 90% 65%)' : '#C7F011',
+          background: 'hsl(0 0% 0% / 0.72)', backdropFilter: 'blur(8px)',
+          border: '1px solid ' + (busy ? 'hsl(0 72% 55% / 0.4)' : mid ? 'hsl(45 90% 55% / 0.4)' : 'hsl(71 91% 51% / 0.4)'),
+          borderRadius: 999, padding: '5px 11px',
+        },
+        badgeDotStyle: { width: 7, height: 7, borderRadius: '50%', background: col, display: 'inline-block', animation: busy ? 'none' : 'pulseGlow 2s infinite' },
+        slotsStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700, color: col },
+        occBarStyle: { width: l.occ + '%', height: '100%', borderRadius: 999, background: col, transition: 'width 0.6s' },
+        wrapStyle: { cursor: 'pointer', animation: 'fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) ' + i * 0.09 + 's backwards' },
+        select: () => this._go('detail', { locIdx: i, courtIdx: 0, dateIdx: 0, dur: 60, time: null, lobby: false, voucherApplied: false, voucherOpen: false, voucherVal: '' }),
+      };
+    });
+
+    // ── ② detail ──
+    const courtCards = loc.courts.map((c, i) => {
+      const on = st.courtIdx === i;
+      return {
+        name: c.n, tag: c.tag, price: eur(loc.price),
+        select: () => this._fixTime({ courtIdx: i }),
+        style: {
+          position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 3,
+          padding: '14px 16px', borderRadius: 14, cursor: 'pointer', textAlign: 'left', transition: 'all 0.22s',
+          background: on ? 'hsl(71 91% 51% / 0.1)' : 'hsl(0 0% 6%)',
+          border: on ? '1px solid hsl(71 91% 51% / 0.65)' : '1px solid hsl(0 0% 15%)',
+          boxShadow: on ? '0 0 22px hsl(71 91% 51% / 0.22)' : 'none', color: '#FAFAFA', minHeight: 44,
+        },
+        checkStyle: { position: 'absolute', top: 10, right: 10, width: 20, height: 20, borderRadius: '50%', background: '#C7F011', color: '#000', display: on ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 14px hsl(71 91% 51% / 0.5)' },
+        tagStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: 'hsl(0 0% 55%)' },
+        priceStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 12.5, fontWeight: 700, color: on ? '#C7F011' : 'hsl(0 0% 65%)', marginTop: 3 },
+      };
+    });
+
+    const dateChips = Array.from({ length: 15 }, (_, i) => {
+      const d = this._dateOf(i);
+      const on = st.dateIdx === i;
+      return {
+        wd: i === 0 ? 'Heute' : WD[d.getDay()], dd: String(d.getDate()).padStart(2, '0'), mon: MON[d.getMonth()],
+        select: () => this._fixTime({ dateIdx: i }),
+        style: {
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, flex: 'none',
+          width: 64, padding: '10px 4px', borderRadius: 13, cursor: 'pointer', transition: 'all 0.22s',
+          background: on ? '#C7F011' : 'hsl(0 0% 6%)', color: on ? '#000' : '#FAFAFA',
+          border: on ? '1px solid transparent' : '1px solid hsl(0 0% 15%)',
+          boxShadow: on ? '0 0 22px hsl(71 91% 51% / 0.35)' : 'none',
+        },
+        wdStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: on ? 'hsl(0 0% 0% / 0.65)' : i === 0 ? '#C7F011' : 'hsl(0 0% 55%)' },
+        monStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 10.5, color: on ? 'hsl(0 0% 0% / 0.65)' : 'hsl(0 0% 50%)' },
+      };
+    });
+
+    const durSegs = [60, 90, 120].map((m) => {
+      const on = st.dur === m;
+      return {
+        label: m + ' Min', price: eur(Math.round(loc.price * m / 60)),
+        select: () => this._fixTime({ dur: m }),
+        style: {
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '13px 8px',
+          borderRadius: 14, cursor: 'pointer', transition: 'all 0.22s', minHeight: 44,
+          background: on ? '#C7F011' : 'hsl(0 0% 6%)', color: on ? '#000' : '#FAFAFA',
+          border: on ? '1px solid transparent' : '1px solid hsl(0 0% 15%)',
+          boxShadow: on ? '0 0 22px hsl(71 91% 51% / 0.35)' : 'none',
+        },
+        priceStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 11.5, color: on ? 'hsl(0 0% 0% / 0.6)' : 'hsl(0 0% 50%)' },
+      };
+    });
+
+    const hrs = this._hours(st.locIdx, st.dateIdx, st.dur);
+    let freeCount = 0;
+    const timeGrid = hrs.map((h) => {
+      const booked = this._booked(st.locIdx, st.courtIdx, st.dateIdx, h);
+      if (!booked) freeCount++;
+      const on = st.time === h;
+      return {
+        label: hh(h), booked,
+        select: () => this.setState({ time: h }),
+        style: {
+          height: 48, borderRadius: 12, fontFamily: "'JetBrains Mono', monospace", fontSize: 13.5, fontWeight: 600,
+          cursor: booked ? 'not-allowed' : 'pointer', transition: 'all 0.18s',
+          background: on ? '#C7F011' : booked ? 'hsl(0 0% 4%)' : 'hsl(0 0% 6%)',
+          color: on ? '#000' : booked ? 'hsl(0 0% 32%)' : '#FAFAFA',
+          border: on ? '1px solid transparent' : booked ? '1px solid hsl(0 0% 11%)' : '1px solid hsl(0 0% 16%)',
+          textDecoration: booked ? 'line-through' : 'none',
+          boxShadow: on ? '0 0 20px hsl(71 91% 51% / 0.4)' : 'none',
+        },
+      };
+    });
+    const noSlots = freeCount === 0;
+
+    const d = this._dateOf(st.dateIdx);
+    const sumDate = WDL[d.getDay()] + ', ' + d.getDate() + '. ' + MONL[d.getMonth()];
+    const sumDateShort = WD[d.getDay()] + ', ' + String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.';
+    const endMin = st.time != null ? st.time * 60 + st.dur : null;
+    const sumTime = st.time != null
+      ? hh(st.time) + ' – ' + String(Math.floor(endMin / 60)).padStart(2, '0') + ':' + String(endMin % 60).padStart(2, '0') + ' Uhr'
+      : 'Uhrzeit wählen …';
+    const baseCents = Math.round(loc.price * st.dur / 60);
+    const totalCents = this._totalCents();
+    const ready = st.time != null;
+
+    // ── checkout ──
+    const mins = String(Math.floor(st.timerLeft / 60)).padStart(2, '0');
+    const secs = String(st.timerLeft % 60).padStart(2, '0');
+    const total0 = (this.props.reserveMinutes ?? 10) * 60;
+    const expired = st.timerLeft <= 0;
+    const low = st.timerLeft > 0 && st.timerLeft < 120;
+    const tCol = expired ? 'hsl(0 72% 58%)' : low ? 'hsl(45 90% 55%)' : '#C7F011';
+    const payMethods = [
+      { icon: 'credit-card', name: 'Karte', sub: 'Visa · Mastercard · Amex' },
+      { icon: 'wallet', name: 'PayPal', sub: 'Mit PayPal-Konto zahlen' },
+    ].map((m, i) => {
+      const on = st.payMethod === i;
+      return {
+        ...m, select: () => this.setState({ payMethod: i }),
+        style: {
+          position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 15px',
+          borderRadius: 14, cursor: 'pointer', transition: 'all 0.22s', textAlign: 'left',
+          background: on ? 'hsl(71 91% 51% / 0.09)' : 'hsl(0 0% 6%)',
+          border: on ? '1px solid hsl(71 91% 51% / 0.6)' : '1px solid hsl(0 0% 15%)',
+          boxShadow: on ? '0 0 20px hsl(71 91% 51% / 0.18)' : 'none',
+        },
+        iconStyle: { width: 38, height: 38, borderRadius: 11, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: on ? 'hsl(71 91% 51% / 0.14)' : 'hsl(0 0% 100% / 0.05)', border: '1px solid ' + (on ? 'hsl(71 91% 51% / 0.4)' : 'hsl(0 0% 16%)'), color: on ? '#C7F011' : 'hsl(0 0% 60%)' },
+        checkStyle: { position: 'absolute', top: 10, right: 10, width: 20, height: 20, borderRadius: '50%', background: '#C7F011', color: '#000', display: on ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 14px hsl(71 91% 51% / 0.5)' },
+      };
+    });
+
+    // ── guest form ──
+    const emailOk = /.+@.+\..+/.test(st.gMail.trim());
+    const guestValid = st.gName.trim().length > 1 && emailOk && st.gAgb;
+
+    const bookingRows = [];
+    if (st.lastBooking) bookingRows.push({ loc: st.lastBooking.loc, when: st.lastBooking.when, status: 'Bestätigt', sub: 'Soeben gebucht · ' + st.lastBooking.price, icon: 'calendar', kind: 'new' });
+    bookingRows.push(
+      { loc: 'P2G Arena Rheinaue Köln', when: 'Di, 7. Jul · 18:00', status: 'Bestätigt', sub: 'Court 2 · 90 Min · öffentliche Lobby', icon: 'calendar', kind: 'up' },
+      { loc: 'P2G Court München-Ost', when: 'So, 28. Jun · 19:00', status: 'Gespielt', sub: '+180 Points gesammelt', icon: 'check', kind: 'past' },
+    );
+    bookingRows.forEach((b) => {
+      const past = b.kind === 'past';
+      b.style = { display: 'flex', flexDirection: 'column', gap: 8, padding: '15px 16px', borderRadius: 15, background: b.kind === 'new' ? 'hsl(71 91% 51% / 0.06)' : 'linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 4%))', border: b.kind === 'new' ? '1px solid hsl(71 91% 51% / 0.35)' : '1px solid hsl(0 0% 14%)', opacity: past ? 0.65 : 1 };
+      b.pillStyle = { fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap', color: past ? 'hsl(0 0% 60%)' : '#C7F011', background: past ? 'hsl(0 0% 100% / 0.06)' : 'hsl(71 91% 51% / 0.1)', border: '1px solid ' + (past ? 'hsl(0 0% 20%)' : 'hsl(71 91% 51% / 0.3)'), borderRadius: 999, padding: '3px 10px' };
+    });
+
+    return {
+      // nav
+      navSteps, effLoggedIn: logged, notLoggedIn: !logged,
+      pointsLabel: st.pointsBalance.toLocaleString('de-DE') + ' P2G Points',
+      doLogin: () => this.setState({ loggedInOverride: true, guestOpen: false }),
+      toggleBookings: () => this.setState((s) => ({ bookingsOpen: !s.bookingsOpen })),
+
+      // screens
+      isLocations: screen === 'locations', isDetail: screen === 'detail', isCheckout: screen === 'checkout',
+      isSuccess: screen === 'success', isCancel: screen === 'cancel',
+      locsLoading: st.locsLoading, locsReady: !st.locsLoading,
+      locCards,
+
+      // detail
+      selLocImg: loc.img, selLocName: loc.name, selLocCity: loc.city.split(' · ')[0],
+      selLocOpen: loc.openLabel, selLocMaps: loc.maps,
+      courtCards, dateChips, durSegs, timeGrid,
+      hasSlots: !noSlots, noSlots,
+      timesFreeLabel: noSlots ? 'ausgebucht' : freeCount + ' von ' + timeGrid.length + ' frei',
+      jumpNextDay: () => this._fixTime({ dateIdx: Math.min(st.dateIdx + 1, 14) }),
+      chk1Style: this._chk(true), chk2Style: this._chk(true), chk3Style: this._chk(true),
+      backToLocs: () => this._go('locations'),
+      sumCourt: loc.courts[st.courtIdx].n + ' · ' + loc.courts[st.courtIdx].tag,
+      sumDate, sumDateShort, sumTime,
+      lobbyTrackStyle: { width: 40, height: 23, borderRadius: 999, flex: 'none', padding: 2, transition: 'all 0.25s', background: st.lobby ? '#C7F011' : 'hsl(0 0% 15%)', boxShadow: st.lobby ? '0 0 14px hsl(71 91% 51% / 0.4)' : 'none', display: 'flex' },
+      lobbyKnobStyle: { width: 19, height: 19, borderRadius: '50%', background: st.lobby ? '#000' : 'hsl(0 0% 45%)', transition: 'all 0.25s', transform: st.lobby ? 'translateX(17px)' : 'translateX(0)' },
+      toggleLobby: () => this.setState((s) => ({ lobby: !s.lobby })),
+      baseLabel: loc.courts[st.courtIdx].n + ' · ' + st.dur + ' Min',
+      basePrice: eur(baseCents), totalPrice: eur(totalCents), discountPrice: eur(baseCents - totalCents),
+      bookWrapStyle: { opacity: ready ? 1 : 0.45, pointerEvents: ready ? 'auto' : 'none', transition: 'opacity 0.3s' },
+      bookHint: ready ? 'Noch nichts bezahlt — im nächsten Schritt geht’s zur Kasse.' : 'Wähle eine Uhrzeit, um fortzufahren.',
+      bookHintStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 12, textAlign: 'center', color: ready ? 'hsl(0 0% 50%)' : '#C7F011' },
+      book: () => { if (!ready) return; if (logged) { this._go('checkout'); this._startTimer(); } else this.setState({ guestOpen: true }); },
+
+      // guest modal
+      guestOpen: st.guestOpen,
+      closeGuest: () => this.setState({ guestOpen: false }),
+      closeGuestBackdrop: (e) => { if (e.target === e.currentTarget) this.setState({ guestOpen: false }); },
+      gName: st.gName, gMail: st.gMail, gPhone: st.gPhone,
+      setGName: (e) => this.setState({ gName: e.target.value }),
+      setGMail: (e) => this.setState({ gMail: e.target.value }),
+      setGPhone: (e) => this.setState({ gPhone: e.target.value }),
+      toggleAgb: () => this.setState((s) => ({ gAgb: !s.gAgb })),
+      agbBoxStyle: { width: 21, height: 21, borderRadius: 7, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', background: st.gAgb ? '#C7F011' : 'hsl(0 0% 8%)', border: st.gAgb ? '1px solid transparent' : '1px solid hsl(0 0% 25%)', boxShadow: st.gAgb ? '0 0 12px hsl(71 91% 51% / 0.4)' : 'none' },
+      agbCheckStyle: { color: '#000', display: st.gAgb ? 'flex' : 'none' },
+      guestSubmitWrapStyle: { opacity: guestValid ? 1 : 0.45, pointerEvents: guestValid ? 'auto' : 'none', transition: 'opacity 0.3s' },
+      guestSubmit: () => { if (!guestValid) return; this.setState({ guestOpen: false }); this._go('checkout'); this._startTimer(); },
+      guestLogin: () => { this.setState({ loggedInOverride: true, guestOpen: false }); this._go('checkout'); this._startTimer(); },
+
+      // checkout
+      backToDetail: () => { this._stopTimer(); this._go('detail'); },
+      timerStr: mins + ':' + secs,
+      timerTitle: expired ? 'Reservierung abgelaufen' : 'Dein Slot ist für dich reserviert',
+      timerSub: expired ? 'Kein Stress — wähle deinen Slot einfach neu.' : loc.courts[st.courtIdx].n + ' · ' + sumDateShort + ' · ' + sumTime,
+      timerCardStyle: { background: 'linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%))', border: '1px solid ' + (expired ? 'hsl(0 72% 55% / 0.45)' : low ? 'hsl(45 90% 55% / 0.45)' : 'hsl(71 91% 51% / 0.3)'), borderRadius: 18, padding: '16px 18px', transition: 'border-color 0.4s' },
+      timerIconStyle: { width: 40, height: 40, borderRadius: 12, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: expired ? 'hsl(0 72% 55% / 0.1)' : 'hsl(71 91% 51% / 0.1)', border: '1px solid ' + (expired ? 'hsl(0 72% 55% / 0.4)' : 'hsl(71 91% 51% / 0.35)'), color: tCol, animation: low ? 'pulseGlow 1.2s infinite' : 'none' },
+      timerDigitsStyle: { fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 26, color: tCol, flex: 'none', transition: 'color 0.4s' },
+      timerBarStyle: { width: Math.max(0, (st.timerLeft / total0) * 100) + '%', height: '100%', borderRadius: 999, background: tCol, transition: 'width 1s linear, background 0.4s' },
+      personIcon: logged ? 'user-check' : 'user',
+      personLine: logged ? 'Florian Steinfelder · flo@padel2go.de' : 'Gast: ' + (st.gName || '—') + ' · ' + (st.gMail || '—'),
+      guestRowStyle: { display: 'flex', alignItems: 'center', gap: 10, background: 'hsl(0 0% 100% / 0.03)', border: '1px solid hsl(0 0% 13%)', borderRadius: 12, padding: '11px 13px' },
+      editPerson: () => { if (!logged) this.setState({ guestOpen: true }); },
+      editPersonStyle: { background: 'none', border: 'none', cursor: logged ? 'default' : 'pointer', color: 'hsl(0 0% 50%)', display: logged ? 'none' : 'flex', padding: 2 },
+      voucherOpen: st.voucherOpen, voucherChevron: st.voucherOpen ? 'chevron-up' : 'chevron-down',
+      toggleVoucher: () => this.setState((s) => ({ voucherOpen: !s.voucherOpen })),
+      voucherVal: st.voucherVal,
+      setVoucherVal: (e) => this.setState({ voucherVal: e.target.value, voucherErr: false }),
+      voucherApplied: st.voucherApplied, voucherNotApplied: !st.voucherApplied,
+      voucherRowStyle: { display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, animation: st.voucherErr ? 'shake 0.4s' : 'none' },
+      voucherErrStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, color: 'hsl(0 72% 62%)', display: st.voucherErr ? 'block' : 'none' },
+      applyVoucher: () => {
+        if (st.voucherVal.trim().toUpperCase() === 'P2G10') this.setState({ voucherApplied: true, voucherErr: false });
+        else { this.setState({ voucherErr: true }); }
+      },
+      removeVoucher: () => this.setState({ voucherApplied: false, voucherVal: '' }),
+      payMethods, payMethodName: st.payMethod === 0 ? 'Karte' : 'PayPal',
+      pointsEarn: String(this._pts()),
+      payLabel: 'Jetzt bezahlen · ' + eur(totalCents),
+      payWrapStyle: { opacity: expired ? 0.45 : 1, pointerEvents: expired ? 'none' : 'auto', transition: 'opacity 0.3s' },
+      pay: () => {
+        if (expired) return;
+        this.setState({ paying: true });
+        this._payT = setTimeout(() => this._finishPay(), 2000);
+      },
+      paying: st.paying,
+      cancelPay: () => { clearTimeout(this._payT); this.setState({ paying: false }); this._go('cancel'); },
+
+      // success
+      bookingCode: st.bookingCode || 'P2G-····',
+      confirmMail: logged ? 'flo@padel2go.de' : (st.gMail || 'deine E-Mail'),
+      guestNoAccount: !logged && !st.accountCreated, accountCreated: !logged && st.accountCreated,
+      createAccount: () => this.setState({ accountCreated: true }),
+      newBooking: () => this._go('locations', { time: null, voucherApplied: false, voucherOpen: false, voucherVal: '', accountCreated: false }),
+
+      // cancel
+      cancelNote: expired ? 'Deine Reservierung ist inzwischen abgelaufen — wähle deinen Slot einfach neu.' : 'Keine Sorge, das kann passieren. Dein Slot ist noch kurz für dich reserviert.',
+      cancelTimerStyle: { display: expired ? 'none' : 'inline-flex', alignItems: 'center', gap: 8, color: tCol, background: 'hsl(71 91% 51% / 0.07)', border: '1px solid hsl(71 91% 51% / 0.28)', borderRadius: 999, padding: '9px 18px' },
+      retryPay: () => { if (expired) { this._go('detail'); } else this._go('checkout'); },
+
+      // drawer
+      bookingsOpen: st.bookingsOpen && logged, bookingRows,
+      closeBookings: () => this.setState({ bookingsOpen: false }),
+      closeBookingsBackdrop: (e) => { if (e.target === e.currentTarget) this.setState({ bookingsOpen: false }); },
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+/* PADEL2GO effects — gradients, shadows, glows, motion.
+   Depth comes from subtle dark-on-dark gradients + lime glow, not heavy shadows. */
+:root {
+  /* Gradients */
+  --gradient-lime: linear-gradient(135deg, hsl(71 91% 51%), hsl(85 85% 45%)); /* @kind color */
+  --gradient-lime-text: linear-gradient(135deg, hsl(71 91% 51%), hsl(85 85% 55%)); /* @kind color */
+  --gradient-dark: linear-gradient(180deg, hsl(0 0% 0%), hsl(0 0% 5%)); /* @kind color */
+  --gradient-card: linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%)); /* @kind color */
+  --gradient-hero: radial-gradient(ellipse at 50% 0%, hsl(71 91% 51% / 0.12), transparent 55%); /* @kind color */
+
+  /* Shadows & glow */
+  --shadow-card: 0 10px 40px hsl(0 0% 0% / 0.5);
+  --shadow-button: 0 4px 20px hsl(71 91% 51% / 0.4);
+  --shadow-lime: 0 0 40px hsl(71 91% 51% / 0.3);
+  --shadow-lime-lg: 0 0 60px hsl(71 91% 51% / 0.5);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+  --dur-fast: 0.2s; /* @kind other */
+  --dur-base: 0.3s; /* @kind other */
+  --dur-slow: 0.6s; /* @kind other */
+
+  /* Glass / blur (nav, popovers) */
+  --blur-glass: blur(24px); /* @kind other */
+}

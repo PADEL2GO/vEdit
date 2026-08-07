@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    [data-type] button { color: hsl(0 0% 62%); background: hsl(0 0% 100% / 0.04); border: 1px solid hsl(0 0% 15%); }
+    [data-type] button[data-on] { color: #0A0A0A; background: #C7F011; border-color: #C7F011; }
+    #vc-table { width: 100%; border-collapse: collapse; min-width: 940px; }
+    #vc-table th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(0 0% 65%); text-align: left; font-weight: 400; padding: 0 14px 12px 0; white-space: nowrap; }
+    #vc-table td { padding: 12px 14px 12px 0; border-top: 1px solid hsl(0 0% 12%); font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: hsl(0 0% 78%); }
+    #vc-table tbody tr:hover td { background: hsl(0 0% 100% / 0.022); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Vouchers">
+  <dc-import name="AdminSidebar" active="vouchers" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/vouchers</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Voucher Codes</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <button onClick="{{ openNew }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.28);white-space:nowrap">
+          <p2g-icon name="plus" size="15"></p2g-icon>Neuer Voucher
+        </button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Gutscheincodes für kostenlose Buchungen verwalten</span>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(190px, 100%), 1fr));gap:14px">
+        <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,110px">
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:hsl(0 0% 72%)">{{ k.label }}</span>
+                <span style="color:hsl(0 0% 58%);display:flex"><p2g-icon name="{{ k.icon }}" size="15"></p2g-icon></span>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:26px;line-height:1;color:{{ k.color }}">{{ k.value }}</span>
+            </div>
+          </x-import>
+        </sc-for>
+      </div>
+
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,520px">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Alle Voucher <span ref="{{ countRef }}" style="font-family:'JetBrains Mono',monospace;font-weight:400;font-size:14px;color:hsl(0 0% 65%)">(8)</span></h2>
+            <label style="position:relative;display:flex;align-items:center;min-width:min(260px, 100%)">
+              <span style="position:absolute;left:11px;display:flex;color:hsl(0 0% 58%)"><p2g-icon name="search" size="15"></p2g-icon></span>
+              <input onInput="{{ onSearch }}" type="text" placeholder="Code oder Beschreibung…" style="width:100%;height:38px;padding:0 12px 0 36px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+            </label>
+          </div>
+
+          <div style="overflow-x:auto">
+            <table id="vc-table">
+              <thead>
+                <tr><th>Code</th><th>Beschreibung</th><th>Rabatt</th><th>Status</th><th>Nutzungen</th><th>Gültig bis</th><th style="text-align:right">Aktionen</th></tr>
+              </thead>
+              <tbody ref="{{ rowsRef }}">
+                <sc-for list="{{ vouchers }}" as="v" hint-placeholder-count="8">
+                  <tr data-q="{{ v.q }}">
+                    <td>
+                      <div style="display:flex;align-items:center;gap:9px">
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:700;letter-spacing:0.08em;color:#FAFAFA;white-space:nowrap">{{ v.code }}</span>
+                        <button onClick="{{ v.copy }}" title="Code kopieren" style="width:26px;height:26px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:7px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="copy" size="12"></p2g-icon></button>
+                      </div>
+                    </td>
+                    <td><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:210px">{{ v.desc }}</span></td>
+                    <td>
+                      <span style="display:inline-flex;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:{{ v.discFg }};background:{{ v.discBg }};border:1px solid {{ v.discBrd }};border-radius:999px;padding:4px 11px;white-space:nowrap">{{ v.discount }}</span>
+                    </td>
+                    <td>
+                      <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ v.stateFg }};background:{{ v.stateBg }};border:1px solid {{ v.stateBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap">
+                        <span style="width:5px;height:5px;border-radius:50%;background:{{ v.stateFg }}"></span>{{ v.state }}
+                      </span>
+                    </td>
+                    <td>
+                      <div style="display:flex;flex-direction:column;gap:5px;min-width:96px">
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#FAFAFA;white-space:nowrap">{{ v.uses }}</span>
+                        <sc-if value="{{ v.hasBar }}" hint-placeholder-val="{{ false }}">
+                          <div style="height:4px;border-radius:999px;background:hsl(0 0% 12%);overflow:hidden">
+                            <div style="height:100%;width:{{ v.usePct }};border-radius:999px;background:{{ v.barColor }}"></div>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:{{ v.untilFg }};white-space:nowrap">{{ v.until }}</span></td>
+                    <td>
+                      <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+                        <button onClick="{{ v.noop }}" style="width:38px;height:22px;flex:none;position:relative;padding:0;background:{{ v.swBg }};border:1px solid {{ v.swBrd }};border-radius:999px;cursor:pointer;transition:background 0.2s">
+                          <span style="position:absolute;top:2px;left:{{ v.knobX }};width:16px;height:16px;border-radius:50%;background:{{ v.knobBg }};transition:left 0.2s"></span>
+                        </button>
+                        <button onClick="{{ v.edit }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="pencil" size="14"></p2g-icon></button>
+                        <button onClick="{{ v.del }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                      </div>
+                    </td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+
+          <span ref="{{ emptyRef }}" style="display:none;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 65%);text-align:center;padding:18px 0">Noch keine Voucher erstellt</span>
+        </div>
+      </x-import>
+    </main>
+  </div>
+
+  <!-- ── Dialog: Voucher ── -->
+  <div ref="{{ dlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDlg }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.78);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(520px, 100%);max-height:88vh;overflow-y:auto;background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:17px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Voucher</span>
+          <h3 ref="{{ dlgTitleRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Neuen Voucher erstellen</h3>
+        </div>
+        <button onClick="{{ closeDlg }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer" style-hover="color:#FAFAFA"><p2g-icon name="x" size="16"></p2g-icon></button>
+      </div>
+
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Code<span style="color:#C7F011"> *</span></span>
+        <div style="display:flex;gap:9px">
+          <input ref="{{ codeRef }}" type="text" value="SUMMER26" style="flex:1;min-width:0;height:42px;padding:0 14px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:11px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+          <button onClick="{{ generate }}" style="height:42px;padding:0 15px;display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.3);border-radius:11px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(71 91% 51% / 0.18)"><p2g-icon name="dices" size="15"></p2g-icon>Generieren</button>
+        </div>
+        <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 58%)">8 Zeichen, keine verwechselbaren Buchstaben (kein I, O, 0, 1).</span>
+      </label>
+
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Beschreibung (optional)</span>
+        <input type="text" placeholder="z. B. Promo-Aktion März" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+      </label>
+
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Rabatt-Typ<span style="color:#C7F011"> *</span></span>
+        <div data-type="1" ref="{{ typeRef }}" style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ types }}" as="t" hint-placeholder-count="3">
+            <button onClick="{{ t.pick }}" data-key="{{ t.key }}" style="flex:1;min-width:120px;height:40px;border-radius:11px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;white-space:nowrap;transition:all 0.2s">{{ t.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <label ref="{{ pctRef }}" style="display:none;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Rabatt in %<span style="color:#C7F011"> *</span></span>
+        <input type="text" placeholder="20" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 58%)">1–99 — für 100 % den Typ „Gratis“ wählen.</span>
+      </label>
+
+      <label ref="{{ eurRef }}" style="display:none;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Rabatt in €<span style="color:#C7F011"> *</span></span>
+        <input type="text" placeholder="10,00" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 58%)">Wird vom Courtpreis abgezogen, min. 0,50 €.</span>
+      </label>
+
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Max. Nutzungen</span>
+        <div style="display:flex;gap:9px">
+          <input ref="{{ maxRef }}" type="text" placeholder="unbegrenzt" style="flex:1;min-width:0;height:40px;padding:0 13px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+          <button onClick="{{ setOnce }}" style="height:40px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer;white-space:nowrap" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">Einmalig</button>
+        </div>
+        <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 58%)">Leer lassen für unbegrenzte Nutzungen.</span>
+      </label>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(190px, 100%), 1fr));gap:12px">
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Gültig ab</span>
+          <input type="text" placeholder="jetzt" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        </label>
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Gültig bis (optional)</span>
+          <input type="text" placeholder="unbegrenzt" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        </label>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 15px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:14px">
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+          <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FAFAFA">Aktiv</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 65%)">Code kann sofort eingelöst werden.</span>
+        </div>
+        <button style="width:42px;height:24px;flex:none;position:relative;padding:0;background:hsl(71 91% 51% / 0.9);border:1px solid hsl(71 91% 51%);border-radius:999px;cursor:pointer">
+          <span style="position:absolute;top:2px;left:20px;width:18px;height:18px;border-radius:50%;background:#0A0A0A"></span>
+        </button>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:16px;border-top:1px solid hsl(0 0% 12%)">
+        <button onClick="{{ closeDlg }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDlg }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25)">Erstellen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: löschen ── -->
+  <div ref="{{ delRef }}" style="display:none;position:fixed;inset:0;z-index:95;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(430px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Voucher löschen?</h3>
+        <p ref="{{ delTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 68%);margin:0">Der Code SUMMER26 wird unwiderruflich gelöscht.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:0;border-radius:11px;cursor:pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div ref="{{ toastRef }}" style="display:none;position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:99;align-items:center;gap:10px;padding:12px 18px;background:hsl(0 0% 8% / 0.96);backdrop-filter:blur(18px);border:1px solid hsl(71 91% 51% / 0.35);border-radius:14px;box-shadow:0 12px 40px hsl(0 0% 0% / 0.6)">
+    <span style="color:#C7F011;display:flex"><p2g-icon name="check" size="16"></p2g-icon></span>
+    <span ref="{{ toastTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;white-space:nowrap">Code kopiert!</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const ON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '18px', '#0A0A0A'];
+const OFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+
+const ST = {
+  Aktiv: ['#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)'],
+  Inaktiv: ['hsl(0 0% 65%)', 'hsl(0 0% 100% / 0.05)', 'hsl(0 0% 18%)'],
+  Abgelaufen: ['#FF6B6B', 'hsl(0 100% 71% / 0.1)', 'hsl(0 100% 71% / 0.3)'],
+  Aufgebraucht: ['#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)'],
+};
+
+const VOUCHERS = [
+  { code: 'SUMMER26', desc: 'Sommer-Promo Juli/August', kind: 'pct', value: '20 %', used: 42, max: 200, until: '31.08.2026 23:59', state: 'Aktiv', active: true },
+  { code: 'LAUNCH100', desc: 'Launch-Aktion — gratis Court', kind: 'free', value: 'Gratis', used: 78, max: 100, until: '31.07.2026 23:59', state: 'Abgelaufen', active: true },
+  { code: 'CLUBTSV5', desc: 'TSV München-Ost Mitglieder', kind: 'eur', value: '5,00 €', used: 24, max: null, until: 'Unbegrenzt', state: 'Aktiv', active: true },
+  { code: 'WELCOME10', desc: 'Neukunden-Rabatt', kind: 'pct', value: '10 %', used: 156, max: null, until: 'Unbegrenzt', state: 'Aktiv', active: true },
+  { code: 'PRESSFREE', desc: 'Pressetermin — einmalig', kind: 'free', value: 'Gratis', used: 1, max: 1, until: 'Unbegrenzt', state: 'Aufgebraucht', active: true },
+  { code: 'PARTNER15', desc: 'Partner-Aktion Wingfield', kind: 'eur', value: '15,00 €', used: 8, max: 50, until: '30.09.2026 23:59', state: 'Aktiv', active: true },
+  { code: 'WINTER25', desc: 'Wintersaison — noch nicht live', kind: 'pct', value: '25 %', used: 0, max: 300, until: '28.02.2027 23:59', state: 'Inaktiv', active: false },
+  { code: 'TESTCODE', desc: '—', kind: 'free', value: 'Gratis', used: 3, max: null, until: 'Unbegrenzt', state: 'Inaktiv', active: false },
+];
+
+class Component extends DCLogic {
+  state = { type: 'free' };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+    this._paint();
+  }
+  componentWillUnmount() { clearInterval(this._iv); clearTimeout(this._toastT); }
+  componentDidUpdate() { this._paint(); }
+
+  _paint() {
+    if (this._typeBox) {
+      this._typeBox.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === this.state.type);
+      });
+    }
+    if (this._pct) this._pct.style.display = this.state.type === 'pct' ? 'flex' : 'none';
+    if (this._eur) this._eur.style.display = this.state.type === 'eur' ? 'flex' : 'none';
+    this._search();
+  }
+
+  _search() {
+    if (!this._rows) return;
+    const q = (this._q || '').toLowerCase();
+    let n = 0;
+    this._rows.querySelectorAll('tr[data-q]').forEach((tr) => {
+      const hit = !q || tr.dataset.q.toLowerCase().indexOf(q) >= 0;
+      tr.style.display = hit ? '' : 'none';
+      if (hit) n += 1;
+    });
+    if (this._count) this._count.textContent = '(' + n + ')';
+    if (this._empty) this._empty.style.display = n ? 'none' : 'block';
+  }
+
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  _toast(msg) {
+    if (!this._toast_) return;
+    if (this._toastText) this._toastText.textContent = msg;
+    this._toast_.style.display = 'flex';
+    clearTimeout(this._toastT);
+    this._toastT = setTimeout(() => { this._toast_.style.display = 'none'; }, 1900);
+  }
+
+  renderVals() {
+    const DISC = {
+      free: ['#C7F011', 'hsl(71 91% 51% / 0.12)', 'hsl(71 91% 51% / 0.35)'],
+      pct: ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)'],
+      eur: ['#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)'],
+    };
+
+    return {
+      kpis: [
+        { label: 'Aktive Codes', value: '4', icon: 'ticket', color: '#C7F011' },
+        { label: 'Einlösungen', value: '312', icon: 'check-check', color: '#FAFAFA' },
+        { label: 'Rabattwert', value: '4.280 €', icon: 'euro', color: '#FAFAFA' },
+        { label: 'Abgelaufen / leer', value: '2', icon: 'clock-alert', color: '#FFC44D' },
+      ],
+      vouchers: VOUCHERS.map((v) => {
+        const s = ST[v.state];
+        const d = DISC[v.kind];
+        const sw = v.active ? ON : OFF;
+        const pct = v.max ? Math.min(100, Math.round((v.used / v.max) * 100)) : 0;
+        return {
+          ...v,
+          q: [v.code, v.desc].join(' '),
+          discount: v.value,
+          discFg: d[0], discBg: d[1], discBrd: d[2],
+          stateFg: s[0], stateBg: s[1], stateBrd: s[2],
+          uses: v.used + '/' + (v.max || '∞'),
+          hasBar: !!v.max,
+          usePct: pct + '%',
+          barColor: pct >= 100 ? '#FFC44D' : '#C7F011',
+          untilFg: v.state === 'Abgelaufen' ? '#FF6B6B' : 'hsl(0 0% 78%)',
+          swBg: sw[0], swBrd: sw[1], knobX: sw[2], knobBg: sw[3],
+          noop: () => {},
+          copy: () => this._toast('Code kopiert!'),
+          edit: () => {
+            if (this._dlgTitle) this._dlgTitle.textContent = 'Voucher bearbeiten';
+            if (this._code) this._code.value = v.code;
+            this.setState({ type: v.kind });
+            this._show(this._dlg, true);
+          },
+          del: () => {
+            if (this._delText) this._delText.textContent = 'Der Code ' + v.code + ' wird unwiderruflich gelöscht.';
+            this._show(this._del, true);
+          },
+        };
+      }),
+      types: [
+        { key: 'free', label: 'Gratis (100 %)', pick: () => this.setState({ type: 'free' }) },
+        { key: 'pct', label: 'Prozentual', pick: () => this.setState({ type: 'pct' }) },
+        { key: 'eur', label: 'Festbetrag', pick: () => this.setState({ type: 'eur' }) },
+      ],
+
+      rowsRef: (el) => { this._rows = el; this._search(); },
+      countRef: (el) => { this._count = el; },
+      emptyRef: (el) => { this._empty = el; },
+      dlgRef: (el) => { this._dlg = el; },
+      dlgTitleRef: (el) => { this._dlgTitle = el; },
+      typeRef: (el) => { this._typeBox = el; this._paint(); },
+      pctRef: (el) => { this._pct = el; },
+      eurRef: (el) => { this._eur = el; },
+      codeRef: (el) => { this._code = el; },
+      maxRef: (el) => { this._max = el; },
+      delRef: (el) => { this._del = el; },
+      delTextRef: (el) => { this._delText = el; },
+      toastRef: (el) => { this._toast_ = el; },
+      toastTextRef: (el) => { this._toastText = el; },
+
+      onSearch: (e) => { this._q = e.target.value; this._search(); },
+      openNew: () => {
+        if (this._dlgTitle) this._dlgTitle.textContent = 'Neuen Voucher erstellen';
+        this.setState({ type: 'free' });
+        if (this._code) this._code.value = this._gen();
+        this._show(this._dlg, true);
+      },
+      closeDlg: () => this._show(this._dlg, false),
+      closeDel: () => this._show(this._del, false),
+      generate: () => { if (this._code) this._code.value = this._gen(); },
+      setOnce: () => { if (this._max) this._max.value = '1'; },
+    };
+  }
+
+  _gen() {
+    const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s = '';
+    for (let i = 0; i < 8; i += 1) s += A[Math.floor(Math.random() * A.length)];
+    return s;
+  }
+}
+</script>
+</body>
+</html>

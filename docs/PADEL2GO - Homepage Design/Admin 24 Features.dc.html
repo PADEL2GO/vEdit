@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #ft-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; align-items: start; }
+    #ft-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 14px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1000px) { #ft-top { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Features">
+  <dc-import name="AdminSidebar" active="features" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/features</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Features</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px;flex:none">
+        <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Launch-Datum, Court-Sichtbarkeit, Feature-Status und Credits-Regeln steuern.</span>
+
+      <div id="ft-top">
+        <!-- Launch-Datum -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,220px">
+          <div style="display:flex;flex-direction:column;gap:15px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:34px;height:34px;flex:none;border-radius:10px;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="rocket" size="16"></p2g-icon></span>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">Launch-Datum</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;line-height:1.45;color:hsl(0 0% 65%)">Treibt den Countdown auf der Startseite und alle „Coming Soon“-Placeholder.</span>
+              </div>
+            </div>
+            <label style="display:flex;flex-direction:column;gap:7px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Datum &amp; Uhrzeit<span style="color:#C7F011"> *</span></span>
+              <input type="text" value="01.07.2026 00:00" style="height:42px;padding:0 14px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:11px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+            </label>
+            <button onClick="{{ saveLaunch }}" style="align-self:flex-start;height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;white-space:nowrap"><span ref="{{ launchLabelRef }}">Speichern</span></button>
+          </div>
+        </x-import>
+
+        <!-- Courts sichtbar -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,220px">
+          <div ref="{{ courtsCardRef }}" style="display:flex;flex-direction:column;gap:15px;padding:17px;border-radius:16px;background:hsl(71 91% 51% / 0.05);border:1px solid hsl(71 91% 51% / 0.32)">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+              <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                <span ref="{{ courtsIconRef }}" style="width:34px;height:34px;flex:none;border-radius:10px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.32);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="layout-grid" size="16"></p2g-icon></span>
+                <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">Courts für User sichtbar</span>
+                    <span ref="{{ courtsBadgeRef }}" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#C7F011;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.35);border-radius:999px;padding:3px 9px;white-space:nowrap">Sichtbar</span>
+                  </div>
+                  <span ref="{{ courtsTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 72%)">Courts sind für alle eingeloggten User sichtbar und buchbar.</span>
+                </div>
+              </div>
+              <button onClick="{{ toggleCourts }}" ref="{{ courtsSwRef }}" style="width:46px;height:26px;flex:none;position:relative;padding:0;background:hsl(71 91% 51% / 0.9);border:1px solid hsl(71 91% 51%);border-radius:999px;cursor:pointer;transition:background 0.2s">
+                <span ref="{{ courtsKnobRef }}" style="position:absolute;top:2px;left:22px;width:20px;height:20px;border-radius:50%;background:#0A0A0A;transition:left 0.2s"></span>
+              </button>
+            </div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.08em;color:hsl(0 0% 55%)">feature_courts_public_enabled</span>
+          </div>
+        </x-import>
+      </div>
+
+      <!-- 7 Features -->
+      <div style="display:flex;flex-direction:column;gap:13px">
+        <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
+          <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">App-Features</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">7 Features · 3-Stufen-Status</span>
+        </div>
+
+        <div id="ft-grid">
+          <sc-for list="{{ features }}" as="f" hint-placeholder-count="7">
+            <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,220px">
+              <div style="display:flex;flex-direction:column;gap:14px;height:100%">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                  <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                    <span style="width:34px;height:34px;flex:none;border-radius:10px;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ f.icon }}" size="16"></p2g-icon></span>
+                    <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA;white-space:nowrap">{{ f.title }}</span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 58%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.route }}</span>
+                    </div>
+                  </div>
+                  <span ref="{{ f.badgeRef }}" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:{{ f.stFg }};background:{{ f.stBg }};border:1px solid {{ f.stBrd }};border-radius:999px;padding:3px 9px;white-space:nowrap;flex:none">
+                    <span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>{{ f.stLabel }}
+                  </span>
+                </div>
+
+                <p style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.55;color:hsl(0 0% 68%);margin:0">{{ f.desc }}</p>
+
+                <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+                  <span style="position:relative;display:flex;align-items:center">
+                    <select onChange="{{ f.change }}" ref="{{ f.selRef }}" style="appearance:none;width:100%;height:38px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                      <option value="visible">Für alle sichtbar</option>
+                      <option value="demo">Demo (nur Admin)</option>
+                      <option value="hidden">Aus</option>
+                    </select>
+                    <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+                  </span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.06em;color:hsl(0 0% 50%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.column }}</span>
+                </div>
+              </div>
+            </x-import>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- Credits als Zahlungsmittel -->
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,300px">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+            <div style="display:flex;align-items:center;gap:11px;min-width:0">
+              <span style="width:34px;height:34px;flex:none;border-radius:10px;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="coins" size="16"></p2g-icon></span>
+              <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">Credits als Zahlungsmittel</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.45;color:hsl(0 0% 65%)">Spieler können P2G Credits beim Checkout einlösen, um einen Teil der Buchung zu bezahlen.</span>
+              </div>
+            </div>
+            <button onClick="{{ toggleCredits }}" ref="{{ creditsSwRef }}" style="width:46px;height:26px;flex:none;position:relative;padding:0;background:hsl(71 91% 51% / 0.9);border:1px solid hsl(71 91% 51%);border-radius:999px;cursor:pointer;transition:background 0.2s">
+              <span ref="{{ creditsKnobRef }}" style="position:absolute;top:2px;left:22px;width:20px;height:20px;border-radius:50%;background:#0A0A0A;transition:left 0.2s"></span>
+            </button>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(220px, 100%), 1fr));gap:13px">
+            <label style="display:flex;flex-direction:column;gap:7px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Max. Rabatt durch Credits (%)</span>
+              <input type="text" value="50" style="height:42px;padding:0 14px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:11px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;line-height:1.45;color:hsl(0 0% 58%)">z. B. 50 = max. 50 % der Buchung. Gilt nicht für Marketplace-Produkte — dort zählt der fixe Punkte-Deckel je Produkt.</span>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:7px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Credits pro Euro</span>
+              <input type="text" value="100" style="height:42px;padding:0 14px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:11px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 58%)">z. B. 100 = 100 Credits = 1 €</span>
+            </label>
+          </div>
+
+          <button onClick="{{ saveCredits }}" style="align-self:flex-start;height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;white-space:nowrap"><span ref="{{ creditsLabelRef }}">Einstellungen speichern</span></button>
+        </div>
+      </x-import>
+
+      <!-- Info -->
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,190px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:11px">
+            <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(200 100% 75% / 0.1);border:1px solid hsl(200 100% 75% / 0.3);display:flex;align-items:center;justify-content:center;color:#7FD4FF"><p2g-icon name="info" size="15"></p2g-icon></span>
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA">Wie funktionieren die 3 Zustände?</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(240px, 100%), 1fr));gap:12px">
+            <sc-for list="{{ states }}" as="st" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:7px;padding:14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:13px">
+                <span style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:{{ st.fg }};background:{{ st.bg }};border:1px solid {{ st.brd }};border-radius:999px;padding:3px 9px;white-space:nowrap">
+                  <span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>{{ st.label }}
+                </span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.55;color:hsl(0 0% 70%)">{{ st.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </x-import>
+    </main>
+  </div>
+
+  <div ref="{{ toastRef }}" style="display:none;position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:99;align-items:center;gap:10px;padding:12px 18px;background:hsl(0 0% 8% / 0.96);backdrop-filter:blur(18px);border:1px solid hsl(71 91% 51% / 0.35);border-radius:14px;box-shadow:0 12px 40px hsl(0 0% 0% / 0.6);max-width:min(460px, calc(100vw - 40px))">
+    <span style="color:#C7F011;display:flex;flex:none"><p2g-icon name="check" size="16"></p2g-icon></span>
+    <span ref="{{ toastTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;line-height:1.4;color:#FAFAFA">Gespeichert</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const STATE = {
+  visible: ['Live', '#C7F011', 'hsl(71 91% 51% / 0.12)', 'hsl(71 91% 51% / 0.35)'],
+  demo: ['Demo', '#FFC44D', 'hsl(41 100% 65% / 0.12)', 'hsl(41 100% 65% / 0.35)'],
+  hidden: ['Aus', 'hsl(0 0% 68%)', 'hsl(0 0% 100% / 0.06)', 'hsl(0 0% 20%)'],
+};
+
+const FEATURES = [
+  { title: 'Lobbies', icon: 'users-round', route: '/lobbies', column: 'feature_lobbies_state', state: 'visible', desc: 'Spontane Spielrunden erstellen und beitreten — offene Plätze werden automatisch gefüllt.' },
+  { title: 'Liga', icon: 'trophy', route: '/dashboard/league', column: 'feature_league_state', state: 'visible', desc: 'Rangliste und Spieler-Statistiken über die gesamte P2G Liga.' },
+  { title: 'Events', icon: 'ticket', route: '/dashboard/events', column: 'feature_events_state', state: 'visible', desc: 'Padel-Events mit DJ, Food und Community — Anmeldung direkt in der App.' },
+  { title: 'Matching', icon: 'sparkles', route: '/dashboard/matching', column: 'feature_matching_state', state: 'demo', desc: 'KI-gestütztes Spieler-Matching nach Level und Verfügbarkeit.' },
+  { title: 'P2G-Punkte', icon: 'coins', route: '/dashboard/p2g-points', column: 'feature_p2g_state', state: 'visible', desc: 'Sammle P2G-Punkte durch Buchungen und KI-Matches und löse sie ein.' },
+  { title: 'Marktplatz', icon: 'shopping-bag', route: '/marketplace', column: 'feature_marketplace_state', state: 'visible', desc: 'Exklusiver Shop für Mitglieder — Equipment, Merch und Member-Deals.' },
+  { title: 'Freunde', icon: 'user-plus', route: '/dashboard/friends', column: 'feature_friends_state', state: 'hidden', desc: 'Freunde einladen, Freundeslisten verwalten und gemeinsam spielen.' },
+];
+
+class Component extends DCLogic {
+  state = { courts: true, credits: true };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+    this._paint();
+  }
+  componentWillUnmount() { clearInterval(this._iv); clearTimeout(this._toastT); clearTimeout(this._t1); }
+  componentDidUpdate() { this._paint(); }
+
+  _sw(box, knob, on) {
+    if (box) {
+      box.style.background = on ? 'hsl(71 91% 51% / 0.9)' : 'hsl(0 0% 16%)';
+      box.style.borderColor = on ? 'hsl(71 91% 51%)' : 'hsl(0 0% 22%)';
+    }
+    if (knob) {
+      knob.style.left = on ? '22px' : '2px';
+      knob.style.background = on ? '#0A0A0A' : 'hsl(0 0% 55%)';
+    }
+  }
+
+  _paint() {
+    const c = this.state.courts;
+    this._sw(this._courtsSw, this._courtsKnob, c);
+    if (this._courtsCard) {
+      this._courtsCard.style.background = c ? 'hsl(71 91% 51% / 0.05)' : 'hsl(200 100% 75% / 0.05)';
+      this._courtsCard.style.borderColor = c ? 'hsl(71 91% 51% / 0.32)' : 'hsl(200 100% 75% / 0.32)';
+    }
+    if (this._courtsIcon) {
+      this._courtsIcon.style.color = c ? '#C7F011' : '#7FD4FF';
+      this._courtsIcon.style.background = c ? 'hsl(71 91% 51% / 0.12)' : 'hsl(200 100% 75% / 0.12)';
+      this._courtsIcon.style.borderColor = c ? 'hsl(71 91% 51% / 0.32)' : 'hsl(200 100% 75% / 0.32)';
+    }
+    if (this._courtsBadge) {
+      this._courtsBadge.style.color = c ? '#C7F011' : '#7FD4FF';
+      this._courtsBadge.style.background = c ? 'hsl(71 91% 51% / 0.12)' : 'hsl(200 100% 75% / 0.12)';
+      this._courtsBadge.style.borderColor = c ? 'hsl(71 91% 51% / 0.35)' : 'hsl(200 100% 75% / 0.35)';
+      this._courtsBadge.innerHTML = '<span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>' + (c ? 'Sichtbar' : 'Nur Admins');
+    }
+    if (this._courtsText) {
+      this._courtsText.textContent = c
+        ? 'Courts sind für alle eingeloggten User sichtbar und buchbar.'
+        : 'Nur Admins sehen die buchbaren Courts. User und Besucher sehen ein „Bald verfügbar“-Overlay.';
+    }
+    this._sw(this._creditsSw, this._creditsKnob, this.state.credits);
+  }
+
+  _toast(msg) {
+    if (!this._toastEl) return;
+    if (this._toastText) this._toastText.textContent = msg;
+    this._toastEl.style.display = 'flex';
+    clearTimeout(this._toastT);
+    this._toastT = setTimeout(() => { this._toastEl.style.display = 'none'; }, 2400);
+  }
+
+  _flash(el, busy, done, idle) {
+    if (!el) return;
+    el.textContent = busy;
+    clearTimeout(this._t1);
+    this._t1 = setTimeout(() => { el.textContent = idle; }, 1400);
+    setTimeout(() => this._toast(done), 400);
+  }
+
+  renderVals() {
+    return {
+      features: FEATURES.map((f) => {
+        const s = STATE[f.state];
+        const refs = {};
+        return {
+          ...f,
+          stLabel: s[0], stFg: s[1], stBg: s[2], stBrd: s[3],
+          badgeRef: (el) => { refs.badge = el; },
+          selRef: (el) => { if (el) el.value = f.state; },
+          change: (e) => {
+            const v = e.target.value;
+            const n = STATE[v];
+            if (refs.badge) {
+              refs.badge.style.color = n[1];
+              refs.badge.style.background = n[2];
+              refs.badge.style.borderColor = n[3];
+              refs.badge.innerHTML = '<span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>' + n[0];
+            }
+            const msg = v === 'visible'
+              ? f.title + ': für alle sichtbar'
+              : v === 'demo' ? f.title + ': Demo — nur für Admins sichtbar' : f.title + ': ausgeschaltet';
+            this._toast(msg);
+          },
+        };
+      }),
+      states: [
+        { label: 'Für alle sichtbar', fg: '#C7F011', bg: 'hsl(71 91% 51% / 0.12)', brd: 'hsl(71 91% 51% / 0.35)', text: 'Nav-Link und Route für jeden eingeloggten User.' },
+        { label: 'Demo (nur Admin)', fg: '#FFC44D', bg: 'hsl(41 100% 65% / 0.12)', brd: 'hsl(41 100% 65% / 0.35)', text: 'Existieren, aber nur Admins sehen sie.' },
+        { label: 'Aus', fg: 'hsl(0 0% 68%)', bg: 'hsl(0 0% 100% / 0.06)', brd: 'hsl(0 0% 20%)', text: 'Nav-Link verborgen, Route leitet weg — auch für Admins.' },
+      ],
+
+      courtsCardRef: (el) => { this._courtsCard = el; this._paint(); },
+      courtsIconRef: (el) => { this._courtsIcon = el; },
+      courtsBadgeRef: (el) => { this._courtsBadge = el; },
+      courtsTextRef: (el) => { this._courtsText = el; },
+      courtsSwRef: (el) => { this._courtsSw = el; },
+      courtsKnobRef: (el) => { this._courtsKnob = el; },
+      creditsSwRef: (el) => { this._creditsSw = el; },
+      creditsKnobRef: (el) => { this._creditsKnob = el; },
+      launchLabelRef: (el) => { this._launchLabel = el; },
+      creditsLabelRef: (el) => { this._creditsLabel = el; },
+      toastRef: (el) => { this._toastEl = el; },
+      toastTextRef: (el) => { this._toastText = el; },
+
+      toggleCourts: () => {
+        const next = !this.state.courts;
+        this.setState({ courts: next });
+        this._toast(next ? 'Feature aktiviert – jetzt für alle User sichtbar' : 'Feature deaktiviert – Coming Soon Overlay wird angezeigt');
+      },
+      toggleCredits: () => {
+        const next = !this.state.credits;
+        this.setState({ credits: next });
+        this._toast(next ? 'Credits-Zahlung aktiviert' : 'Credits-Zahlung deaktiviert');
+      },
+      saveLaunch: () => this._flash(this._launchLabel, 'Speichert…', 'Launch-Datum gespeichert – gilt für Countdown & alle Placeholder', 'Speichern'),
+      saveCredits: () => this._flash(this._creditsLabel, 'Speichert…', 'Credits-Einstellungen gespeichert', 'Einstellungen speichern'),
+    };
+  }
+}
+</script>
+</body>
+</html>

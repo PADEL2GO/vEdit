@@ -1,0 +1,38 @@
+/* PADEL2GO typography.
+   Display: Bricolage Grotesque (h1–h6, expressive headlines, italic accents)
+   Body:    DM Sans (all running text, UI labels)
+   Stat:    JetBrains Mono (metrics, dashboard numbers, tabular figures) */
+:root {
+  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Type scale (matches the site's tailwind usage) */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  --text-5xl: 3rem;      /* 48px */
+  --text-6xl: 3.75rem;   /* 60px */
+
+  /* Weights */
+  --weight-normal: 400; /* @kind font */
+  --weight-medium: 500; /* @kind font */
+  --weight-semibold: 600; /* @kind font */
+  --weight-bold: 700; /* @kind font */
+  --weight-extrabold: 800; /* @kind font */
+
+  /* Line heights */
+  --leading-tight: 1.1; /* @kind font */
+  --leading-snug: 1.25; /* @kind font */
+  --leading-normal: 1.5; /* @kind font */
+  --leading-relaxed: 1.65; /* @kind font */
+
+  /* Tracking */
+  --tracking-tight: -0.02em; /* @kind font */
+  --tracking-wide: 0.08em; /* @kind font */
+}

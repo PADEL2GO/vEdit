@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #us-table { width: 100%; border-collapse: collapse; min-width: 920px; }
+    #us-table th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(0 0% 65%); text-align: left; font-weight: 400; padding: 0 14px 12px 0; white-space: nowrap; }
+    #us-table td { padding: 12px 14px 12px 0; border-top: 1px solid hsl(0 0% 12%); font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: hsl(0 0% 78%); }
+    #us-table tbody tr:hover td { background: hsl(0 0% 100% / 0.022); }
+    [data-dtab] { color: hsl(0 0% 60%); border-bottom: 2px solid transparent; }
+    [data-dtab]:hover { color: #FAFAFA; }
+    [data-dtab][data-on] { color: #C7F011; border-bottom-color: #C7F011; }
+    .us-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr)); gap: 11px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Benutzer">
+  <dc-import name="AdminSidebar" active="users" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/users</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Benutzer</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 72%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px;padding:6px 12px;white-space:nowrap">4.218 Accounts</span>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Vollständige Benutzerverwaltung — Suche über E-Mail, Name, Username und User-ID.</span>
+
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,600px">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Benutzerliste <span ref="{{ countRef }}" style="font-family:'JetBrains Mono',monospace;font-weight:400;font-size:14px;color:hsl(0 0% 65%)">(4.218)</span></h2>
+            <label style="position:relative;display:flex;align-items:center;min-width:min(300px, 100%)">
+              <span style="position:absolute;left:11px;display:flex;color:hsl(0 0% 58%)"><p2g-icon name="search" size="15"></p2g-icon></span>
+              <input onInput="{{ onSearch }}" type="text" placeholder="Name, Username, E-Mail oder ID…" style="width:100%;height:38px;padding:0 12px 0 36px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+            </label>
+          </div>
+
+          <div style="overflow-x:auto">
+            <table id="us-table">
+              <thead>
+                <tr><th>Benutzer</th><th>Username</th><th>Credits</th><th>Rollen</th><th>Registriert</th><th style="text-align:right">Aktionen</th></tr>
+              </thead>
+              <tbody ref="{{ rowsRef }}">
+                <sc-for list="{{ users }}" as="u" hint-placeholder-count="10">
+                  <tr data-q="{{ u.q }}">
+                    <td>
+                      <div style="display:flex;align-items:center;gap:11px">
+                        <span style="width:34px;height:34px;flex:none;border-radius:50%;background:{{ u.avBg }};border:1px solid {{ u.avBrd }};color:{{ u.avFg }};font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11.5px;display:flex;align-items:center;justify-content:center">{{ u.initials }}</span>
+                        <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                          <span style="font-size:13.5px;font-weight:600;color:#FAFAFA;white-space:nowrap">{{ u.name }}</span>
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap">{{ u.email }}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap">{{ u.usernameLabel }}</span></td>
+                    <td>
+                      <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#C7F011;white-space:nowrap"><p2g-icon name="coins" size="13"></p2g-icon>{{ u.credits }}</span>
+                    </td>
+                    <td>
+                      <div style="display:flex;gap:6px;flex-wrap:wrap">
+                        <sc-for list="{{ u.roles }}" as="r" hint-placeholder-count="1">
+                          <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:{{ r.fg }};background:{{ r.bg }};border:1px solid {{ r.brd }};border-radius:999px;padding:3px 9px;white-space:nowrap">{{ r.label }}</span>
+                        </sc-for>
+                      </div>
+                    </td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap">{{ u.created }}</span></td>
+                    <td>
+                      <div style="display:flex;align-items:center;justify-content:flex-end;gap:7px">
+                        <button onClick="{{ u.open }}" title="Details" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="eye" size="14"></p2g-icon></button>
+                        <span style="position:relative;display:flex;align-items:center">
+                          <select style="appearance:none;height:30px;padding:0 26px 0 10px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;outline:none;cursor:pointer">
+                            <option>Rollen</option><option>{{ u.adminAction }}</option><option>{{ u.modAction }}</option><option>{{ u.clubAction }}</option>
+                          </select>
+                          <span style="position:absolute;right:9px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="12"></p2g-icon></span>
+                        </span>
+                        <button onClick="{{ u.del }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                      </div>
+                    </td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:14px;border-top:1px solid hsl(0 0% 12%);flex-wrap:wrap">
+            <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">25 pro Seite · serverseitig paginiert</span>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button ref="{{ prevRef }}" onClick="{{ prev }}" style="height:34px;padding:0 13px;display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 45%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:9px;cursor:not-allowed;white-space:nowrap"><p2g-icon name="chevron-left" size="14"></p2g-icon>Zurück</button>
+              <span ref="{{ pageRef }}" style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#FAFAFA;white-space:nowrap">Seite 1</span>
+              <button onClick="{{ next }}" style="height:34px;padding:0 13px;display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer;white-space:nowrap;transition:color 0.2s, border-color 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">Weiter <p2g-icon name="chevron-right" size="14"></p2g-icon></button>
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </main>
+  </div>
+
+  <!-- ── Detail-Dialog ── -->
+  <div ref="{{ dlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDlg }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.8);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(860px, 100%);max-height:90vh;overflow-y:auto;background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:22px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="position:sticky;top:0;z-index:3;background:hsl(0 0% 6% / 0.95);backdrop-filter:blur(18px);border-bottom:1px solid hsl(0 0% 14%);padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+          <div style="display:flex;align-items:center;gap:13px;min-width:0">
+            <span ref="{{ dAvRef }}" style="width:46px;height:46px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center">LK</span>
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+              <span ref="{{ dNameRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA">Lena Kramer</span>
+              <span ref="{{ dUserRef }}" style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 65%)">@lenak</span>
+            </div>
+          </div>
+          <button onClick="{{ closeDlg }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer" style-hover="color:#FAFAFA"><p2g-icon name="x" size="16"></p2g-icon></button>
+        </div>
+        <div ref="{{ dTabRef }}" style="display:flex;gap:22px;overflow-x:auto">
+          <sc-for list="{{ detailTabs }}" as="t" hint-placeholder-count="4">
+            <button onClick="{{ t.pick }}" data-dtab="1" data-key="{{ t.key }}" style="display:inline-flex;align-items:center;gap:7px;padding:0 2px 10px;background:none;border-top:0;border-left:0;border-right:0;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:color 0.2s">
+              <p2g-icon name="{{ t.icon }}" size="15"></p2g-icon>{{ t.label }}
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="padding:22px 24px 24px">
+        <!-- Übersicht -->
+        <div ref="{{ dv1Ref }}" style="display:flex;flex-direction:column;gap:16px">
+          <div class="us-kpi">
+            <sc-for list="{{ overviewKpis }}" as="k" hint-placeholder-count="4">
+              <div style="display:flex;flex-direction:column;gap:7px;padding:15px;background:{{ k.bg }};border:1px solid {{ k.brd }};border-radius:14px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ k.label }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:22px;line-height:1;color:{{ k.fg }}">{{ k.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:12px;padding:17px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#FAFAFA">Profil-Informationen</span>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(190px, 100%), 1fr));gap:11px">
+              <sc-for list="{{ profileRows }}" as="p" hint-placeholder-count="6">
+                <div style="display:flex;flex-direction:column;gap:3px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ p.label }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;color:#FAFAFA">{{ p.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(250px, 100%), 1fr));gap:12px">
+            <div style="display:flex;flex-direction:column;gap:11px;padding:17px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#FAFAFA">Verifizierungsstatus</span>
+              <sc-for list="{{ verifications }}" as="v" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="color:{{ v.color }};display:flex"><p2g-icon name="{{ v.icon }}" size="15"></p2g-icon></span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 78%)">{{ v.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px;padding:17px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#FAFAFA">Lieferadresse</span>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 82%)">Sonnenstraße 14</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 82%)">80331 München</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%)">Deutschland</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Matches -->
+        <div ref="{{ dv2Ref }}" style="display:none;flex-direction:column;gap:9px">
+          <sc-for list="{{ matches }}" as="m" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:13px;padding:12px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:12px;flex-wrap:wrap">
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:150px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#FAFAFA;white-space:nowrap">Match #{{ m.id }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap">{{ m.when }}</span>
+              </div>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.06em;color:{{ m.resFg }};background:{{ m.resBg }};border:1px solid {{ m.resBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap;flex:none">{{ m.result }}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 72%);white-space:nowrap;flex:none">AI: {{ m.score }}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#C7F011;white-space:nowrap;flex:none">+{{ m.credits }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- Buchungen -->
+        <div ref="{{ dv3Ref }}" style="display:none;flex-direction:column;gap:9px">
+          <sc-for list="{{ bookings }}" as="b" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:13px;padding:12px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:12px;flex-wrap:wrap">
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:180px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">{{ b.court }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap">{{ b.when }}</span>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;color:#FAFAFA;white-space:nowrap;flex:none">{{ b.price }}</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ b.stFg }};background:{{ b.stBg }};border:1px solid {{ b.stBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap;flex:none">{{ b.status }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- Wallet -->
+        <div ref="{{ dv4Ref }}" style="display:none;flex-direction:column;gap:16px">
+          <div class="us-kpi">
+            <sc-for list="{{ walletKpis }}" as="k" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:7px;padding:15px;background:{{ k.bg }};border:1px solid {{ k.brd }};border-radius:14px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ k.label }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:22px;line-height:1;color:{{ k.fg }}">{{ k.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:11px;padding:17px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#FAFAFA">Transaktionshistorie</span>
+            <sc-for list="{{ ledger }}" as="l" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:12px;padding:11px 12px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 12%);border-radius:11px;flex-wrap:wrap">
+                <span style="color:{{ l.color }};display:flex;flex:none"><p2g-icon name="{{ l.icon }}" size="15"></p2g-icon></span>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:150px">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 82%)">{{ l.desc }}</span>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 65%);white-space:nowrap">{{ l.when }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;color:{{ l.typeFg }};background:{{ l.typeBg }};border-radius:999px;padding:2px 7px;white-space:nowrap">{{ l.type }}</span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex:none">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:{{ l.color }};white-space:nowrap">{{ l.delta }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 58%);white-space:nowrap">→ {{ l.after }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:space-between;padding-top:20px;margin-top:20px;border-top:1px solid hsl(0 0% 12%);flex-wrap:wrap">
+          <button onClick="{{ openDel }}" style="height:42px;padding:0 17px;display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FF6B6B;background:hsl(0 100% 71% / 0.08);border:1px solid hsl(0 100% 71% / 0.32);border-radius:11px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(0 100% 71% / 0.18)"><p2g-icon name="trash-2" size="15"></p2g-icon>Benutzer löschen</button>
+          <button onClick="{{ closeDlg }}" style="height:42px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Schließen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: löschen ── -->
+  <div ref="{{ delRef }}" style="display:none;position:fixed;inset:0;z-index:95;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.8);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(480px, 100%);max-height:88vh;overflow-y:auto;background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 100% 71% / 0.25);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:17px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Benutzer endgültig löschen?</h3>
+        <p ref="{{ delTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.55;color:hsl(0 0% 68%);margin:0">Du bist dabei, den Benutzer <span style="color:#FAFAFA;font-weight:700">Lena Kramer</span> zu löschen.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px;padding:15px;background:hsl(0 100% 71% / 0.05);border:1px solid hsl(0 100% 71% / 0.18);border-radius:13px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#FF6B6B">Unwiderruflich — folgende Daten werden gelöscht</span>
+        <sc-for list="{{ delItems }}" as="d" hint-placeholder-count="6">
+          <span style="display:flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 74%)">
+            <span style="width:4px;height:4px;border-radius:50%;background:#FF6B6B;flex:none"></span>{{ d }}
+          </span>
+        </sc-for>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Gib DELETE ein, um zu bestätigen<span style="color:#FF6B6B"> *</span></span>
+        <input onInput="{{ onConfirm }}" type="text" placeholder="DELETE" style="height:42px;padding:0 14px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;letter-spacing:0.12em;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:11px;outline:none;transition:border-color 0.2s" style-focus="border-color:#FF6B6B">
+      </label>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button ref="{{ delBtnRef }}" onClick="{{ closeDel }}" style="height:42px;padding:0 19px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 45%);background:hsl(0 0% 14%);border:0;border-radius:11px;cursor:not-allowed">Endgültig löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const ROLE = {
+  Admin: ['#F43F5E', 'hsl(347 89% 58% / 0.12)', 'hsl(347 89% 58% / 0.35)'],
+  Mod: ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)'],
+  '🎾 Club': ['#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)'],
+  User: ['hsl(0 0% 72%)', 'hsl(0 0% 100% / 0.05)', 'hsl(0 0% 18%)'],
+};
+
+const USERS = [
+  { initials: 'FS', name: 'Florian Steinfelder', email: 'florian@padel2go.de', username: 'flosteinfelder', credits: '48.200', roles: ['Admin'], created: '02.01.2026' },
+  { initials: 'AB', name: 'Anna Brenner', email: 'anna.brenner@padel2go.de', username: 'annab', credits: '26.400', roles: ['Admin', 'Mod'], created: '08.01.2026' },
+  { initials: 'LK', name: 'Lena Kramer', email: 'lena.kramer@mail.de', username: 'lenak', credits: '14.580', roles: ['User'], created: '14.02.2026' },
+  { initials: 'MK', name: 'Marco Kern', email: 'mkern@mail.de', username: 'mkern', credits: '10.340', roles: ['User'], created: '19.02.2026' },
+  { initials: 'AW', name: 'Andreas Wolf', email: 'a.wolf@tsv-muenchen-ost.de', username: 'awolf', credits: '3.120', roles: ['🎾 Club'], created: '01.03.2026' },
+  { initials: 'CR', name: 'Christian Ritter', email: 'c.ritter@sv-rheinaue.de', username: 'critter', credits: '2.880', roles: ['🎾 Club'], created: '12.03.2026' },
+  { initials: 'TS', name: 'Tim Sauer', email: 'tsauer@mail.de', username: 'tsauer', credits: '5.680', roles: ['Mod'], created: '28.03.2026' },
+  { initials: 'JW', name: 'Jana Weiss', email: 'janaw@mail.de', username: 'janaw', credits: '5.920', roles: ['User'], created: '04.04.2026' },
+  { initials: 'ND', name: 'Nina Dörr', email: 'ndoerr@mail.de', username: 'ndoerr', credits: '3.050', roles: ['User'], created: '22.05.2026' },
+  { initials: '?', name: 'Unbekannt', email: 'gast-8f21@padel2go.de', username: '', credits: '0', roles: ['User'], created: '30.07.2026' },
+];
+
+class Component extends DCLogic {
+  state = { dtab: 'overview' };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 14) clearInterval(this._iv);
+    }, 350);
+    this._paint();
+  }
+  componentWillUnmount() { clearInterval(this._iv); clearTimeout(this._deb); }
+  componentDidUpdate() { this._paint(); }
+
+  _paint() {
+    const t = this.state.dtab;
+    if (this._dtabs) {
+      this._dtabs.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === t);
+      });
+    }
+    [['overview', this._dv1], ['matches', this._dv2], ['bookings', this._dv3], ['wallet', this._dv4]].forEach(([k, el]) => {
+      if (el) el.style.display = t === k ? 'flex' : 'none';
+    });
+    this._filter();
+  }
+
+  _filter() {
+    if (!this._rows) return;
+    const q = (this._q || '').toLowerCase();
+    let n = 0;
+    this._rows.querySelectorAll('tr[data-q]').forEach((tr) => {
+      const hit = !q || tr.dataset.q.toLowerCase().indexOf(q) >= 0;
+      tr.style.display = hit ? '' : 'none';
+      if (hit) n += 1;
+    });
+    if (this._count) this._count.textContent = q ? '(' + n + ')' : '(4.218)';
+  }
+
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    return {
+      users: USERS.map((u) => {
+        const isAdmin = u.roles.indexOf('Admin') >= 0;
+        const isMod = u.roles.indexOf('Mod') >= 0;
+        const isClub = u.roles.indexOf('🎾 Club') >= 0;
+        return {
+          ...u,
+          q: [u.name, u.username, u.email].join(' '),
+          usernameLabel: u.username ? '@' + u.username : '-',
+          avBg: isAdmin ? 'var(--gradient-lime)' : 'hsl(0 0% 100% / 0.06)',
+          avBrd: isAdmin ? 'hsl(71 91% 51%)' : 'hsl(0 0% 18%)',
+          avFg: isAdmin ? '#0A0A0A' : 'hsl(0 0% 82%)',
+          roles: u.roles.map((r) => {
+            const c = ROLE[r] || ROLE.User;
+            return { label: r, fg: c[0], bg: c[1], brd: c[2] };
+          }),
+          adminAction: isAdmin ? 'Admin entfernen' : 'Admin machen',
+          modAction: isMod ? 'Moderator entfernen' : 'Moderator machen',
+          clubAction: isClub ? '🎾 Club Owner entfernen' : '🎾 Club Owner machen',
+          open: () => {
+            if (this._dAv) this._dAv.textContent = u.initials;
+            if (this._dName) this._dName.textContent = u.name;
+            if (this._dUser) this._dUser.textContent = u.username ? '@' + u.username : u.email;
+            this.setState({ dtab: 'overview' });
+            this._show(this._dlg, true);
+          },
+          del: () => {
+            if (this._delText) this._delText.innerHTML = 'Du bist dabei, den Benutzer <span style="color:#FAFAFA;font-weight:700">' + u.name + '</span> zu löschen.';
+            this._show(this._del, true);
+          },
+        };
+      }),
+
+      detailTabs: [
+        { key: 'overview', label: 'Übersicht', icon: 'layout-dashboard' },
+        { key: 'matches', label: 'Matches', icon: 'swords' },
+        { key: 'bookings', label: 'Buchungen', icon: 'calendar' },
+        { key: 'wallet', label: 'Wallet', icon: 'wallet' },
+      ].map((t) => ({ ...t, pick: () => this.setState({ dtab: t.key }) })),
+
+      overviewKpis: [
+        { label: 'Reward Credits', value: '12.480', fg: '#C7F011', bg: 'linear-gradient(135deg, hsl(71 91% 51% / 0.09), hsl(71 91% 51% / 0.02))', brd: 'hsl(71 91% 51% / 0.26)' },
+        { label: 'Play Credits', value: '2.100', fg: '#7FD4FF', bg: 'hsl(200 100% 75% / 0.05)', brd: 'hsl(200 100% 75% / 0.22)' },
+        { label: 'Matches', value: '42', fg: '#FAFAFA', bg: 'hsl(0 0% 100% / 0.03)', brd: 'hsl(0 0% 13%)' },
+        { label: 'Buchungen', value: '31', fg: '#FAFAFA', bg: 'hsl(0 0% 100% / 0.03)', brd: 'hsl(0 0% 13%)' },
+      ],
+      profileRows: [
+        { label: 'User ID', value: '8f21c4a9' },
+        { label: 'Registriert', value: '14.02.2026 18:42' },
+        { label: 'Skill Level', value: '6/10 · AI: 6,4' },
+        { label: 'Alter', value: '31' },
+        { label: 'Referral Code', value: 'LENAK-2026' },
+        { label: 'Lifetime Credits', value: '48.200' },
+      ],
+      verifications: [
+        { label: 'E-Mail verifiziert', icon: 'check-circle', color: '#C7F011' },
+        { label: 'Telefon verifiziert', icon: 'check-circle', color: '#C7F011' },
+        { label: 'Profil vollständig', icon: 'x-circle', color: 'hsl(0 0% 45%)' },
+      ],
+      matches: [
+        { id: '5a12c8f0', when: '03.08.2026 18:04', result: 'WIN', score: '7,2', credits: '300' },
+        { id: '4d88b1e7', when: '31.07.2026 19:30', result: 'LOSS', score: '5,8', credits: '150' },
+        { id: '3c04a9d2', when: '28.07.2026 17:00', result: 'WIN', score: '6,9', credits: '225' },
+        { id: '2b71f430', when: '24.07.2026 12:00', result: 'WIN', score: '7,5', credits: '300' },
+        { id: '19e5c088', when: '19.07.2026 20:00', result: 'LOSS', score: '5,1', credits: '150' },
+        { id: '0af23b61', when: '12.07.2026 18:30', result: 'WIN', score: '6,4', credits: '225' },
+      ].map((m) => ({
+        ...m,
+        resFg: m.result === 'WIN' ? '#C7F011' : '#FF6B6B',
+        resBg: m.result === 'WIN' ? 'hsl(71 91% 51% / 0.1)' : 'hsl(0 100% 71% / 0.1)',
+        resBrd: m.result === 'WIN' ? 'hsl(71 91% 51% / 0.3)' : 'hsl(0 100% 71% / 0.3)',
+      })),
+      bookings: [
+        { court: 'Court 1 @ TSV München-Ost', when: '03.08.2026 · 18:00 – 19:30', price: '36,00 €', status: 'Bestätigt' },
+        { court: 'Court 2 @ TSV München-Ost', when: '31.07.2026 · 19:30 – 21:00', price: '36,00 €', status: 'Bestätigt' },
+        { court: 'Court 1 @ SV Rheinaue Köln', when: '28.07.2026 · 17:00 – 18:30', price: '32,00 €', status: 'Bestätigt' },
+        { court: 'Court 3 @ TC Hamburg-Alster', when: '24.07.2026 · 12:00 – 13:00', price: '26,00 €', status: 'Ausstehend' },
+        { court: 'Court 1 @ TSG Stuttgart-Süd', when: '19.07.2026 · 20:00 – 21:30', price: '36,00 €', status: 'Storniert' },
+        { court: 'Court 2 @ TSV München-Ost', when: '12.07.2026 · 18:30 – 20:00', price: '36,00 €', status: 'Bestätigt' },
+      ].map((b) => {
+        const map = {
+          Bestätigt: ['#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)'],
+          Ausstehend: ['#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)'],
+          Storniert: ['#FF6B6B', 'hsl(0 100% 71% / 0.1)', 'hsl(0 100% 71% / 0.3)'],
+        };
+        const c = map[b.status];
+        return { ...b, stFg: c[0], stBg: c[1], stBrd: c[2] };
+      }),
+      walletKpis: [
+        { label: 'Reward Credits', value: '12.480', fg: '#C7F011', bg: 'linear-gradient(135deg, hsl(71 91% 51% / 0.09), hsl(71 91% 51% / 0.02))', brd: 'hsl(71 91% 51% / 0.26)' },
+        { label: 'Play Credits', value: '2.100', fg: '#7FD4FF', bg: 'hsl(200 100% 75% / 0.05)', brd: 'hsl(200 100% 75% / 0.22)' },
+        { label: 'Lifetime', value: '48.200', fg: '#FAFAFA', bg: 'hsl(0 0% 100% / 0.03)', brd: 'hsl(0 0% 13%)' },
+      ],
+      ledger: [
+        { delta: '+300', desc: 'Payback · Buchung 90 Min. (×1,5)', when: '03.08.2026 19:32', type: 'Reward', after: '12.480' },
+        { delta: '−4.000', desc: 'Marketplace · Bullpadel Vertex 04', when: '03.08.2026 14:08', type: 'Reward', after: '12.180' },
+        { delta: '+500', desc: 'Referral · Marco Kern', when: '28.07.2026 10:14', type: 'Reward', after: '16.180' },
+        { delta: '+150', desc: 'Payback · Buchung 90 Min.', when: '24.07.2026 13:02', type: 'Reward', after: '15.680' },
+        { delta: '−600', desc: 'Play-Credits eingelöst · Court-Buchung', when: '19.07.2026 21:35', type: 'Play', after: '2.100' },
+        { delta: '+200', desc: 'Payback · Buchung 120 Min.', when: '12.07.2026 20:04', type: 'Reward', after: '15.530' },
+      ].map((l) => {
+        const down = l.delta.indexOf('−') === 0;
+        return {
+          ...l,
+          icon: down ? 'trending-down' : 'trending-up',
+          color: down ? '#FF6B6B' : '#C7F011',
+          typeFg: l.type === 'Play' ? '#7FD4FF' : '#C7F011',
+          typeBg: l.type === 'Play' ? 'hsl(200 100% 75% / 0.12)' : 'hsl(71 91% 51% / 0.12)',
+        };
+      }),
+      delItems: [
+        'Profil- und Kontodaten',
+        'Wallet + Credits',
+        'Buchungen + Zahlungen',
+        'Matches + Analysen',
+        'Rewards + Transaktionen',
+        'Benachrichtigungen + Streaks',
+      ],
+
+      rowsRef: (el) => { this._rows = el; this._filter(); },
+      countRef: (el) => { this._count = el; },
+      dlgRef: (el) => { this._dlg = el; },
+      dTabRef: (el) => { this._dtabs = el; this._paint(); },
+      dv1Ref: (el) => { this._dv1 = el; },
+      dv2Ref: (el) => { this._dv2 = el; },
+      dv3Ref: (el) => { this._dv3 = el; },
+      dv4Ref: (el) => { this._dv4 = el; },
+      dAvRef: (el) => { this._dAv = el; },
+      dNameRef: (el) => { this._dName = el; },
+      dUserRef: (el) => { this._dUser = el; },
+      delRef: (el) => { this._del = el; },
+      delTextRef: (el) => { this._delText = el; },
+      delBtnRef: (el) => { this._delBtn = el; },
+      pageRef: (el) => { this._page = el; },
+      prevRef: (el) => { this._prev = el; },
+
+      onSearch: (e) => {
+        const v = e.target.value;
+        clearTimeout(this._deb);
+        this._deb = setTimeout(() => { this._q = v; this._filter(); }, 300);
+      },
+      onConfirm: (e) => {
+        const ok = e.target.value === 'DELETE';
+        if (!this._delBtn) return;
+        this._delBtn.style.color = ok ? '#0A0A0A' : 'hsl(0 0% 45%)';
+        this._delBtn.style.background = ok ? '#FF6B6B' : 'hsl(0 0% 14%)';
+        this._delBtn.style.cursor = ok ? 'pointer' : 'not-allowed';
+      },
+      closeDlg: () => this._show(this._dlg, false),
+      openDel: () => this._show(this._del, true),
+      closeDel: () => this._show(this._del, false),
+      prev: () => this._nav(-1),
+      next: () => this._nav(1),
+    };
+  }
+
+  _nav(d) {
+    this._p = Math.max(1, (this._p || 1) + d);
+    if (this._page) this._page.textContent = 'Seite ' + this._p;
+    if (this._prev) {
+      const off = this._p === 1;
+      this._prev.style.color = off ? 'hsl(0 0% 45%)' : 'hsl(0 0% 85%)';
+      this._prev.style.cursor = off ? 'not-allowed' : 'pointer';
+    }
+  }
+}
+</script>
+</body>
+</html>

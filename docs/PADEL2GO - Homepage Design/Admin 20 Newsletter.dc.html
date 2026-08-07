@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #nl-split { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1100px) { #nl-split { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Newsletter">
+  <dc-import name="AdminSidebar" active="newsletter" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/newsletter</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Newsletter</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <button style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer;white-space:nowrap;transition:color 0.2s, border-color 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="file-plus" size="14"></p2g-icon>Neuer Entwurf</button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Komponiere den PADEL2GO-Newsletter und versende ihn an bestätigte Abonnenten.</span>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(200px, 100%), 1fr));gap:14px">
+        <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="3">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,116px">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:hsl(0 0% 72%)">{{ k.label }}</span>
+                <span style="color:{{ k.color }};display:flex"><p2g-icon name="{{ k.icon }}" size="15"></p2g-icon></span>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:27px;line-height:1;color:{{ k.color }}">{{ k.value }}</span>
+            </div>
+          </x-import>
+        </sc-for>
+      </div>
+
+      <div id="nl-split">
+        <!-- Editor -->
+        <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,560px">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">Inhalt</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">Bestehenden Entwurf bearbeiten</span>
+              </div>
+
+              <label style="display:flex;flex-direction:column;gap:7px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Betreff<span style="color:#C7F011"> *</span></span>
+                <input onInput="{{ onSubject }}" type="text" value="P2G Update #08 — Season Opening, neue Courts &amp; Marketplace-Drops" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              </label>
+
+              <label style="display:flex;flex-direction:column;gap:7px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Vorschautext (Preheader)</span>
+                <input type="text" value="Alles Wichtige aus der P2G-Welt im August." style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 58%)">Kurzer Text, der in der Inbox-Vorschau erscheint.</span>
+              </label>
+
+              <div style="display:flex;flex-direction:column;gap:11px;padding-top:14px;border-top:1px solid hsl(0 0% 12%)">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Blöcke</span>
+                  <div style="display:flex;gap:7px;flex-wrap:wrap">
+                    <sc-for list="{{ blockTypes }}" as="bt" hint-placeholder-count="4">
+                      <button style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.3);border-radius:8px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(71 91% 51% / 0.18)"><p2g-icon name="{{ bt.icon }}" size="12"></p2g-icon>{{ bt.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="4">
+                    <div style="display:flex;flex-direction:column;gap:10px;padding:14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:13px">
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                        <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:{{ b.badgeFg }};background:{{ b.badgeBg }};border:1px solid {{ b.badgeBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap">
+                          <p2g-icon name="{{ b.icon }}" size="11"></p2g-icon>{{ b.type }}
+                        </span>
+                        <div style="display:flex;gap:6px">
+                          <button title="Nach oben" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:{{ b.upFg }};background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:7px;cursor:{{ b.upCursor }}"><p2g-icon name="chevron-up" size="12"></p2g-icon></button>
+                          <button title="Nach unten" style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:{{ b.downFg }};background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:7px;cursor:{{ b.downCursor }}"><p2g-icon name="chevron-down" size="12"></p2g-icon></button>
+                          <button style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:7px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="12"></p2g-icon></button>
+                        </div>
+                      </div>
+
+                      <sc-if value="{{ b.isText }}" hint-placeholder-val="{{ false }}">
+                        <textarea rows="3" value="{{ b.value }}" placeholder="Textabsatz… (Zeilenumbrüche bleiben erhalten)" style="padding:10px 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.55;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;outline:none;resize:vertical;transition:border-color 0.2s" style-focus="border-color:#C7F011"></textarea>
+                      </sc-if>
+                      <sc-if value="{{ b.isSingle }}" hint-placeholder-val="{{ true }}">
+                        <input type="text" value="{{ b.value }}" placeholder="{{ b.ph }}" style="height:38px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                      </sc-if>
+                      <sc-if value="{{ b.isImage }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;flex-direction:column;gap:9px">
+                          <div style="position:relative;height:120px;border-radius:11px;overflow:hidden;border:1px solid hsl(0 0% 15%);cursor:pointer">
+                            <img src="{{ b.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">
+                          </div>
+                          <div style="display:flex;gap:9px;flex-wrap:wrap">
+                            <button style="height:32px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer;white-space:nowrap" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="upload" size="12"></p2g-icon>Bild ersetzen</button>
+                            <input type="text" value="{{ b.alt }}" placeholder="Alt-Text (optional)" style="flex:1;min-width:130px;height:32px;padding:0 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                          </div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ b.isButton }}" hint-placeholder-val="{{ false }}">
+                        <div style="display:flex;gap:9px;flex-wrap:wrap">
+                          <input type="text" value="{{ b.value }}" placeholder="Button-Text" style="flex:1;min-width:130px;height:38px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                          <input type="text" value="{{ b.url }}" placeholder="https://…" style="flex:1;min-width:150px;height:38px;padding:0 12px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:12px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </x-import>
+
+          <!-- Aktionen -->
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,120px">
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button onClick="{{ save }}" style="flex:1;min-width:150px;height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:12px;cursor:pointer;white-space:nowrap;transition:color 0.2s, border-color 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="save" size="15"></p2g-icon><span ref="{{ saveLabelRef }}">Entwurf speichern</span></button>
+              <button onClick="{{ test }}" style="flex:1;min-width:150px;height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#7FD4FF;background:hsl(200 100% 75% / 0.08);border:1px solid hsl(200 100% 75% / 0.3);border-radius:12px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(200 100% 75% / 0.16)"><p2g-icon name="mail-check" size="15"></p2g-icon><span ref="{{ testLabelRef }}">Test an mich</span></button>
+              <button onClick="{{ openSend }}" style="flex:1;min-width:150px;height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:12px;cursor:pointer;box-shadow:0 0 24px hsl(71 91% 51% / 0.28);white-space:nowrap"><p2g-icon name="send" size="15"></p2g-icon>An alle senden</button>
+            </div>
+          </x-import>
+        </div>
+
+        <!-- Vorschau + Verlauf -->
+        <div style="display:flex;flex-direction:column;gap:18px;min-width:0">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,520px">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">Live-Vorschau</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">So sieht der Newsletter im Postfach aus</span>
+              </div>
+
+              <div style="border-radius:15px;overflow:hidden;border:1px solid hsl(0 0% 15%);background:#F5F5F3">
+                <div style="background:#0A0A0A;padding:18px;display:flex;align-items:center;gap:9px">
+                  <img src="assets/p2g-icon-clean.png" alt="" style="height:26px;width:auto;display:block">
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;letter-spacing:-0.02em;color:#FAFAFA">PADEL<span style="color:#C7F011">2</span>GO</span>
+                </div>
+                <div style="padding:22px 20px;display:flex;flex-direction:column;gap:15px">
+                  <h2 ref="{{ pvHeadRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:20px;line-height:1.2;color:#7C9600;margin:0">Season Opening München — jetzt Ticket sichern</h2>
+                  <p style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;color:#333;margin:0">Am 15. August eröffnen wir unseren ersten Standort mit einem Community-Event: Testmatches, DJ, Food Trucks und Pro-Coaching. Wir freuen uns auf dich!</p>
+                  <img src="assets/events-hero.jpg" alt="" style="width:100%;height:150px;object-fit:cover;border-radius:12px;display:block">
+                  <div style="display:flex;justify-content:center;padding:6px 0">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#0A0A0A;background:#C7F011;border-radius:999px;padding:12px 26px;white-space:nowrap">Ticket sichern</span>
+                  </div>
+                </div>
+                <div style="background:#EAEAE6;padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11px;line-height:1.5;color:#666">PADEL2GO GmbH · Impressum · Datenschutz</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:#7C9600;text-decoration:underline">Abmelden</span>
+                </div>
+              </div>
+            </div>
+          </x-import>
+
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,340px">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA">Verlauf</span>
+              <div style="display:flex;flex-direction:column;gap:9px">
+                <sc-for list="{{ campaigns }}" as="c" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 13px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:12px;flex-wrap:wrap">
+                    <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:160px">
+                      <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px">{{ c.subject }}</span>
+                      <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 65%);white-space:nowrap">{{ c.meta }}</span>
+                    </div>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:{{ c.stFg }};background:{{ c.stBg }};border:1px solid {{ c.stBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap;flex:none">{{ c.status }}</span>
+                    <sc-if value="{{ c.canReset }}" hint-placeholder-val="{{ false }}">
+                      <button style="height:28px;padding:0 11px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:#FFC44D;background:hsl(41 100% 65% / 0.09);border:1px solid hsl(41 100% 65% / 0.3);border-radius:8px;cursor:pointer;white-space:nowrap;flex:none">Zurücksetzen</button>
+                    </sc-if>
+                    <sc-if value="{{ c.canEdit }}" hint-placeholder-val="{{ false }}">
+                      <button style="height:28px;padding:0 11px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer;white-space:nowrap;flex:none" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">Bearbeiten</button>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </x-import>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div ref="{{ sendRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeSend }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.78);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(460px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(71 91% 51% / 0.25);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:17px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="send" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Newsletter jetzt an ALLE senden?</h3>
+        <p style="font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.55;color:hsl(0 0% 68%);margin:0">Der Newsletter geht an <span style="color:#C7F011;font-weight:700">2.148 bestätigte Abonnenten</span>. Der Versand läuft in Batches und kann nicht gestoppt werden.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeSend }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeSend }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25)">Jetzt senden</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const BT = {
+  Überschrift: ['#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)', 'heading-2'],
+  Text: ['hsl(0 0% 82%)', 'hsl(0 0% 100% / 0.05)', 'hsl(0 0% 18%)', 'align-left'],
+  Bild: ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)', 'image'],
+  Button: ['#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)', 'mouse-pointer-click'],
+};
+
+const BLOCKS = [
+  { type: 'Überschrift', value: 'Season Opening München — jetzt Ticket sichern', ph: 'Überschrift' },
+  { type: 'Text', value: 'Am 15. August eröffnen wir unseren ersten Standort mit einem Community-Event: Testmatches, DJ, Food Trucks und Pro-Coaching. Wir freuen uns auf dich!' },
+  { type: 'Bild', img: 'assets/events-hero.jpg', alt: 'Season Opening Event' },
+  { type: 'Button', value: 'Ticket sichern', url: 'https://padel2go.de/events/season-opening' },
+];
+
+const CAMPAIGNS = [
+  { subject: 'P2G Update #08 — Season Opening, neue Courts & Marketplace-Drops', meta: 'Entwurf · noch nicht versendet', status: 'draft' },
+  { subject: 'P2G Update #07 — Liga-Start & neue Standorte', meta: '2.148/2.148 gesendet · 02.07.2026 09:00', status: 'sent' },
+  { subject: 'P2G Update #06 — Marketplace ist live', meta: '1.980/2.010 gesendet · 4 fehlgeschlagen · 04.06.2026 09:00', status: 'sent' },
+  { subject: 'Sondermail: Wartungsfenster', meta: '640/1.940 gesendet · Versand läuft', status: 'sending' },
+  { subject: '(kein Betreff)', meta: '0/1.860 gesendet · 12.04.2026 11:20', status: 'failed' },
+];
+
+const ST = {
+  draft: ['Entwurf', 'hsl(0 0% 72%)', 'hsl(0 0% 100% / 0.05)', 'hsl(0 0% 18%)'],
+  sending: ['Versand läuft', '#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)'],
+  sent: ['Gesendet', '#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)'],
+  failed: ['Fehlgeschlagen', '#FF6B6B', 'hsl(0 100% 71% / 0.1)', 'hsl(0 100% 71% / 0.3)'],
+};
+
+class Component extends DCLogic {
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); clearTimeout(this._t1); clearTimeout(this._t2); }
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  _flash(el, busy, done, idle) {
+    if (!el) return;
+    el.textContent = busy;
+    clearTimeout(this._t1);
+    this._t1 = setTimeout(() => {
+      el.textContent = done;
+      this._t2 = setTimeout(() => { el.textContent = idle; }, 2000);
+    }, 900);
+  }
+
+  renderVals() {
+    const last = BLOCKS.length - 1;
+    return {
+      kpis: [
+        { label: 'Bestätigte Abonnenten', value: '2.148', icon: 'mail-check', color: '#C7F011' },
+        { label: 'Ausstehende Bestätigung', value: '186', icon: 'clock', color: '#FFC44D' },
+        { label: 'Abgemeldet', value: '94', icon: 'mail-x', color: '#FF6B6B' },
+      ],
+      blockTypes: [
+        { label: 'Überschrift', icon: 'heading-2' },
+        { label: 'Text', icon: 'align-left' },
+        { label: 'Bild', icon: 'image' },
+        { label: 'Button', icon: 'mouse-pointer-click' },
+      ],
+      blocks: BLOCKS.map((b, i) => {
+        const c = BT[b.type];
+        return {
+          ...b,
+          icon: c[3],
+          badgeFg: c[0], badgeBg: c[1], badgeBrd: c[2],
+          isText: b.type === 'Text',
+          isImage: b.type === 'Bild',
+          isButton: b.type === 'Button',
+          isSingle: b.type === 'Überschrift',
+          upFg: i === 0 ? 'hsl(0 0% 30%)' : 'hsl(0 0% 80%)',
+          upCursor: i === 0 ? 'not-allowed' : 'pointer',
+          downFg: i === last ? 'hsl(0 0% 30%)' : 'hsl(0 0% 80%)',
+          downCursor: i === last ? 'not-allowed' : 'pointer',
+        };
+      }),
+      campaigns: CAMPAIGNS.map((c) => {
+        const s = ST[c.status];
+        return {
+          ...c,
+          status: s[0], stFg: s[1], stBg: s[2], stBrd: s[3],
+          canReset: c.status === 'sending',
+          canEdit: c.status === 'draft',
+        };
+      }),
+
+      pvHeadRef: (el) => { this._pvHead = el; },
+      saveLabelRef: (el) => { this._saveLabel = el; },
+      testLabelRef: (el) => { this._testLabel = el; },
+      sendRef: (el) => { this._send = el; },
+
+      onSubject: () => {},
+      save: () => this._flash(this._saveLabel, 'Speichert…', 'Entwurf gespeichert', 'Entwurf speichern'),
+      test: () => this._flash(this._testLabel, 'Sendet…', 'Test-Mail verschickt', 'Test an mich'),
+      openSend: () => this._show(this._send, true),
+      closeSend: () => this._show(this._send, false),
+    };
+  }
+}
+</script>
+</body>
+</html>

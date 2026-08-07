@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    input::placeholder { color: hsl(0 0% 38%); }
+    input[type="range"] { accent-color: #C7F011; height: 22px; margin: 0; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes springIn { 0% { transform: scale(0); opacity: 0; } 55% { transform: scale(1.14); opacity: 1; } 78% { transform: scale(0.94); } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 hsl(71 91% 51% / 0); } 50% { box-shadow: 0 0 24px hsl(71 91% 51% / 0.35); } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    #mp-detail { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 24px; align-items: stretch; }
+    #mp-detail > .sc-host-x > div { height: 100%; box-sizing: border-box; }
+    #mp-infogrid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: 24px; align-items: stretch; }
+    #mp-infogrid > .sc-host-x > div { height: 100%; box-sizing: border-box; }
+    #mp-checkout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+    #mp-catchips { scrollbar-width: none; }
+    #mp-catchips::-webkit-scrollbar { display: none; }
+    @media (max-width: 980px) { #mp-detail, #mp-checkout { grid-template-columns: 1fr; } #mp-summary { position: static !important; } }
+    @media (max-width: 860px) { #mp-infogrid { grid-template-columns: 1fr; } }
+    @media (max-width: 820px) { #mp-navlinks { display: none !important; } }
+    @media (max-width: 640px) { #mp-points { display: none !important; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+</helmet>
+
+<!-- ═══════════ NAV ═══════════ -->
+<header style="position:fixed;top:0;left:0;right:0;z-index:60;background:hsl(0 0% 0% / 0.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 15% / 0.5)">
+  <div style="max-width:1280px;margin:0 auto;padding:0 20px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:14px">
+    <a href="Homepage.dc.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex:none">
+      <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:32px;width:auto;display:block">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;letter-spacing:-0.02em;color:#FAFAFA">PADEL<span style="color:#C7F011">2</span>GO</span>
+    </a>
+
+    <div id="mp-navlinks" style="display:flex;align-items:center;gap:4px;min-width:0">
+      <a href="Mein P2G.dc.html" style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:hsl(0 0% 65%);text-decoration:none;padding:7px 13px;border-radius:999px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">Dashboard</a>
+      <a href="Booking.dc.html" style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:hsl(0 0% 65%);text-decoration:none;padding:7px 13px;border-radius:999px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">Court buchen</a>
+      <a href="Events.dc.html" style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:hsl(0 0% 65%);text-decoration:none;padding:7px 13px;border-radius:999px" style-hover="color:#C7F011;background:hsl(71 91% 51% / 0.08)">Events</a>
+      <button onClick="{{ goCatalog }}" style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:7px 13px;cursor:pointer">Marketplace</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;flex:none">
+      <sc-if value="{{ effLoggedIn }}" hint-placeholder-val="{{ true }}">
+        <span id="mp-points" style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:6px 13px;white-space:nowrap">
+          <p2g-icon name="star" size="13"></p2g-icon>{{ pointsLabel }}
+        </span>
+        <span style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg, hsl(71 91% 51% / 0.25), hsl(71 91% 51% / 0.06));border:1px solid hsl(71 91% 51% / 0.4);display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;color:#C7F011">F</span>
+      </sc-if>
+      <sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ doLogin }}" style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:hsl(0 0% 80%);background:none;border:1px solid hsl(0 0% 15%);border-radius:999px;padding:7px 16px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">Login</button>
+      </sc-if>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ ① KATALOG ═══════════ -->
+<sc-if value="{{ isCatalog }}" hint-placeholder-val="{{ true }}">
+<section data-screen-label="① Marketplace — Katalog" style="min-height:100vh;background:radial-gradient(ellipse 70% 40% at 50% 0%, hsl(71 91% 51% / 0.06), transparent), #000;padding:108px 20px 90px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:30px">
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center">
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Badge" variant="lime" dot="{{ true }}" hint-size="120px,26px">Marketplace</x-import>
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(32px, 5vw, 54px);line-height:1.08;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Dein Spiel. Dein <span style="background:var(--gradient-lime-text);-webkit-background-clip:text;background-clip:text;color:transparent">Equipment.</span></h1>
+      <p style="font-family:'DM Sans',sans-serif;font-size:17.5px;line-height:1.6;color:hsl(0 0% 65%);margin:0;max-width:560px">Schläger, Bälle, Schuhe &amp; mehr — vom P2G Team getestet. Direkt zu dir nach Hause.</p>
+      <sc-if value="{{ effLoggedIn }}" hint-placeholder-val="{{ true }}">
+        <span style="display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:7px 16px">
+          <p2g-icon name="coins" size="14"></p2g-icon>{{ heroPointsHint }}
+        </span>
+      </sc-if>
+      <sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ false }}">
+        <span style="display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:7px 16px">
+          <p2g-icon name="zap" size="14"></p2g-icon>Ohne Konto shoppen — mit Konto Points einlösen
+        </span>
+      </sc-if>
+    </div>
+
+    <!-- Filter -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div id="mp-catchips" style="display:flex;gap:9px;overflow-x:auto;padding:2px;margin:-2px">
+        <sc-for list="{{ catChips }}" as="c" hint-placeholder-count="7">
+          <button onClick="{{ c.select }}" style="{{ c.style }}" style-hover="border-color:hsl(71 91% 51% / 0.5)">
+            <p2g-icon name="{{ c.icon }}" size="14"></p2g-icon>{{ c.label }}<span style="{{ c.countStyle }}">{{ c.count }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div id="mp-toolbar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:220px;max-width:380px">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Input" placeholder="Produkt oder Marke suchen …" value="{{ queryVal }}" onChange="{{ setQuery }}" hint-size="100%,44px"></x-import>
+        </div>
+        <div style="display:flex;gap:6px;background:hsl(0 0% 5%);border:1px solid hsl(0 0% 14%);border-radius:999px;padding:4px">
+          <sc-for list="{{ sortSegs }}" as="s" hint-placeholder-count="3">
+            <button onClick="{{ s.select }}" style="{{ s.style }}">{{ s.label }}</button>
+          </sc-for>
+        </div>
+        <button onClick="{{ toggleAvail }}" style="{{ availStyle }}" style-hover="border-color:hsl(71 91% 51% / 0.5)">
+          <span style="{{ availDotStyle }}"></span>Nur verfügbare
+        </button>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 50%);margin-left:auto;white-space:nowrap">{{ resultLabel }}</span>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;color:hsl(0 0% 45%)">MARKE</span>
+        <sc-for list="{{ brandChips }}" as="b" hint-placeholder-count="6">
+          <button onClick="{{ b.select }}" style="{{ b.style }}" style-hover="border-color:hsl(71 91% 51% / 0.5)">{{ b.label }}</button>
+        </sc-for>
+        <span style="width:1px;height:18px;background:hsl(0 0% 16%);margin:0 4px"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;color:hsl(0 0% 45%)">PREIS</span>
+        <sc-for list="{{ priceChips }}" as="p" hint-placeholder-count="4">
+          <button onClick="{{ p.select }}" style="{{ p.style }}" style-hover="border-color:hsl(71 91% 51% / 0.5)">{{ p.label }}</button>
+        </sc-for>
+        <button onClick="{{ resetFilters }}" style="{{ resetStyle }}" style-hover="color:#FAFAFA">
+          <p2g-icon name="x" size="12"></p2g-icon>Zurücksetzen
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(min(250px, 100%), 1fr));gap:18px">
+        <sc-for list="{{ prodCards }}" as="p" hint-placeholder-count="8">
+          <div onClick="{{ p.open }}" style="{{ p.wrapStyle }}">
+            <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" padding="{{ 0 }}" hint-size="100%,360px">
+              <div style="display:flex;flex-direction:column;height:100%">
+                <div style="position:relative;border-radius:15px 15px 0 0;overflow:hidden">
+                  <div style="{{ p.imgWrapStyle }}">
+                    <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ p.slotId }}" shape="rect" fit="cover" placeholder="{{ p.slotPlaceholder }}" style="width:100%;height:100%;display:block" hint-size="100%,100%"></x-import>
+                  </div>
+                  <span style="{{ p.featBadgeStyle }}"><p2g-icon name="{{ p.featIcon }}" size="11"></p2g-icon>{{ p.featLabel }}</span>
+                  <span style="{{ p.offBadgeStyle }}">{{ p.offLabel }}</span>
+                  <span style="{{ p.soldOverlayStyle }}">Ausverkauft</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;padding:16px 18px 18px;flex:1">
+                  <div style="display:flex;flex-direction:column;gap:3px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 52%)">{{ p.brand }}</span>
+                    <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;letter-spacing:-0.01em;line-height:1.25;color:#FAFAFA;margin:0">{{ p.name }}</h3>
+                  </div>
+                  <div style="display:flex;align-items:baseline;gap:8px;margin-top:auto;padding-top:4px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:17.5px;color:#FAFAFA">{{ p.priceStr }}</span>
+                    <span style="{{ p.uvpStyle }}">{{ p.uvpStr }}</span>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                    <span style="display:inline-flex;align-items:center;gap:6px"><span style="{{ p.stockDotStyle }}"></span><span style="{{ p.stockLabelStyle }}">{{ p.stockLabel }}</span></span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011">Details<p2g-icon name="arrow-right" size="13"></p2g-icon></span>
+                  </div>
+                </div>
+              </div>
+            </x-import>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:60px 20px;background:hsl(0 0% 100% / 0.02);border:1px dashed hsl(0 0% 20%);border-radius:20px">
+        <span style="width:52px;height:52px;border-radius:50%;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 18%);display:flex;align-items:center;justify-content:center;color:hsl(0 0% 55%)"><p2g-icon name="search" size="24"></p2g-icon></span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:hsl(0 0% 80%)">Nichts gefunden für deine Filter</span>
+        <button onClick="{{ resetFilters }}" style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:9px 18px;cursor:pointer" style-hover="background:hsl(71 91% 51% / 0.16)"><p2g-icon name="rotate-ccw" size="14"></p2g-icon>Filter zurücksetzen</button>
+      </div>
+    </sc-if>
+  </div>
+</section>
+</sc-if>
+
+<!-- ═══════════ ② PRODUKTDETAIL ═══════════ -->
+<sc-if value="{{ isProduct }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="② Produkt-Detailseite" style="min-height:100vh;background:#000;padding:96px 20px 90px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:22px">
+
+    <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+      <button onClick="{{ goCatalog }}" style="background:none;border:none;padding:2px 0;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 55%)" style-hover="color:#C7F011">Marketplace</button>
+      <span style="color:hsl(0 0% 35%);display:flex"><p2g-icon name="chevron-right" size="13"></p2g-icon></span>
+      <button onClick="{{ goCatFiltered }}" style="background:none;border:none;padding:2px 0;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 55%)" style-hover="color:#C7F011">{{ dCat }}</button>
+      <span style="color:hsl(0 0% 35%);display:flex"><p2g-icon name="chevron-right" size="13"></p2g-icon></span>
+      <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA">{{ dName }}</span>
+    </div>
+
+    <div id="mp-detail">
+      <!-- Galerie -->
+      <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+        <div style="position:relative;flex:1;min-height:440px;border-radius:20px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.8);background:linear-gradient(145deg, hsl(0 0% 7%), hsl(0 0% 3%))">
+          <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ dSlotMain }}" shape="rect" fit="cover" placeholder="{{ dSlotMainPh }}" style="width:100%;height:100%;display:block" hint-size="100%,100%"></x-import>
+          <span style="{{ dSoldOverlayStyle }}">Ausverkauft</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="height:150px;border-radius:16px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.8);background:linear-gradient(145deg, hsl(0 0% 7%), hsl(0 0% 3%))">
+            <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ dSlotB }}" shape="rect" fit="cover" placeholder="Detailfoto" style="width:100%;height:100%;display:block" hint-size="100%,100%"></x-import>
+          </div>
+          <div style="height:150px;border-radius:16px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.8);background:linear-gradient(145deg, hsl(0 0% 7%), hsl(0 0% 3%))">
+            <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ dSlotC }}" shape="rect" fit="cover" placeholder="Action-Shot" style="width:100%;height:100%;display:block" hint-size="100%,100%"></x-import>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buy-Box -->
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 26 }}" hint-size="100%,600px">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:5px 12px">{{ dBrand }}</span>
+            <span style="{{ dFeatBadgeStyle }}"><p2g-icon name="{{ dFeatIcon }}" size="11"></p2g-icon>{{ dFeatLabel }}</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(26px, 3.4vw, 34px);letter-spacing:-0.02em;line-height:1.12;color:#FAFAFA;margin:0">{{ dName }}</h1>
+            <p style="font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;color:hsl(0 0% 62%);margin:0">{{ dSubtitle }}</p>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:34px;color:#C7F011;line-height:1.1">{{ dPriceStr }}</span>
+              <span style="{{ dUvpStyle }}">UVP {{ dUvpStr }}</span>
+              <span style="{{ dOffBadgeStyle }}">{{ dOffLabel }}</span>
+            </div>
+            <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 50%)">inkl. MwSt. · zzgl. Versand</span>
+          </div>
+
+          <sc-if value="{{ effLoggedIn }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:11px;background:hsl(71 91% 51% / 0.07);border:1px solid hsl(71 91% 51% / 0.25);border-radius:14px;padding:12px 14px">
+              <span style="color:#C7F011;display:flex;animation:floatY 4s ease-in-out infinite"><p2g-icon name="coins" size="18"></p2g-icon></span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;color:hsl(0 0% 80%)">Mit deinen Points: bis zu <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#C7F011">−{{ dMaxSaveStr }}</span> Rabatt im Checkout.</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:11px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:14px;padding:12px 14px">
+              <span style="color:#C7F011;display:flex"><p2g-icon name="gift" size="17"></p2g-icon></span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.55;color:hsl(0 0% 65%)">Mit P2G Konto zahlst du bis zu <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#C7F011">{{ maxPctLabel }}</span> mit Points. <button onClick="{{ doLogin }}" style="background:none;border:none;padding:0;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;text-decoration:underline">Einloggen</button></span>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="{{ dStockDotStyle }}"></span>
+            <span style="{{ dStockLabelStyle }}">{{ dStockLabel }}</span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%)">{{ dShipNote }}</span>
+          </div>
+
+          <sc-if value="{{ dInStock }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:12px;align-items:stretch">
+              <div style="display:flex;align-items:center;gap:2px;background:hsl(0 0% 6%);border:1px solid hsl(0 0% 15%);border-radius:14px;padding:4px;flex:none">
+                <button onClick="{{ qtyMinus }}" style="{{ qtyMinusStyle }}"><p2g-icon name="minus" size="15"></p2g-icon></button>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:#FAFAFA;width:36px;text-align:center">{{ qtyStr }}</span>
+                <button onClick="{{ qtyPlus }}" style="{{ qtyPlusStyle }}"><p2g-icon name="plus" size="15"></p2g-icon></button>
+              </div>
+              <div style="flex:1">
+                <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="hero" size="xl" onClick="{{ buyNow }}" style="width:100%" hint-size="100%,56px"><p2g-icon name="zap" size="17"></p2g-icon>Jetzt kaufen</x-import>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ dSoldOut }}" hint-placeholder-val="{{ false }}">
+            <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="outline" size="xl" onClick="{{ notifyMe }}" style="width:100%" hint-size="100%,56px"><p2g-icon name="bell" size="16"></p2g-icon>{{ notifyLabel }}</x-import>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:9px;padding-top:2px">
+            <span style="display:inline-flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%)"><span style="color:#C7F011;display:flex"><p2g-icon name="truck" size="15"></p2g-icon></span>Versand <span style="font-family:'JetBrains Mono',monospace">€4,90</span> · gratis ab <span style="font-family:'JetBrains Mono',monospace">€75</span></span>
+            <span style="display:inline-flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%)"><span style="color:#C7F011;display:flex"><p2g-icon name="rotate-ccw" size="15"></p2g-icon></span>30 Tage Rückgaberecht</span>
+            <span style="display:inline-flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%)"><span style="color:#C7F011;display:flex"><p2g-icon name="shield-check" size="15"></p2g-icon></span>Sichere Zahlung über Stripe — Karte &amp; PayPal</span>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- Specs + Beschreibung -->
+    <div id="mp-infogrid">
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 24 }}" hint-size="100%,300px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0 0 8px">Technische Details</h3>
+          <sc-for list="{{ dSpecRows }}" as="sp" hint-placeholder-count="5">
+            <div style="{{ sp.rowStyle }}">
+              <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 55%)">{{ sp.label }}</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;text-align:right">{{ sp.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </x-import>
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 24 }}" hint-size="100%,300px">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Beschreibung</h3>
+          <sc-for list="{{ dDescParas }}" as="dp" hint-placeholder-count="2">
+            <p style="font-family:'DM Sans',sans-serif;font-size:14.5px;line-height:1.7;color:hsl(0 0% 70%);margin:0">{{ dp.text }}</p>
+          </sc-for>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- Verwandte -->
+    <div style="display:flex;flex-direction:column;gap:16px;margin-top:8px">
+      <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:21px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Passt dazu</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(min(250px, 100%), 1fr));gap:18px">
+        <sc-for list="{{ relCards }}" as="p" hint-placeholder-count="3">
+          <div onClick="{{ p.open }}" style="{{ p.wrapStyle }}">
+            <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" padding="{{ 0 }}" hint-size="100%,340px">
+              <div style="display:flex;flex-direction:column;height:100%">
+                <div style="position:relative;border-radius:15px 15px 0 0;overflow:hidden">
+                  <div style="{{ p.imgWrapStyle }}">
+                    <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ p.slotId }}" shape="rect" fit="cover" placeholder="{{ p.slotPlaceholder }}" style="width:100%;height:100%;display:block" hint-size="100%,100%"></x-import>
+                  </div>
+                  <span style="{{ p.offBadgeStyle }}">{{ p.offLabel }}</span>
+                  <span style="{{ p.soldOverlayStyle }}">Ausverkauft</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;padding:16px 18px 18px;flex:1">
+                  <div style="display:flex;flex-direction:column;gap:3px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 52%)">{{ p.brand }}</span>
+                    <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;letter-spacing:-0.01em;line-height:1.25;color:#FAFAFA;margin:0">{{ p.name }}</h3>
+                  </div>
+                  <div style="display:flex;align-items:baseline;gap:8px;margin-top:auto;padding-top:4px">
+                    <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:17.5px;color:#FAFAFA">{{ p.priceStr }}</span>
+                    <span style="{{ p.uvpStyle }}">{{ p.uvpStr }}</span>
+                  </div>
+                </div>
+              </div>
+            </x-import>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ═══════════ ③ CHECKOUT ═══════════ -->
+<sc-if value="{{ isCheckout }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="③ Marketplace-Checkout" style="min-height:100vh;background:radial-gradient(ellipse 60% 34% at 50% 0%, hsl(71 91% 51% / 0.05), transparent), #000;padding:96px 20px 90px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+  <div style="max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:18px">
+    <button onClick="{{ backToProduct }}" style="display:inline-flex;align-items:center;gap:7px;align-self:flex-start;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 60%);padding:6px 0" style-hover="color:#C7F011">
+      <p2g-icon name="arrow-left" size="16"></p2g-icon>Zurück zum Produkt
+    </button>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(26px, 4vw, 38px);letter-spacing:-0.02em;color:#FAFAFA;margin:0">Fast deins!</h1>
+      <p style="font-family:'DM Sans',sans-serif;font-size:15.5px;color:hsl(0 0% 60%);margin:0">Lieferadresse angeben, Zahlart wählen — bezahlt wird sicher über Stripe.</p>
+    </div>
+
+    <div id="mp-checkout">
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+        <!-- Lieferadresse -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 22 }}" hint-size="100%,380px">
+          <div style="display:flex;flex-direction:column;gap:15px">
+            <div style="display:flex;align-items:center;gap:13px">
+              <span style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="map-pin" size="19"></p2g-icon></span>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.16em;color:hsl(0 0% 50%)">SCHRITT 01</span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Lieferadresse</h3>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 75%)">Name</span>
+                <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Input" placeholder="Vor- und Nachname" value="{{ aName }}" onChange="{{ setAName }}" hint-size="100%,44px"></x-import>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 75%)">E-Mail <span style="color:hsl(0 0% 45%);font-weight:500">· für deine Bestellbestätigung</span></span>
+                <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Input" type="email" placeholder="name@mail.de" value="{{ aMail }}" onChange="{{ setAMail }}" hint-size="100%,44px"></x-import>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 75%)">Straße &amp; Hausnummer</span>
+                <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Input" placeholder="z. B. Lindwurmstraße 42" value="{{ aStreet }}" onChange="{{ setAStreet }}" hint-size="100%,44px"></x-import>
+              </div>
+              <div style="display:grid;grid-template-columns:140px 1fr;gap:12px">
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 75%)">PLZ</span>
+                  <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Input" placeholder="80331" value="{{ aZip }}" onChange="{{ setAZip }}" hint-size="100%,44px"></x-import>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 75%)">Ort</span>
+                  <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Input" placeholder="München" value="{{ aCity }}" onChange="{{ setACity }}" hint-size="100%,44px"></x-import>
+                </div>
+              </div>
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 50%)"><p2g-icon name="lock" size="12"></p2g-icon>Deine Daten werden nur für diese Bestellung verwendet.</span>
+          </div>
+        </x-import>
+
+        <!-- Zahlart -->
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 22 }}" hint-size="100%,200px">
+          <div style="display:flex;flex-direction:column;gap:15px">
+            <div style="display:flex;align-items:center;gap:13px">
+              <span style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="credit-card" size="19"></p2g-icon></span>
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.16em;color:hsl(0 0% 50%)">SCHRITT 02</span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Zahlart</h3>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(200px, 100%), 1fr));gap:10px">
+              <sc-for list="{{ payMethods }}" as="pm" hint-placeholder-count="2">
+                <button onClick="{{ pm.select }}" style="{{ pm.style }}" style-hover="border-color:hsl(71 91% 51% / 0.55)">
+                  <span style="{{ pm.checkStyle }}"><p2g-icon name="check" size="12" stroke-width="3"></p2g-icon></span>
+                  <span style="{{ pm.iconStyle }}"><p2g-icon name="{{ pm.icon }}" size="19"></p2g-icon></span>
+                  <span style="display:flex;flex-direction:column;gap:1px;text-align:left">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;color:#FAFAFA">{{ pm.name }}</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 55%)">{{ pm.sub }}</span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <!-- Bestellübersicht -->
+      <div id="mp-summary" style="position:sticky;top:90px">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 24 }}" hint-size="100%,560px">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA;margin:0">Bestellübersicht</h3>
+
+            <div style="display:flex;gap:13px;align-items:center">
+              <div style="width:64px;height:64px;border-radius:12px;overflow:hidden;border:1px solid hsl(0 0% 15%);flex:none;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 4%))">
+                <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ dSlotMain }}" shape="rect" fit="cover" placeholder="Foto" style="width:100%;height:100%;display:block" hint-size="64px,64px"></x-import>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;color:#FAFAFA;line-height:1.25">{{ dName }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 55%)">{{ sumQtyLine }}</span>
+              </div>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:#FAFAFA;flex:none">{{ subtotalStr }}</span>
+            </div>
+
+            <div style="height:1px;background:hsl(0 0% 13%)"></div>
+
+            <sc-if value="{{ effLoggedIn }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:11px;background:hsl(71 91% 51% / 0.06);border:1px solid hsl(71 91% 51% / 0.22);border-radius:14px;padding:14px 15px">
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="color:#C7F011;display:flex"><p2g-icon name="coins" size="16"></p2g-icon></span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FAFAFA;flex:1">P2G Points einlösen</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#C7F011">{{ balanceChip }}</span>
+                </div>
+                <sc-if value="{{ hasSlider }}" hint-placeholder-val="{{ true }}">
+                  <input type="range" min="0" max="{{ sliderMax }}" step="10" value="{{ sliderVal }}" onChange="{{ setSlider }}" style="width:100%;cursor:pointer;display:block">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:hsl(0 0% 70%)">{{ sliderPointsLabel }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:#C7F011">−{{ discountStr }}</span>
+                  </div>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 50%)">{{ sliderMaxHint }}</span>
+                </sc-if>
+                <sc-if value="{{ noSliderPoints }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 60%)">Noch keine Points — sammle welche bei deiner nächsten <a href="Booking.dc.html" style="color:#C7F011;text-decoration:none;font-weight:700">Court-Buchung</a>.</span>
+                </sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:flex-start;gap:11px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:14px;padding:13px 14px">
+                <span style="color:#C7F011;display:flex;margin-top:1px"><p2g-icon name="gift" size="17"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.55;color:hsl(0 0% 65%)">Points einlösen geht nur mit Konto. <button onClick="{{ doLogin }}" style="background:none;border:none;padding:0;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;text-decoration:underline">Kostenlos einloggen</button> — oder einfach als Gast bestellen.</span>
+              </div>
+            </sc-if>
+
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)"><span>Zwischensumme</span><span style="font-family:'JetBrains Mono',monospace">{{ subtotalStr }}</span></div>
+              <sc-if value="{{ hasDiscount }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#C7F011"><span style="display:inline-flex;align-items:center;gap:6px"><p2g-icon name="coins" size="13"></p2g-icon>{{ discountPtsLabel }}</span><span style="font-family:'JetBrains Mono',monospace">−{{ discountStr }}</span></div>
+              </sc-if>
+              <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)"><span style="display:inline-flex;align-items:center;gap:6px"><p2g-icon name="truck" size="13"></p2g-icon>Versand</span><span style="{{ shipValStyle }}">{{ shipStr }}</span></div>
+              <div style="height:1px;background:hsl(0 0% 13%)"></div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline">
+                <span style="font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;color:#FAFAFA">Gesamt</span>
+                <span style="display:flex;flex-direction:column;align-items:flex-end">
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:30px;color:#C7F011;line-height:1.1">{{ totalStr }}</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 50%)">inkl. MwSt.</span>
+                </span>
+              </div>
+            </div>
+
+            <sc-if value="{{ effLoggedIn }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:10px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:12px;padding:11px 13px">
+                <span style="color:#C7F011;display:flex"><p2g-icon name="sparkles" size="15"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 70%)">Du sammelst <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#C7F011">+{{ earnStr }} Points</span> mit dieser Bestellung.</span>
+              </div>
+            </sc-if>
+
+            <div style="{{ payWrapStyle }}">
+              <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="hero" size="xl" onClick="{{ pay }}" style="width:100%" hint-size="100%,56px"><p2g-icon name="lock" size="16"></p2g-icon>{{ payLabel }}</x-import>
+            </div>
+            <span style="{{ payHintStyle }}">{{ payHint }}</span>
+            <span style="display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 50%)"><p2g-icon name="shield-check" size="13"></p2g-icon>Sichere Zahlung über Stripe · SSL-verschlüsselt</span>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ═══════════ ④ SUCCESS ═══════════ -->
+<sc-if value="{{ isSuccess }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="④ Success — Bestellung bestätigt" style="min-height:100vh;background:radial-gradient(ellipse 60% 40% at 50% 0%, hsl(71 91% 51% / 0.09), transparent), #000;padding:120px 20px 90px">
+  <div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center">
+    <span style="width:96px;height:96px;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.45);display:flex;align-items:center;justify-content:center;color:#C7F011;box-shadow:0 0 60px hsl(71 91% 51% / 0.3);animation:springIn 0.7s cubic-bezier(0.16,1,0.3,1)">
+      <p2g-icon name="package-check" size="44" stroke-width="2.2"></p2g-icon>
+    </span>
+    <div style="display:flex;flex-direction:column;gap:10px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.15s backwards">
+      <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(30px, 5vw, 42px);letter-spacing:-0.02em;color:#FAFAFA;margin:0">Bestellung bestätigt! 🎾</h1>
+      <p style="font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;color:hsl(0 0% 65%);margin:0">Deine Bestellbestätigung ist unterwegs an <span style="color:#FAFAFA;font-weight:600">{{ oMail }}</span></p>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:hsl(0 0% 50%)">Bestellnummer <span style="color:#C7F011">{{ oCode }}</span></span>
+    </div>
+
+    <div style="width:100%;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.28s backwards">
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hover="{{ false }}" padding="{{ 24 }}" hint-size="100%,280px">
+        <div style="display:flex;flex-direction:column;gap:12px;text-align:left">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)">Produkt</span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#FAFAFA;text-align:right">{{ oProduct }}</span>
+          </div>
+          <div style="height:1px;background:hsl(0 0% 12%)"></div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)">Lieferung an</span>
+            <span style="display:flex;flex-direction:column;gap:1px;text-align:right">
+              <span style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#FAFAFA">{{ oAddrName }}</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 60%)">{{ oAddrLine }}</span>
+            </span>
+          </div>
+          <div style="height:1px;background:hsl(0 0% 12%)"></div>
+          <sc-if value="{{ oHasDiscount }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+              <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)">Points eingelöst</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:13.5px;font-weight:700;color:#C7F011">{{ oDiscountLine }}</span>
+            </div>
+            <div style="height:1px;background:hsl(0 0% 12%)"></div>
+          </sc-if>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 60%)">Bezahlt</span>
+            <span style="display:inline-flex;align-items:center;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#C7F011">{{ oTotal }}</span><span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:3px 9px"><span style="width:6px;height:6px;border-radius:50%;background:#C7F011"></span>{{ oMethod }}</span></span>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <span style="display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:999px;padding:8px 16px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.36s backwards">
+      <span style="color:#C7F011;display:flex"><p2g-icon name="truck" size="14"></p2g-icon></span>Versand in 1–2 Werktagen · Tracking-Link per Mail
+    </span>
+
+    <sc-if value="{{ effLoggedIn }}" hint-placeholder-val="{{ true }}">
+      <div style="width:100%;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.35);border-radius:18px;padding:18px 20px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.44s backwards">
+        <span style="width:46px;height:46px;border-radius:13px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011;flex:none;animation:floatY 4s ease-in-out infinite"><p2g-icon name="coins" size="21"></p2g-icon></span>
+        <span style="display:flex;flex-direction:column;gap:2px;text-align:left">
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:20px;color:#C7F011">+{{ oEarned }} P2G Points</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%)">wurden deinem Konto gutgeschrieben 💚 · Neuer Stand: <span style="font-family:'JetBrains Mono',monospace;color:#C7F011">{{ pointsLabel }}</span></span>
+        </span>
+      </div>
+    </sc-if>
+    <sc-if value="{{ notLoggedIn }}" hint-placeholder-val="{{ false }}">
+      <div style="width:100%;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.35);border-radius:18px;padding:18px 20px;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.44s backwards">
+        <span style="width:46px;height:46px;border-radius:13px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011;flex:none"><p2g-icon name="gift" size="21"></p2g-icon></span>
+        <span style="display:flex;flex-direction:column;gap:2px;text-align:left">
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:18px;color:#C7F011">+{{ oEarned }} Points verpasst</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;color:hsl(0 0% 65%)">Mit kostenlosem P2G Konto sammelst du bei jeder Bestellung — <button onClick="{{ doLogin }}" style="background:none;border:none;padding:0;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#C7F011;text-decoration:underline">jetzt anmelden</button>.</span>
+        </span>
+      </div>
+    </sc-if>
+
+    <div style="display:flex;gap:12px;width:100%;flex-wrap:wrap;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.52s backwards">
+      <div style="flex:1;min-width:200px"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="outline" size="lg" onClick="{{ shopMore }}" style="width:100%" hint-size="100%,48px"><p2g-icon name="shopping-bag" size="16"></p2g-icon>Weiter shoppen</x-import></div>
+      <div style="flex:1;min-width:200px"><a href="Booking.dc.html" style="text-decoration:none;display:block"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="lime" size="lg" style="width:100%" hint-size="100%,48px"><p2g-icon name="calendar-days" size="16"></p2g-icon>Court buchen</x-import></a></div>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<!-- ═══════════ OVERLAY: STRIPE ═══════════ -->
+<sc-if value="{{ paying }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Overlay — Stripe Redirect" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:110;background:hsl(0 0% 0% / 0.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.25s ease-out">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center">
+    <span style="display:flex;animation:spin 1s linear infinite;color:#C7F011"><p2g-icon name="loader-2" size="42"></p2g-icon></span>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:20px;color:#FAFAFA">Weiterleitung zu Stripe …</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:14px;color:hsl(0 0% 60%)">{{ totalStr }} · {{ payMethodName }}</span>
+    </div>
+    <button onClick="{{ cancelPay }}" style="background:none;border:1px solid hsl(0 0% 20%);border-radius:999px;padding:8px 18px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:hsl(0 0% 65%)" style-hover="color:#FAFAFA;border-color:hsl(0 0% 35%)">Abbrechen</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer style="border-top:1px solid hsl(0 0% 15% / 0.6);background:linear-gradient(180deg, #000, hsl(0 0% 3%));padding:26px 20px">
+  <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:9px">
+      <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:24px;width:auto">
+      <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%)">© 2026 PADEL2GO</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <a href="#" style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%);text-decoration:none" style-hover="color:#C7F011">Impressum</a>
+      <a href="#" style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%);text-decoration:none" style-hover="color:#C7F011">Datenschutz</a>
+      <a href="#" style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%);text-decoration:none" style-hover="color:#C7F011">AGB &amp; Widerruf</a>
+      <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 50%)">Made with 💚 in Deutschland</span>
+    </div>
+  </div>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;loggedIn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Demo-Zustand&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;katalog&quot;,&quot;options&quot;:[&quot;katalog&quot;,&quot;produkt&quot;,&quot;checkout&quot;,&quot;bestaetigt&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo-Zustand&quot;},&quot;pointsBalance&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:1240,&quot;min&quot;:0,&quot;max&quot;:20000,&quot;unit&quot;:&quot;Points&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Demo-Zustand&quot;},&quot;maxPointsPercent&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:30,&quot;min&quot;:10,&quot;max&quot;:50,&quot;step&quot;:5,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Shop-Regeln&quot;}}">
+const CATS = [
+  ['Schläger', 'zap'], ['Bälle', 'circle-dot'], ['Bekleidung', 'shirt'],
+  ['Schuhe', 'footprints'], ['Taschen', 'backpack'], ['Zubehör', 'package'],
+];
+const BRANDS = ['P2G', 'Bullpadel', 'Head', 'NOX', 'adidas', 'ASICS'];
+const SHIP_CENTS = 490;
+const FREE_FROM = 7500;
+
+const PRODUCTS = [
+  {
+    slug: 'p2g-pro-carbon', brand: 'P2G', cat: 'Schläger', name: 'P2G Pro Carbon',
+    sub: 'Unser Allrounder — 100 % Carbon, entwickelt mit P2G Coaches.',
+    price: 14900, uvp: 17900, stock: 12, pop: 98, feat: true,
+    specs: [['Form', 'Tropfen'], ['Gewicht', '360 g'], ['Balance', 'Mittel'], ['Oberfläche', '3K Carbon, rau'], ['Kern', 'Soft-EVA'], ['Level', 'Einsteiger – Fortgeschritten']],
+    desc: [
+      'Der P2G Pro Carbon ist unser eigener Schläger: fehlerverzeihend, kontrolliert und mit genug Power für schnelle Bandejas. Entwickelt und getestet mit den Coaches an unseren Standorten.',
+      'Die raue 3K-Carbon-Oberfläche gibt dir mehr Spin, der Soft-EVA-Kern schont Arm und Ellenbogen — ideal für ambitionierte Einsteiger und Vielspieler.',
+    ],
+  },
+  {
+    slug: 'bullpadel-hack-04', brand: 'Bullpadel', cat: 'Schläger', name: 'Bullpadel Hack 04',
+    sub: 'Das Wettkampf-Racket — maximale Power für dein Angriffsspiel.',
+    price: 23900, uvp: 28900, stock: 5, pop: 92, feat: true,
+    specs: [['Form', 'Diamant'], ['Gewicht', '365 g'], ['Balance', 'Hoch'], ['Oberfläche', '12K Carbon'], ['Kern', 'MultiEVA'], ['Level', 'Fortgeschritten – Profi']],
+    desc: [
+      'Kompromisslose Power: Der Hack 04 ist für Spieler gebaut, die den Punkt am Netz entscheiden. Diamantform und hohe Balance bringen maximalen Druck in Smash und Víbora.',
+      'Der MultiEVA-Kern kombiniert Explosivität mit sauberem Ballgefühl — das Racket für ambitionierte Turnierspieler.',
+    ],
+  },
+  {
+    slug: 'head-speed-motion', brand: 'Head', cat: 'Schläger', name: 'Head Speed Motion',
+    sub: 'Leicht, rund, kontrolliert — für lange Ballwechsel.',
+    price: 17900, uvp: 21900, stock: 9, pop: 85,
+    specs: [['Form', 'Rund'], ['Gewicht', '355 g'], ['Balance', 'Niedrig'], ['Oberfläche', 'Graphen-Carbon'], ['Kern', 'Power Foam'], ['Level', 'Einsteiger – Fortgeschritten']],
+    desc: ['Der Speed Motion spielt sich leicht und präzise: niedrige Balance, runde Form, großer Sweetspot. Perfekt, wenn du dein Spiel über Kontrolle und Konstanz aufbaust.'],
+  },
+  {
+    slug: 'nox-at10-genius', brand: 'NOX', cat: 'Schläger', name: 'NOX AT10 Genius',
+    sub: 'Das Signature-Racket von Agustín Tapia — Kontrolle trifft Power.',
+    price: 19900, uvp: null, stock: 2, pop: 88,
+    specs: [['Form', 'Tropfen'], ['Gewicht', '360 g'], ['Balance', 'Mittel'], ['Oberfläche', '18K Carbon'], ['Kern', 'HR3-EVA'], ['Level', 'Fortgeschritten – Profi']],
+    desc: ['Das AT10 Genius verbindet höchste Ansprüche an Kontrolle mit erstaunlicher Power aus dem HR3-Kern. Ein Racket für Spieler, die das Tempo selbst bestimmen wollen.'],
+  },
+  {
+    slug: 'head-padel-pro-3', brand: 'Head', cat: 'Bälle', name: 'Head Padel Pro — 3er Dose',
+    sub: 'Der Turnierball — druckvoll, langlebig, wettkampferprobt.',
+    price: 690, uvp: null, stock: 140, pop: 95,
+    specs: [['Inhalt', '3 Bälle'], ['Typ', 'Druckball'], ['Einsatz', 'Training & Turnier'], ['Filz', 'Premium-Wollfilz']],
+    desc: ['Der Standard auf unseren Courts: konstanter Druck, sauberer Absprung und ein Filz, der auch intensive Matches übersteht.'],
+  },
+  {
+    slug: 'p2g-match-balls', brand: 'P2G', cat: 'Bälle', name: 'P2G Match Balls — 3er Dose',
+    sub: 'Unser Hausball — abgestimmt auf P2G Courts, fair im Preis.',
+    price: 550, uvp: 690, stock: 200, pop: 90, isNew: true,
+    specs: [['Inhalt', '3 Bälle'], ['Typ', 'Druckball'], ['Einsatz', 'Training & Match'], ['Filz', 'Wollfilz-Mix']],
+    desc: ['Gemeinsam mit unserem Ballpartner entwickelt und auf das Sprungverhalten unserer Courts abgestimmt. Wer bei P2G spielt, spielt mit diesem Ball.'],
+  },
+  {
+    slug: 'p2g-performance-shirt', brand: 'P2G', cat: 'Bekleidung', name: 'P2G Performance Shirt',
+    sub: 'Atmungsaktives Match-Shirt — natürlich in Lime on Black.',
+    price: 3490, uvp: null, stock: 34, pop: 80, isNew: true,
+    specs: [['Material', '92 % Polyester, 8 % Elasthan'], ['Passform', 'Athletic Fit'], ['Größen', 'S – XXL'], ['Pflege', '30 °C Maschinenwäsche']],
+    desc: ['Leicht, schnelltrocknend und geschnitten für explosive Bewegungen. Das Shirt, das unsere Coaches auf dem Court tragen.'],
+  },
+  {
+    slug: 'adidas-padel-shorts', brand: 'adidas', cat: 'Bekleidung', name: 'adidas Padel Shorts',
+    sub: 'Leichte Shorts mit Balltasche — bewegungsfreundlich geschnitten.',
+    price: 3990, uvp: 4590, stock: 18, pop: 74,
+    specs: [['Material', '100 % Recycling-Polyester'], ['Taschen', '2 + Balltasche'], ['Größen', 'S – XXL'], ['Länge', '7 Zoll']],
+    desc: ['Bewegungsfreiheit ohne Kompromisse: elastischer Bund, leichtes Gewebe und eine Balltasche, die den zweiten Ball sicher hält.'],
+  },
+  {
+    slug: 'adidas-gamecourt-padel', brand: 'adidas', cat: 'Schuhe', name: 'adidas GameCourt 2 Padel',
+    sub: 'Grip für Kunstrasen — stabil bei schnellen Richtungswechseln.',
+    price: 8990, uvp: 11000, stock: 0, pop: 89,
+    specs: [['Sohle', 'Clay/Padel-Profil'], ['Dämpfung', 'Cloudfoam'], ['Obermaterial', 'Mesh, verstärkt'], ['Größen', '40 – 47']],
+    desc: ['Der GameCourt 2 ist auf Padel-Kunstrasen zuhause: griffige Sohle, stabiler Seitenhalt und Dämpfung für harte Stopps am Glas.'],
+  },
+  {
+    slug: 'asics-gel-padel-pro', brand: 'ASICS', cat: 'Schuhe', name: 'ASICS Gel-Padel Pro 5',
+    sub: 'Gel-Dämpfung und Stabilität für lange Matchtage.',
+    price: 9990, uvp: null, stock: 7, pop: 83,
+    specs: [['Sohle', 'Padel-Profil'], ['Dämpfung', 'GEL™-Technologie'], ['Obermaterial', 'Synthetik/Mesh'], ['Größen', '40 – 48']],
+    desc: ['ASICS-Klassiker fürs Padel: GEL-Dämpfung in der Ferse, stabiler Stand bei Ausfallschritten und ein Profil, das auf Sand-Kunstrasen greift.'],
+  },
+  {
+    slug: 'bullpadel-paletero-pro', brand: 'Bullpadel', cat: 'Taschen', name: 'Bullpadel Paletero Pro',
+    sub: 'Platz für 2 Rackets, Schuhe & Wechselkleidung — mit Thermofach.',
+    price: 6990, uvp: 7990, stock: 11, pop: 78,
+    specs: [['Volumen', 'ca. 35 l'], ['Fächer', '3 + Thermofach'], ['Schuhfach', 'Ja, belüftet'], ['Maße', '54 × 32 × 24 cm']],
+    desc: ['Der Paletero für alle, die öfter als einmal pro Woche spielen: Das Thermofach schützt deine Rackets, das belüftete Schuhfach den Rest deiner Tasche.'],
+  },
+  {
+    slug: 'p2g-overgrip-set', brand: 'P2G', cat: 'Zubehör', name: 'P2G Overgrip — 3er Set',
+    sub: 'Griffbänder mit extra Grip — trocken auch im fünften Satz.',
+    price: 890, uvp: null, stock: 96, pop: 86,
+    specs: [['Inhalt', '3 Overgrips'], ['Stärke', '0,6 mm'], ['Oberfläche', 'Leicht klebrig, schweißabsorbierend'], ['Farbe', 'Lime / Schwarz / Weiß']],
+    desc: ['Frischer Grip in 30 Sekunden: Unsere Overgrips absorbieren Schweiß zuverlässig und geben dir ein sicheres, direktes Griffgefühl.'],
+  },
+];
+
+const eur = (c) => '€' + (c / 100).toFixed(2).replace('.', ',');
+const pts = (n) => n.toLocaleString('de-DE');
+const bySlug = (s) => PRODUCTS.find((p) => p.slug === s) || PRODUCTS[0];
+
+class Component extends DCLogic {
+  state = {
+    screen: 'catalog',
+    cat: 'Alle', brands: [], priceRange: 'all', availOnly: false, q: '', sort: 'pop',
+    prodSlug: 'p2g-pro-carbon', qty: 1, notified: false,
+    aName: '', aMail: '', aStreet: '', aZip: '', aCity: '',
+    payMethod: 0, pointsUse: 0, paying: false,
+    loggedInOverride: null, pointsBalance: null, order: null,
+  };
+
+  _loggedIn() { return this.state.loggedInOverride ?? (this.props.loggedIn ?? true); }
+  _balance() { return this.state.pointsBalance ?? (this.props.pointsBalance ?? 1240); }
+  _maxPct() { return this.props.maxPointsPercent ?? 30; }
+  _prod() { return bySlug(this.state.prodSlug); }
+  _go(screen, extra) { this.setState({ screen, ...(extra || {}) }); window.scrollTo(0, 0); }
+
+  _subtotal() { return this._prod().price * this.state.qty; }
+  _maxRedeem() {
+    if (!this._loggedIn()) return 0;
+    const cap = Math.floor((this._subtotal() * this._maxPct()) / 100);
+    return Math.max(0, Math.floor(Math.min(this._balance(), cap) / 10) * 10);
+  }
+  _redeem() { return Math.min(this.state.pointsUse, this._maxRedeem()); }
+  _ship() { return this._subtotal() >= FREE_FROM ? 0 : SHIP_CENTS; }
+  _total() { return Math.max(50, this._subtotal() - this._redeem() + this._ship()); }
+  _earn() { return Math.round(this._total() / 10); }
+
+  _prefillAddress(patch) {
+    const s = this.state;
+    if (this._loggedIn() && !s.aName && !s.aMail && !s.aStreet) {
+      Object.assign(patch, { aName: 'Florian Steinfelder', aMail: 'flo@padel2go.de', aStreet: 'Lindwurmstraße 42', aZip: '80331', aCity: 'München' });
+    }
+    return patch;
+  }
+
+  componentDidMount() {
+    const s = this.props.startScreen ?? 'katalog';
+    if (s === 'produkt') this._go('product', { prodSlug: 'p2g-pro-carbon' });
+    if (s === 'checkout') this._go('checkout', this._prefillAddress({ prodSlug: 'p2g-pro-carbon', qty: 1, pointsUse: 0 }));
+    if (s === 'bestaetigt') {
+      this.setState({
+        screen: 'success',
+        order: {
+          code: 'MP-7K2F', mail: this._loggedIn() ? 'flo@padel2go.de' : 'alex.weber@mail.de',
+          product: 'P2G Pro Carbon × 1', addrName: 'Florian Steinfelder', addrLine: 'Lindwurmstraße 42 · 80331 München',
+          total: eur(14900 - 500 + 0), method: 'Karte', spent: 500, earned: Math.round((14900 - 500) / 10),
+        },
+      });
+    }
+  }
+
+  _openProduct(slug) { this._go('product', { prodSlug: slug, qty: 1, notified: false }); }
+
+  _card(p, i) {
+    const soldOut = p.stock === 0;
+    const low = !soldOut && p.stock <= 5;
+    const stockCol = soldOut ? 'hsl(0 72% 58%)' : low ? 'hsl(45 90% 55%)' : '#C7F011';
+    const off = p.uvp ? Math.round((1 - p.price / p.uvp) * 100) : 0;
+    const badge = p.feat ? 'Bestseller' : p.isNew ? 'Neu' : null;
+    return {
+      slotId: 'mp-' + p.slug, slotPlaceholder: 'Foto: ' + p.name,
+      brand: p.brand, name: p.name, priceStr: eur(p.price),
+      uvpStr: p.uvp ? eur(p.uvp) : '',
+      uvpStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 12.5, color: 'hsl(0 0% 45%)', textDecoration: 'line-through', display: p.uvp ? 'inline' : 'none' },
+      featLabel: badge || '', featIcon: p.feat ? 'flame' : 'sparkles',
+      featBadgeStyle: { position: 'absolute', top: 12, left: 12, display: badge ? 'inline-flex' : 'none', alignItems: 'center', gap: 5, fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, fontWeight: 700, color: '#C7F011', background: 'hsl(0 0% 0% / 0.72)', backdropFilter: 'blur(8px)', border: '1px solid hsl(71 91% 51% / 0.4)', borderRadius: 999, padding: '4px 10px' },
+      offLabel: '−' + off + ' %',
+      offBadgeStyle: { position: 'absolute', top: 12, right: 12, display: off > 0 ? 'inline-flex' : 'none', alignItems: 'center', whiteSpace: 'nowrap', fontFamily: "'JetBrains Mono', monospace", fontSize: 11.5, fontWeight: 700, color: '#FAFAFA', background: 'hsl(0 0% 0% / 0.72)', backdropFilter: 'blur(8px)', border: '1px solid hsl(0 0% 100% / 0.15)', borderRadius: 999, padding: '4px 10px' },
+      soldOverlayStyle: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: soldOut ? 'inline-flex' : 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: 700, color: '#FAFAFA', background: 'hsl(0 0% 0% / 0.8)', backdropFilter: 'blur(6px)', border: '1px solid hsl(0 0% 30%)', borderRadius: 999, padding: '7px 16px', whiteSpace: 'nowrap' },
+      imgWrapStyle: { height: 190, opacity: soldOut ? 0.45 : 1, filter: soldOut ? 'grayscale(0.7)' : 'none' },
+      stockLabel: soldOut ? 'Ausverkauft' : low ? 'Nur noch ' + p.stock + ' Stück' : 'Auf Lager',
+      stockDotStyle: { width: 7, height: 7, borderRadius: '50%', background: stockCol, display: 'inline-block', flex: 'none' },
+      stockLabelStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: 600, color: stockCol, whiteSpace: 'nowrap' },
+      wrapStyle: { cursor: 'pointer', animation: 'fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) ' + Math.min(i * 0.06, 0.4) + 's backwards' },
+      open: () => this._openProduct(p.slug),
+    };
+  }
+
+  renderVals() {
+    const st = this.state;
+    const logged = this._loggedIn();
+    const prod = this._prod();
+    const maxPct = this._maxPct();
+
+    // ── filters ──
+    const catCount = (c) => PRODUCTS.filter((p) => c === 'Alle' || p.cat === c).length;
+    const catChips = [['Alle', 'layout-grid'], ...CATS].map(([label, icon]) => {
+      const on = st.cat === label;
+      return {
+        label, icon, count: String(catCount(label)),
+        select: () => this.setState({ cat: label }),
+        style: { display: 'inline-flex', alignItems: 'center', gap: 7, flex: 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 13.5, fontWeight: 600, padding: '9px 15px', borderRadius: 999, cursor: 'pointer', transition: 'all 0.22s', background: on ? '#C7F011' : 'hsl(0 0% 6%)', color: on ? '#000' : 'hsl(0 0% 75%)', border: on ? '1px solid transparent' : '1px solid hsl(0 0% 15%)', boxShadow: on ? '0 0 20px hsl(71 91% 51% / 0.3)' : 'none' },
+        countStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: on ? 'hsl(0 0% 0% / 0.6)' : 'hsl(0 0% 45%)' },
+      };
+    });
+
+    const sortSegs = [['pop', 'Beliebt'], ['asc', 'Preis ↑'], ['desc', 'Preis ↓']].map(([key, label]) => {
+      const on = st.sort === key;
+      return {
+        label, select: () => this.setState({ sort: key }),
+        style: { fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: 600, padding: '7px 13px', borderRadius: 999, cursor: 'pointer', border: 'none', transition: 'all 0.2s', background: on ? '#C7F011' : 'transparent', color: on ? '#000' : 'hsl(0 0% 65%)' },
+      };
+    });
+
+    const brandChips = BRANDS.map((b) => {
+      const on = st.brands.includes(b);
+      return {
+        label: b,
+        select: () => this.setState((s) => ({ brands: on ? s.brands.filter((x) => x !== b) : [...s.brands, b] })),
+        style: { fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: 600, padding: '6px 13px', borderRadius: 999, cursor: 'pointer', transition: 'all 0.2s', background: on ? 'hsl(71 91% 51% / 0.12)' : 'hsl(0 0% 6%)', color: on ? '#C7F011' : 'hsl(0 0% 65%)', border: on ? '1px solid hsl(71 91% 51% / 0.5)' : '1px solid hsl(0 0% 15%)' },
+      };
+    });
+
+    const priceChips = [['all', 'Alle'], ['low', 'bis 50 €'], ['mid', '50 – 150 €'], ['high', 'ab 150 €']].map(([key, label]) => {
+      const on = st.priceRange === key;
+      return {
+        label, select: () => this.setState({ priceRange: key }),
+        style: { fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: 600, padding: '6px 13px', borderRadius: 999, cursor: 'pointer', transition: 'all 0.2s', background: on ? 'hsl(71 91% 51% / 0.12)' : 'hsl(0 0% 6%)', color: on ? '#C7F011' : 'hsl(0 0% 65%)', border: on ? '1px solid hsl(71 91% 51% / 0.5)' : '1px solid hsl(0 0% 15%)' },
+      };
+    });
+
+    const filtersActive = st.cat !== 'Alle' || st.brands.length > 0 || st.priceRange !== 'all' || st.availOnly || st.q.trim() !== '';
+    const q = st.q.trim().toLowerCase();
+    let list = PRODUCTS.filter((p) =>
+      (st.cat === 'Alle' || p.cat === st.cat) &&
+      (st.brands.length === 0 || st.brands.includes(p.brand)) &&
+      (st.priceRange === 'all' || (st.priceRange === 'low' ? p.price < 5000 : st.priceRange === 'mid' ? p.price >= 5000 && p.price <= 15000 : p.price > 15000)) &&
+      (!st.availOnly || p.stock > 0) &&
+      (q === '' || (p.name + ' ' + p.brand + ' ' + p.cat).toLowerCase().includes(q))
+    );
+    list = list.slice().sort((a, b) => st.sort === 'asc' ? a.price - b.price : st.sort === 'desc' ? b.price - a.price : b.pop - a.pop);
+    const prodCards = list.map((p, i) => this._card(p, i));
+
+    // ── detail ──
+    const dSoldOut = prod.stock === 0;
+    const dLow = !dSoldOut && prod.stock <= 5;
+    const dStockCol = dSoldOut ? 'hsl(0 72% 58%)' : dLow ? 'hsl(45 90% 55%)' : '#C7F011';
+    const dOff = prod.uvp ? Math.round((1 - prod.price / prod.uvp) * 100) : 0;
+    const dBadge = prod.feat ? 'Bestseller' : prod.isNew ? 'Neu' : null;
+    const qtyMax = Math.min(prod.stock, 5);
+    const dMaxSave = Math.min(this._balance(), Math.floor((prod.price * st.qty * maxPct) / 100));
+    const related = PRODUCTS.filter((p) => p.slug !== prod.slug && p.cat === prod.cat);
+    PRODUCTS.filter((p) => p.slug !== prod.slug && p.cat !== prod.cat && (p.feat || p.isNew || p.pop > 85)).forEach((p) => { if (related.length < 3) related.push(p); });
+    const relCards = related.slice(0, 3).map((p, i) => this._card(p, i));
+
+    const specRows = prod.specs.map(([label, value], i) => ({
+      label, value,
+      rowStyle: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16, padding: '10px 0', borderTop: i === 0 ? 'none' : '1px solid hsl(0 0% 12%)' },
+    }));
+
+    // ── checkout ──
+    const subtotal = this._subtotal();
+    const maxRedeem = this._maxRedeem();
+    const redeem = this._redeem();
+    const ship = this._ship();
+    const total = this._total();
+    const emailOk = /.+@.+\..+/.test(st.aMail.trim());
+    const addrValid = st.aName.trim().length > 1 && emailOk && st.aStreet.trim().length > 3 && /^\d{4,5}$/.test(st.aZip.trim()) && st.aCity.trim().length > 1;
+
+    const payMethods = [
+      { icon: 'credit-card', name: 'Karte', sub: 'Visa · Mastercard · Amex' },
+      { icon: 'wallet', name: 'PayPal', sub: 'Mit PayPal-Konto zahlen' },
+    ].map((m, i) => {
+      const on = st.payMethod === i;
+      return {
+        ...m, select: () => this.setState({ payMethod: i }),
+        style: { position: 'relative', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 15px', borderRadius: 14, cursor: 'pointer', transition: 'all 0.22s', textAlign: 'left', background: on ? 'hsl(71 91% 51% / 0.09)' : 'hsl(0 0% 6%)', border: on ? '1px solid hsl(71 91% 51% / 0.6)' : '1px solid hsl(0 0% 15%)', boxShadow: on ? '0 0 20px hsl(71 91% 51% / 0.18)' : 'none' },
+        iconStyle: { width: 38, height: 38, borderRadius: 11, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: on ? 'hsl(71 91% 51% / 0.14)' : 'hsl(0 0% 100% / 0.05)', border: '1px solid ' + (on ? 'hsl(71 91% 51% / 0.4)' : 'hsl(0 0% 16%)'), color: on ? '#C7F011' : 'hsl(0 0% 60%)' },
+        checkStyle: { position: 'absolute', top: 10, right: 10, width: 20, height: 20, borderRadius: '50%', background: '#C7F011', color: '#000', display: on ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 14px hsl(71 91% 51% / 0.5)' },
+      };
+    });
+
+    const order = st.order || {};
+
+    return {
+      // nav / shared
+      effLoggedIn: logged, notLoggedIn: !logged,
+      pointsLabel: pts(this._balance()) + ' P2G Points',
+      doLogin: () => this.setState((s) => this._prefillAddress({ loggedInOverride: true })),
+      goCatalog: () => this._go('catalog'),
+      isCatalog: st.screen === 'catalog', isProduct: st.screen === 'product',
+      isCheckout: st.screen === 'checkout', isSuccess: st.screen === 'success',
+
+      // catalog
+      heroPointsHint: pts(this._balance()) + ' Points verfügbar — bis zu ' + maxPct + ' % Rabatt im Checkout',
+      catChips, sortSegs, brandChips, priceChips,
+      queryVal: st.q, setQuery: (e) => this.setState({ q: e.target.value }),
+      toggleAvail: () => this.setState((s) => ({ availOnly: !s.availOnly })),
+      availStyle: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, padding: '9px 15px', borderRadius: 999, cursor: 'pointer', transition: 'all 0.2s', background: st.availOnly ? 'hsl(71 91% 51% / 0.12)' : 'hsl(0 0% 6%)', color: st.availOnly ? '#C7F011' : 'hsl(0 0% 65%)', border: st.availOnly ? '1px solid hsl(71 91% 51% / 0.5)' : '1px solid hsl(0 0% 15%)' },
+      availDotStyle: { width: 8, height: 8, borderRadius: '50%', flex: 'none', background: st.availOnly ? '#C7F011' : 'hsl(0 0% 30%)', boxShadow: st.availOnly ? '0 0 10px hsl(71 91% 51% / 0.6)' : 'none', transition: 'all 0.2s' },
+      resultLabel: list.length === PRODUCTS.length ? PRODUCTS.length + ' Produkte' : list.length + ' von ' + PRODUCTS.length,
+      resetFilters: () => this.setState({ cat: 'Alle', brands: [], priceRange: 'all', availOnly: false, q: '', sort: 'pop' }),
+      resetStyle: { display: filtersActive ? 'inline-flex' : 'none', alignItems: 'center', gap: 5, fontFamily: "'DM Sans', sans-serif", fontSize: 12.5, fontWeight: 600, padding: '6px 12px', borderRadius: 999, cursor: 'pointer', background: 'none', border: 'none', color: 'hsl(0 0% 50%)' },
+      prodCards, hasResults: list.length > 0, noResults: list.length === 0,
+
+      // detail
+      dCat: prod.cat, dName: prod.name, dBrand: prod.brand, dSubtitle: prod.sub,
+      goCatFiltered: () => this._go('catalog', { cat: prod.cat }),
+      dSlotMain: 'mp-' + prod.slug, dSlotMainPh: 'Titelbild: ' + prod.name,
+      dSlotB: 'mp-' + prod.slug + '-b', dSlotC: 'mp-' + prod.slug + '-c',
+      dSoldOverlayStyle: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: dSoldOut ? 'inline-flex' : 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700, color: '#FAFAFA', background: 'hsl(0 0% 0% / 0.8)', backdropFilter: 'blur(6px)', border: '1px solid hsl(0 0% 30%)', borderRadius: 999, padding: '9px 20px', whiteSpace: 'nowrap' },
+      dFeatLabel: dBadge || '', dFeatIcon: prod.feat ? 'flame' : 'sparkles',
+      dFeatBadgeStyle: { display: dBadge ? 'inline-flex' : 'none', alignItems: 'center', gap: 5, fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, fontWeight: 700, color: '#C7F011', background: 'hsl(71 91% 51% / 0.1)', border: '1px solid hsl(71 91% 51% / 0.35)', borderRadius: 999, padding: '5px 11px' },
+      dPriceStr: eur(prod.price),
+      dUvpStr: prod.uvp ? eur(prod.uvp) : '',
+      dUvpStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 14.5, color: 'hsl(0 0% 45%)', textDecoration: 'line-through', display: prod.uvp ? 'inline' : 'none' },
+      dOffLabel: '−' + dOff + ' %',
+      dOffBadgeStyle: { display: dOff > 0 ? 'inline-flex' : 'none', alignItems: 'center', whiteSpace: 'nowrap', fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700, color: '#C7F011', background: 'hsl(71 91% 51% / 0.1)', border: '1px solid hsl(71 91% 51% / 0.35)', borderRadius: 999, padding: '4px 10px' },
+      dMaxSaveStr: eur(dMaxSave), maxPctLabel: maxPct + ' %',
+      dStockLabel: dSoldOut ? 'Ausverkauft' : dLow ? 'Nur noch ' + prod.stock + ' Stück' : 'Auf Lager',
+      dStockDotStyle: { width: 8, height: 8, borderRadius: '50%', background: dStockCol, display: 'inline-block', flex: 'none', animation: dSoldOut ? 'none' : 'pulseGlow 2s infinite' },
+      dStockLabelStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 13.5, fontWeight: 700, color: dStockCol, whiteSpace: 'nowrap' },
+      dShipNote: dSoldOut ? '· bald wieder verfügbar' : '· Lieferung in 2–4 Werktagen',
+      dInStock: !dSoldOut, dSoldOut,
+      qtyStr: String(st.qty),
+      qtyMinus: () => this.setState((s) => ({ qty: Math.max(1, s.qty - 1) })),
+      qtyPlus: () => this.setState((s) => ({ qty: Math.min(qtyMax, s.qty + 1) })),
+      qtyMinusStyle: { width: 38, height: 38, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: st.qty <= 1 ? 'default' : 'pointer', background: 'none', border: 'none', color: st.qty <= 1 ? 'hsl(0 0% 30%)' : '#FAFAFA' },
+      qtyPlusStyle: { width: 38, height: 38, borderRadius: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: st.qty >= qtyMax ? 'default' : 'pointer', background: 'none', border: 'none', color: st.qty >= qtyMax ? 'hsl(0 0% 30%)' : '#FAFAFA' },
+      buyNow: () => this._go('checkout', this._prefillAddress({ pointsUse: 0 })),
+      notifyMe: () => this.setState({ notified: true }),
+      notifyLabel: st.notified ? 'Alles klar — wir melden uns! 💚' : 'Benachrichtigen, wenn verfügbar',
+      dSpecRows: specRows,
+      dDescParas: prod.desc.map((text) => ({ text })),
+      relCards,
+
+      // checkout
+      backToProduct: () => this._go('product'),
+      aName: st.aName, aMail: st.aMail, aStreet: st.aStreet, aZip: st.aZip, aCity: st.aCity,
+      setAName: (e) => this.setState({ aName: e.target.value }),
+      setAMail: (e) => this.setState({ aMail: e.target.value }),
+      setAStreet: (e) => this.setState({ aStreet: e.target.value }),
+      setAZip: (e) => this.setState({ aZip: e.target.value }),
+      setACity: (e) => this.setState({ aCity: e.target.value }),
+      payMethods, payMethodName: st.payMethod === 0 ? 'Karte' : 'PayPal',
+      sumQtyLine: 'Menge: ' + st.qty + ' × ' + eur(prod.price),
+      subtotalStr: eur(subtotal),
+      balanceChip: pts(this._balance()) + ' Points',
+      hasSlider: maxRedeem >= 10, noSliderPoints: maxRedeem < 10,
+      sliderMax: maxRedeem, sliderVal: redeem,
+      setSlider: (e) => this.setState({ pointsUse: Number(e.target.value) }),
+      sliderPointsLabel: pts(redeem) + ' Points',
+      sliderMaxHint: 'Max. ' + maxPct + ' % des Warenwerts · 100 Points = €1,00',
+      discountStr: eur(redeem), hasDiscount: redeem > 0,
+      discountPtsLabel: pts(redeem) + ' Points eingelöst',
+      shipStr: ship === 0 ? 'Gratis' : eur(ship),
+      shipValStyle: { fontFamily: "'JetBrains Mono', monospace", fontWeight: ship === 0 ? 700 : 400, color: ship === 0 ? '#C7F011' : 'hsl(0 0% 60%)' },
+      totalStr: eur(total),
+      earnStr: pts(this._earn()),
+      payLabel: 'Jetzt bezahlen · ' + eur(total),
+      payWrapStyle: { opacity: addrValid ? 1 : 0.45, pointerEvents: addrValid ? 'auto' : 'none', transition: 'opacity 0.3s' },
+      payHint: addrValid ? 'Mit Klick auf „Jetzt bezahlen" geht\'s sicher weiter zu Stripe.' : 'Fülle deine Lieferadresse aus, um fortzufahren.',
+      payHintStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 12, textAlign: 'center', color: addrValid ? 'hsl(0 0% 50%)' : '#C7F011' },
+      pay: () => {
+        if (!addrValid) return;
+        this.setState({ paying: true });
+        this._payT = setTimeout(() => {
+          const code = 'MP-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+          this.setState((s) => ({
+            paying: false, screen: 'success',
+            pointsBalance: logged ? this._balance() - redeem + this._earn() : this._balance(),
+            order: {
+              code, mail: st.aMail, product: prod.name + ' × ' + st.qty,
+              addrName: st.aName, addrLine: st.aStreet + ' · ' + st.aZip + ' ' + st.aCity,
+              total: eur(total), method: st.payMethod === 0 ? 'Karte' : 'PayPal',
+              spent: redeem, earned: this._earn(),
+            },
+          }));
+          window.scrollTo(0, 0);
+        }, 2000);
+      },
+      paying: st.paying,
+      cancelPay: () => { clearTimeout(this._payT); this.setState({ paying: false }); },
+
+      // success
+      oCode: order.code || 'MP-····', oMail: order.mail || 'deine E-Mail',
+      oProduct: order.product || '', oAddrName: order.addrName || '', oAddrLine: order.addrLine || '',
+      oTotal: order.total || '', oMethod: order.method || 'Karte',
+      oHasDiscount: (order.spent || 0) > 0,
+      oDiscountLine: '−' + pts(order.spent || 0) + ' Points · −' + eur(order.spent || 0),
+      oEarned: pts(order.earned || 0),
+      shopMore: () => this._go('catalog', { qty: 1, pointsUse: 0 }),
+    };
+  }
+
+  componentWillUnmount() { clearTimeout(this._payT); }
+}
+
+</script>
+</body>
+</html>

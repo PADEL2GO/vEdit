@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #ev-table { width: 100%; border-collapse: collapse; min-width: 980px; }
+    #ev-table th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(0 0% 65%); text-align: left; font-weight: 400; padding: 0 14px 12px 0; white-space: nowrap; }
+    #ev-table td { padding: 12px 14px 12px 0; border-top: 1px solid hsl(0 0% 12%); font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: hsl(0 0% 78%); }
+    #ev-table tbody tr:hover td { background: hsl(0 0% 100% / 0.022); }
+    #ev-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 13px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Events">
+  <dc-import name="AdminSidebar" active="events" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/events</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Events</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <button onClick="{{ startTranslate }}" ref="{{ trBtnRef }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer;white-space:nowrap;transition:color 0.2s, border-color 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">
+          <p2g-icon name="languages" size="15"></p2g-icon><span ref="{{ trLabelRef }}">Alle übersetzen</span>
+        </button>
+        <button onClick="{{ openForm }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.28);white-space:nowrap">
+          <p2g-icon name="plus" size="15"></p2g-icon>Neues Event
+        </button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)"><span style="color:#C7F011;font-weight:700">5 veröffentlicht</span>, <span style="color:#FFC44D;font-weight:700">2 Entwürfe</span></span>
+
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,540px">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
+            <label style="position:relative;display:flex;align-items:center;flex:1;min-width:min(240px, 100%)">
+              <span style="position:absolute;left:11px;display:flex;color:hsl(0 0% 58%)"><p2g-icon name="search" size="15"></p2g-icon></span>
+              <input onInput="{{ onSearch }}" type="text" placeholder="Suche nach Titel oder Stadt…" style="width:100%;height:38px;padding:0 12px 0 36px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+            </label>
+            <span style="position:relative;display:flex;align-items:center">
+              <select onChange="{{ onFilter }}" style="appearance:none;height:38px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                <option value="all">Alle Events</option><option value="live">Veröffentlicht</option><option value="draft">Entwürfe</option>
+              </select>
+              <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+            </span>
+          </div>
+
+          <div style="overflow-x:auto">
+            <table id="ev-table">
+              <thead>
+                <tr><th>Event</th><th>Standort</th><th>Datum</th><th>Featured</th><th>Status</th><th>Tickets</th><th style="text-align:right">Aktionen</th></tr>
+              </thead>
+              <tbody ref="{{ rowsRef }}">
+                <sc-for list="{{ events }}" as="e" hint-placeholder-count="7">
+                  <tr data-q="{{ e.q }}" data-state="{{ e.stateKey }}">
+                    <td>
+                      <div style="display:flex;align-items:center;gap:12px">
+                        <img src="{{ e.img }}" alt="" style="width:48px;height:48px;flex:none;object-fit:cover;border-radius:11px;border:1px solid hsl(0 0% 15%);display:block">
+                        <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                          <span style="font-size:13.5px;font-weight:700;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px">{{ e.title }}</span>
+                          <div style="display:flex;align-items:center;gap:8px">
+                            <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%);white-space:nowrap">{{ e.city }}</span>
+                            <span style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:{{ e.typeFg }};background:{{ e.typeBg }};border:1px solid {{ e.typeBrd }};border-radius:999px;padding:2px 8px;white-space:nowrap">{{ e.type }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span style="white-space:nowrap">{{ e.venue }}</span></td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap">{{ e.date }}</span></td>
+                    <td>
+                      <button onClick="{{ e.noop }}" style="width:38px;height:22px;position:relative;padding:0;background:{{ e.fBg }};border:1px solid {{ e.fBrd }};border-radius:999px;cursor:pointer;transition:background 0.2s">
+                        <span style="position:absolute;top:2px;left:{{ e.fX }};width:16px;height:16px;border-radius:50%;background:{{ e.fKnob }};transition:left 0.2s"></span>
+                      </button>
+                    </td>
+                    <td>
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <button onClick="{{ e.noop }}" style="width:38px;height:22px;flex:none;position:relative;padding:0;background:{{ e.pBg }};border:1px solid {{ e.pBrd }};border-radius:999px;cursor:pointer;transition:background 0.2s">
+                          <span style="position:absolute;top:2px;left:{{ e.pX }};width:16px;height:16px;border-radius:50%;background:{{ e.pKnob }};transition:left 0.2s"></span>
+                        </button>
+                        <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ e.stateFg }};background:{{ e.stateBg }};border:1px solid {{ e.stateBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap">
+                          <span style="width:5px;height:5px;border-radius:50%;background:{{ e.stateFg }}"></span>{{ e.state }}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <sc-if value="{{ e.hasTicket }}" hint-placeholder-val="{{ true }}">
+                        <a href="#" style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;white-space:nowrap">Link <p2g-icon name="external-link" size="12"></p2g-icon></a>
+                      </sc-if>
+                      <sc-if value="{{ e.noTicket }}" hint-placeholder-val="{{ false }}">
+                        <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 55%);white-space:nowrap">über P2G</span>
+                      </sc-if>
+                    </td>
+                    <td>
+                      <div style="display:flex;align-items:center;justify-content:flex-end;gap:7px">
+                        <button onClick="{{ e.edit }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="pencil" size="14"></p2g-icon></button>
+                        <button onClick="{{ e.del }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                      </div>
+                    </td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+
+          <span ref="{{ emptyRef }}" style="display:none;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 65%);text-align:center;padding:18px 0">Keine Events gefunden</span>
+        </div>
+      </x-import>
+    </main>
+  </div>
+
+  <!-- ── EventForm ── -->
+  <div ref="{{ formRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeForm }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.78);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(820px, 100%);max-height:90vh;overflow-y:auto;background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:22px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="position:sticky;top:0;z-index:2;background:hsl(0 0% 6% / 0.95);backdrop-filter:blur(18px);border-bottom:1px solid hsl(0 0% 14%);padding:20px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Event</span>
+          <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Neues Event erstellen</h3>
+        </div>
+        <button onClick="{{ closeForm }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer" style-hover="color:#FAFAFA"><p2g-icon name="x" size="16"></p2g-icon></button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:22px;padding:24px">
+
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Event-Bild</span>
+          <div style="display:flex;align-items:center;justify-content:center;gap:11px;height:130px;background:hsl(0 0% 100% / 0.028);border:1px dashed hsl(0 0% 20%);border-radius:15px;cursor:pointer;transition:border-color 0.2s" style-hover="border-color:hsl(71 91% 51% / 0.5)">
+            <span style="color:hsl(0 0% 58%);display:flex"><p2g-icon name="image-plus" size="20"></p2g-icon></span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%)">Klicken zum Hochladen</span>
+          </div>
+        </div>
+
+        <div id="ev-form">
+          <sc-for list="{{ formFields }}" as="f" hint-placeholder-count="12">
+            <label style="display:flex;flex-direction:column;gap:7px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ f.label }}<sc-if value="{{ f.req }}" hint-placeholder-val="{{ false }}"><span style="color:#C7F011"> *</span></sc-if></span>
+              <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
+                <span style="position:relative;display:flex;align-items:center">
+                  <select style="appearance:none;width:100%;height:40px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                    <sc-for list="{{ f.options }}" as="o" hint-placeholder-count="3">
+                      <option value="{{ o }}">{{ o }}</option>
+                    </sc-for>
+                  </select>
+                  <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+                </span>
+              </sc-if>
+              <sc-if value="{{ f.isInput }}" hint-placeholder-val="{{ true }}">
+                <input type="text" placeholder="{{ f.ph }}" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              </sc-if>
+            </label>
+          </sc-for>
+        </div>
+
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Beschreibung</span>
+          <textarea rows="3" placeholder="Was passiert bei diesem Event?" style="padding:11px 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;resize:vertical;transition:border-color 0.2s" style-focus="border-color:#C7F011"></textarea>
+        </label>
+
+        <!-- Highlights -->
+        <div style="display:flex;flex-direction:column;gap:11px;padding:17px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+          <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#FAFAFA">Highlights &amp; Features</span>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <sc-for list="{{ activeHighlights }}" as="h" hint-placeholder-count="3">
+              <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.32);border-radius:999px;padding:6px 11px;white-space:nowrap">
+                {{ h }}<span style="display:flex;cursor:pointer;color:hsl(71 91% 51% / 0.7)"><p2g-icon name="x" size="12"></p2g-icon></span>
+              </span>
+            </sc-for>
+          </div>
+          <input type="text" placeholder="Eigenes Highlight hinzufügen…" style="height:38px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%)">Vorschläge</span>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="8">
+              <button style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:hsl(0 0% 78%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:6px 11px;cursor:pointer;white-space:nowrap;transition:all 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4);background:hsl(71 91% 51% / 0.08)">+ {{ s }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- Artists -->
+        <div style="display:flex;flex-direction:column;gap:12px;padding:17px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#FAFAFA">Artists &amp; Performer</span>
+            <button style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.3);border-radius:9px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(71 91% 51% / 0.18)"><p2g-icon name="plus" size="14"></p2g-icon>Artist</button>
+          </div>
+          <sc-for list="{{ artists }}" as="a" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:13px;padding:12px 13px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 13%);border-radius:13px">
+              <span style="color:hsl(0 0% 45%);display:flex;cursor:grab"><p2g-icon name="grip-vertical" size="15"></p2g-icon></span>
+              <span style="width:44px;height:44px;flex:none;border-radius:11px;background:hsl(0 0% 100% / 0.05);border:1px dashed hsl(0 0% 20%);display:flex;align-items:center;justify-content:center;color:hsl(0 0% 55%);cursor:pointer"><p2g-icon name="user" size="17"></p2g-icon></span>
+              <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0">
+                <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.name }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.meta }}</span>
+              </div>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#C7A6FF;background:hsl(263 100% 82% / 0.1);border:1px solid hsl(263 100% 82% / 0.3);border-radius:999px;padding:4px 10px;white-space:nowrap;flex:none">{{ a.role }}</span>
+              <button style="width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- Brands -->
+        <div style="display:flex;flex-direction:column;gap:12px;padding:17px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#FAFAFA">Partner &amp; Brands</span>
+            <button style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.3);border-radius:9px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(71 91% 51% / 0.18)"><p2g-icon name="plus" size="14"></p2g-icon>Brand</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(200px, 100%), 1fr));gap:11px">
+            <sc-for list="{{ brands }}" as="b" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 13%);border-radius:13px">
+                <span style="width:40px;height:40px;flex:none;border-radius:9px;background:#F5F5F3;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 45%);cursor:pointer"><p2g-icon name="image" size="16"></p2g-icon></span>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.name }}</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap">{{ b.type }}</span>
+                </div>
+                <button style="width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="13"></p2g-icon></button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- Switches -->
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <sc-for list="{{ formSwitches }}" as="s" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 15px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:14px">
+              <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FAFAFA">{{ s.label }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 65%)">{{ s.hint }}</span>
+              </div>
+              <button style="width:42px;height:24px;flex:none;position:relative;padding:0;background:{{ s.bg }};border:1px solid {{ s.brd }};border-radius:999px;cursor:pointer;transition:background 0.2s">
+                <span style="position:absolute;top:2px;left:{{ s.x }};width:18px;height:18px;border-radius:50%;background:{{ s.knob }};transition:left 0.2s"></span>
+              </button>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:18px;border-top:1px solid hsl(0 0% 12%)">
+          <button onClick="{{ closeForm }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+          <button onClick="{{ closeForm }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25)">Event erstellen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialog: löschen ── -->
+  <div ref="{{ delRef }}" style="display:none;position:fixed;inset:0;z-index:95;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(430px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Event löschen?</h3>
+        <p ref="{{ delTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 68%);margin:0">„Season Opening München“ wird unwiderruflich gelöscht.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:0;border-radius:11px;cursor:pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const TYPE = {
+  Party: ['#C7A6FF', 'hsl(263 100% 82% / 0.1)', 'hsl(263 100% 82% / 0.3)'],
+  Turnier: ['#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)'],
+  'Open Play': ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)'],
+  Workshop: ['#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)'],
+  Corporate: ['hsl(0 0% 82%)', 'hsl(0 0% 100% / 0.05)', 'hsl(0 0% 18%)'],
+  'Season Opening': ['#FF9E6B', 'hsl(20 100% 71% / 0.1)', 'hsl(20 100% 71% / 0.3)'],
+};
+
+const EVENTS = [
+  { title: 'Season Opening München', city: 'München', type: 'Season Opening', venue: 'TSV München-Ost', date: '15. Aug 2026', img: 'assets/events-hero.jpg', featured: true, published: true, ticket: true },
+  { title: 'Padel Night × DJ Kova', city: 'Köln', type: 'Party', venue: 'SV Rheinaue Köln', date: '22. Aug 2026', img: 'assets/skypadel-sunset.jpg', featured: false, published: true, ticket: true },
+  { title: 'P2G Open Play Night', city: 'Hamburg', type: 'Open Play', venue: 'TC Hamburg-Alster', date: '29. Aug 2026', img: 'assets/tennis-padel-aerial.jpg', featured: false, published: true, ticket: false },
+  { title: 'Sommer-Turnier Stuttgart', city: 'Stuttgart', type: 'Turnier', venue: 'TSG Stuttgart-Süd', date: '05. Sep 2026', img: 'assets/padel-norway.jpg', featured: true, published: true, ticket: true },
+  { title: 'Beginner Clinic mit Pro-Coach', city: 'München', type: 'Workshop', venue: 'TSV München-Ost', date: '12. Sep 2026', img: 'assets/skypadel-outdoor.jpg', featured: false, published: true, ticket: false },
+  { title: 'Corporate Padel Cup', city: 'Köln', type: 'Corporate', venue: 'SV Rheinaue Köln', date: '26. Sep 2026', img: 'assets/fuer-vereine-hero.jpg', featured: false, published: false, ticket: false },
+  { title: 'Pop-Up Court Leipzig', city: 'Leipzig', type: 'Party', venue: 'SC Leipzig-Nord', date: '10. Okt 2026', img: 'assets/league-hero.jpg', featured: false, published: false, ticket: false },
+];
+
+const ON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '18px', '#0A0A0A'];
+const OFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 14) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); clearInterval(this._tr); }
+
+  _filter() {
+    if (!this._rows) return;
+    const q = (this._q || '').toLowerCase();
+    const f = this._f || 'all';
+    let n = 0;
+    this._rows.querySelectorAll('tr[data-q]').forEach((tr) => {
+      const hitQ = !q || tr.dataset.q.toLowerCase().indexOf(q) >= 0;
+      const hitF = f === 'all' || tr.dataset.state === f;
+      const hit = hitQ && hitF;
+      tr.style.display = hit ? '' : 'none';
+      if (hit) n += 1;
+    });
+    if (this._empty) this._empty.style.display = n ? 'none' : 'block';
+  }
+
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    return {
+      events: EVENTS.map((e) => {
+        const t = TYPE[e.type] || TYPE.Corporate;
+        const f = e.featured ? ON : OFF;
+        const p = e.published ? ON : OFF;
+        return {
+          ...e,
+          q: [e.title, e.city, e.venue, e.type].join(' '),
+          stateKey: e.published ? 'live' : 'draft',
+          state: e.published ? 'Live' : 'Entwurf',
+          stateFg: e.published ? '#C7F011' : '#FFC44D',
+          stateBg: e.published ? 'hsl(71 91% 51% / 0.1)' : 'hsl(41 100% 65% / 0.1)',
+          stateBrd: e.published ? 'hsl(71 91% 51% / 0.3)' : 'hsl(41 100% 65% / 0.3)',
+          typeFg: t[0], typeBg: t[1], typeBrd: t[2],
+          fBg: f[0], fBrd: f[1], fX: f[2], fKnob: f[3],
+          pBg: p[0], pBrd: p[1], pX: p[2], pKnob: p[3],
+          hasTicket: e.ticket,
+          noTicket: !e.ticket,
+          noop: () => {},
+          edit: () => this._show(this._form, true),
+          del: () => {
+            if (this._delText) this._delText.textContent = '„' + e.title + '“ wird unwiderruflich gelöscht.';
+            this._show(this._del, true);
+          },
+        };
+      }),
+
+      formFields: [
+        { label: 'Standort', req: true, isSelect: true, options: ['Standort wählen', 'TSV München-Ost', 'SV Rheinaue Köln', 'TC Hamburg-Alster', 'TSG Stuttgart-Süd'] },
+        { label: 'Event-Typ', isSelect: true, options: ['Party / Social Event', 'Open-Play-Night', 'Turnier', 'Corporate Event', 'Workshop / Clinic', 'Season Opening', 'Pop-Up Event', 'Sonstiges'] },
+        { label: 'Titel', req: true, isInput: true, ph: 'Season Opening München' },
+        { label: 'Venue / Location Name', isInput: true, ph: 'z. B. Padel Club Berlin' },
+        { label: 'Adresse', isInput: true, ph: 'Sportpark Ost 4' },
+        { label: 'PLZ', isInput: true, ph: '81829' },
+        { label: 'Stadt', isInput: true, ph: 'München' },
+        { label: 'Startdatum', isInput: true, ph: '15.08.2026 18:00' },
+        { label: 'Enddatum', isInput: true, ph: '15.08.2026 23:00' },
+        { label: 'Externer Ticket-Link', isInput: true, ph: 'leer = Buchung über P2G' },
+        { label: 'Kapazität', isInput: true, ph: '80' },
+        { label: 'Preis-Anzeige', isInput: true, ph: 'z. B. €15 / Gratis für Members' },
+      ],
+      activeHighlights: ['DJ', 'Bar & Drinks', 'Pro-Coaching'],
+      suggestions: ['Live-Musik', 'Food Trucks', 'Turnier', 'Anfänger-freundlich', 'Networking', 'Gewinnspiele', 'Goodie Bags', 'After-Party'],
+      artists: [
+        { name: 'DJ Kova', meta: '@djkova · spotify.com/djkova', role: 'DJ' },
+        { name: 'Marta Ruiz', meta: '@martapadel · Pro-Spielerin', role: 'Pro-Spieler' },
+      ],
+      brands: [
+        { name: 'SkyPadel', type: 'Equipment-Partner' },
+        { name: 'Wingfield', type: 'Partner' },
+        { name: 'Red Bull', type: 'Sponsor' },
+      ],
+      formSwitches: [
+        { label: 'Featured Event', hint: 'Wird als Haupt-Event auf der Events-Seite hervorgehoben.', bg: OFF[0], brd: OFF[1], x: OFF[2], knob: OFF[3] },
+        { label: 'Veröffentlicht', hint: 'Event wird im Frontend angezeigt.', bg: ON[0], brd: ON[1], x: ON[2], knob: ON[3] },
+      ],
+
+      rowsRef: (el) => { this._rows = el; this._filter(); },
+      emptyRef: (el) => { this._empty = el; },
+      formRef: (el) => { this._form = el; },
+      delRef: (el) => { this._del = el; },
+      delTextRef: (el) => { this._delText = el; },
+      trBtnRef: (el) => { this._trBtn = el; },
+      trLabelRef: (el) => { this._trLabel = el; },
+
+      onSearch: (e) => { this._q = e.target.value; this._filter(); },
+      onFilter: (e) => { this._f = e.target.value; this._filter(); },
+      openForm: () => this._show(this._form, true),
+      closeForm: () => this._show(this._form, false),
+      closeDel: () => this._show(this._del, false),
+      startTranslate: () => {
+        if (this._tr) return;
+        let done = 0;
+        const total = EVENTS.length;
+        const step = () => {
+          done += 1;
+          if (this._trLabel) this._trLabel.textContent = 'Übersetze ' + done + '/' + total + ' …';
+          if (done >= total) {
+            clearInterval(this._tr);
+            this._tr = null;
+            if (this._trLabel) this._trLabel.textContent = total + ' Einträge übersetzt';
+            setTimeout(() => { if (this._trLabel) this._trLabel.textContent = 'Alle übersetzen'; }, 2200);
+          }
+        };
+        step();
+        this._tr = setInterval(step, 420);
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    #co-table { width: 100%; border-collapse: collapse; min-width: 880px; }
+    #co-table th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(0 0% 65%); text-align: left; font-weight: 400; padding: 0 14px 12px 0; white-space: nowrap; }
+    #co-table td { padding: 13px 14px 13px 0; border-top: 1px solid hsl(0 0% 12%); font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: hsl(0 0% 78%); }
+    #co-table tbody tr:hover td { background: hsl(0 0% 100% / 0.022); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Club Owners">
+  <dc-import name="AdminSidebar" active="owners" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/club-owners</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Club Owners</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <button onClick="{{ openDlg }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.28)">
+          <p2g-icon name="plus" size="15"></p2g-icon>Neue Zuweisung
+        </button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:18px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
+        <span style="font-family:'DM Sans',sans-serif;font-size:14px;color:hsl(0 0% 65%)">Club-Owner-Zuweisungen und Kontingente verwalten</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#FFC44D;background:hsl(41 100% 65% / 0.09);border:1px solid hsl(41 100% 65% / 0.28);border-radius:999px;padding:4px 10px;white-space:nowrap">Legacy-Modell</span>
+      </div>
+
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,420px">
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Zuweisungen <span ref="{{ countRef }}" style="font-family:'JetBrains Mono',monospace;font-weight:400;font-size:14px;color:hsl(0 0% 65%)">(6)</span></h2>
+            <label style="position:relative;display:flex;align-items:center;min-width:min(280px, 100%)">
+              <span style="position:absolute;left:11px;display:flex;color:hsl(0 0% 58%)"><p2g-icon name="search" size="15"></p2g-icon></span>
+              <input onInput="{{ onSearch }}" type="text" placeholder="Name, Court oder Standort…" style="width:100%;height:38px;padding:0 12px 0 36px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+            </label>
+          </div>
+
+          <div style="overflow-x:auto">
+            <table id="co-table">
+              <thead>
+                <tr>
+                  <th>Club Owner</th>
+                  <th>Court</th>
+                  <th>Standort</th>
+                  <th>Kontingent</th>
+                  <th>Erstellt</th>
+                  <th style="text-align:right">Aktion</th>
+                </tr>
+              </thead>
+              <tbody ref="{{ rowsRef }}">
+                <sc-for list="{{ owners }}" as="o" hint-placeholder-count="6">
+                  <tr data-q="{{ o.q }}">
+                    <td>
+                      <div style="display:flex;align-items:center;gap:11px">
+                        <span style="width:32px;height:32px;flex:none;border-radius:50%;background:hsl(41 100% 65% / 0.1);border:1px solid hsl(41 100% 65% / 0.3);color:#FFC44D;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">{{ o.initials }}</span>
+                        <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                          <div style="display:flex;align-items:center;gap:8px">
+                            <span style="font-size:13.5px;font-weight:600;color:#FAFAFA;white-space:nowrap">{{ o.name }}</span>
+                            <span style="font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#FFC44D;background:hsl(41 100% 65% / 0.1);border:1px solid hsl(41 100% 65% / 0.28);border-radius:999px;padding:2px 8px;white-space:nowrap">Club</span>
+                          </div>
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap">@{{ o.username }} · {{ o.id }}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span style="font-weight:600;color:#FAFAFA;white-space:nowrap">{{ o.court }}</span></td>
+                    <td><span style="white-space:nowrap">{{ o.location }}</span></td>
+                    <td>
+                      <div style="display:flex;flex-direction:column;gap:6px;min-width:130px">
+                        <div style="display:flex;align-items:baseline;gap:6px">
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#C7F011">{{ o.hours }}</span>
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap">h / Monat</span>
+                        </div>
+                        <div style="height:5px;border-radius:999px;background:hsl(0 0% 12%);overflow:hidden">
+                          <div style="height:100%;width:{{ o.usedPct }};border-radius:999px;background:var(--gradient-lime)"></div>
+                        </div>
+                        <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 58%);white-space:nowrap">{{ o.used }} genutzt</span>
+                      </div>
+                    </td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap">{{ o.created }}</span></td>
+                    <td>
+                      <div style="display:flex;justify-content:flex-end">
+                        <button title="Zuweisung löschen" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                      </div>
+                    </td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+
+          <span ref="{{ emptyRef }}" style="display:none;font-family:'DM Sans',sans-serif;font-size:13.5px;color:hsl(0 0% 65%);text-align:center;padding:18px 0">Keine Zuweisungen gefunden</span>
+        </div>
+      </x-import>
+
+      <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,230px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.01em;color:#FAFAFA">So richtest du einen Club Owner ein</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(240px, 100%), 1fr));gap:12px">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="5">
+              <div style="display:flex;align-items:flex-start;gap:11px;padding:13px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:13px">
+                <span style="width:22px;height:22px;flex:none;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);color:#C7F011;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center">{{ s.n }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;color:hsl(0 0% 72%)">{{ s.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </x-import>
+    </main>
+  </div>
+
+  <div ref="{{ dlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDlg }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(470px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Zuweisung</span>
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Club Owner Zuweisung</h3>
+        <p style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;color:hsl(0 0% 68%);margin:0">Weise einem Club Owner einen Court zu und lege das Kontingent fest.</p>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Club Owner<span style="color:#C7F011"> *</span></span>
+        <span style="position:relative;display:flex;align-items:center">
+          <select style="appearance:none;width:100%;height:40px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+            <option>Benutzer auswählen…</option><option>Andreas Wolf (@awolf)</option><option>Beate Hofmann (@bhofmann)</option><option>Christian Ritter (@critter)</option>
+          </select>
+          <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+        </span>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Court<span style="color:#C7F011"> *</span></span>
+        <span style="position:relative;display:flex;align-items:center">
+          <select style="appearance:none;width:100%;height:40px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+            <option>Court auswählen…</option><option>Court 1 (TSV München-Ost)</option><option>Court 2 (SV Rheinaue Köln)</option><option>Court 3 (TC Hamburg-Alster)</option>
+          </select>
+          <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+        </span>
+      </label>
+      <label style="display:flex;flex-direction:column;gap:7px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Monatskontingent (Stunden)<span style="color:#C7F011"> *</span></span>
+        <input type="text" value="40" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 58%)">= 2.400 Minuten pro Monat · max. 200 h</span>
+      </label>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDlg }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDlg }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25)">Erstellen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const OWNERS = [
+  { initials: 'AW', name: 'Andreas Wolf', username: 'awolf', id: '8f21…c4', court: 'Court 1', location: 'TSV München-Ost', hours: 40, usedPct: '72%', used: '28,8 h', created: '12.01.2026' },
+  { initials: 'BH', name: 'Beate Hofmann', username: 'bhofmann', id: '2ad7…91', court: 'Court 2', location: 'TSV München-Ost', hours: 30, usedPct: '54%', used: '16,2 h', created: '03.02.2026' },
+  { initials: 'CR', name: 'Christian Ritter', username: 'critter', id: '71cc…0f', court: 'Court 1', location: 'SV Rheinaue Köln', hours: 40, usedPct: '88%', used: '35,2 h', created: '19.02.2026' },
+  { initials: 'DK', name: 'Doreen Kley', username: 'dkley', id: '5b09…7a', court: 'Court 2', location: 'SV Rheinaue Köln', hours: 20, usedPct: '35%', used: '7,0 h', created: '08.03.2026' },
+  { initials: 'EM', name: 'Erik Mahler', username: 'emahler', id: '9d44…2e', court: 'Court 1', location: 'TC Hamburg-Alster', hours: 50, usedPct: '61%', used: '30,5 h', created: '22.04.2026' },
+  { initials: 'FN', name: 'Frauke Nolte', username: 'fnolte', id: '3e17…88', court: 'Court 3', location: 'TSG Stuttgart-Süd', hours: 25, usedPct: '12%', used: '3,0 h', created: '30.05.2026' },
+];
+
+class Component extends DCLogic {
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 12) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+
+  _search() {
+    if (!this._rows) return;
+    const q = (this._q || '').toLowerCase();
+    let n = 0;
+    this._rows.querySelectorAll('tr[data-q]').forEach((tr) => {
+      const hit = !q || tr.dataset.q.toLowerCase().indexOf(q) >= 0;
+      tr.style.display = hit ? '' : 'none';
+      if (hit) n += 1;
+    });
+    if (this._count) this._count.textContent = '(' + n + ')';
+    if (this._empty) this._empty.style.display = n ? 'none' : 'block';
+  }
+
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    return {
+      owners: OWNERS.map((o) => ({
+        ...o,
+        q: [o.name, o.username, o.court, o.location].join(' '),
+      })),
+      steps: [
+        { n: '1', text: 'Rolle „club_owner“ unter Benutzer vergeben.' },
+        { n: '2', text: 'Hier eine neue Zuweisung anlegen.' },
+        { n: '3', text: 'Court auswählen und Monatskontingent setzen.' },
+        { n: '4', text: 'Owner sieht seinen Court im Club Panel.' },
+        { n: '5', text: 'Kontingent läuft monatlich automatisch zurück.' },
+      ],
+      rowsRef: (el) => { this._rows = el; this._search(); },
+      countRef: (el) => { this._count = el; },
+      emptyRef: (el) => { this._empty = el; },
+      dlgRef: (el) => { this._dlg = el; },
+      onSearch: (e) => { this._q = e.target.value; this._search(); },
+      openDlg: () => this._show(this._dlg, true),
+      closeDlg: () => this._show(this._dlg, false),
+    };
+  }
+}
+</script>
+</body>
+</html>

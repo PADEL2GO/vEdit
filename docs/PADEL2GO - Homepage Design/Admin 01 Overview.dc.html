@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    [data-seg] button { color: hsl(0 0% 60%); background: transparent; border: 1px solid transparent; }
+    [data-seg] button[data-on] { color: #0A0A0A; background: #C7F011; border-color: #C7F011; }
+    #ad-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(224px, 100%), 1fr)); gap: 16px; }
+    #ad-club { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 16px; }
+    #ad-lower { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+    #ad-table { width: 100%; border-collapse: collapse; }
+    #ad-table th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(0 0% 65%); text-align: left; font-weight: 400; padding: 0 14px 12px 0; white-space: nowrap; }
+    #ad-table td { padding: 13px 14px 13px 0; border-top: 1px solid hsl(0 0% 12%); font-family: 'DM Sans', sans-serif; font-size: 14px; color: hsl(0 0% 78%); }
+    #ad-table tbody tr:hover td { background: hsl(0 0% 100% / 0.022); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes growBar { from { transform: scaleY(0); } }
+    @media (max-width: 1180px) { #ad-lower { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Overview">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <dc-import name="AdminSidebar" active="overview" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <!-- Topbar -->
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Overview</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex:none">
+        <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 62%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px;padding:6px 12px;white-space:nowrap">
+          <span style="width:6px;height:6px;border-radius:50%;background:#C7F011"></span>Live · 03.08.2026
+        </span>
+        <button style="width:36px;height:36px;position:relative;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:50%;cursor:pointer;transition:color 0.2s, border-color 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">
+          <p2g-icon name="bell" size="16"></p2g-icon>
+          <span style="position:absolute;top:7px;right:8px;width:6px;height:6px;border-radius:50%;background:#C7F011"></span>
+        </button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:26px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px">
+
+      <!-- ── Plattform-KPIs ── -->
+      <section style="display:flex;flex-direction:column;gap:14px;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Plattform</h2>
+          <div data-seg="1" ref="{{ rangeRef }}" style="display:flex;gap:3px;padding:3px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:11px">
+            <sc-for list="{{ ranges }}" as="r" hint-placeholder-count="3">
+              <button onClick="{{ r.pick }}" data-key="{{ r.label }}" style="padding:6px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;transition:color 0.2s, background 0.2s">{{ r.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div id="ad-kpi">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,146px">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                  <span style="width:38px;height:38px;flex:none;border-radius:11px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.16), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ k.icon }}" size="18"></p2g-icon></span>
+                  <span style="display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:{{ k.trendColor }};white-space:nowrap"><p2g-icon name="{{ k.trendIcon }}" size="12"></p2g-icon>{{ k.trend }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:5px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:30px;line-height:1;color:#FAFAFA">{{ k.value }}</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 58%)">{{ k.label }}</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">{{ k.sub }}</span>
+                </div>
+              </div>
+            </x-import>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- ── Club-KPIs ── -->
+      <section style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Clubs</h2>
+          <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">Buchungen &amp; Kontingente</span>
+        </div>
+
+        <div id="ad-club">
+          <sc-for list="{{ clubKpis }}" as="c" hint-placeholder-count="3">
+            <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,132px">
+              <div style="display:flex;flex-direction:column;gap:13px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:hsl(0 0% 72%)">{{ c.label }}</span>
+                  <span style="color:hsl(0 0% 58%);display:flex"><p2g-icon name="{{ c.icon }}" size="15"></p2g-icon></span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:8px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:27px;line-height:1;color:#FAFAFA">{{ c.value }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 65%)">{{ c.unit }}</span>
+                </div>
+                <sc-if value="{{ c.hasBar }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <div style="height:6px;border-radius:999px;background:hsl(0 0% 13%);overflow:hidden">
+                      <div style="height:100%;border-radius:999px;background:var(--gradient-lime);width:{{ c.pct }}"></div>
+                    </div>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">{{ c.sub }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ c.noBar }}" hint-placeholder-val="{{ true }}">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">{{ c.sub }}</span>
+                </sc-if>
+              </div>
+            </x-import>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- ── Letzte Buchungen + Standorte ── -->
+      <section id="ad-lower">
+
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,470px">
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Letzte Buchungen</h2>
+                <span ref="{{ countRef }}" style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">6 von 148 Buchungen</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:9px">
+                <label style="position:relative;display:flex;align-items:center">
+                  <span style="position:absolute;left:11px;display:flex;color:hsl(0 0% 65%);pointer-events:none"><p2g-icon name="map-pin" size="14"></p2g-icon></span>
+                  <select ref="{{ courtRef }}" onChange="{{ onCourt }}" style="appearance:none;height:36px;padding:0 30px 0 33px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer">
+                    <sc-for list="{{ courtOptions }}" as="o" hint-placeholder-count="4">
+                      <option value="{{ o }}">{{ o }}</option>
+                    </sc-for>
+                  </select>
+                  <span style="position:absolute;right:11px;display:flex;color:hsl(0 0% 65%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+                </label>
+                <a href="Admin 02 Buchungen.dc.html" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;white-space:nowrap">Alle <p2g-icon name="arrow-right" size="14"></p2g-icon></a>
+              </div>
+            </div>
+
+            <div style="overflow-x:auto">
+              <table id="ad-table">
+                <thead>
+                  <tr>
+                    <th>Spieler</th>
+                    <th>Court</th>
+                    <th>Slot</th>
+                    <th>Betrag</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody ref="{{ rowsRef }}">
+                  <sc-for list="{{ bookings }}" as="b" hint-placeholder-count="6">
+                    <tr data-court="{{ b.court }}">
+                      <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                          <span style="width:30px;height:30px;flex:none;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.26);color:#C7F011;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">{{ b.initials }}</span>
+                          <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                            <span style="font-size:13.5px;font-weight:600;color:#FAFAFA;white-space:nowrap">{{ b.name }}</span>
+                            <sc-if value="{{ b.isClub }}" hint-placeholder-val="{{ false }}">
+                              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:hsl(0 0% 65%)">Club · {{ b.club }}</span>
+                            </sc-if>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span style="white-space:nowrap">{{ b.court }}</span></td>
+                      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:hsl(0 0% 66%);white-space:nowrap">{{ b.slot }}</span></td>
+                      <td><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#FAFAFA;white-space:nowrap">{{ b.amount }}</span></td>
+                      <td>
+                        <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:{{ b.statusFg }};background:{{ b.statusBg }};border:1px solid {{ b.statusBrd }};border-radius:999px;padding:5px 11px;white-space:nowrap">
+                          <span style="width:5px;height:5px;border-radius:50%;background:{{ b.statusFg }}"></span>{{ b.status }}
+                        </span>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </x-import>
+
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,470px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Standorte</h2>
+              <a href="Admin 03 Courts.dc.html" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;white-space:nowrap">Verwalten <p2g-icon name="arrow-right" size="14"></p2g-icon></a>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ locations }}" as="l" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 13%);border-radius:14px;transition:border-color 0.2s" style-hover="border-color:hsl(71 91% 51% / 0.35)">
+                  <span style="width:34px;height:34px;flex:none;border-radius:10px;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 15%);display:flex;align-items:center;justify-content:center;color:{{ l.dotColor }}"><p2g-icon name="map-pin" size="15"></p2g-icon></span>
+                  <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.address }}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none">
+                    <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:{{ l.dotColor }}">{{ l.courts }}</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;color:hsl(0 0% 58%);white-space:nowrap">{{ l.courtLabel }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;border-top:1px solid hsl(0 0% 13%)">
+              <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 50%)">5 Standorte · 14 Courts online</span>
+              <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="outline" size="sm" hint-size="150px,34px">Neuer Standort</x-import>
+            </div>
+          </div>
+        </x-import>
+      </section>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const PAGE_KEY = 'overview';
+
+const STATUS = {
+  Bezahlt: ['#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)'],
+  Offen: ['#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)'],
+  Storniert: ['#FF6B6B', 'hsl(0 100% 71% / 0.1)', 'hsl(0 100% 71% / 0.3)'],
+  Club: ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)'],
+};
+
+const BOOKINGS = [
+  { initials: 'LK', name: 'Lena Kramer', court: 'München-Ost · Court 1', slot: 'Heute 18:00–19:30', amount: '36,00 €', status: 'Bezahlt' },
+  { initials: 'TM', name: 'Tobias Meyer', court: 'Köln · Court 2', slot: 'Heute 19:30–21:00', amount: '32,00 €', status: 'Bezahlt' },
+  { initials: 'SV', name: 'SV Rheinaue', court: 'Köln · Court 1', slot: 'Heute 17:00–18:30', amount: '0,00 €', status: 'Club', isClub: true, club: 'SV Rheinaue' },
+  { initials: 'JW', name: 'Jana Weiss', court: 'Hamburg · Court 3', slot: 'Morgen 08:00–09:30', amount: '28,00 €', status: 'Offen' },
+  { initials: 'MK', name: 'Marco Kern', court: 'München-Ost · Court 2', slot: 'Morgen 12:00–13:00', amount: '24,00 €', status: 'Bezahlt' },
+  { initials: 'ND', name: 'Nina Dörr', court: 'Stuttgart · Court 1', slot: 'Gestern 20:00–21:30', amount: '36,00 €', status: 'Storniert' },
+];
+
+class Component extends DCLogic {
+  state = { range: 'Heute', court: 'Alle Courts' };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if ((window.lucide && n > 2) || n > 20) clearInterval(this._iv);
+    }, 350);
+    this._paint();
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  componentDidUpdate() { this._paint(); }
+
+  /* selection + row filtering run on the DOM: the runtime re-asserts
+     template-declared inline styles, so attributes drive CSS instead */
+  _paint() {
+    // active nav item — each admin page sets its own PAGE_KEY
+    document.querySelectorAll('[data-nav][data-key]').forEach((a) => {
+      a.toggleAttribute('data-on', a.dataset.key === PAGE_KEY);
+    });
+    if (this._range) {
+      this._range.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === this.state.range);
+      });
+    }
+    if (this._rows) {
+      const c = this.state.court;
+      let shown = 0;
+      this._rows.querySelectorAll('tr[data-court]').forEach((tr) => {
+        const hit = c === 'Alle Courts' || tr.dataset.court.indexOf(c) === 0;
+        tr.style.display = hit ? '' : 'none';
+        if (hit) shown += 1;
+      });
+      if (this._count) this._count.textContent = shown + ' von 148 Buchungen';
+    }
+  }
+
+  renderVals() {
+    const range = this.state.range;
+    const kpiSets = {
+      Heute: [
+        { icon: 'calendar-check', value: '38', label: 'Buchungen heute', sub: '12 offene Slots übrig', trend: '+14%', up: true },
+        { icon: 'euro', value: '1.184 €', label: 'Umsatz heute', sub: 'Ø 31,20 € pro Buchung', trend: '+9%', up: true },
+        { icon: 'users', value: '4.218', label: 'Registrierte Benutzer', sub: '+26 heute', trend: '+0,6%', up: true },
+        { icon: 'layout-grid', value: '14', label: 'Aktive Courts', sub: '5 Standorte', trend: 'stabil', up: null },
+      ],
+      Woche: [
+        { icon: 'calendar-check', value: '241', label: 'Buchungen diese Woche', sub: 'Ø 34 pro Tag', trend: '+8%', up: true },
+        { icon: 'euro', value: '7.612 €', label: 'Umsatz diese Woche', sub: 'Ø 31,60 € pro Buchung', trend: '+11%', up: true },
+        { icon: 'users', value: '4.218', label: 'Registrierte Benutzer', sub: '+167 diese Woche', trend: '+4,1%', up: true },
+        { icon: 'layout-grid', value: '14', label: 'Aktive Courts', sub: '5 Standorte', trend: 'stabil', up: null },
+      ],
+      Monat: [
+        { icon: 'calendar-check', value: '1.042', label: 'Buchungen im Monat', sub: 'Ø 34 pro Tag', trend: '+22%', up: true },
+        { icon: 'euro', value: '32.480 €', label: 'Umsatz im Monat', sub: 'Ø 31,20 € pro Buchung', trend: '+19%', up: true },
+        { icon: 'users', value: '4.218', label: 'Registrierte Benutzer', sub: '+612 im Monat', trend: '+17%', up: true },
+        { icon: 'layout-grid', value: '14', label: 'Aktive Courts', sub: '5 Standorte', trend: '+2', up: true },
+      ],
+    };
+
+    return {
+      navGroups: [
+        { label: 'Übersicht', items: [
+          { key: 'overview', label: 'Overview', icon: 'layout-dashboard', href: 'Admin 01 Overview.dc.html' },
+          { key: 'analytics', label: 'Analytics', icon: 'chart-line', href: '#' },
+          { key: 'utilization', label: 'Auslastung', icon: 'gauge', href: '#' },
+        ] },
+        { label: 'Betrieb', items: [
+          { key: 'bookings', label: 'Buchungen', icon: 'calendar', href: '#', hasCount: true, count: '38' },
+          { key: 'courts', label: 'Courts & Standorte', icon: 'map-pin', href: '#' },
+          { key: 'clubs', label: 'Clubs', icon: 'building-2', href: '#' },
+          { key: 'owners', label: 'Club Owners', icon: 'key-round', href: '#' },
+          { key: 'events', label: 'Events', icon: 'ticket', href: '#' },
+        ] },
+        { label: 'Commerce', items: [
+          { key: 'marketplace', label: 'Marketplace', icon: 'shopping-bag', href: '#', hasCount: true, count: '7' },
+          { key: 'points', label: 'P2G Points', icon: 'coins', href: '#' },
+          { key: 'vouchers', label: 'Vouchers', icon: 'tag', href: '#' },
+        ] },
+        { label: 'Content', items: [
+          { key: 'news', label: 'News / Artikel', icon: 'newspaper', href: '#' },
+          { key: 'teasers', label: 'Location Teasers', icon: 'megaphone', href: '#' },
+          { key: 'gallery', label: 'SkyPadel Galerie', icon: 'images', href: '#' },
+          { key: 'partners', label: 'Partner-Kacheln', icon: 'handshake', href: '#' },
+          { key: 'slides', label: 'Touchpoint Slides', icon: 'gallery-horizontal', href: '#' },
+          { key: 'qr', label: 'QR-Panel', icon: 'qr-code', href: '#' },
+          { key: 'visuals', label: 'Visuals', icon: 'image', href: '#' },
+          { key: 'colors', label: 'Farben', icon: 'palette', href: '#' },
+        ] },
+        { label: 'System', items: [
+          { key: 'users', label: 'Benutzer', icon: 'users', href: '#' },
+          { key: 'notifications', label: 'Mitteilungen', icon: 'bell', href: '#' },
+          { key: 'newsletter', label: 'Newsletter', icon: 'mail', href: '#' },
+          { key: 'integrations', label: 'Integrationen', icon: 'plug', href: '#' },
+          { key: 'features', label: 'Features', icon: 'toggle-right', href: '#' },
+          { key: 'settings', label: 'Einstellungen', icon: 'settings', href: '#' },
+        ] },
+      ],
+
+      ranges: ['Heute', 'Woche', 'Monat'].map((label) => ({
+        label,
+        pick: (e) => {
+          const box = e.currentTarget.parentElement;
+          box.querySelectorAll('button[data-key]').forEach((b) => {
+            b.toggleAttribute('data-on', b.dataset.key === label);
+          });
+          this.setState({ range: label });
+        },
+      })),
+
+      kpis: kpiSets[range].map((k) => ({
+        ...k,
+        trendIcon: k.up === null ? 'minus' : k.up ? 'trending-up' : 'trending-down',
+        trendColor: k.up === null ? 'hsl(0 0% 65%)' : k.up ? '#C7F011' : '#FF6B6B',
+      })),
+
+      clubKpis: [
+        { label: 'Club-Buchungen heute', value: '9', unit: 'Slots', icon: 'building-2', sub: '3 Clubs aktiv', noBar: true },
+        { label: 'Club-Buchungen Woche', value: '52', unit: 'Slots', icon: 'calendar-range', sub: '+7 vs. Vorwoche', noBar: true },
+        { label: 'Kontingent-Nutzung', value: '68', unit: '%', icon: 'gauge', sub: '8.160 von 12.000 Min. verbraucht', hasBar: true, pct: '68%' },
+      ],
+
+      courtOptions: ['Alle Courts', 'München-Ost', 'Köln', 'Hamburg', 'Stuttgart'],
+      onCourt: (e) => this.setState({ court: e.target.value }),
+      courtRef: (el) => { this._court = el; },
+      rowsRef: (el) => { this._rows = el; this._paint(); },
+      countRef: (el) => { this._count = el; },
+      rangeRef: (el) => { this._range = el; this._paint(); },
+
+      bookings: BOOKINGS.map((b) => {
+        const s = STATUS[b.status];
+        return { ...b, statusFg: s[0], statusBg: s[1], statusBrd: s[2] };
+      }),
+
+      locations: [
+        { name: 'TSV München-Ost', address: 'Sportpark Ost, 81829 München', courts: '4', courtLabel: 'Courts online', dotColor: '#C7F011' },
+        { name: 'SV Rheinaue Köln', address: 'Rheinauer Weg 12, 50999 Köln', courts: '3', courtLabel: 'Courts online', dotColor: '#C7F011' },
+        { name: 'TC Hamburg-Alster', address: 'Alsterufer 40, 22085 Hamburg', courts: '3', courtLabel: 'Courts online', dotColor: '#C7F011' },
+        { name: 'TSG Stuttgart-Süd', address: 'Karl-Kloss-Str. 8, 70180 Stuttgart', courts: '4', courtLabel: 'Courts online', dotColor: '#C7F011' },
+        { name: 'SC Leipzig-Nord', address: 'Delitzscher Str. 90, 04129 Leipzig', courts: '0', courtLabel: 'im Aufbau', dotColor: 'hsl(0 0% 65%)' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

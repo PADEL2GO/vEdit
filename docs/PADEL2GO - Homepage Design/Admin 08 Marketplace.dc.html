@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; text-decoration: none; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #ad-shell { display: grid; grid-template-columns: 258px minmax(0, 1fr); min-height: 100vh; }
+    [data-tab] { color: hsl(0 0% 60%); border-bottom: 2px solid transparent; }
+    [data-tab]:hover { color: #FAFAFA; }
+    [data-tab][data-on] { color: #C7F011; border-bottom-color: #C7F011; }
+    [data-seg] button { color: hsl(0 0% 62%); background: transparent; border: 1px solid transparent; }
+    [data-seg] button[data-on] { color: #0A0A0A; background: #C7F011; border-color: #C7F011; }
+    #mp-kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 14px; }
+    .mp-table { width: 100%; border-collapse: collapse; }
+    .mp-table th { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: hsl(0 0% 65%); text-align: left; font-weight: 400; padding: 0 14px 12px 0; white-space: nowrap; }
+    .mp-table th.num, .mp-table td.num { text-align: right; padding-right: 18px; }
+    .mp-table td { padding: 12px 14px 12px 0; border-top: 1px solid hsl(0 0% 12%); font-family: 'DM Sans', sans-serif; font-size: 13.5px; color: hsl(0 0% 78%); }
+    .mp-table tbody tr:hover td { background: hsl(0 0% 100% / 0.022); }
+    #mp-prod { min-width: 940px; }
+    #mp-ord { min-width: 1080px; }
+    #mp-ret { min-width: 860px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 900px) { #ad-shell { grid-template-columns: minmax(0, 1fr); } #ad-shell > *:first-child { display: none; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="ad-shell" data-screen-label="Admin — Marketplace">
+  <dc-import name="AdminSidebar" active="marketplace" style="position:sticky;top:0;align-self:start;height:100vh" hint-size="258px,100vh"></dc-import>
+
+  <div style="display:flex;flex-direction:column;min-width:0">
+
+    <header style="position:sticky;top:0;z-index:40;background:hsl(0 0% 2% / 0.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 12%);padding:0 clamp(18px, 3vw, 32px);height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 58%);white-space:nowrap">/admin/marketplace</span>
+        <span style="width:1px;height:16px;background:hsl(0 0% 18%);flex:none"></span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;white-space:nowrap">Marketplace</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;flex:none">
+        <button onClick="{{ openCat }}" style="display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer;white-space:nowrap;transition:color 0.2s, border-color 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="folder-tree" size="14"></p2g-icon>Kategorien</button>
+        <button onClick="{{ openBrand }}" style="display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer;white-space:nowrap;transition:color 0.2s, border-color 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="tag" size="14"></p2g-icon>Marken</button>
+        <button onClick="{{ openProduct }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.28);white-space:nowrap"><p2g-icon name="plus" size="15"></p2g-icon>Neues Produkt</button>
+        <div style="display:flex;align-items:center;gap:9px;padding:5px 12px 5px 5px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:999px">
+          <span style="width:27px;height:27px;flex:none;border-radius:50%;background:var(--gradient-lime);color:#0A0A0A;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center">FS</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">Florian</span>
+        </div>
+      </div>
+    </header>
+
+    <main style="display:flex;flex-direction:column;gap:20px;padding:clamp(20px, 3vw, 32px) clamp(18px, 3vw, 32px) 64px;animation:fadeUp 0.45s cubic-bezier(0.16,1,0.3,1)">
+
+      <div id="mp-kpi">
+        <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="3">
+          <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,132px">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <span style="width:38px;height:38px;flex:none;border-radius:11px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.16), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.3);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ k.icon }}" size="18"></p2g-icon></span>
+                <span style="display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#C7F011;white-space:nowrap"><p2g-icon name="trending-up" size="12"></p2g-icon>{{ k.trend }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:28px;line-height:1;color:#FAFAFA">{{ k.value }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:hsl(0 0% 65%)">{{ k.label }}</span>
+              </div>
+            </div>
+          </x-import>
+        </sc-for>
+      </div>
+
+      <div ref="{{ tabRef }}" style="display:flex;gap:22px;border-bottom:1px solid hsl(0 0% 12%);overflow-x:auto">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+          <button onClick="{{ t.pick }}" data-tab="1" data-key="{{ t.key }}" style="display:inline-flex;align-items:center;gap:8px;padding:0 2px 11px;background:none;border-top:0;border-left:0;border-right:0;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:color 0.2s">
+            <p2g-icon name="{{ t.icon }}" size="16"></p2g-icon>{{ t.label }}
+            <sc-if value="{{ t.hasCount }}" hint-placeholder-val="{{ false }}">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;background:hsl(0 0% 100% / 0.07);border-radius:999px;padding:2px 7px">{{ t.count }}</span>
+            </sc-if>
+          </button>
+        </sc-for>
+      </div>
+
+      <!-- ═══ Produkte ═══ -->
+      <div ref="{{ v1Ref }}" style="display:flex;flex-direction:column;gap:18px">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,560px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Produkte <span ref="{{ prodCountRef }}" style="font-family:'JetBrains Mono',monospace;font-weight:400;font-size:14px;color:hsl(0 0% 65%)">(8)</span></h2>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <span style="position:relative;display:flex;align-items:center">
+                  <select onChange="{{ onCat }}" style="appearance:none;height:36px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                    <option value="all">Alle Kategorien</option><option value="Schläger">Schläger</option><option value="Bälle">Bälle</option><option value="Bekleidung">Bekleidung</option><option value="Taschen">Taschen</option><option value="Zubehör">Zubehör</option>
+                  </select>
+                  <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+                </span>
+                <span style="position:relative;display:flex;align-items:center">
+                  <select onChange="{{ onStatus }}" style="appearance:none;height:36px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                    <option value="all">Alle</option><option value="live">Aktiv</option><option value="draft">Inaktiv</option>
+                  </select>
+                  <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+                </span>
+              </div>
+            </div>
+
+            <div style="overflow-x:auto">
+              <table class="mp-table" id="mp-prod">
+                <thead>
+                  <tr><th>Produkt</th><th>Kategorie</th><th>Marke</th><th class="num">Preis</th><th class="num">Points</th><th>Status</th><th>Aktiv</th><th style="text-align:right">Aktionen</th></tr>
+                </thead>
+                <tbody ref="{{ prodRowsRef }}">
+                  <sc-for list="{{ products }}" as="p" hint-placeholder-count="8">
+                    <tr data-cat="{{ p.category }}" data-state="{{ p.stateKey }}">
+                      <td>
+                        <div style="display:flex;align-items:center;gap:12px">
+                          <img src="{{ p.img }}" alt="" style="width:44px;height:44px;flex:none;object-fit:cover;border-radius:10px;border:1px solid hsl(0 0% 15%);display:block">
+                          <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                            <div style="display:flex;align-items:center;gap:7px">
+                              <sc-if value="{{ p.featured }}" hint-placeholder-val="{{ false }}">
+                                <span style="color:#C7F011;display:flex"><p2g-icon name="star" size="13"></p2g-icon></span>
+                              </sc-if>
+                              <span style="font-size:13.5px;font-weight:700;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px">{{ p.name }}</span>
+                            </div>
+                            <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px">{{ p.subtitle }}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td><span style="display:inline-flex;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:4px 10px;white-space:nowrap">{{ p.category }}</span></td>
+                      <td><span style="white-space:nowrap">{{ p.brand }}</span></td>
+                      <td class="num"><span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAFAFA;white-space:nowrap">{{ p.price }}</span></td>
+                      <td class="num"><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:{{ p.pointsFg }};white-space:nowrap">{{ p.points }}</span></td>
+                      <td>
+                        <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ p.stateFg }};background:{{ p.stateBg }};border:1px solid {{ p.stateBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap">
+                          <span style="width:5px;height:5px;border-radius:50%;background:{{ p.stateFg }}"></span>{{ p.state }}
+                        </span>
+                      </td>
+                      <td>
+                        <button onClick="{{ p.noop }}" style="width:38px;height:22px;position:relative;padding:0;background:{{ p.swBg }};border:1px solid {{ p.swBrd }};border-radius:999px;cursor:pointer;transition:background 0.2s">
+                          <span style="position:absolute;top:2px;left:{{ p.knobX }};width:16px;height:16px;border-radius:50%;background:{{ p.knobBg }};transition:left 0.2s"></span>
+                        </button>
+                      </td>
+                      <td>
+                        <div style="display:flex;align-items:center;justify-content:flex-end;gap:7px">
+                          <button onClick="{{ p.edit }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 82%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="pencil" size="14"></p2g-icon></button>
+                          <button onClick="{{ p.del }}" style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="14"></p2g-icon></button>
+                        </div>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </x-import>
+
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,260px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Empfehlungen (Referrals)</h2>
+              <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">Punkte-Gutschriften aus Weiterempfehlungen</span>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="mp-table">
+                <thead><tr><th>Nutzer</th><th class="num">Geworben</th><th class="num">Punkte</th><th class="num">Wert</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ referrals }}" as="r" hint-placeholder-count="4">
+                    <tr>
+                      <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                          <span style="width:28px;height:28px;flex:none;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.26);color:#C7F011;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:10.5px;display:flex;align-items:center;justify-content:center">{{ r.initials }}</span>
+                          <span style="font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">{{ r.name }}</span>
+                        </div>
+                      </td>
+                      <td class="num"><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap">{{ r.count }}</span></td>
+                      <td class="num"><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#C7F011;white-space:nowrap">{{ r.points }}</span></td>
+                      <td class="num"><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#FAFAFA;white-space:nowrap">{{ r.value }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <!-- ═══ Bestellungen ═══ -->
+      <div ref="{{ v2Ref }}" style="display:none;flex-direction:column;gap:18px">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,560px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:11px">
+                <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Bestellungen &amp; Versand</h2>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#FFC44D;background:hsl(41 100% 65% / 0.1);border:1px solid hsl(41 100% 65% / 0.3);border-radius:999px;padding:4px 10px;white-space:nowrap">3 offen</span>
+              </div>
+              <button style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:hsl(0 0% 85%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;cursor:pointer;white-space:nowrap;transition:color 0.2s, border-color 0.2s" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="download" size="14"></p2g-icon>Belege exportieren (CSV)</button>
+            </div>
+
+            <div data-seg="1" ref="{{ ordSegRef }}" style="display:flex;gap:3px;padding:3px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:11px;align-self:flex-start;flex-wrap:wrap">
+              <sc-for list="{{ ordFilters }}" as="f" hint-placeholder-count="5">
+                <button onClick="{{ f.pick }}" data-key="{{ f.key }}" style="padding:6px 13px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;white-space:nowrap;transition:color 0.2s, background 0.2s">{{ f.label }}</button>
+              </sc-for>
+            </div>
+
+            <div style="overflow-x:auto">
+              <table class="mp-table" id="mp-ord">
+                <thead>
+                  <tr><th>Datum</th><th>Bestellnr.</th><th>Kunde</th><th>Produkt</th><th>Lieferadresse</th><th class="num">Bezahlt</th><th>Status</th><th style="text-align:right">Aktionen</th></tr>
+                </thead>
+                <tbody ref="{{ ordRowsRef }}">
+                  <sc-for list="{{ orders }}" as="o" hint-placeholder-count="6">
+                    <tr data-state="{{ o.stateKey }}">
+                      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap">{{ o.date }}</span></td>
+                      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#FAFAFA;white-space:nowrap">{{ o.ref }}</span></td>
+                      <td>
+                        <div style="display:flex;flex-direction:column;gap:1px">
+                          <span style="font-size:13px;font-weight:600;color:#FAFAFA;white-space:nowrap">{{ o.customer }}</span>
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap">{{ o.email }}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="display:flex;align-items:center;gap:9px">
+                          <img src="{{ o.img }}" alt="" style="width:32px;height:32px;flex:none;object-fit:cover;border-radius:8px;border:1px solid hsl(0 0% 15%);display:block">
+                          <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+                            <span style="font-size:12.5px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:170px">{{ o.product }}</span>
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 65%);white-space:nowrap">Menge: {{ o.qty }}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="display:flex;flex-direction:column;gap:1px">
+                          <span style="font-size:12px;color:hsl(0 0% 78%);white-space:nowrap">{{ o.street }}</span>
+                          <span style="font-size:11.5px;color:hsl(0 0% 65%);white-space:nowrap">{{ o.cityLine }}</span>
+                        </div>
+                      </td>
+                      <td class="num">
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#FAFAFA;white-space:nowrap">{{ o.paid }}</span>
+                          <sc-if value="{{ o.hasPoints }}" hint-placeholder-val="{{ false }}">
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C7F011;white-space:nowrap">{{ o.pointsNote }}</span>
+                          </sc-if>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="display:flex;flex-direction:column;gap:4px">
+                          <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:{{ o.stateFg }};background:{{ o.stateBg }};border:1px solid {{ o.stateBrd }};border-radius:999px;padding:4px 10px;white-space:nowrap;align-self:flex-start">
+                            <span style="width:5px;height:5px;border-radius:50%;background:{{ o.stateFg }}"></span>{{ o.state }}
+                          </span>
+                          <sc-if value="{{ o.hasTracking }}" hint-placeholder-val="{{ false }}">
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 58%);white-space:nowrap">{{ o.tracking }}</span>
+                          </sc-if>
+                        </div>
+                      </td>
+                      <td>
+                        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">
+                          <sc-if value="{{ o.shippable }}" hint-placeholder-val="{{ false }}">
+                            <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;flex-wrap:wrap">
+                              <span style="position:relative;display:flex;align-items:center">
+                                <select style="appearance:none;height:30px;padding:0 26px 0 10px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;outline:none;cursor:pointer">
+                                  <option>DHL</option><option>DPD</option><option>GLS</option><option>Hermes</option><option>Andere</option>
+                                </select>
+                                <span style="position:absolute;right:9px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="12"></p2g-icon></span>
+                              </span>
+                              <input type="text" placeholder="Sendungsnr." style="width:110px;height:30px;padding:0 10px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                              <button style="height:30px;padding:0 11px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:8px;cursor:pointer;white-space:nowrap">Versenden + Mail</button>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ o.cancellable }}" hint-placeholder-val="{{ false }}">
+                            <button onClick="{{ o.cancel }}" style="height:28px;padding:0 11px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(0 100% 71% / 0.16)">Stornieren</button>
+                          </sc-if>
+                        </div>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <!-- ═══ Retouren ═══ -->
+      <div ref="{{ v3Ref }}" style="display:none;flex-direction:column;gap:18px">
+        <x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Card" hint-size="100%,400px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;align-items:center;gap:11px">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Retouren &amp; Widerrufe</h2>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#FFC44D;background:hsl(41 100% 65% / 0.1);border:1px solid hsl(41 100% 65% / 0.3);border-radius:999px;padding:4px 10px;white-space:nowrap">2 offen</span>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="mp-table" id="mp-ret">
+                <thead><tr><th>Datum</th><th>Bestellung</th><th>Grund</th><th>Status</th><th>Interne Notiz</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ returns }}" as="r" hint-placeholder-count="4">
+                    <tr>
+                      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;white-space:nowrap">{{ r.date }}</span></td>
+                      <td>
+                        <div style="display:flex;flex-direction:column;gap:1px">
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#FAFAFA;white-space:nowrap">{{ r.ref }}</span>
+                          <span style="font-size:12px;color:hsl(0 0% 78%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">{{ r.product }}</span>
+                          <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 65%);white-space:nowrap">{{ r.email }}</span>
+                        </div>
+                      </td>
+                      <td><span style="font-size:12.5px;color:hsl(0 0% 78%);display:block;max-width:200px">{{ r.reason }}</span></td>
+                      <td>
+                        <span style="position:relative;display:flex;align-items:center">
+                          <select style="appearance:none;height:32px;padding:0 28px 0 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;cursor:pointer">
+                            <option>Angemeldet</option><option>Ware eingegangen</option><option>Erstattet</option><option>Abgelehnt</option>
+                          </select>
+                          <span style="position:absolute;right:10px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="12"></p2g-icon></span>
+                        </span>
+                      </td>
+                      <td>
+                        <input type="text" placeholder="Notiz…" value="{{ r.note }}" style="width:100%;min-width:150px;height:32px;padding:0 11px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+            <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 58%);padding-top:12px;border-top:1px solid hsl(0 0% 12%)">Erstattung wie gewohnt über den Stornieren-Button der Bestellung auslösen.</span>
+          </div>
+        </x-import>
+      </div>
+    </main>
+  </div>
+
+  <!-- ── Produkt-Dialog ── -->
+  <div ref="{{ prodDlgRef }}" style="display:none;position:fixed;inset:0;z-index:90;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeProduct }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.78);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(760px, 100%);max-height:90vh;overflow-y:auto;background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:22px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="position:sticky;top:0;z-index:2;background:hsl(0 0% 6% / 0.95);backdrop-filter:blur(18px);border-bottom:1px solid hsl(0 0% 14%);padding:20px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#C7F011">Produkt</span>
+          <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Neues Produkt erstellen</h3>
+          <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 65%)">Alle Felder mit * sind Pflichtfelder.</span>
+        </div>
+        <button onClick="{{ closeProduct }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer" style-hover="color:#FAFAFA"><p2g-icon name="x" size="16"></p2g-icon></button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:22px;padding:24px">
+
+        <!-- AI-Import -->
+        <div style="display:flex;flex-direction:column;gap:12px;padding:17px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.07), hsl(71 91% 51% / 0.01));border:1px solid hsl(71 91% 51% / 0.24);border-radius:15px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="width:32px;height:32px;flex:none;border-radius:9px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.32);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="sparkles" size="16"></p2g-icon></span>
+            <div style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;color:#FAFAFA">Per URL oder Datei ausfüllen (AI)</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">Zieht Name, Beschreibung, Specs, Preis, Marke &amp; Bilder automatisch.</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap">
+            <input type="text" placeholder="https://… Produktseite (Hersteller oder Shop)" style="flex:1;min-width:min(240px, 100%);height:38px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+            <button style="height:38px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer;white-space:nowrap">Ausfüllen</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:9px;height:44px;background:hsl(0 0% 100% / 0.04);border:1px dashed hsl(0 0% 20%);border-radius:11px;cursor:pointer;transition:border-color 0.2s" style-hover="border-color:hsl(71 91% 51% / 0.5)">
+            <span style="color:hsl(0 0% 58%);display:flex"><p2g-icon name="file-up" size="15"></p2g-icon></span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 65%)">Oder Produkt-Datei hochladen (PDF / HTML, max. 15 MB)</span>
+          </div>
+        </div>
+
+        <!-- Bilder -->
+        <div style="display:grid;grid-template-columns:150px minmax(0, 1fr);gap:16px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Titelbild<span style="color:#C7F011"> *</span></span>
+            <div style="aspect-ratio:2/3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:hsl(0 0% 100% / 0.03);border:1px dashed hsl(0 0% 20%);border-radius:13px;cursor:pointer;transition:border-color 0.2s" style-hover="border-color:hsl(71 91% 51% / 0.5)">
+              <span style="color:hsl(0 0% 58%);display:flex"><p2g-icon name="image-plus" size="20"></p2g-icon></span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%);text-align:center;padding:0 8px">Hochformat 2:3<br>1200 × 1800 px</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Weitere Bilder (Galerie)</span>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(76px, 1fr));gap:9px">
+              <sc-for list="{{ gallerySlots }}" as="g" hint-placeholder-count="5">
+                <div style="aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px dashed hsl(0 0% 18%);border-radius:9px;color:hsl(0 0% 45%);cursor:pointer;transition:border-color 0.2s" style-hover="border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="plus" size="15"></p2g-icon></div>
+              </sc-for>
+            </div>
+            <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;line-height:1.5;color:hsl(0 0% 58%)">Reihenfolge steuert die Galerie auf der Produktseite (Titelbild zuerst).</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(220px, 100%), 1fr));gap:13px">
+          <sc-for list="{{ prodFields }}" as="f" hint-placeholder-count="12">
+            <label style="display:flex;flex-direction:column;gap:7px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ f.label }}<sc-if value="{{ f.req }}" hint-placeholder-val="{{ false }}"><span style="color:#C7F011"> *</span></sc-if></span>
+              <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
+                <span style="position:relative;display:flex;align-items:center">
+                  <select style="appearance:none;width:100%;height:40px;padding:0 32px 0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;cursor:pointer" style-focus="border-color:#C7F011">
+                    <sc-for list="{{ f.options }}" as="o" hint-placeholder-count="3">
+                      <option value="{{ o }}">{{ o }}</option>
+                    </sc-for>
+                  </select>
+                  <span style="position:absolute;right:12px;display:flex;color:hsl(0 0% 58%);pointer-events:none"><p2g-icon name="chevron-down" size="14"></p2g-icon></span>
+                </span>
+              </sc-if>
+              <sc-if value="{{ f.isInput }}" hint-placeholder-val="{{ true }}">
+                <input type="text" placeholder="{{ f.ph }}" style="height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              </sc-if>
+              <sc-if value="{{ f.hint }}" hint-placeholder-val="{{ false }}">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11px;line-height:1.45;color:hsl(0 0% 58%)">{{ f.hintText }}</span>
+              </sc-if>
+            </label>
+          </sc-for>
+        </div>
+
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Kurzbeschreibung<span style="color:#C7F011"> *</span></span>
+          <textarea rows="2" placeholder="Kurze Beschreibung für Produktkarten…" style="padding:11px 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;resize:vertical;transition:border-color 0.2s" style-focus="border-color:#C7F011"></textarea>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Langbeschreibung</span>
+          <textarea rows="4" placeholder="Ausführlicher Produkttext…" style="padding:11px 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.5;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;resize:vertical;transition:border-color 0.2s" style-focus="border-color:#C7F011"></textarea>
+        </label>
+
+        <!-- Specs -->
+        <div style="display:flex;flex-direction:column;gap:11px;padding:17px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+          <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#FAFAFA">Spezifikationen</span>
+          <sc-for list="{{ specs }}" as="s" hint-placeholder-count="3">
+            <div style="display:flex;gap:9px;align-items:center">
+              <input type="text" value="{{ s.k }}" placeholder="Merkmal (z. B. Gewicht)" style="flex:1;min-width:0;height:36px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              <input type="text" value="{{ s.v }}" placeholder="Wert (z. B. 365 g)" style="flex:1;min-width:0;height:36px;padding:0 12px;box-sizing:border-box;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              <button style="width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="13"></p2g-icon></button>
+            </div>
+          </sc-for>
+          <button style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.09);border:1px solid hsl(71 91% 51% / 0.3);border-radius:9px;cursor:pointer;white-space:nowrap" style-hover="background:hsl(71 91% 51% / 0.18)"><p2g-icon name="plus" size="14"></p2g-icon>Merkmal hinzufügen</button>
+        </div>
+
+        <!-- GPSR -->
+        <div style="display:flex;flex-direction:column;gap:13px;padding:17px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+          <div style="display:flex;flex-direction:column;gap:3px">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#FAFAFA">Produktsicherheit &amp; Kennzeichnung (GPSR)</span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">EU-Verantwortlicher nur nötig, wenn der Hersteller außerhalb der EU sitzt.</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(min(200px, 100%), 1fr));gap:11px">
+            <sc-for list="{{ gpsrFields }}" as="g" hint-placeholder-count="9">
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">{{ g.label }}</span>
+                <input type="text" placeholder="{{ g.ph }}" style="height:36px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+              </label>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- SEO -->
+        <div style="display:flex;flex-direction:column;gap:13px;padding:17px;background:hsl(0 0% 100% / 0.025);border:1px solid hsl(0 0% 12%);border-radius:15px">
+          <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;letter-spacing:-0.01em;color:#FAFAFA">SEO (optional)</span>
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Meta-Titel · max. 60 Zeichen</span>
+            <input type="text" placeholder="Bullpadel Vertex 04 kaufen | PADEL2GO" style="height:36px;padding:0 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 65%)">Meta-Beschreibung · max. 155 Zeichen</span>
+            <textarea rows="2" placeholder="Kurzer Suchmaschinen-Text…" style="padding:10px 12px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;color:#FAFAFA;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;outline:none;resize:vertical;transition:border-color 0.2s" style-focus="border-color:#C7F011"></textarea>
+          </label>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 15px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:14px">
+          <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+            <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#FAFAFA">Featured (hervorheben)</span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 65%)">Zeigt das Produkt prominent im Shop.</span>
+          </div>
+          <button style="width:42px;height:24px;flex:none;position:relative;padding:0;background:hsl(0 0% 16%);border:1px solid hsl(0 0% 22%);border-radius:999px;cursor:pointer">
+            <span style="position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:hsl(0 0% 55%)"></span>
+          </button>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:18px;border-top:1px solid hsl(0 0% 12%)">
+          <button onClick="{{ closeProduct }}" style="height:42px;padding:0 17px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+          <button onClick="{{ closeProduct }}" style="height:42px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:11px;cursor:pointer;box-shadow:0 0 22px hsl(71 91% 51% / 0.25)">Erstellen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Katalog-Dialog (Kategorien / Marken) ── -->
+  <div ref="{{ catDlgRef }}" style="display:none;position:fixed;inset:0;z-index:92;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeCat }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.78);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(520px, 100%);max-height:86vh;overflow-y:auto;background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <h3 ref="{{ catTitleRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Kategorien verwalten</h3>
+          <span ref="{{ catHintRef }}" style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 65%)">Produktkategorien für den Shop (z. B. Schläger, Bälle, Bekleidung).</span>
+        </div>
+        <button onClick="{{ closeCat }}" style="width:32px;height:32px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:9px;cursor:pointer" style-hover="color:#FAFAFA"><p2g-icon name="x" size="16"></p2g-icon></button>
+      </div>
+      <div style="display:flex;gap:9px">
+        <input type="text" placeholder="z. B. Schläger" style="flex:1;min-width:0;height:40px;padding:0 13px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:13.5px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:10px;outline:none;transition:border-color 0.2s" style-focus="border-color:#C7F011">
+        <button style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;color:#0A0A0A;background:var(--gradient-lime);border:0;border-radius:10px;cursor:pointer"><p2g-icon name="plus" size="16"></p2g-icon></button>
+      </div>
+      <div ref="{{ catListRef }}" style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ catalogItems }}" as="c" hint-placeholder-count="6">
+          <div data-kind="{{ c.kind }}" style="display:flex;align-items:center;gap:11px;padding:11px 12px;background:hsl(0 0% 100% / 0.028);border:1px solid hsl(0 0% 12%);border-radius:12px">
+            <sc-if value="{{ c.isBrand }}" hint-placeholder-val="{{ false }}">
+              <span style="width:34px;height:34px;flex:none;border-radius:50%;background:#F5F5F3;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 45%);cursor:pointer"><p2g-icon name="image-plus" size="14"></p2g-icon></span>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0">
+              <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 65%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">/{{ c.slug }}</span>
+            </div>
+            <button style="width:36px;height:21px;flex:none;position:relative;padding:0;background:{{ c.swBg }};border:1px solid {{ c.swBrd }};border-radius:999px;cursor:pointer">
+              <span style="position:absolute;top:2px;left:{{ c.knobX }};width:15px;height:15px;border-radius:50%;background:{{ c.knobBg }}"></span>
+            </button>
+            <button style="width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 78%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:8px;cursor:pointer" style-hover="color:#C7F011"><p2g-icon name="pencil" size="13"></p2g-icon></button>
+            <button style="width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;color:#FF6B6B;background:hsl(0 100% 71% / 0.07);border:1px solid hsl(0 100% 71% / 0.26);border-radius:8px;cursor:pointer" style-hover="background:hsl(0 100% 71% / 0.16)"><p2g-icon name="trash-2" size="13"></p2g-icon></button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dialogs: löschen / stornieren ── -->
+  <div ref="{{ delRef }}" style="display:none;position:fixed;inset:0;z-index:95;align-items:center;justify-content:center;padding:20px">
+    <div onClick="{{ closeDel }}" style="position:absolute;inset:0;background:hsl(0 0% 0% / 0.76);backdrop-filter:blur(4px)"></div>
+    <div style="position:relative;width:min(450px, 100%);background:linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));border:1px solid hsl(0 0% 15%);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;animation:fadeUp 0.25s cubic-bezier(0.16,1,0.3,1)">
+      <span style="width:44px;height:44px;border-radius:13px;background:hsl(0 100% 71% / 0.1);border:1px solid hsl(0 100% 71% / 0.3);display:flex;align-items:center;justify-content:center;color:#FF6B6B"><p2g-icon name="alert-triangle" size="20"></p2g-icon></span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <h3 ref="{{ delTitleRef }}" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Produkt löschen?</h3>
+        <p ref="{{ delTextRef }}" style="font-family:'DM Sans',sans-serif;font-size:13.5px;line-height:1.55;color:hsl(0 0% 68%);margin:0">Hat das Produkt bereits Bestellungen, wird es stattdessen nur deaktiviert — Bestellhistorie und Belege bleiben erhalten.</p>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeDel }}" style="height:40px;padding:0 16px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:hsl(0 0% 80%);background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer">Abbrechen</button>
+        <button onClick="{{ closeDel }}" ref="{{ delBtnRef }}" style="height:40px;padding:0 18px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#0A0A0A;background:#FF6B6B;border:0;border-radius:11px;cursor:pointer">Löschen</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1440, &quot;height&quot;: 960 }
+}">
+const ON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '18px', '#0A0A0A'];
+const OFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+const SMON = ['hsl(71 91% 51% / 0.9)', 'hsl(71 91% 51%)', '17px', '#0A0A0A'];
+const SMOFF = ['hsl(0 0% 16%)', 'hsl(0 0% 22%)', '2px', 'hsl(0 0% 55%)'];
+
+const PRODUCTS = [
+  { name: 'Bullpadel Vertex 04', subtitle: 'Kontrolle & Power für Fortgeschrittene', category: 'Schläger', brand: 'Bullpadel', price: '289,00 €', points: '4.000', live: true, featured: true, img: 'assets/skypadel-outdoor.jpg' },
+  { name: 'Adidas Metalbone 3.4', subtitle: 'Der Allrounder für harte Schläge', category: 'Schläger', brand: 'Adidas', price: '249,00 €', points: '3.000', live: true, featured: true, img: 'assets/skypadel-sunset.jpg' },
+  { name: 'Head Pro S Padel Balls', subtitle: '3er-Dose, turnierzugelassen', category: 'Bälle', brand: 'Head', price: '8,90 €', points: '0', live: true, featured: false, img: 'assets/tennis-padel-aerial.jpg' },
+  { name: 'P2G Performance Shirt', subtitle: 'Atmungsaktiv, recyceltes Polyester', category: 'Bekleidung', brand: 'PADEL2GO', price: '49,00 €', points: '1.500', live: true, featured: false, img: 'assets/padel-norway.jpg' },
+  { name: 'P2G Court Bag Pro', subtitle: '3 Fächer, Thermo-Schlägerfach', category: 'Taschen', brand: 'PADEL2GO', price: '119,00 €', points: '2.000', live: true, featured: false, img: 'assets/events-hero.jpg' },
+  { name: 'Babolat Grip Pack', subtitle: '3× Overgrip, weiß', category: 'Zubehör', brand: 'Babolat', price: '12,50 €', points: '0', live: true, featured: false, img: 'assets/league-hero.jpg' },
+  { name: 'P2G Cap Lime', subtitle: 'Snapback mit Stickmark', category: 'Bekleidung', brand: 'PADEL2GO', price: '29,00 €', points: '900', live: false, featured: false, img: 'assets/rewards-hero.jpg' },
+  { name: 'Wilson Bela Elite', subtitle: 'Einsteiger-Schläger, leicht', category: 'Schläger', brand: 'Wilson', price: '159,00 €', points: '2.500', live: false, featured: false, img: 'assets/fuer-vereine-hero.jpg' },
+];
+
+const OS = {
+  Offen: ['#FFC44D', 'hsl(41 100% 65% / 0.1)', 'hsl(41 100% 65% / 0.3)'],
+  Versendet: ['#7FD4FF', 'hsl(200 100% 75% / 0.1)', 'hsl(200 100% 75% / 0.3)'],
+  Geliefert: ['#C7F011', 'hsl(71 91% 51% / 0.1)', 'hsl(71 91% 51% / 0.3)'],
+  Storniert: ['#FF6B6B', 'hsl(0 100% 71% / 0.1)', 'hsl(0 100% 71% / 0.3)'],
+  Erstattet: ['#FF6B6B', 'hsl(0 100% 71% / 0.1)', 'hsl(0 100% 71% / 0.3)'],
+};
+
+const ORDERS = [
+  { date: '03.08.2026', ref: 'P2G-10248', customer: 'Lena Kramer', email: 'lena.kramer@mail.de', product: 'Bullpadel Vertex 04', qty: 1, street: 'Sonnenstr. 14', cityLine: '80331 München · DE', paid: '249,00 €', pointsNote: '4.000 P. eingelöst', state: 'Offen', img: 'assets/skypadel-outdoor.jpg' },
+  { date: '02.08.2026', ref: 'P2G-10247', customer: 'Tobias Meyer', email: 'tobias.m@mail.de', product: 'P2G Court Bag Pro', qty: 1, street: 'Rheinauer Weg 12', cityLine: '50999 Köln · DE', paid: '119,00 €', state: 'Offen', img: 'assets/events-hero.jpg' },
+  { date: '02.08.2026', ref: 'P2G-10246', customer: 'Gast', email: 'jw@mail.de', product: 'Head Pro S Padel Balls', qty: 3, street: 'Alsterufer 40', cityLine: '22085 Hamburg · DE', paid: '26,70 €', state: 'Offen', img: 'assets/tennis-padel-aerial.jpg' },
+  { date: '31.07.2026', ref: 'P2G-10241', customer: 'Marco Kern', email: 'mkern@mail.de', product: 'Adidas Metalbone 3.4', qty: 1, street: 'Karl-Kloss-Str. 8', cityLine: '70180 Stuttgart · DE', paid: '219,00 €', pointsNote: '3.000 P. eingelöst', state: 'Versendet', tracking: 'DHL · 00340434…812 · 01.08.', img: 'assets/skypadel-sunset.jpg' },
+  { date: '28.07.2026', ref: 'P2G-10238', customer: 'Nina Dörr', email: 'ndoerr@mail.de', product: 'P2G Performance Shirt', qty: 2, street: 'Delitzscher Str. 90', cityLine: '04129 Leipzig · DE', paid: '98,00 €', state: 'Geliefert', tracking: 'DPD · 09821…441 · 30.07.', img: 'assets/padel-norway.jpg' },
+  { date: '24.07.2026', ref: 'P2G-10232', customer: 'Paul Frank', email: 'pfrank@mail.de', product: 'P2G Cap Lime', qty: 1, street: 'Hafenstr. 3', cityLine: '20359 Hamburg · DE', paid: '29,00 €', state: 'Erstattet', img: 'assets/rewards-hero.jpg' },
+];
+
+class Component extends DCLogic {
+  state = { tab: 'products', ordFilter: 'open' };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+      if (n > 14) clearInterval(this._iv);
+    }, 350);
+    this._paint();
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  componentDidUpdate() { this._paint(); }
+
+  _paint() {
+    const t = this.state.tab;
+    if (this._tabs) {
+      this._tabs.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === t);
+      });
+    }
+    [['products', this._v1], ['orders', this._v2], ['returns', this._v3]].forEach(([k, el]) => {
+      if (el) el.style.display = t === k ? 'flex' : 'none';
+    });
+    if (this._ordSeg) {
+      this._ordSeg.querySelectorAll('button[data-key]').forEach((b) => {
+        b.toggleAttribute('data-on', b.dataset.key === this.state.ordFilter);
+      });
+    }
+    this._filterProd();
+    this._filterOrd();
+  }
+
+  _filterProd() {
+    if (!this._prodRows) return;
+    const cat = this._cat || 'all';
+    const st = this._st || 'all';
+    let n = 0;
+    this._prodRows.querySelectorAll('tr[data-cat]').forEach((tr) => {
+      const hit = (cat === 'all' || tr.dataset.cat === cat) && (st === 'all' || tr.dataset.state === st);
+      tr.style.display = hit ? '' : 'none';
+      if (hit) n += 1;
+    });
+    if (this._prodCount) this._prodCount.textContent = '(' + n + ')';
+  }
+
+  _filterOrd() {
+    if (!this._ordRows) return;
+    const f = this.state.ordFilter;
+    this._ordRows.querySelectorAll('tr[data-state]').forEach((tr) => {
+      tr.style.display = f === 'all' || tr.dataset.state === f ? '' : 'none';
+    });
+  }
+
+  _show(el, on) { if (el) el.style.display = on ? 'flex' : 'none'; }
+
+  renderVals() {
+    return {
+      kpis: [
+        { icon: 'euro', value: '18.420 €', label: 'Umsatz (bezahlt)', trend: '+24%' },
+        { icon: 'shopping-bag', value: '148', label: 'Bestellungen', trend: '+18%' },
+        { icon: 'coins', value: '412.500', label: 'Eingelöste Punkte', trend: '+31%' },
+      ],
+      tabs: [
+        { key: 'products', label: 'Produkte', icon: 'package', hasCount: true, count: '8', pick: () => this.setState({ tab: 'products' }) },
+        { key: 'orders', label: 'Bestellungen', icon: 'truck', hasCount: true, count: '3', pick: () => this.setState({ tab: 'orders' }) },
+        { key: 'returns', label: 'Retouren', icon: 'undo-2', hasCount: true, count: '2', pick: () => this.setState({ tab: 'returns' }) },
+      ],
+      products: PRODUCTS.map((p) => {
+        const s = p.live ? ON : OFF;
+        return {
+          ...p,
+          stateKey: p.live ? 'live' : 'draft',
+          state: p.live ? 'Live' : 'Entwurf',
+          stateFg: p.live ? '#C7F011' : '#FFC44D',
+          stateBg: p.live ? 'hsl(71 91% 51% / 0.1)' : 'hsl(41 100% 65% / 0.1)',
+          stateBrd: p.live ? 'hsl(71 91% 51% / 0.3)' : 'hsl(41 100% 65% / 0.3)',
+          pointsFg: p.points === '0' ? 'hsl(0 0% 55%)' : '#C7F011',
+          swBg: s[0], swBrd: s[1], knobX: s[2], knobBg: s[3],
+          noop: () => {},
+          edit: () => this._show(this._prodDlg, true),
+          del: () => {
+            if (this._delTitle) this._delTitle.textContent = 'Produkt löschen?';
+            if (this._delText) this._delText.textContent = 'Möchtest du „' + p.name + '“ wirklich löschen? Hat das Produkt bereits Bestellungen, wird es stattdessen nur deaktiviert — Bestellhistorie und Belege bleiben erhalten.';
+            if (this._delBtn) this._delBtn.textContent = 'Löschen';
+            this._show(this._del, true);
+          },
+        };
+      }),
+      referrals: [
+        { initials: 'LK', name: 'Lena Kramer', count: '7', points: '3.500', value: '35,00 €' },
+        { initials: 'MK', name: 'Marco Kern', count: '5', points: '2.500', value: '25,00 €' },
+        { initials: 'TS', name: 'Tim Sauer', count: '3', points: '1.500', value: '15,00 €' },
+        { initials: 'AB', name: 'Anna Brenner', count: '2', points: '1.000', value: '10,00 €' },
+      ],
+      ordFilters: [
+        { key: 'open', label: 'Offen (zu versenden)' },
+        { key: 'Versendet', label: 'Versendet' },
+        { key: 'Geliefert', label: 'Geliefert' },
+        { key: 'Erstattet', label: 'Storniert / Erstattet' },
+        { key: 'all', label: 'Alle' },
+      ].map((f) => ({ ...f, pick: () => this.setState({ ordFilter: f.key }) })),
+      orders: ORDERS.map((o) => {
+        const s = OS[o.state];
+        return {
+          ...o,
+          stateKey: o.state === 'Offen' ? 'open' : o.state,
+          stateFg: s[0], stateBg: s[1], stateBrd: s[2],
+          hasPoints: !!o.pointsNote,
+          hasTracking: !!o.tracking,
+          shippable: o.state === 'Offen',
+          cancellable: o.state === 'Offen' || o.state === 'Versendet',
+          cancel: () => {
+            if (this._delTitle) this._delTitle.textContent = 'Bestellung stornieren & erstatten?';
+            if (this._delText) this._delText.textContent = '„' + o.product + '“ (' + o.ref + ') wird storniert. Der bezahlte Betrag ' + o.paid + ' wird über Stripe zurückerstattet, eingelöste Punkte werden gutgeschrieben und der Lagerbestand zurückgebucht.';
+            if (this._delBtn) this._delBtn.textContent = 'Stornieren & erstatten';
+            this._show(this._del, true);
+          },
+        };
+      }),
+      returns: [
+        { date: '01.08.2026', ref: 'P2G-10232', product: 'P2G Cap Lime', email: 'pfrank@mail.de', reason: 'Größe passt nicht', note: 'Ware geprüft, einwandfrei' },
+        { date: '30.07.2026', ref: 'P2G-10229', product: 'P2G Performance Shirt', email: 'sroth@mail.de', reason: 'Falsche Farbe geliefert', note: '' },
+        { date: '22.07.2026', ref: 'P2G-10214', product: 'Head Pro S Padel Balls', email: 'ndoerr@mail.de', reason: '—', note: 'Erstattet am 24.07.' },
+        { date: '15.07.2026', ref: 'P2G-10201', product: 'Babolat Grip Pack', email: 'awolf@mail.de', reason: 'Doppelt bestellt', note: 'Abgelehnt — Frist überschritten' },
+      ],
+      prodFields: [
+        { label: 'Name', req: true, isInput: true, ph: 'Bullpadel Vertex 04' },
+        { label: 'Slug (URL)', isInput: true, ph: 'bullpadel-vertex-04', hint: true, hintText: '/marketplace/bullpadel-vertex-04' },
+        { label: 'Untertitel', isInput: true, ph: 'Kontrolle & Power für Fortgeschrittene' },
+        { label: 'Produktkategorie', isSelect: true, options: ['— keine —', 'Schläger', 'Bälle', 'Bekleidung', 'Taschen', 'Zubehör'] },
+        { label: 'Marke', isSelect: true, options: ['— keine —', 'Adidas', 'Babolat', 'Bullpadel', 'Head', 'PADEL2GO', 'Wilson'] },
+        { label: 'Preis (€)', req: true, isInput: true, ph: '289,00' },
+        { label: 'UVP (€)', isInput: true, ph: 'Streichpreis' },
+        { label: 'Punkte-Rabatt (max. Points)', isInput: true, ph: '0', hint: true, hintText: '100 Points = 1,00 € · 0 = kein Punkterabatt' },
+        { label: 'Marken-/Partner-Text', isInput: true, ph: 'wird bei Markenwahl vorbelegt' },
+        { label: 'Bestand (optional)', isInput: true, ph: 'leer = Unbegrenzt' },
+        { label: 'Sortierung', isInput: true, ph: '0' },
+        { label: 'Status', isSelect: true, options: ['Live', 'Entwurf'] },
+      ],
+      gpsrFields: [
+        { label: 'Hersteller Name', ph: 'Bullpadel S.L.' },
+        { label: 'Hersteller E-Mail', ph: 'info@bullpadel.com' },
+        { label: 'Hersteller Anschrift', ph: 'Straße, PLZ, Ort, Land' },
+        { label: 'EU-Verantwortlicher Name', ph: 'nur bei Nicht-EU-Hersteller' },
+        { label: 'EU-Verantwortlicher E-Mail', ph: 'eu-rep@…' },
+        { label: 'Produkt-ID / Charge', ph: 'GTIN / EAN / SKU' },
+        { label: 'Materialzusammensetzung', ph: 'Pflicht bei Textilien' },
+        { label: 'Lieferzeit min (Werktage)', ph: '2' },
+        { label: 'Lieferzeit max (Werktage)', ph: '4' },
+      ],
+      specs: [
+        { k: 'Gewicht', v: '365 g' },
+        { k: 'Form', v: 'Diamant' },
+        { k: 'Kern', v: 'MultiEva' },
+      ],
+      gallerySlots: [1, 2, 3, 4, 5],
+      catalogItems: [
+        { name: 'Schläger', slug: 'schlaeger', kind: 'category', on: true },
+        { name: 'Bälle', slug: 'baelle', kind: 'category', on: true },
+        { name: 'Bekleidung', slug: 'bekleidung', kind: 'category', on: true },
+        { name: 'Taschen', slug: 'taschen', kind: 'category', on: true },
+        { name: 'Zubehör', slug: 'zubehoer', kind: 'category', on: true },
+        { name: 'Geschenkideen', slug: 'geschenkideen', kind: 'category', on: false },
+      ].map((c) => {
+        const s = c.on ? SMON : SMOFF;
+        return { ...c, isBrand: false, swBg: s[0], swBrd: s[1], knobX: s[2], knobBg: s[3] };
+      }),
+
+      tabRef: (el) => { this._tabs = el; this._paint(); },
+      v1Ref: (el) => { this._v1 = el; },
+      v2Ref: (el) => { this._v2 = el; },
+      v3Ref: (el) => { this._v3 = el; },
+      prodRowsRef: (el) => { this._prodRows = el; this._filterProd(); },
+      prodCountRef: (el) => { this._prodCount = el; },
+      ordRowsRef: (el) => { this._ordRows = el; this._filterOrd(); },
+      ordSegRef: (el) => { this._ordSeg = el; this._paint(); },
+      prodDlgRef: (el) => { this._prodDlg = el; },
+      catDlgRef: (el) => { this._catDlg = el; },
+      catTitleRef: (el) => { this._catTitle = el; },
+      catHintRef: (el) => { this._catHint = el; },
+      catListRef: (el) => { this._catList = el; },
+      delRef: (el) => { this._del = el; },
+      delTitleRef: (el) => { this._delTitle = el; },
+      delTextRef: (el) => { this._delText = el; },
+      delBtnRef: (el) => { this._delBtn = el; },
+
+      onCat: (e) => { this._cat = e.target.value; this._filterProd(); },
+      onStatus: (e) => { this._st = e.target.value; this._filterProd(); },
+      openProduct: () => this._show(this._prodDlg, true),
+      closeProduct: () => this._show(this._prodDlg, false),
+      openCat: () => {
+        if (this._catTitle) this._catTitle.textContent = 'Kategorien verwalten';
+        if (this._catHint) this._catHint.textContent = 'Produktkategorien für den Shop (z. B. Schläger, Bälle, Bekleidung).';
+        this._show(this._catDlg, true);
+      },
+      openBrand: () => {
+        if (this._catTitle) this._catTitle.textContent = 'Marken verwalten';
+        if (this._catHint) this._catHint.textContent = 'Marken für die Produkte. Klick auf den Kreis lädt ein Logo hoch — es erscheint auf Produktkarten und Produktseite.';
+        this._show(this._catDlg, true);
+      },
+      closeCat: () => this._show(this._catDlg, false),
+      closeDel: () => this._show(this._del, false),
+    };
+  }
+}
+</script>
+</body>
+</html>

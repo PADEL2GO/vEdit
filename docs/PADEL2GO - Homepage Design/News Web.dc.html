@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: var(--acc, #C7F011); text-decoration: none; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    #nw-root { --acc: #C7F011; --acc-soft: hsl(71 91% 51% / 0.12); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+    #nw-rail { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 4px 0 14px; scrollbar-width: none; }
+    #nw-rail::-webkit-scrollbar { display: none; }
+    #nw-rail > * { scroll-snap-align: start; }
+    #nw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(272px, 100%), 1fr)); gap: 22px; }
+    /* chip colors live in CSS: the runtime owns template-declared inline styles */
+    #nw-chips button[data-topic] { color: hsl(0 0% 72%); background: hsl(0 0% 100% / 0.04); border: 1px solid hsl(0 0% 16%); }
+    #nw-chips button[data-topic="Alle"], #nw-chips button[data-topic="Inside P2G"] { --c: #C7F011; }
+    #nw-chips button[data-topic="Events"] { --c: #B06BFF; }
+    #nw-chips button[data-topic="Marketplace"] { --c: #FF8A1F; }
+    #nw-chips button[data-topic="Community"] { --c: #FF4D4D; }
+    #nw-chips button[data-topic="Business"] { --c: #2FE0C0; }
+    #nw-chips button[data-topic] [data-dot] { background: var(--c); }
+    #nw-chips button[data-on] { color: #0A0A0A; background: var(--c); border-color: var(--c); }
+    #nw-chips button[data-on] [data-dot] { background: #0A0A0A; }
+    @media (max-width: 900px) { #nw-navlinks { display: none !important; } }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div id="nw-root" ref="{{ rootRef }}" style="min-height:100vh;background:#000">
+
+  <!-- ═══ NAV ═══ -->
+  <header style="position:sticky;top:0;z-index:60;background:hsl(0 0% 0% / 0.8);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid hsl(0 0% 15% / 0.5)">
+    <div style="max-width:1280px;margin:0 auto;padding:0 20px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+      <a href="Homepage.dc.html" style="display:flex;align-items:center;gap:10px;flex:none">
+        <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:34px;width:auto;display:block">
+        <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.02em;color:#FAFAFA">PADEL<span style="color:#C7F011">2</span>GO</span>
+      </a>
+      <nav id="nw-navlinks" style="display:flex;align-items:center;gap:2px">
+        <a href="Fuer Spieler.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);padding:8px 14px;border-radius:999px" style-hover="color:var(--acc);background:hsl(0 0% 100% / 0.06)">Für Spieler</a>
+        <a href="Homepage.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);padding:8px 14px;border-radius:999px" style-hover="color:var(--acc);background:hsl(0 0% 100% / 0.06)">Für Vereine</a>
+        <a href="Booking.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);padding:8px 14px;border-radius:999px" style-hover="color:var(--acc);background:hsl(0 0% 100% / 0.06)">Standorte</a>
+        <a href="Events.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);padding:8px 14px;border-radius:999px" style-hover="color:var(--acc);background:hsl(0 0% 100% / 0.06)">Events</a>
+        <a href="News Web.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:600;color:var(--acc);background:hsl(0 0% 100% / 0.07);padding:8px 14px;border-radius:999px">News</a>
+        <a href="Marketplace.dc.html" style="font-family:'DM Sans',sans-serif;font-size:14.5px;color:hsl(0 0% 75%);padding:8px 14px;border-radius:999px" style-hover="color:var(--acc);background:hsl(0 0% 100% / 0.06)">Marketplace</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button style="font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 75%);background:none;border:1px solid hsl(0 0% 15%);border-radius:999px;padding:6px 12px;cursor:pointer" style-hover="color:var(--acc);border-color:hsl(0 0% 30%)">DE</button>
+        <a href="Login.dc.html"><x-import component-from-global-scope="PADEL2GODesignSystem_1e83ca.Button" variant="lime" size="sm" pill="{{ true }}" hint-size="76px,36px">Login</x-import></a>
+      </div>
+    </div>
+  </header>
+
+  <div data-screen-label="Web — News" style="max-width:1280px;margin:0 auto;padding:56px 20px 96px;display:flex;flex-direction:column;gap:44px">
+
+    <!-- ═══ HEADER ═══ -->
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:28px;flex-wrap:wrap;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1)">
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:14px;max-width:620px">
+        <span style="display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--acc);background:hsl(0 0% 100% / 0.05);border:1px solid var(--acc-brd, hsl(0 0% 20%));border-radius:999px;padding:7px 14px;white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:var(--acc)"></span> P2G News</span>
+        <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(34px, 5.4vw, 60px);line-height:1.04;letter-spacing:-0.025em;color:#FAFAFA;margin:0">Alles aus dem <span style="color:var(--acc)">Network</span>.</h1>
+        <p style="font-family:'DM Sans',sans-serif;font-size:17px;line-height:1.6;color:hsl(0 0% 65%);margin:0">Neue Standorte, Events, Community-Stories — frisch vom Court.</p>
+      </div>
+      <a href="#" style="display:inline-flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:600;color:hsl(0 0% 75%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:11px 20px;transition:color 0.2s, border-color 0.2s" style-hover="color:var(--acc);border-color:hsl(0 0% 32%)"><p2g-icon name="instagram" size="17"></p2g-icon> @padel2go folgen</a>
+    </div>
+
+    <!-- ═══ TOPIC-FILTER ═══ -->
+    <div id="nw-chips" ref="{{ chipsRef }}" style="display:flex;gap:10px;flex-wrap:wrap;animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.06s backwards">
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+        <button onClick="{{ c.pick }}" data-topic="{{ c.label }}" style="display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;border-radius:999px;padding:10px 20px;cursor:pointer;transition:color 0.2s, background 0.2s, border-color 0.2s">
+          <span data-dot="1" style="width:7px;height:7px;border-radius:50%;flex:none"></span>{{ c.label }}
+        </button>
+      </sc-for>
+    </div>
+
+    <!-- ═══ HIGHLIGHT-RAIL (4:5) ═══ -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <h2 style="display:flex;align-items:center;gap:10px;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.01em;color:#FAFAFA;margin:0"><span style="color:var(--acc);display:flex"><p2g-icon name="flame" size="18"></p2g-icon></span> Highlights</h2>
+        <div style="display:flex;gap:8px">
+          <button onClick="{{ railPrev }}" aria-label="Zurück" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:50%;cursor:pointer;transition:color 0.2s, border-color 0.2s" style-hover="color:var(--acc);border-color:hsl(0 0% 32%)"><p2g-icon name="arrow-left" size="17"></p2g-icon></button>
+          <button onClick="{{ railNext }}" aria-label="Weiter" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:50%;cursor:pointer;transition:color 0.2s, border-color 0.2s" style-hover="color:var(--acc);border-color:hsl(0 0% 32%)"><p2g-icon name="arrow-right" size="17"></p2g-icon></button>
+        </div>
+      </div>
+      <div id="nw-rail" ref="{{ railRef }}">
+        <sc-for list="{{ featured }}" as="f" hint-placeholder-count="0">
+          <a href="News Artikel Web.dc.html" style="flex:none;width:min(340px, 78vw);display:flex;flex-direction:column;gap:0;text-decoration:none">
+            <div style="position:relative;aspect-ratio:4 / 5;border-radius:24px;overflow:hidden;border:1px solid hsl(0 0% 16%);transition:border-color 0.25s, transform 0.25s, box-shadow 0.25s" style-hover="border-color:{{ f.accBorder }};transform:translateY(-4px);box-shadow:0 18px 46px hsl(0 0% 0% / 0.6)">
+              <div role="img" aria-label="{{ f.title }}" style="position:absolute;top:0;left:0;width:100%;height:100%;background-image:url({{ f.img }});background-size:cover;background-position:center"></div>
+              <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(190deg, hsl(0 0% 0% / 0.1) 22%, hsl(0 0% 0% / 0.92) 88%)"></div>
+              <span style="position:absolute;top:16px;left:16px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:{{ f.acc }};background:hsl(0 0% 0% / 0.62);backdrop-filter:blur(10px);border:1px solid {{ f.accBorder }};border-radius:999px;padding:6px 13px;white-space:nowrap">{{ f.cat }}</span>
+              <div style="position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:9px;padding:22px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;color:hsl(0 0% 62%)">{{ f.date }}</span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;line-height:1.12;letter-spacing:-0.015em;color:#FAFAFA;margin:0">{{ f.title }}</h3>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:{{ f.acc }}">Weiterlesen <p2g-icon name="arrow-right" size="15"></p2g-icon></span>
+              </div>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- ═══ FEED (4:5 Grid) ═══ -->
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:4px;border-bottom:1px solid hsl(0 0% 14%)">
+        <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">{{ feedTitle }}</h2>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 50%)">{{ countLabel }}</span>
+      </div>
+
+      <div id="nw-grid">
+        <sc-for list="{{ posts }}" as="p" hint-placeholder-count="0">
+          <a href="News Artikel Web.dc.html" style="display:flex;flex-direction:column;gap:14px;text-decoration:none">
+            <div style="position:relative;aspect-ratio:4 / 5;border-radius:20px;overflow:hidden;border:1px solid hsl(0 0% 15%);background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));transition:border-color 0.25s, transform 0.25s" style-hover="border-color:{{ p.accBorder }};transform:translateY(-3px)">
+              <div role="img" aria-label="{{ p.title }}" style="position:absolute;top:0;left:0;width:100%;height:100%;background-image:url({{ p.img }});background-size:cover;background-position:center"></div>
+              <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(190deg, hsl(0 0% 0% / 0.15) 30%, hsl(0 0% 0% / 0.85) 92%)"></div>
+              <span style="position:absolute;top:14px;left:14px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:{{ p.acc }};background:hsl(0 0% 0% / 0.62);backdrop-filter:blur(10px);border:1px solid {{ p.accBorder }};border-radius:999px;padding:5px 11px;white-space:nowrap">{{ p.cat }}</span>
+              <div style="position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:7px;padding:18px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.1em;color:hsl(0 0% 60%)">{{ p.date }} · {{ p.read }}</span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;line-height:1.18;letter-spacing:-0.01em;color:#FAFAFA;margin:0">{{ p.title }}</h3>
+              </div>
+            </div>
+            <p style="font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.55;color:hsl(0 0% 62%);margin:0;padding:0 2px">{{ p.excerpt }}</p>
+          </a>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;justify-content:center;padding-top:20px">
+        <button style="display:inline-flex;align-items:center;gap:9px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:14px 28px;cursor:pointer;transition:color 0.2s, border-color 0.2s" style-hover="color:var(--acc);border-color:hsl(0 0% 32%)">Mehr laden <p2g-icon name="chevron-down" size="17"></p2g-icon></button>
+      </div>
+    </div>
+
+    <!-- ═══ NEWSLETTER ═══ -->
+    <div style="position:relative;overflow:hidden;border:1px solid var(--acc-brd, hsl(0 0% 18%));border-radius:26px;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));padding:clamp(28px, 4vw, 46px);display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap">
+      <div ref="{{ glowRef }}" style="position:absolute;right:-120px;top:-120px;width:340px;height:340px;border-radius:50%;pointer-events:none"></div>
+      <div style="position:relative;display:flex;flex-direction:column;gap:9px;max-width:440px">
+        <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(22px, 3vw, 30px);line-height:1.12;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Keine News verpassen.</h3>
+        <p style="font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.55;color:hsl(0 0% 65%);margin:0">Einmal pro Monat das Wichtigste aus dem P2G Network — kein Spam.</p>
+      </div>
+      <div style="position:relative;display:flex;gap:10px;flex-wrap:wrap;min-width:min(340px, 100%)">
+        <input type="email" placeholder="deine@email.de" style="flex:1;min-width:180px;height:52px;padding:0 18px;box-sizing:border-box;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 18%);border-radius:14px;outline:none;transition:border-color 0.2s" style-focus="border-color:var(--acc)">
+        <button style="height:52px;padding:0 24px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;color:#0A0A0A;background:var(--acc);border:none;border-radius:14px;cursor:pointer;transition:transform 0.15s, filter 0.2s" style-hover="transform:translateY(-1px);filter:brightness(1.08)">Abonnieren</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+/* 5 Topics (Alle + 5) — jedes mit eigenem Colorcode. "Alle" = Brand-Lime. */
+const TOPICS = {
+  'Alle': '#C7F011',
+  'Inside P2G': '#C7F011',
+  'Events': '#B06BFF',
+  'Marketplace': '#FF8A1F',
+  'Community': '#FF4D4D',
+  'Business': '#2FE0C0',
+};
+
+const ALL = [
+  { cat: 'Inside P2G', date: '28.07.2026', read: '3 Min', img: 'assets/skypadel-outdoor.jpg', title: 'München-Ost geht live', excerpt: 'Zwei mobile Courts, KI-Kamera und Flutlicht — ab August bespielbar.' },
+  { cat: 'Events', date: '24.07.2026', read: '2 Min', img: 'assets/events-hero.jpg', title: 'Padel Night: Turnierserie startet', excerpt: 'Sechs Standorte, ein Format — jeden Monat um Points spielen.' },
+  { cat: 'Community', date: '19.07.2026', read: '2 Min', img: 'assets/skypadel-sunset.jpg', title: 'Golden Hour Sessions', excerpt: 'Jeden Freitag Sunset-Padel auf ausgewählten Courts.' },
+  { cat: 'Marketplace', date: '15.07.2026', read: '2 Min', img: 'assets/rewards-hero.jpg', title: 'Neue Rackets im Marketplace', excerpt: 'Ab jetzt auch komplett mit P2G Points einlösbar.' },
+  { cat: 'Inside P2G', date: '11.07.2026', read: '5 Min', img: 'assets/padel-norway.jpg', title: 'Wie wir einen Court in 11 Tagen bauen', excerpt: 'Vom Fundamentcheck bis zum ersten Aufschlag — hinter den Kulissen.' },
+  { cat: 'Inside P2G', date: '07.07.2026', read: '3 Min', img: 'assets/tennis-padel-aerial.jpg', title: 'Hamburg: Bauantrag ist durch', excerpt: 'Der Standort an der Alster startet im Frühjahr mit drei Courts.' },
+  { cat: 'Business', date: '02.07.2026', read: '4 Min', img: 'assets/fuer-vereine-hero.jpg', title: 'Padel ohne Investment', excerpt: 'Revenue-Share statt Eigenkapital — das Modell für Vereine.' },
+  { cat: 'Events', date: '26.06.2026', read: '2 Min', img: 'assets/league-hero.jpg', title: 'Recap: Season Opening Köln', excerpt: '64 Spieler, 12 Stunden Padel und ein Finale, das keiner erwartet hat.' },
+  { cat: 'Inside P2G', date: '22.06.2026', read: '4 Min', img: 'assets/skypadel-outdoor.jpg', title: 'Was hinter unserer KI-Analyse steckt', excerpt: 'Wie aus Kamerabildern Heatmaps und dein Match-Score werden.' },
+  { cat: 'Marketplace', date: '18.06.2026', read: '2 Min', img: 'assets/rewards-hero.jpg', title: 'Member-Deals im Juli', excerpt: 'Bis zu 30% auf Bälle, Grips und P2G Merch.' },
+  { cat: 'Community', date: '12.06.2026', read: '3 Min', img: 'assets/events-hero.jpg', title: 'Neue Spielpartner finden', excerpt: 'Matchmaking nach Level — direkt in der App.' },
+  { cat: 'Business', date: '06.06.2026', read: '3 Min', img: 'assets/tennis-padel-aerial.jpg', title: 'Partner am Court werden', excerpt: 'Sichtbarkeit für Marken, wo die Community entsteht.' },
+];
+
+class Component extends DCLogic {
+  state = { cat: 'Alle' };
+
+  componentDidMount() {
+    let n = 0;
+    this._iv = setInterval(() => {
+      n += 1;
+      this._sync();
+      if ((window.lucide && n > 2) || n > 20) clearInterval(this._iv);
+    }, 350);
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  componentDidUpdate() { this._sync(); }
+  _sync() {
+    if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    const acc = TOPICS[this.state.cat] || TOPICS['Alle'];
+    if (this._root) {
+      this._root.style.setProperty('--acc', acc);
+      this._root.style.setProperty('--acc-brd', acc + '55');
+    }
+    if (this._glow) {
+      this._glow.style.background = 'radial-gradient(circle, ' + acc + '26, transparent 70%)';
+    }
+    this._paintChips(this.state.cat);
+  }
+
+  /* The runtime re-asserts template-declared inline styles, so the active
+     chip is styled in CSS and only an undeclared attribute is toggled. */
+  _paintChips(active, scope) {
+    const box = scope || this._chips || document.getElementById('nw-chips');
+    if (!box) return;
+    box.querySelectorAll('button[data-topic]').forEach((b) => {
+      b.toggleAttribute('data-on', b.dataset.topic === active);
+    });
+  }
+
+  renderVals() {
+    const active = this.state.cat;
+    const filtered = active === 'Alle' ? ALL : ALL.filter((p) => p.cat === active);
+    const deco = (p) => ({ ...p, acc: TOPICS[p.cat], accBorder: TOPICS[p.cat] + '66' });
+    return {
+      cats: Object.keys(TOPICS).map((label) => {
+        return {
+          label,
+          pick: (e) => {
+            const btn = e.currentTarget;
+            this._paintChips(label, btn.parentElement);
+            if (this._root) {
+              this._root.style.setProperty('--acc', TOPICS[label]);
+              this._root.style.setProperty('--acc-brd', TOPICS[label] + '55');
+            }
+            this.setState({ cat: label });
+          },
+        };
+      }),
+      featured: ALL.slice(0, 4).map(deco),
+      posts: filtered.map(deco),
+      feedTitle: active === 'Alle' ? 'Alle Beiträge' : active,
+      countLabel: filtered.length + ' Beiträge',
+      rootRef: (el) => { this._root = el; this._sync(); },
+      chipsRef: (el) => { this._chips = el; this._sync(); },
+      glowRef: (el) => { this._glow = el; },
+      railRef: (el) => { this._rail = el; },
+      railPrev: () => { if (this._rail) this._rail.scrollBy({ left: -358, behavior: 'smooth' }); },
+      railNext: () => { if (this._rail) this._rail.scrollBy({ left: 358, behavior: 'smooth' }); },
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/styles.css">
+  <script src="_ds/padel2go-design-system-1e83ca8e-0a96-4799-8c02-846a1409d2bf/_ds_bundle.js"></script>
+  <script src="https://unpkg.com/lucide@0.462.0/dist/umd/lucide.min.js"></script>
+  <script src="p2g-icon.js"></script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #000; color: #FAFAFA; }
+    body { font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #C7F011; } a:hover { color: #D8FF29; }
+    p2g-icon { display: inline-flex; line-height: 0; flex: none; }
+    [data-scroll] { scrollbar-width: none; } [data-scroll]::-webkit-scrollbar { display: none; }
+    [data-scroll] > * { flex-shrink: 0; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 hsl(71 91% 51% / 0); } 50% { box-shadow: 0 0 20px hsl(71 91% 51% / 0.4); } }
+    @keyframes barIn { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes springIn { 0% { transform: scale(0); opacity: 0; } 55% { transform: scale(1.14); opacity: 1; } 78% { transform: scale(0.94); } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    input::placeholder { color: hsl(0 0% 38%); }
+    input[type="range"] { accent-color: #C7F011; height: 22px; margin: 0; }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;background:radial-gradient(ellipse 60% 36% at 50% 0%, hsl(71 91% 51% / 0.07), transparent), #000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:44px 24px">
+
+  <div style="display:flex;align-items:center;gap:10px">
+    <img src="assets/p2g-icon-clean.png" alt="PADEL2GO" style="height:26px;width:auto;display:block">
+    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;letter-spacing:-0.02em;color:#FAFAFA">PADEL<span style="color:#C7F011">2</span>GO <span style="color:hsl(0 0% 45%);font-weight:600">· Mobile App</span></span>
+  </div>
+
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+    <div style="height:100%;position:relative;background:#000;overflow:hidden;font-family:'DM Sans',sans-serif">
+
+      <!-- ═══ SCREEN: Mein P2G (Home) ═══ -->
+      <sc-if value="{{ scrHome }}" hint-placeholder-val="{{ true }}">
+        <div data-scroll data-screen-label="App — Mein P2G" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:16px;background:radial-gradient(ellipse 90% 30% at 50% 0%, hsl(71 91% 51% / 0.08), transparent), #000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="width:42px;height:42px;flex:none;border-radius:50%;background:linear-gradient(135deg, hsl(71 91% 51% / 0.25), hsl(71 91% 51% / 0.06));border:1px solid hsl(71 91% 51% / 0.4);display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16px;color:#C7F011">{{ avatarInitial }}</span>
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.02em;color:#FAFAFA;line-height:1.1">Moin, <span style="color:#C7F011">{{ userName }}.</span></span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 50%)">{{ dateLabel }}</span>
+            </span>
+            <button onClick="{{ openNews }}" style="position:relative;width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 62%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="bell" size="17"></p2g-icon><span style="position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:#C7F011;border:1.5px solid #000"></span></button>
+          </div>
+
+          <div data-screen-label="Points Card" style="background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(71 91% 51% / 0.25);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 0 40px hsl(71 91% 51% / 0.08)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;color:hsl(0 0% 55%)"><span style="color:#C7F011;display:flex"><p2g-icon name="star" size="13"></p2g-icon></span>P2G POINTS</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.22);border-radius:999px;padding:4px 10px">+80 P diese Woche</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:44px;line-height:1;color:#C7F011;text-shadow:0 0 32px hsl(71 91% 51% / 0.4)">{{ pointsDisplay }}</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 60%)">{{ euroLabel }} <span style="color:hsl(0 0% 40%)">· 100 P = €1,00</span></span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:hsl(0 0% 72%)">{{ levelChip }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:hsl(0 0% 46%)">{{ nextLevelLabel }}</span>
+              </div>
+              <div style="height:8px;border-radius:999px;background:hsl(0 0% 12%);border:1px solid hsl(0 0% 16%);overflow:hidden">
+                <div style="width:{{ levelPct }};height:100%;border-radius:999px;background:linear-gradient(90deg, #C7F011, #D8FF29);box-shadow:0 0 12px hsl(71 91% 51% / 0.5);transform-origin:left;animation:barIn 0.9s cubic-bezier(0.16,1,0.3,1)"></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:9px">
+              <button onClick="{{ goMarket }}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#000;background:#C7F011;border:none;border-radius:12px;cursor:pointer;box-shadow:0 0 24px hsl(71 91% 51% / 0.25)" style-hover="box-shadow:0 0 34px hsl(71 91% 51% / 0.4)" style-active="transform:scale(0.98)"><p2g-icon name="gift" size="16"></p2g-icon>Punkte einlösen</button>
+              <button onClick="{{ openHistorie }}" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;height:44px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:hsl(0 0% 62%);background:none;border:1px solid hsl(0 0% 17%);border-radius:12px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="history" size="15"></p2g-icon>Historie</button>
+            </div>
+          </div>
+
+          <div data-screen-label="Match CTA" style="position:relative;border-radius:20px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.7);min-height:216px;display:flex;flex-direction:column;justify-content:flex-end">
+            <img src="assets/skypadel-sunset.jpg" alt="SkyPadel Court bei Sonnenuntergang" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+            <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(200deg, hsl(0 0% 0% / 0.12), hsl(0 0% 0% / 0.92) 82%)"></div>
+            <span style="position:absolute;top:13px;left:13px;display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:#C7F011;background:hsl(0 0% 0% / 0.6);backdrop-filter:blur(10px);border:1px solid hsl(71 91% 51% / 0.35);border-radius:999px;padding:6px 11px"><span style="width:6px;height:6px;border-radius:50%;background:#C7F011;animation:pulseGlow 2s infinite"></span>Heute noch Slots frei</span>
+            <div style="position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:11px;padding:16px">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:23px;line-height:1.1;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Zeit für dein nächstes <span style="font-style:italic;color:#C7F011">Match?</span></h2>
+              <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 78%)"><span style="color:#C7F011;display:flex"><p2g-icon name="map-pin" size="12"></p2g-icon></span>Nächster Slot: heute 17:00 · SkyPadel Hamburg</span>
+              <button onClick="{{ goBuchen }}" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;color:#000;background:linear-gradient(90deg, #C7F011, #D8FF29);border:none;border-radius:13px;cursor:pointer;box-shadow:0 0 30px hsl(71 91% 51% / 0.3)" style-active="transform:scale(0.98)">🎾 Jetzt Court buchen</button>
+            </div>
+          </div>
+
+          <div data-screen-label="Meine Buchungen" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Meine Buchungen</h3>
+              <button onClick="{{ goBuchen }}" style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#C7F011;background:none;border:none;padding:0;cursor:pointer">Neue Buchung<p2g-icon name="arrow-right" size="12"></p2g-icon></button>
+            </div>
+            <sc-for list="{{ bookings }}" as="b" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:15px;padding:11px 12px" style-hover="border-color:hsl(71 91% 51% / 0.35)">
+                <span style="display:flex;flex-direction:column;align-items:center;gap:1px;width:46px;flex:none;background:hsl(71 91% 51% / 0.07);border:1px solid hsl(71 91% 51% / 0.25);border-radius:12px;padding:7px 3px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:17px;line-height:1;color:#C7F011">{{ b.day }}</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:0.13em;color:hsl(0 0% 55%)">{{ b.mon }}</span>
+                </span>
+                <span style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+                  <span style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:13.5px;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.loc }} · {{ b.court }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 54%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.wd }} · {{ b.time }} · <span style="color:#C7F011">{{ b.earn }}</span></span>
+                </span>
+                <button onClick="{{ b.openTicket }}" title="Ticket anzeigen" style="width:38px;height:38px;flex:none;display:flex;align-items:center;justify-content:center;background:none;border:1px solid hsl(0 0% 16%);border-radius:11px;color:hsl(0 0% 60%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="qr-code" size="16"></p2g-icon></button>
+              </div>
+            </sc-for>
+            <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 46%)"><span style="color:#C7F011;display:flex"><p2g-icon name="shield-check" size="12"></p2g-icon></span>Kostenlose Stornierung bis 24 h vor Spielbeginn</span>
+          </div>
+
+          <div data-screen-label="Event-Teaser" style="border-radius:20px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.7);background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));display:flex;flex-direction:column">
+            <div style="position:relative;height:116px;flex:none">
+              <img src="assets/events-hero.jpg" alt="Community Event" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+              <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, hsl(0 0% 0% / 0.15), hsl(0 0% 4%))"></div>
+              <span style="position:absolute;top:11px;right:11px;display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;color:#C7F011;background:hsl(0 0% 0% / 0.72);backdrop-filter:blur(8px);border:1px solid hsl(71 91% 51% / 0.4);border-radius:999px;padding:4px 10px"><p2g-icon name="check" size="11" stroke-width="3"></p2g-icon>Angemeldet</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;padding:14px 16px 16px">
+              <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:#C7F011"><span style="width:6px;height:6px;border-radius:50%;background:#C7F011;animation:pulseGlow 2s infinite"></span>DEIN NÄCHSTES EVENT</span>
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;line-height:1.18;letter-spacing:-0.01em;color:#FAFAFA;margin:0">P2G Summer Opening — Night Session</h3>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 70%)"><span style="color:#C7F011;display:flex"><p2g-icon name="calendar" size="12"></p2g-icon></span>{{ evDate }} · 19:00 – 02:00 Uhr</span>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 70%)"><span style="color:#C7F011;display:flex"><p2g-icon name="map-pin" size="12"></p2g-icon></span>P2G Court München-Ost</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 48%)">5 weitere Events buchbar</span>
+                <button onClick="{{ goEvents }}" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#000;background:#C7F011;border:none;border-radius:10px;cursor:pointer" style-active="transform:scale(0.98)">Zu den Events</button>
+              </div>
+            </div>
+          </div>
+
+          <div data-screen-label="Neue Locations" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Neue Locations</h3>
+              <button onClick="{{ openLocations }}" style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#C7F011;background:none;border:none;padding:0;cursor:pointer">Alle ansehen<p2g-icon name="arrow-right" size="12"></p2g-icon></button>
+            </div>
+            <div data-scroll style="display:flex;gap:11px;overflow-x:auto;margin:0 -18px;padding:2px 18px 4px">
+              <sc-for list="{{ locations }}" as="l" hint-placeholder-count="3">
+                <div style="width:210px;flex:none;border-radius:17px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.7);background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%))" style-hover="border-color:hsl(71 91% 51% / 0.35)">
+                  <div style="position:relative;height:104px">
+                    <img src="{{ l.img }}" alt="{{ l.name }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+                    <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, transparent 40%, hsl(0 0% 4%))"></div>
+                    <sc-if value="{{ l.isNew }}" hint-placeholder-val="{{ false }}">
+                      <span style="position:absolute;top:9px;left:9px;font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:800;letter-spacing:0.1em;color:#000;background:#C7F011;border-radius:999px;padding:3px 9px">NEU</span>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:4px;padding:11px 13px 13px">
+                    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:hsl(0 0% 52%)">{{ l.meta }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div data-screen-label="News kompakt" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">News</h3>
+              <button onClick="{{ openNews }}" style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#C7F011;background:none;border:none;padding:0;cursor:pointer">Alle News<p2g-icon name="arrow-right" size="12"></p2g-icon></button>
+            </div>
+            <sc-for list="{{ newsShort }}" as="nw" hint-placeholder-count="2">
+              <button onClick="{{ openNews }}" style="display:flex;align-items:stretch;gap:12px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:15px;padding:10px;cursor:pointer;text-align:left" style-hover="border-color:hsl(71 91% 51% / 0.35)">
+                <span style="position:relative;width:76px;flex:none;border-radius:11px;overflow:hidden">
+                  <img src="{{ nw.img }}" alt="{{ nw.title }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+                </span>
+                <span style="display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;padding:2px 0">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:hsl(0 0% 52%)">{{ nw.date }} · {{ nw.tag }}</span>
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:13.5px;line-height:1.3;color:#FAFAFA">{{ nw.title }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#C7F011;margin-top:auto">Weiterlesen<p2g-icon name="arrow-right" size="11"></p2g-icon></span>
+                </span>
+              </button>
+            </sc-for>
+          </div>
+
+          <div data-screen-label="Social" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span style="display:inline-flex;align-items:center;gap:8px"><span style="color:#C7F011;display:flex"><p2g-icon name="instagram" size="15"></p2g-icon></span><h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">@padel2go</h3></span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:4px 11px">Folgen</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:8px">
+              <sc-for list="{{ socialPosts }}" as="s" hint-placeholder-count="3">
+                <div style="position:relative;aspect-ratio:1;border-radius:13px;overflow:hidden;border:1px solid hsl(0 0% 14%)">
+                  <img src="{{ s.img }}" alt="Instagram Post" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+                  <span style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg, transparent, hsl(0 0% 0% / 0.75));display:flex;align-items:center;gap:4px;padding:14px 8px 6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#FAFAFA"><span style="color:#C7F011;display:flex"><p2g-icon name="heart" size="10"></p2g-icon></span>{{ s.likes }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <span style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:hsl(0 0% 38%);padding-top:4px">Made with 💚 in Deutschland</span>
+        </div>
+      </sc-if>
+
+      <!-- ═══ SUB: Punkte-Historie ═══ -->
+      <sc-if value="{{ scrHistorie }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Punkte-Historie" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:16px;background:#000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button onClick="{{ back }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 70%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-left" size="19"></p2g-icon></button>
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Punkte-Historie</h2>
+          </div>
+          <div style="background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(71 91% 51% / 0.25);border-radius:18px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <span style="display:flex;flex-direction:column;gap:3px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 52%)">AKTUELLES GUTHABEN</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:28px;line-height:1;color:#C7F011;text-shadow:0 0 24px hsl(71 91% 51% / 0.35)">{{ balDisplay }} P</span>
+            </span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 55%)">{{ euroLabel }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ txns }}" as="x" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:12px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:15px;padding:12px 14px">
+                <span style="width:38px;height:38px;flex:none;border-radius:11px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.14), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.28);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ x.icon }}" size="16"></p2g-icon></span>
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+                  <span style="font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ x.title }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:hsl(0 0% 50%)">{{ x.date }}</span>
+                </span>
+                <sc-if value="{{ x.plus }}" hint-placeholder-val="{{ true }}">
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13.5px;color:#C7F011;flex:none">{{ x.amt }}</span>
+                </sc-if>
+                <sc-if value="{{ x.minus }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13.5px;color:hsl(0 0% 72%);flex:none">{{ x.amt }}</span>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 46%)"><span style="color:#C7F011;display:flex"><p2g-icon name="sparkles" size="12"></p2g-icon></span>Punkte sammelst du bei jeder Buchung, jedem Event und für geworbene Freunde.</span>
+        </div>
+      </sc-if>
+
+      <!-- ═══ SUB: QR-Ticket ═══ -->
+      <sc-if value="{{ scrTicket }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Buchungs-Ticket" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:16px;background:radial-gradient(ellipse 90% 34% at 50% 0%, hsl(71 91% 51% / 0.09), transparent), #000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button onClick="{{ back }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 70%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-left" size="19"></p2g-icon></button>
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Dein Ticket</h2>
+          </div>
+          <div style="background:#FAFAFA;border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 0 50px hsl(71 91% 51% / 0.12)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span style="display:inline-flex;align-items:center;gap:8px"><img src="assets/p2g-icon-clean.png" alt="P2G" style="height:22px;width:auto"><span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;color:#333">BOOKING-TICKET</span></span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;color:#000;background:hsl(71 91% 51%);border-radius:999px;padding:4px 10px">{{ tEarn }}</span>
+            </div>
+            <div style="display:flex;justify-content:center;padding:6px 0">{{ qrEl }}</div>
+            <div style="border-top:2px dashed hsl(0 0% 80%)"></div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;letter-spacing:-0.01em;color:#000">{{ tLoc }} · {{ tCourt }}</span>
+              <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#333"><p2g-icon name="calendar" size="13"></p2g-icon>{{ tDate }}</span>
+              <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#333"><p2g-icon name="clock" size="13"></p2g-icon>{{ tTime }}</span>
+              <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 45%)"><p2g-icon name="hash" size="12"></p2g-icon>P2G-8H2K4-2026</span>
+            </div>
+          </div>
+          <span style="display:inline-flex;align-items:flex-start;gap:8px;font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.5;color:hsl(0 0% 55%)"><span style="color:#C7F011;display:flex;padding-top:2px"><p2g-icon name="scan-line" size="13"></p2g-icon></span>Zeig den QR-Code beim Check-in am Court. Kostenlose Stornierung bis 24 h vor Spielbeginn.</span>
+        </div>
+      </sc-if>
+
+      <!-- ═══ SUB: News ═══ -->
+      <sc-if value="{{ scrNews }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — News" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:14px;background:#000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button onClick="{{ back }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 70%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-left" size="19"></p2g-icon></button>
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Aktuelles aus der <span style="color:#C7F011">P2G-Welt</span></h2>
+          </div>
+          <sc-for list="{{ newsFull }}" as="nw" hint-placeholder-count="3">
+            <div style="border-radius:18px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.7);background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%))" style-hover="border-color:hsl(71 91% 51% / 0.35)">
+              <div style="position:relative;height:136px">
+                <img src="{{ nw.img }}" alt="{{ nw.title }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+                <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, transparent 45%, hsl(0 0% 4%))"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;padding:13px 15px 15px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#C7F011">{{ nw.date }} · {{ nw.tag }}</span>
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16.5px;line-height:1.22;color:#FAFAFA">{{ nw.title }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 62%)">{{ nw.excerpt }}</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#C7F011;margin-top:3px">Weiterlesen<p2g-icon name="arrow-right" size="12"></p2g-icon></span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ═══ SUB: Neue Locations ═══ -->
+      <sc-if value="{{ scrLocations }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Neue Locations" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:14px;background:#000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button onClick="{{ back }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 70%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-left" size="19"></p2g-icon></button>
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Neue Locations</h2>
+          </div>
+          <sc-for list="{{ locations }}" as="l" hint-placeholder-count="3">
+            <div style="border-radius:18px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.7);background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%))" style-hover="border-color:hsl(71 91% 51% / 0.35)">
+              <div style="position:relative;height:140px">
+                <img src="{{ l.img }}" alt="{{ l.name }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+                <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, transparent 40%, hsl(0 0% 4%))"></div>
+                <sc-if value="{{ l.isNew }}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute;top:11px;left:11px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:800;letter-spacing:0.1em;color:#000;background:#C7F011;border-radius:999px;padding:4px 10px">NEU</span>
+                </sc-if>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;padding:13px 15px 15px">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;letter-spacing:-0.01em;color:#FAFAFA">{{ l.name }}</span>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 58%)"><span style="color:#C7F011;display:flex"><p2g-icon name="map-pin" size="12"></p2g-icon></span>{{ l.city }} · {{ l.meta }}</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 48%)">{{ l.open }}</span>
+                  <button onClick="{{ goBuchen }}" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#000;background:#C7F011;border:none;border-radius:10px;cursor:pointer" style-active="transform:scale(0.98)">Court buchen</button>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ═══ BOOKING ①: Standorte ═══ -->
+      <sc-if value="{{ scrBkLocs }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Booking: Standorte" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(ellipse 90% 30% at 50% 0%, hsl(71 91% 51% / 0.07), transparent), #000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:23px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Wähle deinen <span style="color:#C7F011">Standort</span></h2>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:4px 10px;flex:none">1 / 3</span>
+            </div>
+            <p style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 58%);margin:0">Echtzeit-Verfügbarkeit an allen PADEL<span style="color:#C7F011">2</span>GO Standorten.</p>
+          </div>
+          <sc-for list="{{ bkLocs }}" as="l" hint-placeholder-count="3">
+            <button onClick="{{ l.select }}" style="display:flex;flex-direction:column;align-items:stretch;padding:0;text-align:left;border-radius:18px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.7);background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));cursor:pointer" style-hover="border-color:hsl(71 91% 51% / 0.45);box-shadow:0 0 24px hsl(71 91% 51% / 0.12)" style-active="transform:scale(0.99)">
+              <span style="position:relative;display:block;height:126px">
+                <img src="{{ l.img }}" alt="{{ l.name }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+                <span style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, transparent 35%, hsl(0 0% 4%))"></span>
+                <span style="{{ l.badgeStyle }}"><span style="width:6px;height:6px;border-radius:50%;background:currentColor"></span>{{ l.badgeLabel }}</span>
+                <span style="position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;color:#FAFAFA;background:hsl(0 0% 0% / 0.72);backdrop-filter:blur(8px);border:1px solid hsl(0 0% 100% / 0.15);border-radius:999px;padding:4px 10px">{{ l.priceFrom }}</span>
+              </span>
+              <span style="display:flex;flex-direction:column;gap:8px;padding:12px 14px 14px">
+                <span style="display:flex;flex-direction:column;gap:3px">
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;letter-spacing:-0.01em;color:#FAFAFA">{{ l.name }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 55%)"><span style="color:#C7F011;display:flex"><p2g-icon name="map-pin" size="11"></p2g-icon></span>{{ l.city }} · {{ l.courtCount }}</span>
+                </span>
+                <span style="display:flex;flex-direction:column;gap:4px">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;color:hsl(0 0% 50%)">{{ l.occLabel }}</span>
+                  <span style="display:block;height:5px;border-radius:999px;background:hsl(0 0% 12%);overflow:hidden"><span style="{{ l.occStyle }}"></span></span>
+                </span>
+                <span style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;color:hsl(0 0% 55%)"><p2g-icon name="clock" size="11"></p2g-icon>{{ l.open }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#C7F011">Auswählen<p2g-icon name="arrow-right" size="12"></p2g-icon></span>
+                </span>
+              </span>
+            </button>
+          </sc-for>
+          <div style="display:flex;align-items:center;gap:12px;border-radius:18px;border:1px dashed hsl(0 0% 18%);padding:13px 14px;opacity:0.75">
+            <span style="position:relative;width:56px;height:56px;flex:none;border-radius:13px;overflow:hidden"><img src="assets/padel-norway.jpg" alt="P2G Court Berlin-Mitte" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(0.55)"></span>
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;color:hsl(0 0% 78%)">P2G Court Berlin-Mitte</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:hsl(0 0% 50%)">Eröffnung Herbst 2026</span>
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:600;color:hsl(0 0% 60%);border:1px solid hsl(0 0% 20%);border-radius:999px;padding:5px 10px;flex:none"><p2g-icon name="bell" size="11"></p2g-icon>Info</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ BOOKING ②: Slot-Picker ═══ -->
+      <sc-if value="{{ scrBkSlot }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:0;left:0;right:0;bottom:0;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div data-scroll data-screen-label="App — Booking: Slot-Picker" style="height:100%;overflow-y:auto;padding:72px 18px 205px;display:flex;flex-direction:column;gap:16px;background:#000">
+            <div style="display:flex;align-items:center;gap:12px">
+              <button onClick="{{ goBkLocs }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 70%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-left" size="19"></p2g-icon></button>
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;flex:1">Termin wählen</h2>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:4px 10px;flex:none">2 / 3</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:15px;padding:10px 12px">
+              <span style="position:relative;width:46px;height:46px;flex:none;border-radius:12px;overflow:hidden"><img src="{{ bkLocImg }}" alt="{{ bkLocName }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover"></span>
+              <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ bkLocName }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:hsl(0 0% 52%)">{{ bkLocCity }} · {{ bkLocOpen }}</span>
+              </span>
+              <button onClick="{{ goBkLocs }}" style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#C7F011;background:none;border:none;padding:4px;cursor:pointer;flex:none">Ändern</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 52%)"><span style="color:#C7F011">01</span> · COURT</span>
+              <div style="display:flex;gap:9px;flex-wrap:wrap">
+                <sc-for list="{{ bkCourts }}" as="c" hint-placeholder-count="2">
+                  <button onClick="{{ c.select }}" style="{{ c.style }}" style-hover="border-color:hsl(71 91% 51% / 0.55)">
+                    <span style="{{ c.nameStyle }}">{{ c.name }}</span>
+                    <span style="{{ c.tagStyle }}">{{ c.tag }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 52%)"><span style="color:#C7F011">02</span> · DATUM</span>
+              <div data-scroll style="display:flex;gap:8px;overflow-x:auto;margin:0 -18px;padding:2px 18px 4px">
+                <sc-for list="{{ bkDates }}" as="d" hint-placeholder-count="7">
+                  <button onClick="{{ d.select }}" style="{{ d.style }}">
+                    <span style="{{ d.wdStyle }}">{{ d.wd }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px">{{ d.dd }}</span>
+                    <span style="{{ d.monStyle }}">{{ d.mon }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 52%)"><span style="color:#C7F011">03</span> · SPIELDAUER</span>
+              <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:9px">
+                <sc-for list="{{ bkDurs }}" as="dr" hint-placeholder-count="3">
+                  <button onClick="{{ dr.select }}" style="{{ dr.style }}" style-hover="border-color:hsl(71 91% 51% / 0.55)">
+                    <span style="{{ dr.labelStyle }}">{{ dr.label }}</span>
+                    <span style="{{ dr.priceStyle }}">{{ dr.price }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 52%)"><span style="color:#C7F011">04</span> · UHRZEIT</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#C7F011">{{ bkFreeLabel }}</span>
+              </div>
+              <sc-if value="{{ bkHasSlots }}" hint-placeholder-val="{{ true }}">
+                <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px">
+                  <sc-for list="{{ bkTimes }}" as="t" hint-placeholder-count="12">
+                    <button onClick="{{ t.select }}" disabled="{{ t.booked }}" style="{{ t.style }}">{{ t.label }}</button>
+                  </sc-for>
+                </div>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:10.5px;color:hsl(0 0% 46%)"><span style="width:9px;height:9px;border-radius:3px;background:hsl(0 0% 10%);border:1px solid hsl(0 0% 22%);display:inline-block"></span>Belegte Slots sind ausgegraut</span>
+              </sc-if>
+              <sc-if value="{{ bkNoSlots }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;padding:22px 14px;background:hsl(0 0% 100% / 0.03);border:1px dashed hsl(0 0% 20%);border-radius:14px">
+                  <span style="width:42px;height:42px;border-radius:50%;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 18%);display:flex;align-items:center;justify-content:center;color:hsl(0 0% 55%)"><p2g-icon name="alert-circle" size="20"></p2g-icon></span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:hsl(0 0% 80%)">Keine freien Slots an diesem Tag</span>
+                  <button onClick="{{ bkJumpNext }}" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:7px 14px;cursor:pointer">Nächster freier Tag<p2g-icon name="arrow-right" size="12"></p2g-icon></button>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:84px;z-index:25;padding:22px 18px 10px;background:linear-gradient(180deg, transparent, hsl(0 0% 0% / 0.92) 38%)">
+            <div style="display:flex;align-items:center;gap:12px;background:linear-gradient(145deg, hsl(0 0% 9%), hsl(0 0% 4%));border:1px solid hsl(0 0% 16%);border-radius:16px;padding:11px 14px">
+              <span style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0">
+                <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;color:hsl(0 0% 52%)">{{ bkSlotSumLabel }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:19px;color:#C7F011;line-height:1.15">{{ bkTotal }}</span>
+              </span>
+              <span style="{{ bkNextWrapStyle }}">
+                <button onClick="{{ goBkCheckout }}" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;height:46px;padding:0 20px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#000;background:linear-gradient(90deg, #C7F011, #D8FF29);border:none;border-radius:12px;cursor:pointer;box-shadow:0 0 26px hsl(71 91% 51% / 0.3)" style-active="transform:scale(0.98)">Weiter<p2g-icon name="arrow-right" size="15"></p2g-icon></button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ BOOKING ③: Checkout ═══ -->
+      <sc-if value="{{ scrBkCheckout }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:0;left:0;right:0;bottom:0;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div data-scroll data-screen-label="App — Booking: Checkout" style="height:100%;overflow-y:auto;padding:72px 18px 215px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(ellipse 90% 30% at 50% 0%, hsl(71 91% 51% / 0.06), transparent), #000">
+            <div style="display:flex;align-items:center;gap:12px">
+              <button onClick="{{ goBkSlot }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 70%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-left" size="19"></p2g-icon></button>
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;flex:1">Fast geschafft!</h2>
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:4px 10px;flex:none">3 / 3</span>
+            </div>
+            <div style="background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:15px;padding:12px 14px">
+              <div style="display:flex;align-items:center;gap:11px">
+                <span style="color:#C7F011;display:flex"><p2g-icon name="timer" size="17"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 70%);flex:1">Slot für dich reserviert</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:#C7F011">{{ bkTimerStr }}</span>
+              </div>
+              <div style="height:4px;border-radius:999px;background:hsl(0 0% 12%);overflow:hidden;margin-top:9px"><div style="{{ bkTimerBarStyle }}"></div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15% / 0.7);border-radius:16px;padding:12px 13px">
+              <span style="position:relative;width:58px;height:58px;flex:none;border-radius:13px;overflow:hidden"><img src="{{ bkLocImg }}" alt="{{ bkLocName }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover"></span>
+              <span style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;color:#FAFAFA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ bkLocName }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 60%)">{{ bkCourtName }} · {{ bkLocCity }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C7F011">{{ bkDateShort }} · {{ bkTimeLabel }}</span>
+              </span>
+              <button onClick="{{ goBkSlot }}" style="width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;background:none;border:1px solid hsl(0 0% 16%);border-radius:10px;color:hsl(0 0% 60%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="pencil-line" size="14"></p2g-icon></button>
+            </div>
+            <div style="background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:15px;padding:13px 14px;display:flex;flex-direction:column;gap:12px">
+              <button onClick="{{ bkVoucherToggle }}" style="display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;padding:0;text-align:left;width:100%">
+                <span style="color:#C7F011;display:flex"><p2g-icon name="ticket" size="16"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#FAFAFA;flex:1">Gutschein einlösen</span>
+                <span style="color:hsl(0 0% 50%);display:flex"><p2g-icon name="{{ bkVoucherChevron }}" size="16"></p2g-icon></span>
+              </button>
+              <sc-if value="{{ bkVoucherOpen }}" hint-placeholder-val="{{ false }}">
+                <sc-if value="{{ bkVoucherNotOk }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;gap:8px">
+                    <input value="{{ bkVoucherVal }}" onChange="{{ bkSetVoucher }}" placeholder="Code — z. B. P2G10" style="flex:1;min-width:0;height:42px;background:hsl(0 0% 0% / 0.5);border:1px solid hsl(0 0% 17%);border-radius:11px;padding:0 13px;font-family:'JetBrains Mono',monospace;font-size:16px;color:#FAFAFA;outline:none" style-focus="border-color:hsl(71 91% 51% / 0.6)">
+                    <button onClick="{{ bkApplyVoucher }}" style="height:42px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:11px;cursor:pointer;flex:none">Einlösen</button>
+                  </div>
+                  <span style="{{ bkVoucherErrStyle }}">Code ungültig — probier’s mit P2G10 🙂</span>
+                </sc-if>
+                <sc-if value="{{ bkVoucherOk }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:9px;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.3);border-radius:11px;padding:10px 12px">
+                    <span style="color:#C7F011;display:flex"><p2g-icon name="check-circle-2" size="15"></p2g-icon></span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#C7F011;flex:1">P2G10 · −10%</span>
+                    <button onClick="{{ bkRemoveVoucher }}" style="background:none;border:none;cursor:pointer;color:hsl(0 0% 55%);display:flex;padding:2px" style-hover="color:#FAFAFA"><p2g-icon name="x" size="14"></p2g-icon></button>
+                  </div>
+                </sc-if>
+              </sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 52%)">ZAHLUNGSART</span>
+              <sc-for list="{{ bkPays }}" as="pm" hint-placeholder-count="3">
+                <button onClick="{{ pm.select }}" style="{{ pm.style }}" style-hover="border-color:hsl(71 91% 51% / 0.55)">
+                  <span style="width:38px;height:38px;flex:none;border-radius:11px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.14), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.28);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ pm.icon }}" size="17"></p2g-icon></span>
+                  <span style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;text-align:left">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#FAFAFA">{{ pm.name }}</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 55%)">{{ pm.sub }}</span>
+                  </span>
+                  <span style="{{ pm.radioStyle }}"></span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:15px;padding:13px 14px">
+              <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)"><span>{{ bkBaseLabel }}</span><span style="font-family:'JetBrains Mono',monospace">{{ bkBase }}</span></div>
+              <sc-if value="{{ bkVoucherOk }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:12px;color:#C7F011"><span style="display:inline-flex;align-items:center;gap:5px"><p2g-icon name="ticket" size="11"></p2g-icon>Gutschein P2G10</span><span style="font-family:'JetBrains Mono',monospace">{{ bkDiscount }}</span></div>
+              </sc-if>
+              <div style="height:1px;background:hsl(0 0% 13%)"></div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline">
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#FAFAFA">Gesamt <span style="font-weight:500;font-size:10.5px;color:hsl(0 0% 50%)">inkl. MwSt.</span></span>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:23px;color:#C7F011">{{ bkTotal }}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;background:hsl(71 91% 51% / 0.07);border:1px solid hsl(71 91% 51% / 0.25);border-radius:14px;padding:11px 13px">
+              <span style="color:#C7F011;display:flex"><p2g-icon name="coins" size="16"></p2g-icon></span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;line-height:1.5;color:hsl(0 0% 78%)">Du sammelst <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#C7F011">{{ bkPtsEarn }}</span> mit dieser Buchung.</span>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:84px;z-index:25;padding:22px 18px 10px;background:linear-gradient(180deg, transparent, hsl(0 0% 0% / 0.92) 38%)">
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <button onClick="{{ bkPayNow }}" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;color:#000;background:linear-gradient(90deg, #C7F011, #D8FF29);border:none;border-radius:13px;cursor:pointer;box-shadow:0 0 30px hsl(71 91% 51% / 0.3)" style-active="transform:scale(0.98)"><p2g-icon name="lock" size="15"></p2g-icon>Jetzt bezahlen · {{ bkTotal }}</button>
+              <span style="display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:10.5px;color:hsl(0 0% 50%)"><p2g-icon name="shield-check" size="11"></p2g-icon>Sichere Zahlung über Stripe · SSL-verschlüsselt</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ BOOKING ④: Success ═══ -->
+      <sc-if value="{{ scrBkSuccess }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Booking: Bestätigung" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:84px 22px 118px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;background:radial-gradient(ellipse 80% 38% at 50% 0%, hsl(71 91% 51% / 0.1), transparent), #000">
+          <span style="width:84px;height:84px;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.45);display:flex;align-items:center;justify-content:center;color:#C7F011;box-shadow:0 0 50px hsl(71 91% 51% / 0.3);animation:springIn 0.7s cubic-bezier(0.16,1,0.3,1)"><p2g-icon name="check" size="40" stroke-width="2.5"></p2g-icon></span>
+          <div style="display:flex;flex-direction:column;gap:7px;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.12s backwards">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:27px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Court gebucht! 🎾</h2>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 55%)">Buchungscode <span style="color:#C7F011">{{ bkCode }}</span></span>
+          </div>
+          <div style="width:100%;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15% / 0.7);border-radius:17px;padding:15px 16px;display:flex;flex-direction:column;gap:10px;text-align:left;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.22s backwards">
+            <div style="display:flex;justify-content:space-between;gap:10px"><span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)">Standort</span><span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:#FAFAFA;text-align:right">{{ bkLocName }}</span></div>
+            <div style="height:1px;background:hsl(0 0% 12%)"></div>
+            <div style="display:flex;justify-content:space-between;gap:10px"><span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)">Court</span><span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:#FAFAFA">{{ bkCourtName }}</span></div>
+            <div style="height:1px;background:hsl(0 0% 12%)"></div>
+            <div style="display:flex;justify-content:space-between;gap:10px"><span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)">Termin</span><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:600;color:#FAFAFA">{{ bkDateShort }} · {{ bkTimeLabel }}</span></div>
+            <div style="height:1px;background:hsl(0 0% 12%)"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)">Bezahlt</span><span style="display:inline-flex;align-items:center;gap:7px"><span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#C7F011">{{ bkTotal }}</span><span style="display:inline-flex;align-items:center;gap:4px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:2px 8px"><span style="width:5px;height:5px;border-radius:50%;background:#C7F011"></span>Bestätigt</span></span></div>
+          </div>
+          <div style="width:100%;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.35);border-radius:16px;padding:14px 15px;text-align:left;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.32s backwards">
+            <span style="width:40px;height:40px;border-radius:12px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011;flex:none"><p2g-icon name="coins" size="18"></p2g-icon></span>
+            <span style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:#C7F011">{{ bkPtsEarn }} P2G Points</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">wurden deinem Konto gutgeschrieben 💚</span>
+            </span>
+          </div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:9px;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.4s backwards">
+            <button onClick="{{ openBkTicket }}" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#000;background:#C7F011;border:none;border-radius:12px;cursor:pointer;box-shadow:0 0 26px hsl(71 91% 51% / 0.25)" style-active="transform:scale(0.98)"><p2g-icon name="qr-code" size="16"></p2g-icon>Ticket anzeigen</button>
+            <button onClick="{{ bkNewBooking }}" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:hsl(0 0% 75%);background:none;border:1px solid hsl(0 0% 17%);border-radius:12px;cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)">Weiteren Court buchen</button>
+            <button onClick="{{ goHomeTab }}" style="background:none;border:none;padding:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011">Zurück zu Mein P2G</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ OVERLAY: Zahlung läuft ═══ -->
+      <sc-if value="{{ payingOverlay }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="App — Stripe Overlay" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:50;background:hsl(0 0% 0% / 0.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:40px;animation:fadeIn 0.25s ease-out">
+          <span style="display:flex;animation:spin 1s linear infinite;color:#C7F011"><p2g-icon name="loader-2" size="38"></p2g-icon></span>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:#FAFAFA">Zahlung wird verarbeitet …</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:hsl(0 0% 60%)">{{ payOvLine }}</span>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:10.5px;color:hsl(0 0% 50%)"><p2g-icon name="lock" size="11"></p2g-icon>Sicher über Stripe</span>
+        </div>
+      </sc-if>
+
+      <!-- ═══ MARKETPLACE ①: Katalog ═══ -->
+      <sc-if value="{{ scrMkCatalog }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Marketplace: Katalog" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:13px;background:radial-gradient(ellipse 90% 30% at 50% 0%, hsl(71 91% 51% / 0.07), transparent), #000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:23px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">P2G <span style="font-style:italic;color:#C7F011">Marketplace</span></h2>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:4px 10px;flex:none"><p2g-icon name="star" size="11"></p2g-icon>{{ balDisplay }} P</span>
+            </div>
+            <p style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 58%);margin:0">Schläger, Bälle &amp; mehr — vom P2G Team getestet.</p>
+          </div>
+          <input value="{{ mkQ }}" onChange="{{ mkSetQ }}" placeholder="Produkt oder Marke suchen …" style="width:100%;box-sizing:border-box;height:42px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:12px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;outline:none" style-focus="border-color:hsl(71 91% 51% / 0.6)">
+          <div data-scroll style="display:flex;gap:8px;overflow-x:auto;margin:0 -18px;padding:2px 18px 2px">
+            <sc-for list="{{ mkCats }}" as="c" hint-placeholder-count="5">
+              <button onClick="{{ c.select }}" style="{{ c.style }}"><p2g-icon name="{{ c.icon }}" size="13"></p2g-icon>{{ c.label }}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ mkHasResults }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px">
+              <sc-for list="{{ mkCards }}" as="p" hint-placeholder-count="6">
+                <button onClick="{{ p.open }}" style="display:flex;flex-direction:column;align-items:stretch;padding:0;text-align:left;border-radius:16px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.7);background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));cursor:pointer" style-hover="border-color:hsl(71 91% 51% / 0.45)" style-active="transform:scale(0.98)">
+                  <span style="position:relative;display:block;height:116px;background:linear-gradient(145deg, hsl(0 0% 9%), hsl(0 0% 4%))">
+                    <span style="{{ p.imgWrapStyle }}">
+                      <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ p.slotId }}" shape="rect" fit="cover" placeholder="{{ p.slotPlaceholder }}" style="width:100%;height:100%;display:block" hint-size="100%,116px"></x-import>
+                    </span>
+                    <span style="{{ p.featBadgeStyle }}">{{ p.featLabel }}</span>
+                    <span style="{{ p.soldOverlayStyle }}">Ausverkauft</span>
+                  </span>
+                  <span style="display:flex;flex-direction:column;gap:4px;padding:10px 11px 12px;flex:1">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.13em;text-transform:uppercase;color:hsl(0 0% 52%)">{{ p.brand }}</span>
+                    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:12.5px;line-height:1.25;color:#FAFAFA">{{ p.name }}</span>
+                    <span style="display:flex;align-items:baseline;gap:6px;margin-top:auto;padding-top:3px">
+                      <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13.5px;color:#FAFAFA">{{ p.priceStr }}</span>
+                      <span style="{{ p.uvpStyle }}">{{ p.uvpStr }}</span>
+                    </span>
+                    <span style="display:inline-flex;align-items:center;gap:5px"><span style="{{ p.stockDotStyle }}"></span><span style="{{ p.stockLabelStyle }}">{{ p.stockLabel }}</span></span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ mkNoResults }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:38px 20px;background:hsl(0 0% 100% / 0.02);border:1px dashed hsl(0 0% 20%);border-radius:16px">
+              <span style="width:46px;height:46px;border-radius:50%;background:hsl(0 0% 100% / 0.05);border:1px solid hsl(0 0% 18%);display:flex;align-items:center;justify-content:center;color:hsl(0 0% 55%)"><p2g-icon name="search" size="21"></p2g-icon></span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:hsl(0 0% 80%)">Nichts gefunden für deine Suche</span>
+              <button onClick="{{ mkReset }}" style="display:inline-flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:7px 14px;cursor:pointer"><p2g-icon name="rotate-ccw" size="12"></p2g-icon>Zurücksetzen</button>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ═══ MARKETPLACE ②: Produkt ═══ -->
+      <sc-if value="{{ scrMkProduct }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Marketplace: Produkt" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:14px;background:#000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button onClick="{{ mkGoCatalog }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 70%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-left" size="19"></p2g-icon></button>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:hsl(0 0% 52%);flex:1">{{ mkCat }}</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:4px 10px;flex:none"><p2g-icon name="star" size="11"></p2g-icon>{{ balDisplay }} P</span>
+          </div>
+          <div style="position:relative;height:230px;border-radius:18px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.8);background:linear-gradient(145deg, hsl(0 0% 7%), hsl(0 0% 3%))">
+            <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ mkSlotMain }}" shape="rect" fit="cover" placeholder="{{ mkSlotPh }}" style="width:100%;height:100%;display:block" hint-size="100%,230px"></x-import>
+            <span style="{{ mkSoldOverlayStyle }}">Ausverkauft</span>
+            <span style="{{ mkFeatBadgeStyle }}">{{ mkFeatLabel }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:4px 10px">{{ mkBrand }}</span>
+              <span style="{{ mkOffBadgeStyle }}">{{ mkOffLabel }}</span>
+            </div>
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;letter-spacing:-0.02em;line-height:1.15;color:#FAFAFA;margin:0">{{ mkName }}</h2>
+            <p style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.55;color:hsl(0 0% 62%);margin:0">{{ mkSub }}</p>
+            <div style="display:flex;align-items:baseline;gap:9px">
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:27px;color:#C7F011;line-height:1.1">{{ mkPriceStr }}</span>
+              <span style="{{ mkUvpStyle }}">UVP {{ mkUvpStr }}</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;color:hsl(0 0% 50%)">inkl. MwSt.</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="{{ mkStockDotStyle }}"></span>
+              <span style="{{ mkStockLabelStyle }}">{{ mkStockLabel }}</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 50%)">{{ mkShipNote }}</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:hsl(71 91% 51% / 0.07);border:1px solid hsl(71 91% 51% / 0.25);border-radius:14px;padding:11px 13px">
+            <span style="color:#C7F011;display:flex"><p2g-icon name="coins" size="16"></p2g-icon></span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;line-height:1.5;color:hsl(0 0% 78%)">Mit deinen Points: bis zu <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#C7F011">−{{ mkMaxSaveStr }}</span> Rabatt im Checkout.</span>
+          </div>
+          <sc-if value="{{ mkInStock }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:10px;align-items:stretch">
+              <div style="display:flex;align-items:center;gap:2px;background:hsl(0 0% 6%);border:1px solid hsl(0 0% 15%);border-radius:13px;padding:3px;flex:none">
+                <button onClick="{{ mkQtyMinus }}" style="{{ mkQtyMinusStyle }}"><p2g-icon name="minus" size="14"></p2g-icon></button>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:#FAFAFA;width:30px;text-align:center">{{ mkQtyStr }}</span>
+                <button onClick="{{ mkQtyPlus }}" style="{{ mkQtyPlusStyle }}"><p2g-icon name="plus" size="14"></p2g-icon></button>
+              </div>
+              <button onClick="{{ mkBuyNow }}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;font-family:'DM Sans',sans-serif;font-size:14.5px;font-weight:700;color:#000;background:linear-gradient(90deg, #C7F011, #D8FF29);border:none;border-radius:13px;cursor:pointer;box-shadow:0 0 28px hsl(71 91% 51% / 0.3)" style-active="transform:scale(0.98)"><p2g-icon name="zap" size="16"></p2g-icon>Jetzt kaufen</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ mkSoldOut }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ mkNotify }}" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:700;color:#C7F011;background:none;border:1px solid hsl(71 91% 51% / 0.4);border-radius:13px;cursor:pointer"><p2g-icon name="bell" size="15"></p2g-icon>{{ mkNotifyLabel }}</button>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <span style="display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)"><span style="color:#C7F011;display:flex"><p2g-icon name="truck" size="13"></p2g-icon></span>Versand <span style="font-family:'JetBrains Mono',monospace">€4,90</span> · gratis ab <span style="font-family:'JetBrains Mono',monospace">€75</span></span>
+            <span style="display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)"><span style="color:#C7F011;display:flex"><p2g-icon name="rotate-ccw" size="13"></p2g-icon></span>30 Tage Rückgaberecht</span>
+            <span style="display:inline-flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)"><span style="color:#C7F011;display:flex"><p2g-icon name="shield-check" size="13"></p2g-icon></span>Sichere Zahlung über Stripe</span>
+          </div>
+          <div style="background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:15px;padding:13px 15px;display:flex;flex-direction:column">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;color:#FAFAFA;padding-bottom:6px">Technische Details</span>
+            <sc-for list="{{ mkSpecs }}" as="sp" hint-placeholder-count="4">
+              <div style="{{ sp.rowStyle }}">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 55%)">{{ sp.label }}</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;color:#FAFAFA;text-align:right">{{ sp.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <p style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.65;color:hsl(0 0% 65%);margin:0">{{ mkDesc }}</p>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;color:#FAFAFA">Passt dazu</span>
+            <div data-scroll style="display:flex;gap:10px;overflow-x:auto;margin:0 -18px;padding:2px 18px 4px">
+              <sc-for list="{{ mkRel }}" as="p" hint-placeholder-count="3">
+                <button onClick="{{ p.open }}" style="width:146px;flex:none;display:flex;flex-direction:column;align-items:stretch;padding:0;text-align:left;border-radius:14px;overflow:hidden;border:1px solid hsl(0 0% 15% / 0.7);background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));cursor:pointer" style-hover="border-color:hsl(71 91% 51% / 0.45)">
+                  <span style="position:relative;display:block;height:88px;background:linear-gradient(145deg, hsl(0 0% 9%), hsl(0 0% 4%))">
+                    <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ p.slotId }}" shape="rect" fit="cover" placeholder="{{ p.slotPlaceholder }}" style="width:100%;height:100%;display:block" hint-size="146px,88px"></x-import>
+                  </span>
+                  <span style="display:flex;flex-direction:column;gap:3px;padding:9px 10px 11px">
+                    <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:11.5px;line-height:1.25;color:#FAFAFA">{{ p.name }}</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;color:#C7F011">{{ p.priceStr }}</span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ MARKETPLACE ③: Checkout ═══ -->
+      <sc-if value="{{ scrMkCheckout }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:0;left:0;right:0;bottom:0;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div data-scroll data-screen-label="App — Marketplace: Checkout" style="height:100%;overflow-y:auto;padding:72px 18px 215px;display:flex;flex-direction:column;gap:13px;background:radial-gradient(ellipse 90% 30% at 50% 0%, hsl(71 91% 51% / 0.06), transparent), #000">
+            <div style="display:flex;align-items:center;gap:12px">
+              <button onClick="{{ mkBackToProduct }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 70%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-left" size="19"></p2g-icon></button>
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0;flex:1">Fast deins!</h2>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15% / 0.7);border-radius:16px;padding:11px 12px">
+              <span style="width:52px;height:52px;flex:none;border-radius:12px;overflow:hidden;border:1px solid hsl(0 0% 15%);background:linear-gradient(145deg, hsl(0 0% 9%), hsl(0 0% 4%))">
+                <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ mkSlotMain }}" shape="rect" fit="cover" placeholder="Foto" style="width:100%;height:100%;display:block" hint-size="52px,52px"></x-import>
+              </span>
+              <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:13.5px;color:#FAFAFA;line-height:1.25">{{ mkName }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:hsl(0 0% 52%)">{{ mkQtyLine }}</span>
+              </span>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13.5px;color:#FAFAFA;flex:none">{{ mkSubStr }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:15px;padding:13px 14px">
+              <span style="display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 52%)"><span style="color:#C7F011;display:flex"><p2g-icon name="map-pin" size="12"></p2g-icon></span>LIEFERADRESSE</span>
+              <input value="{{ mkAName }}" onChange="{{ mkSetAName }}" placeholder="Vor- und Nachname" style="width:100%;box-sizing:border-box;height:42px;background:hsl(0 0% 0% / 0.5);border:1px solid hsl(0 0% 17%);border-radius:11px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;outline:none" style-focus="border-color:hsl(71 91% 51% / 0.6)">
+              <input value="{{ mkAStreet }}" onChange="{{ mkSetAStreet }}" placeholder="Straße &amp; Hausnummer" style="width:100%;box-sizing:border-box;height:42px;background:hsl(0 0% 0% / 0.5);border:1px solid hsl(0 0% 17%);border-radius:11px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;outline:none" style-focus="border-color:hsl(71 91% 51% / 0.6)">
+              <div style="display:grid;grid-template-columns:110px 1fr;gap:9px">
+                <input value="{{ mkAZip }}" onChange="{{ mkSetAZip }}" placeholder="PLZ" style="width:100%;box-sizing:border-box;height:42px;background:hsl(0 0% 0% / 0.5);border:1px solid hsl(0 0% 17%);border-radius:11px;padding:0 13px;font-family:'JetBrains Mono',monospace;font-size:16px;color:#FAFAFA;outline:none" style-focus="border-color:hsl(71 91% 51% / 0.6)">
+                <input value="{{ mkACity }}" onChange="{{ mkSetACity }}" placeholder="Ort" style="width:100%;box-sizing:border-box;height:42px;background:hsl(0 0% 0% / 0.5);border:1px solid hsl(0 0% 17%);border-radius:11px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;outline:none" style-focus="border-color:hsl(71 91% 51% / 0.6)">
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;background:hsl(71 91% 51% / 0.06);border:1px solid hsl(71 91% 51% / 0.22);border-radius:15px;padding:13px 14px">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="color:#C7F011;display:flex"><p2g-icon name="coins" size="15"></p2g-icon></span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#FAFAFA;flex:1">P2G Points einlösen</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C7F011">{{ mkBalChip }}</span>
+              </div>
+              <sc-if value="{{ mkHasSlider }}" hint-placeholder-val="{{ true }}">
+                <input type="range" min="0" max="{{ mkSliderMax }}" step="10" value="{{ mkSliderVal }}" onChange="{{ mkSetSlider }}" style="width:100%;cursor:pointer;display:block">
+                <div style="display:flex;justify-content:space-between;align-items:baseline">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 70%)">{{ mkSliderLabel }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:#C7F011">−{{ mkDiscountStr }}</span>
+                </div>
+                <span style="font-family:'DM Sans',sans-serif;font-size:10px;color:hsl(0 0% 50%)">{{ mkSliderHint }}</span>
+              </sc-if>
+              <sc-if value="{{ mkNoSlider }}" hint-placeholder-val="{{ false }}">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;line-height:1.5;color:hsl(0 0% 60%)">Noch keine Points — sammle welche bei deiner nächsten Court-Buchung.</span>
+              </sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 52%)">ZAHLUNGSART</span>
+              <sc-for list="{{ mkPays }}" as="pm" hint-placeholder-count="3">
+                <button onClick="{{ pm.select }}" style="{{ pm.style }}" style-hover="border-color:hsl(71 91% 51% / 0.55)">
+                  <span style="width:38px;height:38px;flex:none;border-radius:11px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.14), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.28);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ pm.icon }}" size="17"></p2g-icon></span>
+                  <span style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;text-align:left">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#FAFAFA">{{ pm.name }}</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 55%)">{{ pm.sub }}</span>
+                  </span>
+                  <span style="{{ pm.radioStyle }}"></span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 14%);border-radius:15px;padding:13px 14px">
+              <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)"><span>Zwischensumme</span><span style="font-family:'JetBrains Mono',monospace">{{ mkSubStr }}</span></div>
+              <sc-if value="{{ mkHasDiscount }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:12px;color:#C7F011"><span style="display:inline-flex;align-items:center;gap:5px"><p2g-icon name="coins" size="11"></p2g-icon>{{ mkDiscountLabel }}</span><span style="font-family:'JetBrains Mono',monospace">−{{ mkDiscountStr }}</span></div>
+              </sc-if>
+              <div style="display:flex;justify-content:space-between;font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)"><span style="display:inline-flex;align-items:center;gap:5px"><p2g-icon name="truck" size="11"></p2g-icon>Versand</span><span style="{{ mkShipStyle }}">{{ mkShipStr }}</span></div>
+              <div style="height:1px;background:hsl(0 0% 13%)"></div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline">
+                <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#FAFAFA">Gesamt <span style="font-weight:500;font-size:10.5px;color:hsl(0 0% 50%)">inkl. MwSt.</span></span>
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:23px;color:#C7F011">{{ mkTotalStr }}</span>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 60%)"><span style="color:#C7F011;display:flex"><p2g-icon name="sparkles" size="12"></p2g-icon></span>Du sammelst <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#C7F011">+{{ mkEarnStr }} P</span> mit dieser Bestellung.</span>
+            </div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:84px;z-index:25;padding:22px 18px 10px;background:linear-gradient(180deg, transparent, hsl(0 0% 0% / 0.92) 38%)">
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <span style="{{ mkPayWrapStyle }}">
+                <button onClick="{{ mkPayNow }}" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;color:#000;background:linear-gradient(90deg, #C7F011, #D8FF29);border:none;border-radius:13px;cursor:pointer;box-shadow:0 0 30px hsl(71 91% 51% / 0.3)" style-active="transform:scale(0.98)"><p2g-icon name="lock" size="15"></p2g-icon>Jetzt bezahlen · {{ mkTotalStr }}</button>
+              </span>
+              <span style="{{ mkPayHintStyle }}">{{ mkPayHint }}</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ MARKETPLACE ④: Success ═══ -->
+      <sc-if value="{{ scrMkSuccess }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Marketplace: Bestätigung" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:84px 22px 118px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;background:radial-gradient(ellipse 80% 38% at 50% 0%, hsl(71 91% 51% / 0.1), transparent), #000">
+          <span style="width:84px;height:84px;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.45);display:flex;align-items:center;justify-content:center;color:#C7F011;box-shadow:0 0 50px hsl(71 91% 51% / 0.3);animation:springIn 0.7s cubic-bezier(0.16,1,0.3,1)"><p2g-icon name="package-check" size="38" stroke-width="2.2"></p2g-icon></span>
+          <div style="display:flex;flex-direction:column;gap:7px;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.12s backwards">
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Bestellung bestätigt! 🎾</h2>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:hsl(0 0% 55%)">Bestellnummer <span style="color:#C7F011">{{ mkOCode }}</span></span>
+          </div>
+          <div style="width:100%;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15% / 0.7);border-radius:17px;padding:15px 16px;display:flex;flex-direction:column;gap:10px;text-align:left;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.22s backwards">
+            <div style="display:flex;justify-content:space-between;gap:10px"><span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)">Produkt</span><span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:#FAFAFA;text-align:right">{{ mkOProduct }}</span></div>
+            <div style="height:1px;background:hsl(0 0% 12%)"></div>
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)">Lieferung an</span><span style="display:flex;flex-direction:column;gap:1px;text-align:right"><span style="font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:600;color:#FAFAFA">{{ mkOName }}</span><span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 60%)">{{ mkOAddr }}</span></span></div>
+            <div style="height:1px;background:hsl(0 0% 12%)"></div>
+            <sc-if value="{{ mkOHasDiscount }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;justify-content:space-between;gap:10px"><span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)">Points eingelöst</span><span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:#C7F011">{{ mkODiscount }}</span></div>
+              <div style="height:1px;background:hsl(0 0% 12%)"></div>
+            </sc-if>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 60%)">Bezahlt</span><span style="display:inline-flex;align-items:center;gap:7px"><span style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:#C7F011">{{ mkOTotal }}</span><span style="display:inline-flex;align-items:center;gap:4px;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:2px 8px"><span style="width:5px;height:5px;border-radius:50%;background:#C7F011"></span>{{ mkOMethod }}</span></span></div>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;color:hsl(0 0% 70%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 15%);border-radius:999px;padding:7px 14px;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.3s backwards"><span style="color:#C7F011;display:flex"><p2g-icon name="truck" size="13"></p2g-icon></span>Versand in 1–2 Werktagen · Tracking per Mail</span>
+          <div style="width:100%;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.03));border:1px solid hsl(71 91% 51% / 0.35);border-radius:16px;padding:14px 15px;text-align:left;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.38s backwards">
+            <span style="width:40px;height:40px;border-radius:12px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011;flex:none"><p2g-icon name="coins" size="18"></p2g-icon></span>
+            <span style="display:flex;flex-direction:column;gap:1px">
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:#C7F011">+{{ mkOEarned }} P2G Points</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)">gutgeschrieben 💚 · Neuer Stand: <span style="font-family:'JetBrains Mono',monospace;color:#C7F011">{{ balDisplay }} P</span></span>
+            </span>
+          </div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:9px;animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.46s backwards">
+            <button onClick="{{ mkShopMore }}" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#000;background:#C7F011;border:none;border-radius:12px;cursor:pointer;box-shadow:0 0 26px hsl(71 91% 51% / 0.25)" style-active="transform:scale(0.98)"><p2g-icon name="shopping-bag" size="16"></p2g-icon>Weiter shoppen</button>
+            <button onClick="{{ goHomeTab }}" style="background:none;border:none;padding:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011">Zurück zu Mein P2G</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ EVENTS: Liste ═══ -->
+      <sc-if value="{{ scrEvList }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Events" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:14px;background:radial-gradient(ellipse 90% 30% at 50% 0%, hsl(71 91% 51% / 0.07), transparent), #000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:23px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Event <span style="color:#C7F011">Booking</span></h2>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:4px 10px;flex:none"><p2g-icon name="star" size="11"></p2g-icon>{{ balDisplay }} P</span>
+            </div>
+            <p style="font-family:'DM Sans',sans-serif;font-size:12.5px;color:hsl(0 0% 58%);margin:0">Spot sichern, Ticket in der Tasche — Storno bis 48 h vorher kostenlos.</p>
+          </div>
+
+          <sc-if value="{{ evHasNext }}" hint-placeholder-val="{{ false }}">
+            <div data-screen-label="Next Up" style="border-radius:20px;overflow:hidden;border:1px solid hsl(71 91% 51% / 0.25);background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));box-shadow:0 0 40px hsl(71 91% 51% / 0.08)">
+              <div style="position:relative;height:104px">
+                <img src="{{ evNxImg }}" alt="{{ evNxTitle }}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover">
+                <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(180deg, hsl(0 0% 0% / 0.15), hsl(0 0% 4%))"></div>
+                <span style="position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;font-size:10.5px;font-weight:700;color:#C7F011;background:hsl(0 0% 0% / 0.72);backdrop-filter:blur(8px);border:1px solid hsl(71 91% 51% / 0.4);border-radius:999px;padding:4px 10px"><p2g-icon name="check" size="11" stroke-width="3"></p2g-icon>Angemeldet</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:11px;padding:13px 15px 15px">
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:#C7F011"><span style="width:6px;height:6px;border-radius:50%;background:#C7F011;animation:pulseGlow 2s infinite"></span>NEXT UP — DEIN NÄCHSTES EVENT</span>
+                <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px;line-height:1.18;letter-spacing:-0.01em;color:#FAFAFA;margin:0">{{ evNxTitle }}</h3>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 72%)"><span style="color:#C7F011;display:flex"><p2g-icon name="calendar" size="12"></p2g-icon></span>{{ evNxDate }} · {{ evNxTime }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 72%)"><span style="color:#C7F011;display:flex"><p2g-icon name="map-pin" size="12"></p2g-icon></span>{{ evNxLoc }}</span>
+                </div>
+                <sc-if value="{{ evCdRunning }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:7px">
+                    <sc-for list="{{ evCdTiles }}" as="t" hint-placeholder-count="4">
+                      <span style="display:flex;flex-direction:column;align-items:center;gap:2px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:12px;padding:9px 4px">
+                        <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:19px;line-height:1;color:#C7F011;text-shadow:0 0 18px hsl(71 91% 51% / 0.4)">{{ t.v }}</span>
+                        <span style="font-family:'DM Sans',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:hsl(0 0% 50%)">{{ t.l }}</span>
+                      </span>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ evCdLive }}" hint-placeholder-val="{{ false }}">
+                  <span style="display:inline-flex;align-items:center;gap:8px;align-self:flex-start;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.4);border-radius:999px;padding:8px 14px;animation:pulseGlow 1.6s infinite"><span style="width:7px;height:7px;border-radius:50%;background:#C7F011"></span>LIVE — läuft gerade 🎾</span>
+                </sc-if>
+                <div style="display:flex;gap:8px">
+                  <button onClick="{{ evNxTicket }}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:42px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#000;background:linear-gradient(90deg, #C7F011, #D8FF29);border:none;border-radius:11px;cursor:pointer;box-shadow:0 0 24px hsl(71 91% 51% / 0.25)" style-active="transform:scale(0.98)"><p2g-icon name="qr-code" size="14"></p2g-icon>Ticket anzeigen</button>
+                  <button onClick="{{ evNxCancel }}" style="display:inline-flex;align-items:center;justify-content:center;height:42px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:hsl(0 0% 55%);background:none;border:1px solid hsl(0 0% 16%);border-radius:11px;cursor:pointer;flex:none" style-hover="color:hsl(0 72% 62%);border-color:hsl(0 72% 55% / 0.4)">Stornieren</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ evNoNext }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:12px;background:hsl(0 0% 100% / 0.02);border:1px dashed hsl(0 0% 20%);border-radius:16px;padding:14px 15px">
+              <span style="width:42px;height:42px;border-radius:12px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 18%);display:flex;align-items:center;justify-content:center;color:hsl(0 0% 55%);flex:none"><p2g-icon name="calendar-plus" size="19"></p2g-icon></span>
+              <span style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14px;color:#FAFAFA">Noch kein Event gebucht</span>
+                <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 55%)">Sichere dir unten deinen ersten Spot.</span>
+              </span>
+            </div>
+          </sc-if>
+
+          <div data-scroll style="display:flex;gap:8px;overflow-x:auto;margin:0 -18px;padding:2px 18px 2px">
+            <sc-for list="{{ evLocChips }}" as="lc" hint-placeholder-count="4">
+              <button onClick="{{ lc.select }}" style="{{ lc.style }}">{{ lc.label }}</button>
+            </sc-for>
+          </div>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:hsl(0 0% 48%)">{{ evCountLabel }}</span>
+
+          <sc-for list="{{ evRows }}" as="r" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;gap:10px;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 15% / 0.7);border-radius:17px;padding:13px 14px" style-hover="border-color:hsl(71 91% 51% / 0.35)">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <span style="display:flex;flex-direction:column;align-items:center;gap:1px;width:48px;flex:none;background:hsl(71 91% 51% / 0.07);border:1px solid hsl(71 91% 51% / 0.25);border-radius:12px;padding:8px 3px">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:{{ r.wdColor }}">{{ r.wd }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:17px;line-height:1.1;color:#FAFAFA">{{ r.day }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;color:#C7F011">{{ r.mon }}</span>
+                </span>
+                <span style="display:flex;flex-direction:column;gap:5px;min-width:0;flex:1">
+                  <span style="display:flex;align-items:center;gap:7px;flex-wrap:wrap">
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.11em;text-transform:uppercase;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.25);border-radius:999px;padding:2px 8px;white-space:nowrap">{{ r.cat }}</span>
+                    <span style="{{ r.regBadgeStyle }}"><p2g-icon name="check" size="10" stroke-width="3"></p2g-icon>Angemeldet</span>
+                  </span>
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;line-height:1.25;letter-spacing:-0.01em;color:#FAFAFA">{{ r.title }}</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:hsl(0 0% 58%)">{{ r.time }} · {{ r.city }}</span>
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="height:5px;border-radius:999px;background:hsl(0 0% 12%);overflow:hidden;flex:1">
+                  <div style="{{ r.barStyle }}"></div>
+                </div>
+                <span style="{{ r.leftStyle }}">{{ r.leftLabel }}</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:#C7F011">{{ r.price }}</span>
+                <sc-if value="{{ r.canBook }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ r.book }}" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 15px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#000;background:#C7F011;border:none;border-radius:10px;cursor:pointer" style-active="transform:scale(0.97)"><p2g-icon name="zap" size="13"></p2g-icon>Spot sichern</button>
+                </sc-if>
+                <sc-if value="{{ r.isReg }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ r.showTicket }}" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#C7F011;background:none;border:1px solid hsl(71 91% 51% / 0.4);border-radius:10px;cursor:pointer"><p2g-icon name="qr-code" size="13"></p2g-icon>Ticket</button>
+                </sc-if>
+                <sc-if value="{{ r.isFull }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:hsl(0 0% 45%);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:7px 13px;white-space:nowrap">Ausverkauft</span>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+          <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 46%)"><span style="color:#C7F011;display:flex"><p2g-icon name="coins" size="12"></p2g-icon></span>Für jedes Event sammelst du Points — einlösbar im Marketplace.</span>
+        </div>
+      </sc-if>
+
+      <!-- ═══ EVENTS: Buchungs-Sheet ═══ -->
+      <sc-if value="{{ evBookOpen }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="App — Event-Buchung Sheet" onClick="{{ evCloseBookBackdrop }}" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:45;background:hsl(0 0% 0% / 0.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;flex-direction:column;justify-content:flex-end;animation:fadeIn 0.22s ease-out">
+          <div style="background:linear-gradient(160deg, hsl(0 0% 9%), hsl(0 0% 3%));border-top:1px solid hsl(0 0% 18%);border-radius:24px 24px 0 0;padding:14px 20px 40px;display:flex;flex-direction:column;gap:14px;animation:slideUp 0.35s cubic-bezier(0.16,1,0.3,1);box-shadow:0 -20px 60px hsl(0 0% 0% / 0.6)">
+            <span style="width:40px;height:4px;border-radius:999px;background:hsl(0 0% 22%);align-self:center"></span>
+            <sc-if value="{{ evBookConfirm }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div style="display:flex;align-items:center;gap:11px">
+                  <span style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="ticket" size="18"></p2g-icon></span>
+                  <div style="display:flex;flex-direction:column;gap:1px">
+                    <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:16.5px;letter-spacing:-0.01em;color:#FAFAFA;margin:0">Spot sichern</h3>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 60%)">Dauert 10 Sekunden — versprochen.</span>
+                  </div>
+                </div>
+                <button onClick="{{ evCloseBook }}" style="background:none;border:1px solid hsl(0 0% 16%);border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:hsl(0 0% 60%);flex:none" style-hover="color:#FAFAFA"><p2g-icon name="x" size="15"></p2g-icon></button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 13%);border-radius:14px;padding:13px 14px">
+                <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;color:#FAFAFA">{{ evBkTitle }}</span>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 75%)"><span style="color:#C7F011;display:flex"><p2g-icon name="calendar" size="12"></p2g-icon></span>{{ evBkDate }} · {{ evBkTime }}</span>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 75%)"><span style="color:#C7F011;display:flex"><p2g-icon name="map-pin" size="12"></p2g-icon></span>{{ evBkLoc }}</span>
+              </div>
+              <sc-if value="{{ evBkPaid }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;align-items:center;gap:10px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 13%);border-radius:13px;padding:11px 13px">
+                  <span style="color:#C7F011;display:flex"><p2g-icon name="credit-card" size="15"></p2g-icon></span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 75%);flex:1">Visa <span style="font-family:'JetBrains Mono',monospace">•••• 4242</span> · hinterlegt</span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:#C7F011">{{ evBkPrice }}</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ evBkFree }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:10px;background:hsl(71 91% 51% / 0.06);border:1px solid hsl(71 91% 51% / 0.22);border-radius:13px;padding:11px 13px">
+                  <span style="color:#C7F011;display:flex"><p2g-icon name="party-popper" size="15"></p2g-icon></span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:hsl(0 0% 75%)">Kostenloses Community-Event — einfach anmelden.</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ evBkEarns }}" hint-placeholder-val="{{ true }}">
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 65%)"><span style="color:#C7F011;display:flex"><p2g-icon name="sparkles" size="13"></p2g-icon></span>Du sammelst <span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#C7F011">+{{ evBkEarn }} Points</span> mit dieser Buchung.</span>
+              </sc-if>
+              <button onClick="{{ evBookNow }}" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#000;background:linear-gradient(90deg, #C7F011, #D8FF29);border:none;border-radius:13px;cursor:pointer;box-shadow:0 0 28px hsl(71 91% 51% / 0.3)" style-active="transform:scale(0.98)"><p2g-icon name="zap" size="15"></p2g-icon>{{ evBkCta }}</button>
+              <span style="display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:10.5px;color:hsl(0 0% 50%)"><p2g-icon name="shield-check" size="11"></p2g-icon>Kostenlose Stornierung bis 48 h vorher</span>
+            </sc-if>
+            <sc-if value="{{ evBookDone }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:13px;text-align:center;padding:6px 0 2px">
+                <span style="width:68px;height:68px;border-radius:50%;background:hsl(71 91% 51% / 0.1);border:1px solid hsl(71 91% 51% / 0.45);display:flex;align-items:center;justify-content:center;color:#C7F011;box-shadow:0 0 40px hsl(71 91% 51% / 0.3);animation:springIn 0.6s cubic-bezier(0.16,1,0.3,1)"><p2g-icon name="check" size="32" stroke-width="2.5"></p2g-icon></span>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.01em;color:#FAFAFA">Du bist dabei! 🎾</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:12.5px;line-height:1.5;color:hsl(0 0% 65%)">{{ evBkTitle }}<br>Ticket-Code <span style="font-family:'JetBrains Mono',monospace;color:#C7F011">{{ evBkCode }}</span></span>
+                </div>
+                <sc-if value="{{ evBkEarns }}" hint-placeholder-val="{{ true }}">
+                  <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:7px 14px"><p2g-icon name="coins" size="13"></p2g-icon>+{{ evBkEarn }} Points gutgeschrieben</span>
+                </sc-if>
+                <div style="display:flex;gap:9px;width:100%">
+                  <button onClick="{{ evCloseBook }}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;height:44px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:hsl(0 0% 75%);background:none;border:1px solid hsl(0 0% 17%);border-radius:12px;cursor:pointer">Fertig</button>
+                  <button onClick="{{ evBkShowTicket }}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:44px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#000;background:#C7F011;border:none;border-radius:12px;cursor:pointer"><p2g-icon name="qr-code" size="14"></p2g-icon>Ticket</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ EVENTS: Ticket-Sheet ═══ -->
+      <sc-if value="{{ evTicketOpen }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="App — Event-Ticket" onClick="{{ evCloseTicketBackdrop }}" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:46;background:hsl(0 0% 0% / 0.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn 0.22s ease-out">
+          <div style="width:100%;position:relative;background:linear-gradient(160deg, hsl(0 0% 9%), hsl(0 0% 3%));border:1px solid hsl(71 91% 51% / 0.35);border-radius:22px;display:flex;flex-direction:column;animation:scaleIn 0.32s cubic-bezier(0.16,1,0.3,1);box-shadow:0 20px 60px hsl(0 0% 0% / 0.65), 0 0 50px hsl(71 91% 51% / 0.12);overflow:hidden">
+            <div style="display:flex;flex-direction:column;gap:11px;padding:20px 20px 16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <span style="display:flex;align-items:center;gap:8px">
+                  <img src="assets/p2g-icon-clean.png" alt="P2G" style="height:22px;width:auto">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.2em;color:hsl(0 0% 55%)">EVENT-TICKET</span>
+                </span>
+                <button onClick="{{ evCloseTicket }}" style="background:none;border:1px solid hsl(0 0% 16%);border-radius:9px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:hsl(0 0% 60%);flex:none" style-hover="color:#FAFAFA"><p2g-icon name="x" size="14"></p2g-icon></button>
+              </div>
+              <h3 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:19px;line-height:1.18;letter-spacing:-0.01em;color:#FAFAFA;margin:0">{{ evTkTitle }}</h3>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 75%)"><span style="color:#C7F011;display:flex"><p2g-icon name="calendar" size="12"></p2g-icon></span>{{ evTkDate }}</span>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 75%)"><span style="color:#C7F011;display:flex"><p2g-icon name="clock" size="12"></p2g-icon></span>{{ evTkTime }}</span>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 75%)"><span style="color:#C7F011;display:flex"><p2g-icon name="map-pin" size="12"></p2g-icon></span>{{ evTkLoc }}</span>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:11.5px;color:hsl(0 0% 75%)"><span style="color:#C7F011;display:flex"><p2g-icon name="user" size="12"></p2g-icon></span>{{ userName }} — 1 Spot</span>
+              </div>
+            </div>
+            <div style="position:relative;border-top:2px dashed hsl(0 0% 22%)">
+              <span style="position:absolute;top:-10px;left:-10px;width:20px;height:20px;border-radius:50%;background:hsl(0 0% 2%);border:1px solid hsl(0 0% 18%)"></span>
+              <span style="position:absolute;top:-10px;right:-10px;width:20px;height:20px;border-radius:50%;background:hsl(0 0% 2%);border:1px solid hsl(0 0% 18%)"></span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 20px 20px">
+              <div style="width:100%;height:48px;border-radius:6px;background:repeating-linear-gradient(90deg, #FAFAFA 0px, #FAFAFA 2px, transparent 2px, transparent 5px, #FAFAFA 5px, #FAFAFA 6px, transparent 6px, transparent 10px);opacity:0.92"></div>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;letter-spacing:0.14em;color:#C7F011">{{ evTkCode }}</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;color:hsl(0 0% 50%)">Zeig dieses Ticket am Einlass — fertig.</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ═══ PROFIL ═══ -->
+      <sc-if value="{{ scrProfil }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Profil" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:15px;background:radial-gradient(ellipse 90% 30% at 50% 0%, hsl(71 91% 51% / 0.07), transparent), #000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+
+          <div style="display:flex;align-items:center;gap:14px">
+            <span style="position:relative;width:64px;height:64px;flex:none;border-radius:50%;background:linear-gradient(135deg, hsl(71 91% 51% / 0.28), hsl(71 91% 51% / 0.06));border:1px solid hsl(71 91% 51% / 0.4);display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:24px;color:#C7F011">{{ avatarInitial }}<span style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:#C7F011;border:2.5px solid #000;display:flex;align-items:center;justify-content:center;color:#000"><p2g-icon name="check" size="12" stroke-width="3.5"></p2g-icon></span></span>
+            <span style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;line-height:1.1">{{ pfFullName }}</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:hsl(0 0% 55%)"><span style="color:#C7F011;display:flex"><p2g-icon name="shield-check" size="12"></p2g-icon></span>{{ pfMemberSince }}</span>
+            </span>
+            <button onClick="{{ openSettings }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 62%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="settings" size="18"></p2g-icon></button>
+          </div>
+
+          <div style="background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(71 91% 51% / 0.25);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 0 40px hsl(71 91% 51% / 0.06)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+              <span style="display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#FAFAFA">{{ levelChip }}</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:hsl(0 0% 50%)">{{ nextLevelLabel }}</span>
+              </span>
+              <button onClick="{{ openHistorie }}" style="display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:#C7F011;background:none;border:none;cursor:pointer;padding:0"><p2g-icon name="star" size="15"></p2g-icon>{{ balDisplay }} P</button>
+            </div>
+            <div style="height:8px;border-radius:999px;background:hsl(0 0% 12%);border:1px solid hsl(0 0% 16%);overflow:hidden">
+              <div style="width:{{ levelPct }};height:100%;border-radius:999px;background:linear-gradient(90deg, #C7F011, #D8FF29);box-shadow:0 0 12px hsl(71 91% 51% / 0.5);transform-origin:left;animation:barIn 0.9s cubic-bezier(0.16,1,0.3,1)"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:9px">
+              <sc-for list="{{ pfStats }}" as="s" hint-placeholder-count="3">
+                <span style="display:flex;flex-direction:column;align-items:center;gap:3px;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 13%);border-radius:13px;padding:11px 4px">
+                  <span style="color:#C7F011;display:flex"><p2g-icon name="{{ s.icon }}" size="16"></p2g-icon></span>
+                  <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:17px;line-height:1;color:#FAFAFA">{{ s.value }}</span>
+                  <span style="font-family:'DM Sans',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:hsl(0 0% 50%);text-align:center">{{ s.label }}</span>
+                </span>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="position:relative;border-radius:18px;overflow:hidden;border:1px solid hsl(71 91% 51% / 0.3);background:linear-gradient(135deg, hsl(71 91% 51% / 0.12), hsl(71 91% 51% / 0.02));display:flex;align-items:center;gap:13px;padding:15px 16px">
+            <span style="width:44px;height:44px;flex:none;border-radius:13px;background:hsl(71 91% 51% / 0.12);border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="user-plus" size="21"></p2g-icon></span>
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+              <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:14.5px;color:#FAFAFA">Freunde werben</span>
+              <span style="font-family:'DM Sans',sans-serif;font-size:11px;line-height:1.4;color:hsl(0 0% 65%)">+60 Points für dich &amp; deine Freunde</span>
+            </span>
+            <button onClick="{{ pfInvite }}" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 14px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:700;color:#000;background:#C7F011;border:none;border-radius:10px;cursor:pointer;flex:none" style-active="transform:scale(0.97)"><p2g-icon name="{{ pfInviteIcon }}" size="14"></p2g-icon>{{ pfInviteLabel }}</button>
+          </div>
+
+          <sc-for list="{{ pfGroups }}" as="g" hint-placeholder-count="3">
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 48%);padding-left:2px">{{ g.title }}</span>
+              <div style="display:flex;flex-direction:column;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 14%);border-radius:16px;overflow:hidden">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+                  <button onClick="{{ it.go }}" style="{{ it.rowStyle }}" style-hover="background:hsl(71 91% 51% / 0.05)">
+                    <span style="width:36px;height:36px;flex:none;border-radius:10px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ it.icon }}" size="17"></p2g-icon></span>
+                    <span style="display:flex;flex-direction:column;gap:1px;min-width:0;flex:1;text-align:left">
+                      <span style="font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:#FAFAFA">{{ it.label }}</span>
+                      <span style="{{ it.subStyle }}">{{ it.sub }}</span>
+                    </span>
+                    <span style="{{ it.valStyle }}">{{ it.value }}</span>
+                    <span style="color:hsl(0 0% 38%);display:flex;flex:none"><p2g-icon name="chevron-right" size="17"></p2g-icon></span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+
+          <button onClick="{{ pfLogout }}" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;color:hsl(0 72% 62%);background:none;border:1px solid hsl(0 72% 55% / 0.3);border-radius:13px;cursor:pointer" style-hover="background:hsl(0 72% 55% / 0.07);border-color:hsl(0 72% 55% / 0.5)"><p2g-icon name="log-out" size="16"></p2g-icon>Abmelden</button>
+          <span style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:hsl(0 0% 34%);padding-top:2px">PADEL2GO · App v1.0.0 · Made with 💚 in Deutschland</span>
+        </div>
+      </sc-if>
+
+      <!-- ═══ PROFIL: Einstellungen ═══ -->
+      <sc-if value="{{ scrSettings }}" hint-placeholder-val="{{ false }}">
+        <div data-scroll data-screen-label="App — Einstellungen" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;padding:72px 18px 118px;display:flex;flex-direction:column;gap:16px;background:#000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <div style="display:flex;align-items:center;gap:12px">
+            <button onClick="{{ back }}" style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;background:hsl(0 0% 100% / 0.03);border:1px solid hsl(0 0% 16%);border-radius:50%;color:hsl(0 0% 70%);cursor:pointer" style-hover="color:#C7F011;border-color:hsl(71 91% 51% / 0.4)"><p2g-icon name="chevron-left" size="19"></p2g-icon></button>
+            <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">Einstellungen</h2>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 48%);padding-left:2px">PERSÖNLICHE DATEN</span>
+            <div style="display:flex;flex-direction:column;gap:11px;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 14%);border-radius:16px;padding:14px">
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:hsl(0 0% 58%)">Name</span>
+                <input value="{{ setName }}" onChange="{{ setSetName }}" placeholder="Dein Name" style="width:100%;box-sizing:border-box;height:44px;background:hsl(0 0% 0% / 0.5);border:1px solid hsl(0 0% 17%);border-radius:11px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;outline:none" style-focus="border-color:hsl(71 91% 51% / 0.6)">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:hsl(0 0% 58%)">E-Mail</span>
+                <input value="{{ setEmail }}" onChange="{{ setSetEmail }}" placeholder="name@mail.de" style="width:100%;box-sizing:border-box;height:44px;background:hsl(0 0% 0% / 0.5);border:1px solid hsl(0 0% 17%);border-radius:11px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:16px;color:#FAFAFA;outline:none" style-focus="border-color:hsl(71 91% 51% / 0.6)">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:hsl(0 0% 58%)">Heim-Standort</span>
+                <div data-scroll style="display:flex;gap:8px;overflow-x:auto;margin:0 -14px;padding:2px 14px">
+                  <sc-for list="{{ setHomeChips }}" as="h" hint-placeholder-count="3">
+                    <button onClick="{{ h.select }}" style="{{ h.style }}">{{ h.label }}</button>
+                  </sc-for>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 48%);padding-left:2px">BENACHRICHTIGUNGEN</span>
+            <div style="display:flex;flex-direction:column;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 14%);border-radius:16px;overflow:hidden">
+              <sc-for list="{{ setToggles }}" as="t" hint-placeholder-count="4">
+                <div style="{{ t.rowStyle }}">
+                  <span style="width:36px;height:36px;flex:none;border-radius:10px;background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 14%);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ t.icon }}" size="16"></p2g-icon></span>
+                  <span style="display:flex;flex-direction:column;gap:1px;min-width:0;flex:1">
+                    <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#FAFAFA">{{ t.label }}</span>
+                    <span style="font-family:'DM Sans',sans-serif;font-size:10.5px;color:hsl(0 0% 52%)">{{ t.sub }}</span>
+                  </span>
+                  <button onClick="{{ t.toggle }}" style="{{ t.trackStyle }}" style-active="transform:scale(0.96)"><span style="{{ t.knobStyle }}"></span></button>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;color:hsl(0 0% 48%);padding-left:2px">RECHTLICHES</span>
+            <div style="display:flex;flex-direction:column;background:linear-gradient(145deg, hsl(0 0% 8%), hsl(0 0% 3%));border:1px solid hsl(0 0% 14%);border-radius:16px;overflow:hidden">
+              <sc-for list="{{ setLegal }}" as="l" hint-placeholder-count="3">
+                <button onClick="{{ noop }}" style="{{ l.rowStyle }}" style-hover="background:hsl(71 91% 51% / 0.05)">
+                  <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:hsl(0 0% 82%);flex:1;text-align:left">{{ l.label }}</span>
+                  <span style="color:hsl(0 0% 38%);display:flex"><p2g-icon name="{{ l.icon }}" size="16"></p2g-icon></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <sc-if value="{{ setSaved }}" hint-placeholder-val="{{ false }}">
+            <span style="display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#C7F011;background:hsl(71 91% 51% / 0.08);border:1px solid hsl(71 91% 51% / 0.3);border-radius:999px;padding:9px 14px;animation:fadeUp 0.3s ease-out"><p2g-icon name="check-circle-2" size="14"></p2g-icon>Änderungen gespeichert 💚</span>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ═══ Platzhalter für kommende Tabs ═══ -->
+      <sc-if value="{{ scrPlaceholder }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="App — Platzhalter" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:60px 36px 120px;background:radial-gradient(ellipse 90% 34% at 50% 0%, hsl(71 91% 51% / 0.07), transparent), #000;animation:fadeUp 0.3s cubic-bezier(0.16,1,0.3,1)">
+          <span style="width:64px;height:64px;border-radius:19px;background:linear-gradient(135deg, hsl(71 91% 51% / 0.18), hsl(71 91% 51% / 0.04));border:1px solid hsl(71 91% 51% / 0.35);display:flex;align-items:center;justify-content:center;color:#C7F011"><p2g-icon name="{{ phIcon }}" size="28"></p2g-icon></span>
+          <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.02em;color:#FAFAFA;margin:0">{{ phTitle }}</h2>
+          <p style="font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;color:hsl(0 0% 58%);margin:0;max-width:250px">{{ phCopy }}</p>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;color:hsl(0 0% 50%);background:hsl(0 0% 100% / 0.04);border:1px solid hsl(0 0% 16%);border-radius:999px;padding:6px 13px">ALS NÄCHSTES IM DESIGN</span>
+        </div>
+      </sc-if>
+
+      <!-- ═══ Tab-Bar ═══ -->
+      <div data-screen-label="Tab-Bar" style="position:absolute;bottom:0;left:0;right:0;z-index:30;background:hsl(0 0% 2% / 0.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid hsl(0 0% 15% / 0.6);display:grid;grid-template-columns:repeat(5, 1fr);padding:9px 6px 28px">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+          <button onClick="{{ t.go }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px 0;min-width:0">
+            <span style="display:flex;color:{{ t.color }};filter:{{ t.filter }}"><p2g-icon name="{{ t.icon }}" size="21"></p2g-icon></span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:{{ t.fw }};color:{{ t.color }};white-space:nowrap">{{ t.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+    </div>
+  </x-import>
+
+  <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:hsl(0 0% 42%);text-align:center">Voll klickbar · Alle 5 Tabs: Mein P2G · Booking · Marketplace · Events · Profil mit Einstellungen</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:520,&quot;height&quot;:1000},&quot;userName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Florian&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo-Zustand&quot;},&quot;pointsBalance&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:1240,&quot;min&quot;:0,&quot;max&quot;:5000,&quot;unit&quot;:&quot;Points&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Demo-Zustand&quot;},&quot;startTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;home&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;buchen&quot;,&quot;events&quot;,&quot;market&quot;,&quot;profil&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Navigation&quot;}}">
+const WDL = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+const WD = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+const MON = ['JAN', 'FEB', 'MÄR', 'APR', 'MAI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEZ'];
+const MONL = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const LEVELS = ['Beginner', 'Improver', 'Advanced', 'Pro', 'Legend'];
+const pts = (n) => n.toLocaleString('de-DE');
+const LIME = '#C7F011';
+const eur = (c) => '€' + (c / 100).toFixed(2).replace('.', ',');
+const BLOCS = [
+  { name: 'P2G Court München-Ost', city: 'München', img: 'assets/skypadel-outdoor.jpg', price: 2400, occ: 38, openLabel: '07–23 Uhr', open: [7, 23], courts: ['Court 1 · Outdoor · Flutlicht', 'Court 2 · Outdoor · Panorama'] },
+  { name: 'P2G Arena Rheinaue Köln', city: 'Köln', img: 'assets/skypadel-sunset.jpg', price: 2800, occ: 82, openLabel: '06–24 Uhr', open: [6, 24], courts: ['Court 1 · Outdoor · Flutlicht', 'Court 2 · Outdoor · Flutlicht', 'Court 3 · Center Court'] },
+  { name: 'P2G Club Hamburg-Alster', city: 'Hamburg', img: 'assets/tennis-padel-aerial.jpg', price: 2200, occ: 61, openLabel: '08–22 Uhr', open: [8, 22], courts: ['Court 1 · Outdoor · Flutlicht', 'Court 2 · Outdoor · Alsterblick'] },
+];
+
+const MPRODS = [
+  { slug: 'p2g-pro-carbon', brand: 'P2G', cat: 'Schläger', name: 'P2G Pro Carbon', sub: 'Unser Allrounder — 100 % Carbon, entwickelt mit P2G Coaches.', price: 14900, uvp: 17900, stock: 12, pop: 98, feat: true, specs: [['Form', 'Tropfen'], ['Gewicht', '360 g'], ['Balance', 'Mittel'], ['Oberfläche', '3K Carbon, rau'], ['Level', 'Einsteiger – Fortgeschritten']], desc: 'Der P2G Pro Carbon ist unser eigener Schläger: fehlerverzeihend, kontrolliert und mit genug Power für schnelle Bandejas. Die raue 3K-Carbon-Oberfläche gibt dir mehr Spin, der Soft-EVA-Kern schont den Arm.' },
+  { slug: 'bullpadel-hack-04', brand: 'Bullpadel', cat: 'Schläger', name: 'Bullpadel Hack 04', sub: 'Das Wettkampf-Racket — maximale Power für dein Angriffsspiel.', price: 23900, uvp: 28900, stock: 5, pop: 92, feat: true, specs: [['Form', 'Diamant'], ['Gewicht', '365 g'], ['Balance', 'Hoch'], ['Oberfläche', '12K Carbon'], ['Level', 'Fortgeschritten – Profi']], desc: 'Kompromisslose Power: Der Hack 04 ist für Spieler gebaut, die den Punkt am Netz entscheiden. Diamantform und hohe Balance bringen maximalen Druck in Smash und Víbora.' },
+  { slug: 'head-speed-motion', brand: 'Head', cat: 'Schläger', name: 'Head Speed Motion', sub: 'Leicht, rund, kontrolliert — für lange Ballwechsel.', price: 17900, uvp: 21900, stock: 9, pop: 85, specs: [['Form', 'Rund'], ['Gewicht', '355 g'], ['Balance', 'Niedrig'], ['Level', 'Einsteiger – Fortgeschritten']], desc: 'Der Speed Motion spielt sich leicht und präzise: niedrige Balance, runde Form, großer Sweetspot. Perfekt, wenn du dein Spiel über Kontrolle und Konstanz aufbaust.' },
+  { slug: 'p2g-match-balls', brand: 'P2G', cat: 'Bälle', name: 'P2G Match Balls — 3er Dose', sub: 'Unser Hausball — abgestimmt auf P2G Courts, fair im Preis.', price: 550, uvp: 690, stock: 200, pop: 90, isNew: true, specs: [['Inhalt', '3 Bälle'], ['Typ', 'Druckball'], ['Einsatz', 'Training & Match']], desc: 'Auf das Sprungverhalten unserer Courts abgestimmt. Wer bei P2G spielt, spielt mit diesem Ball.' },
+  { slug: 'p2g-performance-shirt', brand: 'P2G', cat: 'Bekleidung', name: 'P2G Performance Shirt', sub: 'Atmungsaktives Match-Shirt — natürlich in Lime on Black.', price: 3490, uvp: null, stock: 34, pop: 80, isNew: true, specs: [['Material', '92 % Polyester, 8 % Elasthan'], ['Passform', 'Athletic Fit'], ['Größen', 'S – XXL']], desc: 'Leicht, schnelltrocknend und geschnitten für explosive Bewegungen. Das Shirt, das unsere Coaches auf dem Court tragen.' },
+  { slug: 'adidas-gamecourt-padel', brand: 'adidas', cat: 'Schuhe', name: 'adidas GameCourt 2 Padel', sub: 'Grip für Kunstrasen — stabil bei schnellen Richtungswechseln.', price: 8990, uvp: 11000, stock: 0, pop: 89, specs: [['Sohle', 'Clay/Padel-Profil'], ['Dämpfung', 'Cloudfoam'], ['Größen', '40 – 47']], desc: 'Der GameCourt 2 ist auf Padel-Kunstrasen zuhause: griffige Sohle, stabiler Seitenhalt und Dämpfung für harte Stopps am Glas.' },
+  { slug: 'asics-gel-padel-pro', brand: 'ASICS', cat: 'Schuhe', name: 'ASICS Gel-Padel Pro 5', sub: 'Gel-Dämpfung und Stabilität für lange Matchtage.', price: 9990, uvp: null, stock: 7, pop: 83, specs: [['Sohle', 'Padel-Profil'], ['Dämpfung', 'GEL™-Technologie'], ['Größen', '40 – 48']], desc: 'ASICS-Klassiker fürs Padel: GEL-Dämpfung in der Ferse, stabiler Stand bei Ausfallschritten und ein Profil, das auf Sand-Kunstrasen greift.' },
+  { slug: 'bullpadel-paletero-pro', brand: 'Bullpadel', cat: 'Taschen', name: 'Bullpadel Paletero Pro', sub: 'Platz für 2 Rackets, Schuhe & Wechselkleidung — mit Thermofach.', price: 6990, uvp: 7990, stock: 11, pop: 78, specs: [['Volumen', 'ca. 35 l'], ['Fächer', '3 + Thermofach'], ['Schuhfach', 'Ja, belüftet']], desc: 'Der Paletero für alle, die öfter als einmal pro Woche spielen: Das Thermofach schützt deine Rackets, das belüftete Schuhfach den Rest deiner Tasche.' },
+  { slug: 'p2g-overgrip-set', brand: 'P2G', cat: 'Zubehör', name: 'P2G Overgrip — 3er Set', sub: 'Griffbänder mit extra Grip — trocken auch im fünften Satz.', price: 890, uvp: null, stock: 96, pop: 86, specs: [['Inhalt', '3 Overgrips'], ['Stärke', '0,6 mm'], ['Farbe', 'Lime / Schwarz / Weiß']], desc: 'Frischer Grip in 30 Sekunden: Unsere Overgrips absorbieren Schweiß zuverlässig und geben dir ein sicheres, direktes Griffgefühl.' },
+];
+const MCATS = [['Alle', 'layout-grid'], ['Schläger', 'zap'], ['Bälle', 'circle-dot'], ['Bekleidung', 'shirt'], ['Schuhe', 'footprints'], ['Taschen', 'backpack'], ['Zubehör', 'package']];
+const EVENTS = [
+  { slug: 'community-open-play', title: 'Community Open Play', cat: 'Open Play', off: 0, time: '17:00 – 21:00', loc: 'P2G Club Hamburg-Alster', city: 'Hamburg', img: 'assets/skypadel-outdoor.jpg', price: 0, spots: 48, left: 9 },
+  { slug: 'summer-opening-night', title: 'P2G Summer Opening — Night Session', cat: 'Party', off: 6, time: '19:00 – 02:00', loc: 'P2G Court München-Ost', city: 'München', img: 'assets/events-hero.jpg', price: 1900, spots: 180, left: 42 },
+  { slug: 'rookie-night', title: 'Rookie Night — Padel für Einsteiger', cat: 'Community', off: 10, time: '18:00 – 21:30', loc: 'P2G Club Hamburg-Alster', city: 'Hamburg', img: 'assets/tennis-padel-aerial.jpg', price: 800, spots: 32, left: 14 },
+  { slug: 'day-drinking-doubles', title: 'Day Drinking Doubles', cat: 'Day Drinking', off: 13, time: '14:00 – 20:00', loc: 'P2G Arena Rheinaue Köln', city: 'Köln', img: 'assets/skypadel-sunset.jpg', price: 1200, spots: 96, left: 51 },
+  { slug: 'corporate-challenge', title: 'Corporate Padel Challenge', cat: 'Corporate', off: 19, time: '16:00 – 22:00', loc: 'P2G Arena Rheinaue Köln', city: 'Köln', img: 'assets/fuer-vereine-hero.jpg', price: 3900, spots: 64, left: 28 },
+  { slug: 'p2g-cup-sommer', title: 'P2G Cup — Sommerturnier', cat: 'Turnier', off: 21, time: '10:00 – 18:00', loc: 'P2G Court München-Ost', city: 'München', img: 'assets/league-hero.jpg', price: 2500, spots: 64, left: 22 },
+];
+const EVLOCS = ['Alle', 'München', 'Köln', 'Hamburg'];
+const evBySlug = (s) => EVENTS.find((e) => e.slug === s);
+const evCodeOf = (slug) => {
+  const n = slug.split('').reduce((a, c) => a + c.charCodeAt(0), 7) % 900 + 100;
+  return 'P2G-EV-' + slug.slice(0, 2).toUpperCase() + n;
+};
+const evEarnOf = (e) => Math.round(e.price / 10);
+
+class Component extends DCLogic {
+  state = {
+    tab: this.props.startTab ?? 'home', sub: null, ticket: null, disp: 0,
+    bkStep: 'locs', bkLoc: 0, bkCourt: 0, bkDate: 0, bkDur: 60, bkTime: null,
+    bkVoucherOpen: false, bkVoucherVal: '', bkVoucherOk: false, bkVoucherErr: false,
+    bkPay: 0, paying: false, payCtx: 'bk', timerLeft: 600, earnedPts: 0, bkCode: null,
+    mkStep: 'catalog', mkCat: 'Alle', mkQ: '', mkSlug: 'p2g-pro-carbon', mkQty: 1,
+    mkUse: 0, mkPay: 0, mkNotified: false, mkOrder: null,
+    mkAName: 'Florian Steinfelder', mkAStreet: 'Lindwurmstraße 42', mkAZip: '80331', mkACity: 'München',
+    evLocF: 'Alle', evReg: ['summer-opening-night'], evEarned: {},
+    evBookSlug: null, evBookDone: false, evTicketSlug: null, evNow: Date.now(),
+    pfInvited: false, pfSettings: false, pfSaved: false,
+    setName: '', setEmail: 'florian@padel2go.de', setHome: 'München',
+    setToggles: { push: true, booking: true, events: true, news: false, points: true },
+  };
+
+  _balance() {
+    const n = Number(this.props.pointsBalance);
+    const base = Number.isFinite(n) ? Math.max(0, Math.round(n)) : 1240;
+    return base + this.state.earnedPts;
+  }
+  _lvl() {
+    const bal = this._balance();
+    const lvl = Math.floor(bal / 500) + 1;
+    const inLvl = bal % 500;
+    return { lvl, name: LEVELS[Math.min(lvl, LEVELS.length) - 1], nextName: LEVELS[Math.min(lvl + 1, LEVELS.length) - 1], pct: Math.round((inLvl / 500) * 100), rest: 500 - inLvl };
+  }
+  _countTo(target) {
+    if (this._raf) cancelAnimationFrame(this._raf);
+    const t0 = performance.now(), dur = 1200;
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / dur);
+      const e = 1 - Math.pow(1 - p, 3);
+      this.setState({ disp: Math.round(target * e) });
+      if (p < 1) this._raf = requestAnimationFrame(tick);
+    };
+    this._raf = requestAnimationFrame(tick);
+  }
+  componentDidMount() {
+    this._countTo(this._balance());
+    this._evT = setInterval(() => { if (this.state.tab === 'events') this.setState({ evNow: Date.now() }); }, 1000);
+  }
+  componentDidUpdate(prev) {
+    if (prev.pointsBalance !== this.props.pointsBalance) {
+      if (this._raf) cancelAnimationFrame(this._raf);
+      this.setState({ disp: this._balance() });
+    }
+    if (prev.startTab !== this.props.startTab && this.props.startTab) this.setState({ tab: this.props.startTab, sub: null });
+  }
+  componentWillUnmount() { if (this._raf) cancelAnimationFrame(this._raf); clearInterval(this._bt); clearTimeout(this._payT); clearInterval(this._evT); }
+
+  _go(tab) { return () => this.setState({ tab, sub: null, ticket: null }); }
+  _sub(sub) { return () => this.setState({ sub }); }
+  _back = () => this.setState({ sub: null, ticket: null });
+
+  _qr() {
+    const n = 21, cells = [];
+    const finder = (x, y) => (x < 7 && y < 7) || (x >= n - 7 && y < 7) || (x < 7 && y >= n - 7);
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+      let on;
+      if (finder(x, y)) {
+        const lx = x < 7 ? x : x - (n - 7), ly = y < 7 ? y : y - (n - 7);
+        on = lx === 0 || lx === 6 || ly === 0 || ly === 6 || (lx >= 2 && lx <= 4 && ly >= 2 && ly <= 4);
+      } else {
+        on = ((x * 3 + y * 7 + ((x * y) % 5)) % 3) === 0 || ((x + y * y) % 7) === 1;
+      }
+      cells.push(React.createElement('span', { key: x + '-' + y, style: { background: on ? '#000' : 'transparent' } }));
+    }
+    return React.createElement('div', { 'aria-label': 'QR-Code', style: { display: 'grid', gridTemplateColumns: 'repeat(' + n + ', 1fr)', width: 176, height: 176 } }, cells);
+  }
+
+  _bkBooked(li, ci, di, h) {
+    if (di === 2) return true;
+    if (di === 0 && h <= new Date().getHours()) return true;
+    const x = ((li + 1) * 131 + (ci + 1) * 37 + (di + 1) * 53 + h * 17) % 100;
+    return x < BLOCS[li].occ * 0.8;
+  }
+  _bkHours() {
+    const [o, c] = BLOCS[this.state.bkLoc].open;
+    const last = Math.floor(c - this.state.bkDur / 60);
+    const out = [];
+    for (let h = o; h <= last; h++) out.push(h);
+    return out;
+  }
+  _bkTotal() {
+    const base = Math.round(BLOCS[this.state.bkLoc].price * this.state.bkDur / 60);
+    return this.state.bkVoucherOk ? Math.round(base * 0.9) : base;
+  }
+  _startBkTimer() {
+    clearInterval(this._bt);
+    this.setState({ timerLeft: 600 });
+    this._bt = setInterval(() => {
+      this.setState((s) => {
+        if (s.timerLeft <= 1) { clearInterval(this._bt); return { timerLeft: 0 }; }
+        return { timerLeft: s.timerLeft - 1 };
+      });
+    }, 1000);
+  }
+  _stopBkTimer() { clearInterval(this._bt); }
+
+  _bkVals() {
+    const st = this.state;
+    const inBk = st.tab === 'buchen' && !st.sub;
+    const step = st.bkStep;
+    const loc = BLOCS[st.bkLoc];
+    const d = (off) => { const x = new Date(); x.setDate(x.getDate() + off); return x; };
+    const selD = d(st.bkDate);
+    const hrs = this._bkHours();
+    const freeHrs = hrs.filter((h) => !this._bkBooked(st.bkLoc, st.bkCourt, st.bkDate, h));
+    const total = this._bkTotal();
+    const base = Math.round(loc.price * st.bkDur / 60);
+    const ptsEarn = Math.round(total / 10);
+    const endOf = (h) => { const m = h * 60 + st.bkDur; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
+    const timeLabel = st.bkTime != null ? String(st.bkTime).padStart(2, '0') + ':00 – ' + endOf(st.bkTime) + ' Uhr' : '—';
+    const dateLabel = WDL[selD.getDay()] + ', ' + selD.getDate() + '. ' + MONL[selD.getMonth()] + ' ' + selD.getFullYear();
+    const mm = Math.floor(st.timerLeft / 60), ss = String(st.timerLeft % 60).padStart(2, '0');
+    const courtName = loc.courts[st.bkCourt].split(' · ')[0];
+    return {
+      scrBkLocs: inBk && step === 'locs',
+      scrBkSlot: inBk && step === 'slot',
+      scrBkCheckout: inBk && step === 'checkout',
+      scrBkSuccess: inBk && step === 'success',
+      payingOverlay: st.paying,
+      bkLocs: BLOCS.map((l, i) => {
+        const busy = l.occ >= 75, mid = l.occ >= 55 && !busy;
+        const col = busy ? 'hsl(0 72% 62%)' : mid ? 'hsl(45 90% 60%)' : LIME;
+        return {
+          img: l.img, name: l.name, city: l.city, courtCount: l.courts.length + ' Courts',
+          priceFrom: 'ab €' + Math.round(l.price / 100) + '/h', open: l.openLabel,
+          badgeLabel: busy ? 'Fast ausgebucht' : mid ? 'Gut gebucht' : 'Verfügbar',
+          badgeStyle: { position: 'absolute', top: 10, left: 10, display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: "'DM Sans', sans-serif", fontSize: 10.5, fontWeight: 700, color: col, background: 'hsl(0 0% 0% / 0.72)', backdropFilter: 'blur(8px)', border: '1px solid ' + (busy ? 'hsl(0 72% 55% / 0.4)' : mid ? 'hsl(45 90% 55% / 0.4)' : 'hsl(71 91% 51% / 0.4)'), borderRadius: 999, padding: '4px 10px' },
+          occLabel: 'Auslastung heute ' + l.occ + ' %',
+          occStyle: { display: 'block', width: l.occ + '%', height: '100%', borderRadius: 999, background: busy ? 'hsl(0 72% 55%)' : mid ? 'hsl(45 90% 55%)' : LIME },
+          select: () => this.setState({ bkLoc: i, bkCourt: 0, bkTime: null, bkStep: 'slot' }),
+        };
+      }),
+      bkLocName: loc.name, bkLocImg: loc.img, bkLocCity: loc.city, bkLocOpen: loc.openLabel,
+      bkCourtName: courtName,
+      bkCourts: loc.courts.map((c, i) => {
+        const sel = i === st.bkCourt;
+        const parts = c.split(' · ');
+        return {
+          name: parts[0], tag: parts.slice(1).join(' · '),
+          select: () => this.setState({ bkCourt: i, bkTime: null }),
+          style: { display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start', padding: '10px 14px', borderRadius: 13, cursor: 'pointer', minWidth: 0, flex: '1 1 40%', textAlign: 'left', background: sel ? 'hsl(71 91% 51% / 0.1)' : 'hsl(0 0% 100% / 0.03)', border: sel ? '1px solid hsl(71 91% 51% / 0.6)' : '1px solid hsl(0 0% 15%)', boxShadow: sel ? '0 0 18px hsl(71 91% 51% / 0.15)' : 'none' },
+          nameStyle: { fontFamily: "'Bricolage Grotesque', sans-serif", fontWeight: 700, fontSize: 13.5, color: sel ? LIME : '#FAFAFA' },
+          tagStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 9.5, color: 'hsl(0 0% 52%)' },
+        };
+      }),
+      bkDates: Array.from({ length: 8 }, (_, i) => {
+        const dt = d(i);
+        const sel = i === st.bkDate;
+        return {
+          wd: i === 0 ? 'Heute' : WD[dt.getDay()], dd: String(dt.getDate()).padStart(2, '0'), mon: MON[dt.getMonth()],
+          select: () => this.setState({ bkDate: i, bkTime: null }),
+          style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: 56, flex: 'none', padding: '9px 0', borderRadius: 13, cursor: 'pointer', border: sel ? '1px solid transparent' : '1px solid hsl(0 0% 15%)', background: sel ? LIME : 'hsl(0 0% 100% / 0.03)', color: sel ? '#000' : '#FAFAFA', boxShadow: sel ? '0 0 18px hsl(71 91% 51% / 0.3)' : 'none' },
+          wdStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: sel ? 'hsl(0 0% 0% / 0.65)' : 'hsl(0 0% 50%)' },
+          monStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 8.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: sel ? 'hsl(0 0% 0% / 0.65)' : 'hsl(0 0% 45%)' },
+        };
+      }),
+      bkDurs: [60, 90, 120].map((m) => {
+        const sel = m === st.bkDur;
+        return {
+          label: m + ' min', price: eur(Math.round(loc.price * m / 60)),
+          select: () => this.setState({ bkDur: m, bkTime: null }),
+          style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '10px 0', borderRadius: 13, cursor: 'pointer', border: sel ? '1px solid hsl(71 91% 51% / 0.6)' : '1px solid hsl(0 0% 15%)', background: sel ? 'hsl(71 91% 51% / 0.1)' : 'hsl(0 0% 100% / 0.03)', boxShadow: sel ? '0 0 18px hsl(71 91% 51% / 0.15)' : 'none' },
+          labelStyle: { fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 13.5, color: sel ? LIME : '#FAFAFA' },
+          priceStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'hsl(0 0% 52%)' },
+        };
+      }),
+      bkTimes: hrs.map((h) => {
+        const booked = this._bkBooked(st.bkLoc, st.bkCourt, st.bkDate, h);
+        const sel = st.bkTime === h;
+        return {
+          label: String(h).padStart(2, '0') + ':00', booked,
+          select: () => this.setState({ bkTime: h }),
+          style: { fontFamily: "'JetBrains Mono', monospace", fontWeight: sel ? 700 : 500, fontSize: 12, padding: '10px 0', borderRadius: 11, textAlign: 'center', cursor: booked ? 'default' : 'pointer', background: sel ? LIME : booked ? 'hsl(0 0% 7%)' : 'hsl(0 0% 100% / 0.03)', color: sel ? '#000' : booked ? 'hsl(0 0% 30%)' : '#FAFAFA', border: sel ? '1px solid transparent' : booked ? '1px solid hsl(0 0% 11%)' : '1px solid hsl(0 0% 16%)', boxShadow: sel ? '0 0 16px hsl(71 91% 51% / 0.35)' : 'none', textDecoration: booked ? 'line-through' : 'none' },
+        };
+      }),
+      bkHasSlots: freeHrs.length > 0, bkNoSlots: freeHrs.length === 0,
+      bkFreeLabel: freeHrs.length + ' Slots frei',
+      bkJumpNext: () => { let nx = st.bkDate + 1; if (nx === 2) nx = 3; if (nx > 7) nx = 7; this.setState({ bkDate: nx, bkTime: null }); },
+      bkTotal: eur(total), bkBase: eur(base),
+      bkBaseLabel: courtName + ' · ' + st.bkDur + ' min',
+      bkDiscount: '−' + eur(base - total),
+      bkPtsEarn: '+' + ptsEarn + ' P',
+      bkTimeLabel: timeLabel,
+      bkDateShort: WD[selD.getDay()] + ', ' + selD.getDate() + '. ' + MON[selD.getMonth()],
+      bkSlotSumLabel: st.bkDur + ' min · ' + (st.bkTime != null ? String(st.bkTime).padStart(2, '0') + ':00 Uhr' : 'Uhrzeit wählen'),
+      bkNextWrapStyle: { opacity: st.bkTime != null ? 1 : 0.4, pointerEvents: st.bkTime != null ? 'auto' : 'none', flex: 'none' },
+      goBkLocs: () => this.setState({ bkStep: 'locs' }),
+      goBkSlot: () => { this._stopBkTimer(); this.setState({ bkStep: 'slot' }); },
+      goBkCheckout: () => { this.setState({ bkStep: 'checkout' }); this._startBkTimer(); },
+      bkPayNow: () => {
+        this.setState({ paying: true, payCtx: 'bk' });
+        this._payT = setTimeout(() => {
+          this._stopBkTimer();
+          const code = 'P2G-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+          this.setState((s) => ({ paying: false, bkStep: 'success', bkCode: code, earnedPts: s.earnedPts + ptsEarn }), () => this._countTo(this._balance()));
+        }, 1600);
+      },
+      bkVoucherToggle: () => this.setState((s) => ({ bkVoucherOpen: !s.bkVoucherOpen })),
+      bkVoucherChevron: st.bkVoucherOpen ? 'chevron-up' : 'chevron-down',
+      bkVoucherOpen: st.bkVoucherOpen, bkVoucherOk: st.bkVoucherOk, bkVoucherNotOk: !st.bkVoucherOk,
+      bkVoucherVal: st.bkVoucherVal,
+      bkSetVoucher: (e) => this.setState({ bkVoucherVal: e.target.value, bkVoucherErr: false }),
+      bkApplyVoucher: () => {
+        if (this.state.bkVoucherVal.trim().toUpperCase() === 'P2G10') this.setState({ bkVoucherOk: true, bkVoucherErr: false });
+        else this.setState({ bkVoucherErr: true });
+      },
+      bkRemoveVoucher: () => this.setState({ bkVoucherOk: false, bkVoucherVal: '' }),
+      bkVoucherErrStyle: { display: st.bkVoucherErr ? 'block' : 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, color: 'hsl(0 72% 62%)' },
+      bkPays: [
+        { icon: 'smartphone', name: 'Apple Pay / Google Pay', sub: 'Express-Checkout' },
+        { icon: 'credit-card', name: 'Kredit- / Debitkarte', sub: 'Visa, Mastercard, Amex' },
+        { icon: 'wallet', name: 'PayPal', sub: 'Mit PayPal-Konto zahlen' },
+      ].map((p, i) => {
+        const sel = i === st.bkPay;
+        return {
+          ...p, select: () => this.setState({ bkPay: i }),
+          style: { display: 'flex', alignItems: 'center', gap: 12, padding: '11px 13px', borderRadius: 14, cursor: 'pointer', textAlign: 'left', width: '100%', background: sel ? 'hsl(71 91% 51% / 0.08)' : 'hsl(0 0% 100% / 0.03)', border: sel ? '1px solid hsl(71 91% 51% / 0.55)' : '1px solid hsl(0 0% 15%)', boxShadow: sel ? '0 0 18px hsl(71 91% 51% / 0.12)' : 'none' },
+          radioStyle: { width: 18, height: 18, borderRadius: '50%', flex: 'none', border: sel ? '5px solid ' + LIME : '1.5px solid hsl(0 0% 30%)', boxSizing: 'border-box' },
+        };
+      }),
+      bkPayName: ['Apple Pay / Google Pay', 'Kredit- / Debitkarte', 'PayPal'][st.bkPay],
+      bkTimerStr: mm + ':' + ss,
+      bkTimerBarStyle: { width: (st.timerLeft / 600 * 100) + '%', height: '100%', borderRadius: 999, background: st.timerLeft < 120 ? 'hsl(0 72% 55%)' : LIME, transition: 'width 1s linear' },
+      bkCode: st.bkCode ?? 'P2G-8F3K',
+      openBkTicket: () => this.setState({ sub: 'ticket', ticket: { loc: loc.name, court: courtName, dateLabel, time: timeLabel, earn: '+' + ptsEarn + ' P' } }),
+      goHomeTab: this._go('home'),
+      bkNewBooking: () => this.setState({ bkStep: 'locs', bkTime: null, bkVoucherOk: false, bkVoucherVal: '', bkVoucherOpen: false }),
+    };
+  }
+
+  _mkProd() { return MPRODS.find((p) => p.slug === this.state.mkSlug) || MPRODS[0]; }
+  _mkSub() { return this._mkProd().price * this.state.mkQty; }
+  _mkMaxRedeem() {
+    const cap = Math.floor(this._mkSub() * 0.3);
+    return Math.max(0, Math.floor(Math.min(this._balance(), cap) / 10) * 10);
+  }
+  _mkRedeem() { return Math.min(this.state.mkUse, this._mkMaxRedeem()); }
+  _mkShip() { return this._mkSub() >= 7500 ? 0 : 490; }
+  _mkTotalC() { return Math.max(50, this._mkSub() - this._mkRedeem() + this._mkShip()); }
+
+  _mkCard(p) {
+    const soldOut = p.stock === 0;
+    const low = !soldOut && p.stock <= 5;
+    const stockCol = soldOut ? 'hsl(0 72% 58%)' : low ? 'hsl(45 90% 55%)' : LIME;
+    const badge = p.feat ? 'Bestseller' : p.isNew ? 'Neu' : null;
+    return {
+      slotId: 'mp-' + p.slug, slotPlaceholder: 'Foto: ' + p.name,
+      brand: p.brand, name: p.name, priceStr: eur(p.price),
+      uvpStr: p.uvp ? eur(p.uvp) : '',
+      uvpStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: 'hsl(0 0% 45%)', textDecoration: 'line-through', display: p.uvp ? 'inline' : 'none' },
+      featLabel: badge || '',
+      featBadgeStyle: { position: 'absolute', top: 8, left: 8, display: badge ? 'inline-flex' : 'none', alignItems: 'center', fontFamily: "'DM Sans', sans-serif", fontSize: 9, fontWeight: 700, color: LIME, background: 'hsl(0 0% 0% / 0.72)', backdropFilter: 'blur(8px)', border: '1px solid hsl(71 91% 51% / 0.4)', borderRadius: 999, padding: '3px 8px' },
+      soldOverlayStyle: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: soldOut ? 'inline-flex' : 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, color: '#FAFAFA', background: 'hsl(0 0% 0% / 0.8)', backdropFilter: 'blur(6px)', border: '1px solid hsl(0 0% 30%)', borderRadius: 999, padding: '5px 11px', whiteSpace: 'nowrap' },
+      imgWrapStyle: { display: 'block', position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: soldOut ? 0.45 : 1, filter: soldOut ? 'grayscale(0.7)' : 'none' },
+      stockLabel: soldOut ? 'Ausverkauft' : low ? 'Nur noch ' + p.stock + ' Stück' : 'Auf Lager',
+      stockDotStyle: { width: 6, height: 6, borderRadius: '50%', background: stockCol, display: 'inline-block', flex: 'none' },
+      stockLabelStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 600, color: stockCol, whiteSpace: 'nowrap' },
+      open: () => this.setState({ mkSlug: p.slug, mkQty: 1, mkUse: 0, mkNotified: false, mkStep: 'product' }),
+    };
+  }
+
+  _mkVals() {
+    const st = this.state;
+    const inMk = st.tab === 'market' && !st.sub;
+    const prod = this._mkProd();
+    const soldOut = prod.stock === 0;
+    const low = !soldOut && prod.stock <= 5;
+    const stockCol = soldOut ? 'hsl(0 72% 58%)' : low ? 'hsl(45 90% 55%)' : LIME;
+    const off = prod.uvp ? Math.round((1 - prod.price / prod.uvp) * 100) : 0;
+    const badge = prod.feat ? 'Bestseller' : prod.isNew ? 'Neu' : null;
+    const qtyMax = Math.min(Math.max(prod.stock, 1), 5);
+    const sub = this._mkSub();
+    const maxRedeem = this._mkMaxRedeem();
+    const redeem = this._mkRedeem();
+    const ship = this._mkShip();
+    const total = this._mkTotalC();
+    const earn = Math.round(total / 10);
+    const maxSave = Math.min(this._balance(), Math.floor(sub * 0.3));
+    const q = st.mkQ.trim().toLowerCase();
+    let list = MPRODS.filter((p) =>
+      (st.mkCat === 'Alle' || p.cat === st.mkCat) &&
+      (q === '' || (p.name + ' ' + p.brand + ' ' + p.cat).toLowerCase().includes(q))
+    ).slice().sort((a, b) => b.pop - a.pop);
+    const rel = MPRODS.filter((p) => p.slug !== prod.slug && p.cat === prod.cat);
+    MPRODS.filter((p) => p.slug !== prod.slug && p.cat !== prod.cat && (p.feat || p.isNew || p.pop > 85)).forEach((p) => { if (rel.length < 3) rel.push(p); });
+    const addrValid = st.mkAName.trim().length > 1 && st.mkAStreet.trim().length > 3 && /^\d{4,5}$/.test(st.mkAZip.trim()) && st.mkACity.trim().length > 1;
+    const order = st.mkOrder || {};
+    return {
+      scrMkCatalog: inMk && st.mkStep === 'catalog',
+      scrMkProduct: inMk && st.mkStep === 'product',
+      scrMkCheckout: inMk && st.mkStep === 'checkout',
+      scrMkSuccess: inMk && st.mkStep === 'success',
+      payOvLine: st.payCtx === 'mk'
+        ? eur(this._mkTotalC()) + ' · ' + ['Apple Pay / Google Pay', 'Karte', 'PayPal'][st.mkPay]
+        : eur(this._bkTotal()) + ' · ' + ['Apple Pay / Google Pay', 'Kredit- / Debitkarte', 'PayPal'][st.bkPay],
+      mkQ: st.mkQ,
+      mkSetQ: (e) => this.setState({ mkQ: e.target.value }),
+      mkReset: () => this.setState({ mkQ: '', mkCat: 'Alle' }),
+      mkCats: MCATS.map(([label, icon]) => {
+        const on = st.mkCat === label;
+        return {
+          label, icon, select: () => this.setState({ mkCat: label }),
+          style: { display: 'inline-flex', alignItems: 'center', gap: 6, flex: 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, padding: '8px 13px', borderRadius: 999, cursor: 'pointer', background: on ? LIME : 'hsl(0 0% 6%)', color: on ? '#000' : 'hsl(0 0% 75%)', border: on ? '1px solid transparent' : '1px solid hsl(0 0% 15%)', boxShadow: on ? '0 0 18px hsl(71 91% 51% / 0.3)' : 'none' },
+        };
+      }),
+      mkCards: list.map((p) => this._mkCard(p)),
+      mkHasResults: list.length > 0, mkNoResults: list.length === 0,
+      mkGoCatalog: () => this.setState({ mkStep: 'catalog' }),
+      mkCat: prod.cat, mkBrand: prod.brand, mkName: prod.name, mkSub: prod.sub,
+      mkSlotMain: 'mp-' + prod.slug, mkSlotPh: 'Titelbild: ' + prod.name,
+      mkPriceStr: eur(prod.price),
+      mkUvpStr: prod.uvp ? eur(prod.uvp) : '',
+      mkUvpStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'hsl(0 0% 45%)', textDecoration: 'line-through', display: prod.uvp ? 'inline' : 'none' },
+      mkOffLabel: '−' + off + ' %',
+      mkOffBadgeStyle: { display: off > 0 ? 'inline-flex' : 'none', alignItems: 'center', fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, fontWeight: 700, color: LIME, background: 'hsl(71 91% 51% / 0.1)', border: '1px solid hsl(71 91% 51% / 0.35)', borderRadius: 999, padding: '3px 9px' },
+      mkFeatLabel: badge || '',
+      mkFeatBadgeStyle: { position: 'absolute', top: 10, left: 10, display: badge ? 'inline-flex' : 'none', alignItems: 'center', fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 700, color: LIME, background: 'hsl(0 0% 0% / 0.72)', backdropFilter: 'blur(8px)', border: '1px solid hsl(71 91% 51% / 0.4)', borderRadius: 999, padding: '4px 10px' },
+      mkSoldOverlayStyle: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: soldOut ? 'inline-flex' : 'none', fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 700, color: '#FAFAFA', background: 'hsl(0 0% 0% / 0.8)', backdropFilter: 'blur(6px)', border: '1px solid hsl(0 0% 30%)', borderRadius: 999, padding: '7px 15px', whiteSpace: 'nowrap' },
+      mkStockLabel: soldOut ? 'Ausverkauft' : low ? 'Nur noch ' + prod.stock + ' Stück' : 'Auf Lager',
+      mkStockDotStyle: { width: 7, height: 7, borderRadius: '50%', background: stockCol, display: 'inline-block', flex: 'none' },
+      mkStockLabelStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 11.5, fontWeight: 700, color: stockCol, whiteSpace: 'nowrap' },
+      mkShipNote: soldOut ? '· bald wieder verfügbar' : '· Lieferung in 2–4 Werktagen',
+      mkInStock: !soldOut, mkSoldOut: soldOut,
+      mkMaxSaveStr: eur(maxSave),
+      mkQtyStr: String(st.mkQty),
+      mkQtyMinus: () => this.setState((s) => ({ mkQty: Math.max(1, s.mkQty - 1) })),
+      mkQtyPlus: () => this.setState((s) => ({ mkQty: Math.min(qtyMax, s.mkQty + 1) })),
+      mkQtyMinusStyle: { width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: st.mkQty <= 1 ? 'default' : 'pointer', background: 'none', border: 'none', color: st.mkQty <= 1 ? 'hsl(0 0% 30%)' : '#FAFAFA' },
+      mkQtyPlusStyle: { width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: st.mkQty >= qtyMax ? 'default' : 'pointer', background: 'none', border: 'none', color: st.mkQty >= qtyMax ? 'hsl(0 0% 30%)' : '#FAFAFA' },
+      mkBuyNow: () => this.setState({ mkStep: 'checkout', mkUse: 0 }),
+      mkNotify: () => this.setState({ mkNotified: true }),
+      mkNotifyLabel: st.mkNotified ? 'Alles klar — wir melden uns! 💚' : 'Benachrichtigen, wenn verfügbar',
+      mkSpecs: prod.specs.map(([label, value], i) => ({ label, value, rowStyle: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 14, padding: '8px 0', borderTop: i === 0 ? 'none' : '1px solid hsl(0 0% 12%)' } })),
+      mkDesc: prod.desc,
+      mkRel: rel.slice(0, 3).map((p) => this._mkCard(p)),
+      mkBackToProduct: () => this.setState({ mkStep: 'product' }),
+      mkQtyLine: 'Menge: ' + st.mkQty + ' × ' + eur(prod.price),
+      mkSubStr: eur(sub),
+      mkAName: st.mkAName, mkAStreet: st.mkAStreet, mkAZip: st.mkAZip, mkACity: st.mkACity,
+      mkSetAName: (e) => this.setState({ mkAName: e.target.value }),
+      mkSetAStreet: (e) => this.setState({ mkAStreet: e.target.value }),
+      mkSetAZip: (e) => this.setState({ mkAZip: e.target.value }),
+      mkSetACity: (e) => this.setState({ mkACity: e.target.value }),
+      mkBalChip: pts(this._balance()) + ' P verfügbar',
+      mkHasSlider: maxRedeem >= 10, mkNoSlider: maxRedeem < 10,
+      mkSliderMax: maxRedeem, mkSliderVal: redeem,
+      mkSetSlider: (e) => this.setState({ mkUse: Number(e.target.value) }),
+      mkSliderLabel: pts(redeem) + ' Points',
+      mkSliderHint: 'Max. 30 % des Warenwerts · 100 Points = €1,00',
+      mkDiscountStr: eur(redeem), mkHasDiscount: redeem > 0,
+      mkDiscountLabel: pts(redeem) + ' Points',
+      mkShipStr: ship === 0 ? 'Gratis' : eur(ship),
+      mkShipStyle: { fontFamily: "'JetBrains Mono', monospace", fontWeight: ship === 0 ? 700 : 400, color: ship === 0 ? LIME : 'hsl(0 0% 60%)' },
+      mkTotalStr: eur(total),
+      mkEarnStr: pts(earn),
+      mkPays: [
+        { icon: 'smartphone', name: 'Apple Pay / Google Pay', sub: 'Express-Checkout' },
+        { icon: 'credit-card', name: 'Kredit- / Debitkarte', sub: 'Visa, Mastercard, Amex' },
+        { icon: 'wallet', name: 'PayPal', sub: 'Mit PayPal-Konto zahlen' },
+      ].map((p, i) => {
+        const sel = i === st.mkPay;
+        return {
+          ...p, select: () => this.setState({ mkPay: i }),
+          style: { display: 'flex', alignItems: 'center', gap: 12, padding: '11px 13px', borderRadius: 14, cursor: 'pointer', textAlign: 'left', width: '100%', background: sel ? 'hsl(71 91% 51% / 0.08)' : 'hsl(0 0% 100% / 0.03)', border: sel ? '1px solid hsl(71 91% 51% / 0.55)' : '1px solid hsl(0 0% 15%)', boxShadow: sel ? '0 0 18px hsl(71 91% 51% / 0.12)' : 'none' },
+          radioStyle: { width: 18, height: 18, borderRadius: '50%', flex: 'none', border: sel ? '5px solid ' + LIME : '1.5px solid hsl(0 0% 30%)', boxSizing: 'border-box' },
+        };
+      }),
+      mkPayWrapStyle: { display: 'block', opacity: addrValid ? 1 : 0.45, pointerEvents: addrValid ? 'auto' : 'none', transition: 'opacity 0.3s' },
+      mkPayHint: addrValid ? '' : 'Fülle deine Lieferadresse aus, um fortzufahren.',
+      mkPayHintStyle: { display: addrValid ? 'none' : 'block', fontFamily: "'DM Sans', sans-serif", fontSize: 11, textAlign: 'center', color: LIME },
+      mkPayNow: () => {
+        this.setState({ paying: true, payCtx: 'mk' });
+        this._payT = setTimeout(() => {
+          const code = 'MP-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+          this.setState((s) => ({
+            paying: false, mkStep: 'success',
+            earnedPts: s.earnedPts - redeem + earn,
+            mkOrder: {
+              code, product: prod.name + ' × ' + st.mkQty,
+              name: st.mkAName, addr: st.mkAStreet + ' · ' + st.mkAZip + ' ' + st.mkACity,
+              total: eur(total), method: ['Apple Pay', 'Karte', 'PayPal'][st.mkPay],
+              spent: redeem, earned: earn,
+            },
+          }), () => this._countTo(this._balance()));
+        }, 1800);
+      },
+      mkOCode: order.code || 'MP-····', mkOProduct: order.product || '',
+      mkOName: order.name || '', mkOAddr: order.addr || '',
+      mkOTotal: order.total || '', mkOMethod: order.method || 'Karte',
+      mkOHasDiscount: (order.spent || 0) > 0,
+      mkODiscount: '−' + pts(order.spent || 0) + ' P · −' + eur(order.spent || 0),
+      mkOEarned: pts(order.earned || 0),
+      mkShopMore: () => this.setState({ mkStep: 'catalog', mkQty: 1, mkUse: 0 }),
+    };
+  }
+
+  _evDate(off) { const d = new Date(); d.setDate(d.getDate() + off); return d; }
+  _evTarget(e) {
+    const d = this._evDate(e.off);
+    const [h, m] = e.time.split(' – ')[0].split(':').map(Number);
+    d.setHours(h, m, 0, 0);
+    return d.getTime();
+  }
+  _evDateFull(e) { const d = this._evDate(e.off); return WDL[d.getDay()] + ', ' + d.getDate() + '. ' + MONL[d.getMonth()] + ' ' + d.getFullYear(); }
+  _evCancel(slug) {
+    this.setState((s) => {
+      const earned = s.evEarned[slug] || 0;
+      const em = { ...s.evEarned };
+      delete em[slug];
+      return { evReg: s.evReg.filter((x) => x !== slug), evEarned: em, earnedPts: s.earnedPts - earned };
+    }, () => this._countTo(this._balance()));
+  }
+
+  _evVals() {
+    const st = this.state;
+    const inEv = st.tab === 'events' && !st.sub;
+    const reg = st.evReg;
+    const list = EVENTS.filter((e) => st.evLocF === 'Alle' || e.city === st.evLocF);
+    const rows = list.map((e) => {
+      const d = this._evDate(e.off);
+      const isReg = reg.includes(e.slug);
+      const effLeft = e.left - (isReg ? 1 : 0);
+      const full = effLeft <= 0 && !isReg;
+      const pct = Math.max(0, Math.min(100, (effLeft / e.spots) * 100));
+      const scarce = pct <= 25;
+      const col = full ? 'hsl(0 0% 40%)' : scarce ? 'hsl(45 90% 55%)' : LIME;
+      return {
+        title: e.title, cat: e.cat, time: e.time + ' Uhr', city: e.city,
+        wd: e.off === 0 ? 'Heute' : WD[d.getDay()], wdColor: e.off === 0 ? LIME : 'hsl(0 0% 55%)',
+        day: String(d.getDate()).padStart(2, '0'), mon: MON[d.getMonth()].toUpperCase(),
+        price: e.price === 0 ? 'Kostenlos' : eur(e.price),
+        leftLabel: full ? 'Ausgebucht' : effLeft + ' frei',
+        leftStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 700, color: col, whiteSpace: 'nowrap' },
+        barStyle: { width: pct + '%', height: '100%', borderRadius: 999, background: col, transition: 'width 0.5s' },
+        regBadgeStyle: { display: isReg ? 'inline-flex' : 'none', alignItems: 'center', gap: 4, fontFamily: "'DM Sans', sans-serif", fontSize: 9.5, fontWeight: 700, color: LIME, background: 'hsl(71 91% 51% / 0.1)', border: '1px solid hsl(71 91% 51% / 0.35)', borderRadius: 999, padding: '2px 8px', whiteSpace: 'nowrap' },
+        canBook: !isReg && !full, isReg, isFull: full,
+        book: () => this.setState({ evBookSlug: e.slug, evBookDone: false }),
+        showTicket: () => this.setState({ evTicketSlug: e.slug }),
+      };
+    });
+    const regEvs = reg.map(evBySlug).filter(Boolean).sort((a, b) => a.off - b.off);
+    const nx = regEvs[0];
+    let nxVals = { evNxTitle: '', evNxImg: '', evNxLoc: '', evNxDate: '', evNxTime: '', evCdRunning: false, evCdLive: false, evCdTiles: [] };
+    if (nx) {
+      const diff = this._evTarget(nx) - st.evNow;
+      const live = diff <= 0;
+      nxVals = {
+        evNxTitle: nx.title, evNxImg: nx.img, evNxLoc: nx.loc + ', ' + nx.city,
+        evNxDate: this._evDateFull(nx), evNxTime: nx.time + ' Uhr',
+        evCdRunning: !live, evCdLive: live,
+        evCdTiles: [
+          { v: String(Math.max(0, Math.floor(diff / 86400000))).padStart(2, '0'), l: 'Tage' },
+          { v: String(Math.max(0, Math.floor((diff % 86400000) / 3600000))).padStart(2, '0'), l: 'Std' },
+          { v: String(Math.max(0, Math.floor((diff % 3600000) / 60000))).padStart(2, '0'), l: 'Min' },
+          { v: String(Math.max(0, Math.floor((diff % 60000) / 1000))).padStart(2, '0'), l: 'Sek' },
+        ],
+        evNxTicket: () => this.setState({ evTicketSlug: nx.slug }),
+        evNxCancel: () => this._evCancel(nx.slug),
+      };
+    }
+    const bk = st.evBookSlug ? evBySlug(st.evBookSlug) : null;
+    const bkEarn = bk ? evEarnOf(bk) : 0;
+    const tk = st.evTicketSlug ? evBySlug(st.evTicketSlug) : null;
+    return {
+      scrEvList: inEv,
+      evLocChips: EVLOCS.map((l) => {
+        const on = st.evLocF === l;
+        return {
+          label: l, select: () => this.setState({ evLocF: l }),
+          style: { fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, padding: '8px 14px', borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none', background: on ? LIME : 'hsl(0 0% 6%)', color: on ? '#000' : 'hsl(0 0% 75%)', border: on ? '1px solid transparent' : '1px solid hsl(0 0% 15%)', boxShadow: on ? '0 0 18px hsl(71 91% 51% / 0.3)' : 'none' },
+        };
+      }),
+      evCountLabel: list.length + ' EVENTS BUCHBAR · ' + regEvs.length + ' ANMELDUNG' + (regEvs.length === 1 ? '' : 'EN'),
+      evRows: rows,
+      evHasNext: inEv && !!nx, evNoNext: inEv && !nx,
+      ...nxVals,
+      evBookOpen: !!bk,
+      evBookConfirm: !!bk && !st.evBookDone, evBookDone: !!bk && st.evBookDone,
+      evBkTitle: bk ? bk.title : '', evBkDate: bk ? this._evDateFull(bk) : '',
+      evBkTime: bk ? bk.time + ' Uhr' : '', evBkLoc: bk ? bk.loc + ', ' + bk.city : '',
+      evBkPrice: bk ? eur(bk.price) : '', evBkPaid: !!bk && bk.price > 0, evBkFree: !!bk && bk.price === 0,
+      evBkEarns: bkEarn > 0, evBkEarn: pts(bkEarn),
+      evBkCta: bk ? (bk.price === 0 ? 'Kostenlos anmelden' : 'Verbindlich buchen · ' + eur(bk.price)) : '',
+      evBkCode: bk ? evCodeOf(bk.slug) : '',
+      evCloseBook: () => this.setState({ evBookSlug: null, evBookDone: false }),
+      evCloseBookBackdrop: (e) => { if (e.target === e.currentTarget) this.setState({ evBookSlug: null, evBookDone: false }); },
+      evBookNow: () => {
+        if (!bk) return;
+        this.setState((s) => ({
+          evBookDone: true,
+          evReg: [...s.evReg, bk.slug],
+          evEarned: { ...s.evEarned, [bk.slug]: bkEarn },
+          earnedPts: s.earnedPts + bkEarn,
+        }), () => this._countTo(this._balance()));
+      },
+      evBkShowTicket: () => this.setState({ evTicketSlug: st.evBookSlug, evBookSlug: null, evBookDone: false }),
+      evTicketOpen: !!tk,
+      evTkTitle: tk ? tk.title : '', evTkDate: tk ? this._evDateFull(tk) : '',
+      evTkTime: tk ? tk.time + ' Uhr' : '', evTkLoc: tk ? tk.loc + ', ' + tk.city : '',
+      evTkCode: tk ? evCodeOf(tk.slug) : '',
+      evCloseTicket: () => this.setState({ evTicketSlug: null }),
+      evCloseTicketBackdrop: (e) => { if (e.target === e.currentTarget) this.setState({ evTicketSlug: null }); },
+    };
+  }
+
+  _pfVals() {
+    const st = this.state;
+    const inPf = st.tab === 'profil' && !st.sub;
+    const name = (this.props.userName ?? 'Florian').trim() || 'Florian';
+    const L = this._lvl();
+    const bal = this._balance();
+    const regCount = st.evReg.length;
+    const settingName = st.setName.trim() || name;
+    const TOGGLE_META = [
+      { key: 'push', icon: 'bell', label: 'Push aktiviert', sub: 'Alle App-Benachrichtigungen' },
+      { key: 'booking', icon: 'calendar-check', label: 'Buchungs-Erinnerungen', sub: '2 h vor Spielbeginn' },
+      { key: 'events', icon: 'trophy', label: 'Event-Einladungen', sub: 'Neue Events an deinen Standorten' },
+      { key: 'news', icon: 'newspaper', label: 'News & Angebote', sub: 'Marketplace-Deals & Updates' },
+      { key: 'points', icon: 'coins', label: 'Points-Updates', sub: 'Wenn du Points sammelst' },
+    ];
+    const homeChip = (label) => {
+      const on = st.setHome === label;
+      return {
+        label, select: () => this.setState({ setHome: label, pfSaved: false }),
+        style: { fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, padding: '8px 14px', borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none', background: on ? LIME : 'hsl(0 0% 6%)', color: on ? '#000' : 'hsl(0 0% 75%)', border: on ? '1px solid transparent' : '1px solid hsl(0 0% 15%)' },
+      };
+    };
+    const rowBase = (i, n) => ({ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 13px', background: 'none', border: 'none', cursor: 'pointer', width: '100%', borderTop: i === 0 ? 'none' : '1px solid hsl(0 0% 12%)' });
+    const groups = [
+      { title: 'AKTIVITÄT', items: [
+        { icon: 'history', label: 'Punkte-Historie', sub: 'Alle Buchungen & Prämien', value: pts(bal) + ' P', go: () => this.setState({ sub: 'historie' }) },
+        { icon: 'calendar-check', label: 'Meine Buchungen', sub: 'Kommende Court-Slots', value: '3', go: this._go('buchen') },
+        { icon: 'trophy', label: 'Meine Events', sub: 'Angemeldete Events', value: String(regCount), go: this._go('events') },
+        { icon: 'qr-code', label: 'Tickets', sub: 'Court- & Event-Tickets', value: '', go: () => this.setState({ sub: 'ticket' }) },
+      ] },
+      { title: 'KONTO', items: [
+        { icon: 'user', label: 'Profil & Einstellungen', sub: 'Name, E-Mail, Standort', value: '', go: () => this.setState({ sub: 'settings' }) },
+        { icon: 'bell', label: 'Benachrichtigungen', sub: st.setToggles.push ? 'Aktiv' : 'Aus', value: '', go: () => this.setState({ sub: 'settings' }) },
+        { icon: 'credit-card', label: 'Zahlungsarten', sub: 'Visa •••• 4242', value: '', go: () => this.setState({ sub: 'settings' }) },
+      ] },
+      { title: 'MEHR', items: [
+        { icon: 'map-pin', label: 'Locations entdecken', sub: 'Neue P2G Courts', value: '', go: () => this.setState({ sub: 'locations' }) },
+        { icon: 'newspaper', label: 'News', sub: 'Aus der P2G-Welt', value: '', go: () => this.setState({ sub: 'news' }) },
+        { icon: 'help-circle', label: 'Hilfe & Support', sub: 'FAQ & Kontakt', value: '', go: () => {} },
+      ] },
+    ].map((g) => ({
+      title: g.title,
+      items: g.items.map((it, i) => ({
+        ...it,
+        rowStyle: rowBase(i),
+        subStyle: { fontFamily: "'DM Sans', sans-serif", fontSize: 10.5, color: 'hsl(0 0% 52%)' },
+        valStyle: { fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700, color: '#C7F011', flex: 'none', display: it.value ? 'inline' : 'none' },
+      })),
+    }));
+    return {
+      scrProfil: inPf && !st.pfSettings,
+      scrSettings: st.sub === 'settings',
+      pfFullName: settingName,
+      pfMemberSince: 'Mitglied seit Juni 2026',
+      pfStats: [
+        { icon: 'calendar-check', value: '24', label: 'Buchungen' },
+        { icon: 'trophy', value: String(6 + regCount), label: 'Events' },
+        { icon: 'flame', value: '5', label: 'Wochen-Streak' },
+      ],
+      openSettings: () => this.setState({ sub: 'settings' }),
+      openHistorie: () => this.setState({ sub: 'historie' }),
+      pfInvited: st.pfInvited,
+      pfInvite: () => this.setState({ pfInvited: true }),
+      pfInviteIcon: st.pfInvited ? 'check' : 'share-2',
+      pfInviteLabel: st.pfInvited ? 'Link kopiert' : 'Einladen',
+      pfGroups: groups,
+      pfLogout: () => {},
+      noop: () => {},
+      setName: st.setName || name,
+      setEmail: st.setEmail,
+      setSetName: (e) => this.setState({ setName: e.target.value, pfSaved: true }),
+      setSetEmail: (e) => this.setState({ setEmail: e.target.value, pfSaved: true }),
+      setHomeChips: ['München', 'Köln', 'Hamburg', 'Berlin'].map(homeChip),
+      setToggles: TOGGLE_META.map((m, i) => {
+        const on = st.setToggles[m.key];
+        return {
+          icon: m.icon, label: m.label, sub: m.sub,
+          rowStyle: { display: 'flex', alignItems: 'center', gap: 12, padding: '11px 13px', borderTop: i === 0 ? 'none' : '1px solid hsl(0 0% 12%)' },
+          toggle: () => this.setState((s) => ({ setToggles: { ...s.setToggles, [m.key]: !s.setToggles[m.key] }, pfSaved: true })),
+          trackStyle: { width: 44, height: 26, flex: 'none', borderRadius: 999, cursor: 'pointer', border: 'none', padding: 3, display: 'flex', justifyContent: on ? 'flex-end' : 'flex-start', background: on ? LIME : 'hsl(0 0% 18%)', boxShadow: on ? '0 0 14px hsl(71 91% 51% / 0.4)' : 'none', transition: 'background 0.2s' },
+          knobStyle: { width: 20, height: 20, borderRadius: '50%', background: on ? '#000' : '#FAFAFA', display: 'block', transition: 'all 0.2s' },
+        };
+      }),
+      setLegal: [
+        { label: 'AGB', icon: 'external-link' },
+        { label: 'Datenschutz', icon: 'external-link' },
+        { label: 'Impressum', icon: 'external-link' },
+      ].map((l, i) => ({ ...l, rowStyle: rowBase(i) })),
+      setSaved: st.pfSaved,
+    };
+  }
+
+  renderVals() {
+    const bal = this._balance();
+    const name = (this.props.userName ?? 'Florian').trim() || 'Florian';
+    const L = this._lvl();
+    const now = new Date();
+    const d = (off) => { const x = new Date(); x.setDate(x.getDate() + off); return x; };
+    const mkB = (off, time, loc, court, earn) => {
+      const dt = d(off);
+      const dateLabel = WDL[dt.getDay()] + ', ' + dt.getDate() + '. ' + MONL[dt.getMonth()] + ' ' + dt.getFullYear();
+      return {
+        day: String(dt.getDate()).padStart(2, '0'), mon: MON[dt.getMonth()], wd: WD[dt.getDay()],
+        time, loc, court, earn: '+' + earn + ' P',
+        openTicket: () => this.setState({ sub: 'ticket', ticket: { loc, court, dateLabel, time, earn: '+' + earn + ' P' } }),
+      };
+    };
+    const bookings = [
+      mkB(3, '18:00 – 19:30 Uhr', 'SkyPadel Hamburg', 'Court 2', 80),
+      mkB(6, '10:00 – 11:00 Uhr', 'SkyPadel Hamburg', 'Court 1', 60),
+      mkB(9, '20:00 – 21:30 Uhr', 'P2G Court Köln', 'Court 4', 80),
+    ];
+    const dt0 = d(3);
+    const t = this.state.ticket ?? { loc: 'SkyPadel Hamburg', court: 'Court 2', dateLabel: WDL[dt0.getDay()] + ', ' + dt0.getDate() + '. ' + MONL[dt0.getMonth()] + ' ' + dt0.getFullYear(), time: '18:00 – 19:30 Uhr', earn: '+80 P' };
+    const tab = this.state.tab, sub = this.state.sub;
+    const tabs = [
+      { id: 'home', icon: 'home', label: 'Mein P2G' },
+      { id: 'buchen', icon: 'calendar-plus', label: 'Buchen' },
+      { id: 'events', icon: 'trophy', label: 'Events' },
+      { id: 'market', icon: 'shopping-bag', label: 'Marketplace' },
+      { id: 'profil', icon: 'user', label: 'Profil' },
+    ].map((x) => ({
+      ...x, go: this._go(x.id),
+      color: tab === x.id ? LIME : 'hsl(0 0% 45%)',
+      fw: tab === x.id ? 700 : 500,
+      filter: tab === x.id ? 'drop-shadow(0 0 8px hsl(71 91% 51% / 0.6))' : 'none',
+    }));
+
+    const ev = d(6);
+    return {
+      scrHome: tab === 'home' && !sub,
+      scrHistorie: sub === 'historie',
+      scrTicket: sub === 'ticket',
+      scrNews: sub === 'news',
+      scrLocations: sub === 'locations',
+      scrPlaceholder: false,
+      ...this._bkVals(),
+      ...this._mkVals(),
+      ...this._evVals(),
+      ...this._pfVals(),
+      phIcon: 'home', phTitle: '', phCopy: '',
+      goBuchen: this._go('buchen'), goEvents: this._go('events'), goMarket: this._go('market'),
+      openHistorie: this._sub('historie'), openNews: this._sub('news'), openLocations: this._sub('locations'),
+      back: this._back, tabs, bookings,
+      userName: name,
+      avatarInitial: (name[0] || 'P').toUpperCase(),
+      dateLabel: WD[now.getDay()] + ', ' + now.getDate() + '. ' + MONL[now.getMonth()] + ' ' + now.getFullYear(),
+      pointsDisplay: pts(this.state.disp > 0 ? Math.min(this.state.disp, bal) : bal),
+      balDisplay: pts(bal),
+      euroLabel: '≈ €' + (bal / 100).toFixed(2).replace('.', ',') + ' Rabattwert',
+      levelChip: 'Level ' + L.lvl + ' · ' + L.name,
+      nextLevelLabel: 'Noch ' + pts(L.rest) + ' P bis Level ' + (L.lvl + 1),
+      levelPct: L.pct + '%',
+      evDate: WD[ev.getDay()] + ', ' + ev.getDate() + '. ' + MONL[ev.getMonth()],
+      tLoc: t.loc, tCourt: t.court, tDate: t.dateLabel, tTime: t.time, tEarn: t.earn,
+      qrEl: this._qr(),
+      locations: [
+        { img: 'assets/skypadel-outdoor.jpg', name: 'SkyPadel Hamburg', city: 'Hamburg-Altona', meta: 'Indoor & Outdoor · 6 Courts', open: 'Täglich 07–23 Uhr', isNew: false },
+        { img: 'assets/tennis-padel-aerial.jpg', name: 'P2G Court München-Ost', city: 'München', meta: 'Outdoor · 4 Courts', open: 'Eröffnung August 2026', isNew: true },
+        { img: 'assets/skypadel-sunset.jpg', name: 'P2G Court Köln', city: 'Köln-Ehrenfeld', meta: 'Indoor · 4 Courts', open: 'Täglich 08–22 Uhr', isNew: true },
+      ],
+      newsShort: [
+        { img: 'assets/padel-norway.jpg', date: '28. Juni 2026', tag: 'Padel-Wissen', title: 'Padel boomt: Warum Deutschland jetzt aufholt' },
+        { img: 'assets/league-hero.jpg', date: '21. Juni 2026', tag: 'Liga', title: 'P2G Liga: So funktioniert das EU-weite Ranking' },
+      ],
+      newsFull: [
+        { img: 'assets/padel-norway.jpg', date: '28. Juni 2026', tag: 'Padel-Wissen', title: 'Padel boomt: Warum Deutschland jetzt aufholt', excerpt: 'Europas am schnellsten wachsender Sport erreicht die Vereine — die Zahlen dahinter.' },
+        { img: 'assets/league-hero.jpg', date: '21. Juni 2026', tag: 'Liga', title: 'P2G Liga: So funktioniert das EU-weite Ranking', excerpt: 'Von Beginner bis Legend: So steigst du in der P2G Liga auf.' },
+        { img: 'assets/skypadel-outdoor.jpg', date: '14. Juni 2026', tag: 'Community', title: 'Recap: Unser erstes Community-Event', excerpt: 'Night Session, volle Courts, neue Doppelpartner — das Recap.' },
+      ],
+      socialPosts: [
+        { img: 'assets/skypadel-sunset.jpg', likes: '1,2k' },
+        { img: 'assets/padel-norway.jpg', likes: '864' },
+        { img: 'assets/events-hero.jpg', likes: '2,1k' },
+      ],
+      txns: [
+        { icon: 'calendar-check', title: 'Court-Buchung · SkyPadel Hamburg', date: '12. Juli 2026', amt: '+80 P', plus: true, minus: false },
+        { icon: 'trophy', title: 'Event-Teilnahme · Community Night', date: '5. Juli 2026', amt: '+120 P', plus: true, minus: false },
+        { icon: 'percent', title: '€5 Rabatt-Code eingelöst', date: '28. Juni 2026', amt: '−500 P', plus: false, minus: true },
+        { icon: 'calendar-check', title: 'Court-Buchung · P2G Court Köln', date: '21. Juni 2026', amt: '+80 P', plus: true, minus: false },
+        { icon: 'user-plus', title: 'Freund geworben · Lisa M.', date: '10. Juni 2026', amt: '+60 P', plus: true, minus: false },
+        { icon: 'sparkles', title: 'Willkommens-Bonus', date: '15. Juni 2026', amt: '+200 P', plus: true, minus: false },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
