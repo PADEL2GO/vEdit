@@ -63,9 +63,9 @@ import { BookingWeekCalendar, BookingDetailDrawer, type Booking } from "@/compon
 
 const CALENDAR_LEGEND = [
   { label: "Spieler", dot: "bg-primary" },
-  { label: "Club", dot: "bg-violet-500" },
-  { label: "Ausstehend", dot: "bg-yellow-500" },
-  { label: "Storniert", dot: "bg-destructive" },
+  { label: "Club", dot: "bg-[#7FD4FF]" },
+  { label: "Ausstehend", dot: "bg-[#FFC44D]" },
+  { label: "Storniert", dot: "bg-[#FF6B6B]" },
 ];
 
 // price_cents/payment_mode stehen in types.ts, credits_used noch nicht (Migration 20260412190000)
@@ -326,7 +326,7 @@ export default function AdminBookings() {
               <span className="font-bold text-foreground">{bookings?.length || 0} Buchungen</span>{" "}
               in dieser Woche
               {clubBookingsCount > 0 && (
-                <span className="ml-2 text-violet-400">
+                <span className="ml-2 text-[#7FD4FF]">
                   ({clubBookingsCount} Club-Buchungen)
                 </span>
               )}
@@ -590,7 +590,7 @@ export default function AdminBookings() {
                             {booking.booking_origin === "club" ? (
                               <Badge
                                 variant="outline"
-                                className="gap-1.5 whitespace-nowrap rounded-full border-violet-500/30 bg-violet-500/10 px-2.5 py-1 text-[11px] font-bold text-violet-400"
+                                className="gap-1.5 whitespace-nowrap rounded-full border-[hsl(200_100%_75%/0.3)] bg-[hsl(200_100%_75%/0.1)] px-2.5 py-1 text-[11px] font-bold text-[#7FD4FF]"
                               >
                                 <Building2 className="h-3 w-3" />
                                 Club
@@ -667,7 +667,7 @@ export default function AdminBookings() {
                           {/* Club Name */}
                           <TableCell className="whitespace-nowrap">
                             {booking.club?.name ? (
-                              <span className="text-[13px] font-semibold text-violet-400">{booking.club.name}</span>
+                              <span className="text-[13px] font-semibold text-[#7FD4FF]">{booking.club.name}</span>
                             ) : (
                               <span className="text-muted-foreground">-</span>
                             )}

@@ -42,6 +42,9 @@ interface BookingWeekCalendarProps {
   endHour?: number;
 }
 
+const HOUR_HEIGHT = 44;
+const GRID_COLS = "grid grid-cols-[62px_repeat(7,minmax(74px,1fr))]";
+
 export function BookingWeekCalendar({
   weekDays,
   bookings,
@@ -75,27 +78,18 @@ export function BookingWeekCalendar({
   };
 
   const getBookingStyle = (status: string, isClubBooking: boolean) => {
-    if (isClubBooking) {
-      switch (status) {
-        case "confirmed":
-          return "bg-violet-500/20 border-violet-500 text-violet-600 hover:bg-violet-500/30";
-        case "cancelled":
-          return "bg-destructive/20 border-destructive text-destructive line-through opacity-60";
-        case "pending":
-          return "bg-yellow-500/20 border-yellow-500 text-yellow-500 hover:bg-yellow-500/30";
-        default:
-          return "bg-muted border-muted-foreground text-muted-foreground";
-      }
+    if (isClubBooking && status === "confirmed") {
+      return "border-[hsl(200_100%_75%/0.4)] bg-[hsl(200_100%_75%/0.14)] text-[#7FD4FF]";
     }
     switch (status) {
       case "confirmed":
-        return "bg-primary/20 border-primary text-primary hover:bg-primary/30";
+        return "border-primary/40 bg-primary/[0.16] text-primary";
       case "cancelled":
-        return "bg-destructive/20 border-destructive text-destructive line-through opacity-60";
+        return "border-[hsl(0_100%_71%/0.36)] bg-[hsl(0_100%_71%/0.12)] text-[#FF6B6B] line-through opacity-60";
       case "pending":
-        return "bg-yellow-500/20 border-yellow-500 text-yellow-500 hover:bg-yellow-500/30";
+        return "border-[hsl(41_100%_65%/0.4)] bg-[hsl(41_100%_65%/0.14)] text-[#FFC44D]";
       default:
-        return "bg-muted border-muted-foreground text-muted-foreground";
+        return "border-[hsl(0_0%_16%)] bg-white/5 text-muted-foreground";
     }
   };
 
@@ -107,42 +101,56 @@ export function BookingWeekCalendar({
   return (
     <TooltipProvider>
       <div className="overflow-x-auto">
-        <div className="min-w-[800px]">
-          {/* Header Row - Days */}
-          <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border">
-            <div className="p-2 text-center text-xs text-muted-foreground">Zeit</div>
+        <div className="min-w-[780px]">
+          {/* Kopfzeile — Tage */}
+          <div className={cn(GRID_COLS, "border-b border-[hsl(0_0%_12%)]")}>
+            <div className="flex h-[34px] items-center justify-end pr-[9px]">
+              <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-[hsl(0_0%_58%)]">
+                Zeit
+              </span>
+            </div>
             {weekDays.map((day, idx) => (
               <div
                 key={idx}
-                className="p-2 text-center border-l border-border"
+                className={cn(
+                  "flex h-[34px] flex-col items-center justify-center gap-[3px] border-l border-[hsl(0_0%_10%)]",
+                  idx === 6 && "bg-white/[0.03]"
+                )}
               >
-                <div className="text-xs text-muted-foreground">
-                  {format(day, "EEEE", { locale: de })}
-                </div>
-                <div className="text-sm font-medium text-foreground">
+                <span
+                  className={cn(
+                    "text-[11.5px] font-bold leading-none text-foreground",
+                    idx === 6 && "text-[hsl(0_0%_65%)]"
+                  )}
+                >
+                  {format(day, "EEEEEE", { locale: de })}
+                </span>
+                <span className="font-mono text-[9.5px] leading-none text-[hsl(0_0%_58%)]">
                   {format(day, "dd.MM")}
-                </div>
+                </span>
               </div>
             ))}
           </div>
 
-          {/* Time Grid */}
+          {/* Stundenraster */}
           <div className="relative">
             {hours.map((hour) => (
               <div
                 key={hour}
-                className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-border/50 min-h-[48px]"
+                className={cn(GRID_COLS, "h-11 border-b border-[hsl(0_0%_8%)]")}
               >
-                <div className="p-2 text-xs text-muted-foreground text-right pr-3">
-                  {hour.toString().padStart(2, "0")}:00
+                <div className="flex items-start justify-end pr-[9px]">
+                  <span className="-translate-y-1.5 font-mono text-[10.5px] text-[hsl(0_0%_58%)]">
+                    {hour.toString().padStart(2, "0")}:00
+                  </span>
                 </div>
                 {weekDays.map((day, dayIdx) => {
                   const dayBookings = getBookingsForDayAndHour(day, hour);
-                  
+
                   return (
                     <div
                       key={dayIdx}
-                      className="border-l border-border/50 relative min-h-[48px] p-0.5"
+                      className="relative border-l border-[hsl(0_0%_10%)]"
                     >
                       {dayBookings.map((booking) => {
                         // Only render if this is the start hour
@@ -161,68 +169,74 @@ export function BookingWeekCalendar({
                               <button
                                 onClick={() => onBookingClick?.(booking)}
                                 className={cn(
-                                  "absolute left-0.5 right-0.5 rounded-md border text-xs p-1 cursor-pointer transition-colors overflow-hidden",
+                                  "absolute left-[3px] right-[3px] flex cursor-pointer flex-col items-start justify-center gap-[3px] overflow-hidden rounded-lg border px-[7px] py-[5px] text-left transition-[filter] duration-150 hover:brightness-[1.35]",
                                   getBookingStyle(booking.status, isClubBooking)
                                 )}
                                 style={{
-                                  height: `${durationHours * 48 - 4}px`,
+                                  top: `${(bookingStart.getMinutes() / 60) * HOUR_HEIGHT + 1}px`,
+                                  height: `${durationHours * HOUR_HEIGHT - 2}px`,
                                   zIndex: 10,
                                 }}
                               >
-                                <div className="font-medium truncate flex items-center gap-1">
-                                  {isClubBooking && <Building2 className="h-3 w-3 flex-shrink-0" />}
-                                  {booking.courts?.name}
-                                </div>
-                                <div className="text-[10px] opacity-80 truncate">
-                                  {format(bookingStart, "HH:mm")} -{" "}
+                                <span className="whitespace-nowrap font-mono text-[9.5px] font-bold leading-none">
+                                  {format(bookingStart, "HH:mm")} –{" "}
                                   {format(bookingEnd, "HH:mm")}
-                                </div>
+                                </span>
+                                <span className="flex w-full min-w-0 items-center gap-1 text-[10.5px] font-semibold leading-none">
+                                  {isClubBooking && (
+                                    <Building2 className="h-2.5 w-2.5 flex-shrink-0" />
+                                  )}
+                                  <span className="truncate">{booking.courts?.name}</span>
+                                </span>
                               </button>
                             </TooltipTrigger>
                             <TooltipContent
                               side="right"
-                              className="bg-popover border-border max-w-xs"
+                              className="max-w-xs rounded-xl border-[hsl(0_0%_15%)] bg-[hsl(0_0%_6%)] px-3.5 py-3"
                             >
-                              <div className="space-y-1">
-                                <div className="font-medium flex items-center gap-1">
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-1 text-[13px] font-semibold text-foreground">
                                   {isClubBooking && (
-                                    <Badge variant="outline" className="text-[10px] bg-violet-500/10 text-violet-600 border-violet-500/30 mr-1">
-                                      <Building2 className="h-2.5 w-2.5 mr-0.5" />
+                                    <Badge
+                                      variant="outline"
+                                      className="mr-1 gap-1 rounded-full border-[hsl(200_100%_75%/0.3)] bg-[hsl(200_100%_75%/0.1)] px-2 py-0.5 text-[10px] font-bold text-[#7FD4FF]"
+                                    >
+                                      <Building2 className="h-2.5 w-2.5" />
                                       Club
                                     </Badge>
                                   )}
                                   {booking.courts?.name} @ {booking.locations?.name}
                                 </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {format(bookingStart, "dd.MM.yyyy HH:mm")} -{" "}
+                                <div className="font-mono text-xs text-muted-foreground">
+                                  {format(bookingStart, "dd.MM.yyyy HH:mm")} –{" "}
                                   {format(bookingEnd, "HH:mm")}
                                 </div>
-                                <div className="text-xs">
+                                <div className="text-xs text-[hsl(0_0%_78%)]">
                                   Benutzer:{" "}
                                   {booking.profiles?.display_name ||
                                     booking.profiles?.username ||
                                     "Unbekannt"}
                                 </div>
                                 {isClubBooking && booking.club?.name && (
-                                  <div className="text-xs text-violet-600">
+                                  <div className="text-xs text-[#7FD4FF]">
                                     Club: {booking.club.name}
                                   </div>
                                 )}
                                 {booking.booked_for_member_name && (
-                                  <div className="text-xs">
+                                  <div className="text-xs text-[hsl(0_0%_78%)]">
                                     Für: {booking.booked_for_member_name}
                                   </div>
                                 )}
                                 <Badge
                                   variant="outline"
                                   className={cn(
-                                    "text-[10px]",
+                                    "rounded-full px-2 py-0.5 text-[10px] font-bold",
                                     booking.status === "confirmed" &&
-                                      "border-primary text-primary",
+                                      "border-primary/30 bg-primary/10 text-primary",
                                     booking.status === "cancelled" &&
-                                      "border-destructive text-destructive",
+                                      "border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]",
                                     booking.status === "pending" &&
-                                      "border-yellow-500 text-yellow-500"
+                                      "border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] text-[#FFC44D]"
                                   )}
                                 >
                                   {booking.status === "confirmed"

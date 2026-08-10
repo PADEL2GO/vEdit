@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Play, Loader2, CheckCircle, AlertCircle, Zap } from "lucide-react";
+import { Play, Loader2, CheckCircle, AlertCircle, AlertTriangle, Zap } from "lucide-react";
 
 interface Court {
   id: string;
@@ -56,26 +56,32 @@ function generateMockAnalysis(userId: string, team: number, aiScore: number) {
     },
     stroke_performance: {
       accuracy_in_percent: Math.floor(Math.random() * 25) + 55,
-      distribution: { 
-        forehand: Math.floor(Math.random() * 15) + 35, 
-        backhand: Math.floor(Math.random() * 15) + 25, 
-        volley: Math.floor(Math.random() * 10) + 15, 
-        lob: Math.floor(Math.random() * 10) + 5 
+      distribution: {
+        forehand: Math.floor(Math.random() * 15) + 35,
+        backhand: Math.floor(Math.random() * 15) + 25,
+        volley: Math.floor(Math.random() * 10) + 15,
+        lob: Math.floor(Math.random() * 10) + 5
       },
       uncovered_areas_percent: Math.floor(Math.random() * 15) + 5,
     },
     movement: {
       total_distance_meters: Math.floor(Math.random() * 1500) + 1500,
-      zone_time: { 
-        net: Math.floor(Math.random() * 20) + 25, 
-        mid: Math.floor(Math.random() * 20) + 35, 
-        baseline: Math.floor(Math.random() * 15) + 15 
+      zone_time: {
+        net: Math.floor(Math.random() * 20) + 25,
+        mid: Math.floor(Math.random() * 20) + 35,
+        baseline: Math.floor(Math.random() * 15) + 15
       },
       coverage_vertical_percent: Math.floor(Math.random() * 20) + 70,
       coverage_horizontal_percent: Math.floor(Math.random() * 20) + 70,
     },
   };
 }
+
+const FIELD_LABEL_CLASSES =
+  "font-mono text-[10px] font-normal uppercase tracking-[0.14em] text-muted-foreground";
+
+const INPUT_CLASSES =
+  "h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]";
 
 export function CameraTestSimulator() {
   const [selectedApiKeyId, setSelectedApiKeyId] = useState<string>("");
@@ -114,11 +120,11 @@ export function CameraTestSimulator() {
         .select("id, name, location_id, locations(name)")
         .eq("is_active", true)
         .order("name");
-      
+
       if (selectedLocationId) {
         query = query.eq("location_id", selectedLocationId);
       }
-      
+
       const { data, error } = await query;
       if (error) throw error;
       return data as Court[];
@@ -166,7 +172,7 @@ export function CameraTestSimulator() {
 
       setSimulationStep("Session wird erstellt...");
       const sessionId = `test-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      
+
       // Step 1: Start session
       const { data: startResult, error: startErr } = await supabase.functions.invoke(
         "camera-webhook/start-session",
@@ -189,9 +195,9 @@ export function CameraTestSimulator() {
       }
 
       setSimulationStep("Match wird verarbeitet...");
-      
+
       // Step 2: Complete match with mock data
-      const playerAnalyses = validPlayers.map((userId, index) => 
+      const playerAnalyses = validPlayers.map((userId, index) =>
         generateMockAnalysis(userId, index < 2 ? 1 : 2, randomScore())
       );
 
@@ -212,7 +218,7 @@ export function CameraTestSimulator() {
         throw new Error(`Match Complete: ${completeErr.message || "Unbekannter Fehler"}`);
       }
       setSimulationStep("");
-      
+
       return {
         session: startResult,
         completion: completeResult,
@@ -237,22 +243,34 @@ export function CameraTestSimulator() {
   const selectedCourt = courts?.find(c => c.id === selectedCourtId);
 
   return (
-    <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-primary" />
-          <CardTitle className="text-base">Match-Simulation (Test-Modus)</CardTitle>
+    <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start gap-3">
+          <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[10px] border border-primary/30 bg-primary/10 text-primary">
+            <Zap className="h-4 w-4" />
+          </span>
+          <div className="flex min-w-0 flex-col gap-[3px]">
+            <h3 className="font-display text-base font-bold tracking-tight text-foreground">
+              Match-Simulation (Test-Modus)
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Simuliere Kamera-Daten um die Integration zu testen.
+            </p>
+          </div>
         </div>
-        <CardDescription>
-          Simuliere Kamera-Daten um die Integration zu testen. Credits werden real vergeben!
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
+
+        <div className="flex items-center gap-[11px] rounded-[13px] border border-[hsl(41_100%_65%/0.22)] bg-[hsl(41_100%_65%/0.06)] px-[15px] py-[13px]">
+          <AlertTriangle className="h-4 w-4 flex-none text-[#FFC44D]" />
+          <span className="text-[12.5px] leading-relaxed text-[hsl(0_0%_78%)]">
+            Credits werden real vergeben!
+          </span>
+        </div>
+
         {/* API Key Selection */}
-        <div className="space-y-2">
-          <Label>API Key auswählen</Label>
+        <div className="flex flex-col gap-[7px]">
+          <Label className={FIELD_LABEL_CLASSES}>API Key auswählen</Label>
           <Select value={selectedApiKeyId} onValueChange={setSelectedApiKeyId}>
-            <SelectTrigger>
+            <SelectTrigger className={INPUT_CLASSES}>
               <SelectValue placeholder="API Key wählen" />
             </SelectTrigger>
             <SelectContent>
@@ -264,15 +282,16 @@ export function CameraTestSimulator() {
             </SelectContent>
           </Select>
           {selectedApiKeyId && (
-            <div className="space-y-2">
-              <Label className="text-xs">API Key Wert eingeben</Label>
+            <div className="flex flex-col gap-[7px] pt-1.5">
+              <Label className={FIELD_LABEL_CLASSES}>API Key Wert eingeben</Label>
               <Input
                 type="password"
                 placeholder="p2g_cam_xxxx-xxxx-xxxx-xxxx"
                 value={testApiKey}
                 onChange={(e) => setTestApiKey(e.target.value)}
+                className={`${INPUT_CLASSES} font-mono`}
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[11.5px] text-muted-foreground">
                 Du musst den Key-Wert von oben kopieren (wird nur einmal angezeigt)
               </p>
             </div>
@@ -280,14 +299,14 @@ export function CameraTestSimulator() {
         </div>
 
         {/* Court Selection */}
-        <div className="space-y-2">
-          <Label>Court auswählen</Label>
-          <Select 
-            value={selectedCourtId} 
+        <div className="flex flex-col gap-[7px]">
+          <Label className={FIELD_LABEL_CLASSES}>Court auswählen</Label>
+          <Select
+            value={selectedCourtId}
             onValueChange={setSelectedCourtId}
             disabled={!selectedApiKeyId}
           >
-            <SelectTrigger>
+            <SelectTrigger className={INPUT_CLASSES}>
               <SelectValue placeholder={selectedApiKeyId ? "Court wählen" : "Erst API Key wählen"} />
             </SelectTrigger>
             <SelectContent>
@@ -299,7 +318,7 @@ export function CameraTestSimulator() {
             </SelectContent>
           </Select>
           {selectedApiKeyId && courts?.length === 0 && (
-            <p className="text-xs text-destructive flex items-center gap-1">
+            <p className="flex items-center gap-1 text-xs text-[#FF6B6B]">
               <AlertCircle className="h-3 w-3" />
               Keine aktiven Courts für diese Location
             </p>
@@ -307,18 +326,20 @@ export function CameraTestSimulator() {
         </div>
 
         {/* Player Selection */}
-        <div className="space-y-3">
-          <Label>Spieler zuweisen</Label>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">Team 1</p>
+        <div className="flex flex-col gap-2.5">
+          <Label className={FIELD_LABEL_CLASSES}>Spieler zuweisen</Label>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+            <div className="flex flex-col gap-2 rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.028] p-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Team 1
+              </p>
               {[0, 1].map((index) => (
                 <Select
                   key={index}
                   value={selectedPlayers[index]}
                   onValueChange={(v) => handlePlayerChange(index, v)}
                 >
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-9 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]">
                     <SelectValue placeholder={`Spieler ${index + 1}`} />
                   </SelectTrigger>
                   <SelectContent>
@@ -331,15 +352,17 @@ export function CameraTestSimulator() {
                 </Select>
               ))}
             </div>
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">Team 2</p>
+            <div className="flex flex-col gap-2 rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.028] p-3">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Team 2
+              </p>
               {[2, 3].map((index) => (
                 <Select
                   key={index}
                   value={selectedPlayers[index]}
                   onValueChange={(v) => handlePlayerChange(index, v)}
                 >
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger className="h-9 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]">
                     <SelectValue placeholder={`Spieler ${index + 1}`} />
                   </SelectTrigger>
                   <SelectContent>
@@ -356,30 +379,34 @@ export function CameraTestSimulator() {
         </div>
 
         {/* Score Selection */}
-        <div className="space-y-3">
-          <Label>Endstand</Label>
+        <div className="flex flex-col gap-2.5">
+          <Label className={FIELD_LABEL_CLASSES}>Endstand</Label>
           <div className="flex items-center gap-4">
             <div className="flex-1 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Team 1</p>
+              <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Team 1
+              </p>
               <Input
                 type="number"
                 min={0}
                 max={10}
                 value={team1Score}
                 onChange={(e) => setTeam1Score(parseInt(e.target.value) || 0)}
-                className="text-center text-lg font-bold"
+                className={`${INPUT_CLASSES} text-center font-mono text-lg font-bold`}
               />
             </div>
-            <span className="text-xl font-bold text-muted-foreground">:</span>
+            <span className="font-mono text-xl font-bold text-muted-foreground">:</span>
             <div className="flex-1 text-center">
-              <p className="text-xs text-muted-foreground mb-1">Team 2</p>
+              <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                Team 2
+              </p>
               <Input
                 type="number"
                 min={0}
                 max={10}
                 value={team2Score}
                 onChange={(e) => setTeam2Score(parseInt(e.target.value) || 0)}
-                className="text-center text-lg font-bold"
+                className={`${INPUT_CLASSES} text-center font-mono text-lg font-bold`}
               />
             </div>
           </div>
@@ -389,16 +416,16 @@ export function CameraTestSimulator() {
         <Button
           onClick={() => simulateMutation.mutate()}
           disabled={simulateMutation.isPending || !selectedCourtId || !testApiKey || !selectedApiKeyId}
-          className="w-full"
+          className="h-10 w-full gap-2 rounded-[11px] bg-gradient-lime text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition-opacity hover:opacity-90"
         >
           {simulateMutation.isPending ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               {simulationStep || "Simulation läuft..."}
             </>
           ) : (
             <>
-              <Play className="h-4 w-4 mr-2" />
+              <Play className="h-4 w-4" />
               Match simulieren
             </>
           )}
@@ -406,27 +433,43 @@ export function CameraTestSimulator() {
 
         {/* Result Display */}
         {simulationResult && (
-          <div className="p-4 bg-background rounded-lg border space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-green-600">
+          <div className="flex flex-col gap-3 rounded-[13px] border border-primary/[0.28] bg-primary/[0.06] p-3.5">
+            <div className="flex items-center gap-2 text-sm font-bold text-primary">
               <CheckCircle className="h-4 w-4" />
               Simulation erfolgreich!
             </div>
-            <div className="space-y-2 text-sm">
-              <p><strong>Session:</strong> {simulationResult.session.session_id}</p>
-              <p><strong>Spieler verarbeitet:</strong> {simulationResult.completion.players_processed}</p>
-              <div className="space-y-1">
-                <p className="font-medium">Credits vergeben:</p>
+            <div className="flex flex-col gap-2 text-[13px] text-[hsl(0_0%_78%)]">
+              <p>
+                <span className="font-semibold text-foreground">Session:</span>{" "}
+                <span className="break-all font-mono text-[12px]">{simulationResult.session.session_id}</span>
+              </p>
+              <p>
+                <span className="font-semibold text-foreground">Spieler verarbeitet:</span>{" "}
+                <span className="font-mono text-[12.5px]">{simulationResult.completion.players_processed}</span>
+              </p>
+              <div className="flex flex-col gap-1.5">
+                <p className="font-semibold text-foreground">Credits vergeben:</p>
                 {simulationResult.completion.results?.map((r: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between text-xs bg-muted/50 px-2 py-1 rounded">
-                    <span className="font-mono">{r.user_id.substring(0, 8)}...</span>
-                    <Badge variant="secondary">+{r.credits_awarded} Credits</Badge>
+                  <div
+                    key={i}
+                    className="flex items-center justify-between gap-2 rounded-[9px] border border-[hsl(0_0%_12%)] bg-white/[0.04] px-2.5 py-1.5"
+                  >
+                    <span className="font-mono text-[11.5px] text-muted-foreground">
+                      {r.user_id.substring(0, 8)}...
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="whitespace-nowrap rounded-full border-primary/[0.28] bg-primary/[0.09] px-2.5 py-0.5 font-mono text-[10.5px] font-bold text-primary"
+                    >
+                      +{r.credits_awarded} Credits
+                    </Badge>
                   </div>
                 ))}
               </div>
             </div>
           </div>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 }

@@ -4,11 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Key, Copy, Trash2, RefreshCw, Eye, EyeOff } from "lucide-react";
+import { Plus, Key, Copy, Trash2, Eye, EyeOff } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
@@ -60,6 +60,12 @@ async function hashApiKey(key: string, salt: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
+const FIELD_LABEL_CLASSES =
+  "font-mono text-[10px] font-normal uppercase tracking-[0.14em] text-muted-foreground";
+
+const INPUT_CLASSES =
+  "h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]";
+
 export function CameraApiKeysTab() {
   const queryClient = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -100,7 +106,7 @@ export function CameraApiKeysTab() {
       const rawKey = generateApiKey();
       const salt = crypto.randomUUID();
       const keyHash = await hashApiKey(rawKey, salt);
-      
+
       const { error } = await supabase
         .from("camera_api_keys")
         .insert({
@@ -109,7 +115,7 @@ export function CameraApiKeysTab() {
           api_key_hash: keyHash,
           salt,
         });
-      
+
       if (error) throw error;
       return rawKey;
     },
@@ -184,129 +190,176 @@ export function CameraApiKeysTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Kamera API Keys</h3>
-          <p className="text-sm text-muted-foreground">
-            Verwalte die Authentifizierung für KI-Kamera-Systeme
-          </p>
-        </div>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Neuer API Key
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Neuen API Key erstellen</DialogTitle>
-            </DialogHeader>
-            
-            {!generatedKey ? (
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="key-name">Name</Label>
-                  <Input
-                    id="key-name"
-                    placeholder="z.B. Bamberg Court 1 Cam"
-                    value={newKeyName}
-                    onChange={(e) => setNewKeyName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Standort</Label>
-                  <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Standort wählen" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {locations?.map((loc) => (
-                        <SelectItem key={loc.id} value={loc.id}>
-                          {loc.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4 py-4">
-                <div className="p-4 bg-accent/20 rounded-lg border border-accent">
-                  <p className="text-sm font-medium mb-2">Dein API Key:</p>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 p-2 bg-background rounded text-sm font-mono break-all">
-                      {showKey ? generatedKey : "•".repeat(40)}
-                    </code>
-                    <Button variant="ghost" size="icon" onClick={() => setShowKey(!showKey)}>
-                      {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={handleCopyKey}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-destructive mt-2">
-                    ⚠️ Dieser Key wird nur einmal angezeigt. Speichere ihn sicher!
-                  </p>
-                </div>
-              </div>
-            )}
+    <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3.5">
+          <div className="flex min-w-0 flex-col gap-[3px]">
+            <h3 className="font-display text-base font-bold tracking-tight text-foreground">
+              Kamera API Keys
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Verwalte die Authentifizierung für KI-Kamera-Systeme
+            </p>
+          </div>
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button className="h-8 flex-none gap-1.5 rounded-[9px] border border-primary/30 bg-primary/[0.09] px-3 text-[12.5px] font-bold text-primary shadow-none hover:bg-primary/[0.18]">
+                <Plus className="h-3.5 w-3.5" />
+                Neuer API Key
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))]">
+              <DialogHeader className="gap-[5px] space-y-0 text-left">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
+                  Kamera
+                </span>
+                <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-foreground">
+                  Neuen API Key erstellen
+                </DialogTitle>
+              </DialogHeader>
 
-            <DialogFooter>
               {!generatedKey ? (
-                <>
-                  <Button variant="outline" onClick={handleCloseCreate}>Abbrechen</Button>
-                  <Button onClick={handleCreate} disabled={createKeyMutation.isPending}>
-                    {createKeyMutation.isPending ? "Erstelle..." : "Key erstellen"}
-                  </Button>
-                </>
+                <div className="flex flex-col gap-4 py-2">
+                  <div className="flex flex-col gap-[7px]">
+                    <Label htmlFor="key-name" className={FIELD_LABEL_CLASSES}>Name</Label>
+                    <Input
+                      id="key-name"
+                      placeholder="z.B. Bamberg Court 1 Cam"
+                      value={newKeyName}
+                      onChange={(e) => setNewKeyName(e.target.value)}
+                      className={INPUT_CLASSES}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-[7px]">
+                    <Label className={FIELD_LABEL_CLASSES}>Standort</Label>
+                    <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
+                      <SelectTrigger className={INPUT_CLASSES}>
+                        <SelectValue placeholder="Standort wählen" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {locations?.map((loc) => (
+                          <SelectItem key={loc.id} value={loc.id}>
+                            {loc.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               ) : (
-                <Button onClick={handleCloseCreate}>Schließen</Button>
+                <div className="py-2">
+                  <div className="flex flex-col gap-[9px] rounded-[13px] border border-dashed border-[hsl(0_0%_18%)] bg-white/[0.03] p-3.5">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(0_0%_58%)]">
+                      Dein API Key
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <code className="min-w-0 flex-1 break-all font-mono text-[12.5px] leading-relaxed text-primary">
+                        {showKey ? generatedKey : "•".repeat(40)}
+                      </code>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowKey(!showKey)}
+                        className="h-[30px] w-[30px] flex-none rounded-lg border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_75%)] hover:bg-white/5 hover:text-primary"
+                      >
+                        {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleCopyKey}
+                        className="h-[30px] w-[30px] flex-none rounded-lg border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_75%)] hover:bg-white/5 hover:text-primary"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                    <p className="text-xs leading-relaxed text-[#FFC44D]">
+                      ⚠️ Dieser Key wird nur einmal angezeigt. Speichere ihn sicher!
+                    </p>
+                  </div>
+                </div>
               )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
 
-      {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">Lade API Keys...</div>
-      ) : apiKeys?.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Key className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-medium mb-2">Keine API Keys</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+              <DialogFooter className="gap-2.5 sm:gap-2.5">
+                {!generatedKey ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={handleCloseCreate}
+                      className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-[17px] text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground"
+                    >
+                      Abbrechen
+                    </Button>
+                    <Button
+                      onClick={handleCreate}
+                      disabled={createKeyMutation.isPending}
+                      className="h-10 rounded-[11px] bg-gradient-lime px-5 text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition-opacity hover:opacity-90"
+                    >
+                      {createKeyMutation.isPending ? "Erstelle..." : "Key erstellen"}
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    onClick={handleCloseCreate}
+                    className="h-10 rounded-[11px] bg-gradient-lime px-5 text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] transition-opacity hover:opacity-90"
+                  >
+                    Schließen
+                  </Button>
+                )}
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {isLoading ? (
+          <div className="py-8 text-center text-[13.5px] text-muted-foreground">Lade API Keys...</div>
+        ) : apiKeys?.length === 0 ? (
+          <div className="flex flex-col items-center rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.02] px-4 py-12 text-center">
+            <span className="mb-4 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
+              <Key className="h-4 w-4" />
+            </span>
+            <h3 className="mb-1 text-sm font-semibold text-foreground">Keine API Keys</h3>
+            <p className="mb-4 text-xs text-muted-foreground">
               Erstelle einen API Key um Kamera-Systeme anzubinden
             </p>
-            <Button onClick={() => setIsCreateOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button
+              onClick={() => setIsCreateOpen(true)}
+              className="h-8 gap-1.5 rounded-[9px] border border-primary/30 bg-primary/[0.09] px-3 text-[12.5px] font-bold text-primary shadow-none hover:bg-primary/[0.18]"
+            >
+              <Plus className="h-3.5 w-3.5" />
               Ersten Key erstellen
             </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {apiKeys?.map((key) => (
-            <Card key={key.id}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Key className="h-4 w-4 text-muted-foreground" />
-                      <CardTitle className="text-base">{key.name}</CardTitle>
-                      <Badge variant={key.is_active ? "default" : "secondary"}>
-                        {key.is_active ? "Aktiv" : "Inaktiv"}
-                      </Badge>
-                    </div>
-                    <CardDescription>
-                      Standort: {key.locations?.name || "Unbekannt"}
-                    </CardDescription>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-[9px]">
+            {apiKeys?.map((key) => (
+              <div
+                key={key.id}
+                className="flex flex-col gap-2.5 rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-3.5 py-[13px]"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-[9px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
+                      <Key className="h-3.5 w-3.5" />
+                    </span>
+                    <span className="truncate text-[13.5px] font-semibold text-foreground">
+                      {key.name}
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className={
+                        key.is_active
+                          ? "flex-none whitespace-nowrap rounded-full border-primary/[0.28] bg-primary/[0.09] px-2.5 py-0.5 text-[10.5px] font-bold text-primary"
+                          : "flex-none whitespace-nowrap rounded-full border-[hsl(0_0%_16%)] bg-white/5 px-2.5 py-0.5 text-[10.5px] font-bold text-muted-foreground"
+                      }
+                    >
+                      {key.is_active ? "Aktiv" : "Inaktiv"}
+                    </Badge>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-none items-center gap-2">
                     <Switch
                       checked={key.is_active}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         toggleActiveMutation.mutate({ id: key.id, isActive: checked })
                       }
                     />
@@ -318,14 +371,14 @@ export function CameraApiKeysTab() {
                           deleteMutation.mutate(key.id);
                         }
                       }}
+                      className="h-8 w-8 rounded-[9px] border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
                     >
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11.5px] text-[hsl(0_0%_58%)]">
+                  <span>Standort: {key.locations?.name || "Unbekannt"}</span>
                   <span>
                     Erstellt: {format(new Date(key.created_at), "dd.MM.yyyy HH:mm", { locale: de })}
                   </span>
@@ -335,11 +388,11 @@ export function CameraApiKeysTab() {
                     </span>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Card>
   );
 }

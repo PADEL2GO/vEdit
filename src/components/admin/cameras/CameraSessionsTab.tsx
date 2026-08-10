@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Users, Clock, ChevronRight, RefreshCw } from "lucide-react";
+import { Video, Users, Clock, RefreshCw } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { de } from "date-fns/locale";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 interface CameraSession {
   id: string;
@@ -29,13 +30,16 @@ interface CameraSession {
   }>;
 }
 
-const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  PENDING: { label: "Wartend", variant: "outline" },
-  ACTIVE: { label: "Aktiv", variant: "default" },
-  PROCESSING: { label: "Verarbeitung", variant: "secondary" },
-  COMPLETED: { label: "Abgeschlossen", variant: "default" },
-  FAILED: { label: "Fehler", variant: "destructive" },
+const statusConfig: Record<string, { label: string; className: string }> = {
+  PENDING: { label: "Wartend", className: "border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] text-[#FFC44D]" },
+  ACTIVE: { label: "Aktiv", className: "border-primary/30 bg-primary/10 text-primary" },
+  PROCESSING: { label: "Verarbeitung", className: "border-[hsl(200_100%_75%/0.3)] bg-[hsl(200_100%_75%/0.1)] text-[#7FD4FF]" },
+  COMPLETED: { label: "Abgeschlossen", className: "border-primary/30 bg-primary/10 text-primary" },
+  FAILED: { label: "Fehler", className: "border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]" },
 };
+
+const SEG_TRIGGER_CLASSES =
+  "gap-2 rounded-lg px-3.5 py-[6px] text-[12.5px] font-bold text-[hsl(0_0%_62%)] transition-colors data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none";
 
 export function CameraSessionsTab() {
   const [view, setView] = useState<"active" | "history">("active");
@@ -77,132 +81,152 @@ export function CameraSessionsTab() {
   const completedSessions = sessions?.filter(s => ["COMPLETED", "FAILED"].includes(s.status)) || [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Kamera Sessions</h3>
-          <p className="text-sm text-muted-foreground">
-            Übersicht über aktive und abgeschlossene Match-Sessions
-          </p>
+    <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3.5">
+          <div className="flex min-w-0 flex-col gap-[3px]">
+            <h3 className="font-display text-base font-bold tracking-tight text-foreground">
+              Kamera Sessions
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Übersicht über aktive und abgeschlossene Match-Sessions
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="h-8 flex-none gap-1.5 rounded-[9px] border-[hsl(0_0%_16%)] bg-white/5 px-3 text-xs font-bold text-[hsl(0_0%_75%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Aktualisieren
+          </Button>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Aktualisieren
-        </Button>
-      </div>
 
-      <Tabs value={view} onValueChange={(v) => setView(v as "active" | "history")}>
-        <TabsList>
-          <TabsTrigger value="active" className="gap-2">
-            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-            Aktiv ({activeSessions.length})
-          </TabsTrigger>
-          <TabsTrigger value="history">
-            Historie
-          </TabsTrigger>
-        </TabsList>
+        <Tabs value={view} onValueChange={(v) => setView(v as "active" | "history")}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <TabsList className="h-auto gap-[3px] rounded-[11px] border border-[hsl(0_0%_14%)] bg-white/[0.04] p-[3px]">
+              <TabsTrigger value="active" className={SEG_TRIGGER_CLASSES}>
+                <span className="h-2 w-2 animate-pulse rounded-full bg-current" />
+                Aktiv ({activeSessions.length})
+              </TabsTrigger>
+              <TabsTrigger value="history" className={SEG_TRIGGER_CLASSES}>
+                Historie
+              </TabsTrigger>
+            </TabsList>
+            {view === "active" && (
+              <span className="inline-flex items-center gap-[7px] whitespace-nowrap font-mono text-[10.5px] uppercase tracking-[0.1em] text-muted-foreground">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+                Auto-Refresh 10 s
+              </span>
+            )}
+          </div>
 
-        <TabsContent value="active" className="mt-4">
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Lade Sessions...</div>
-          ) : activeSessions.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Video className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-medium mb-2">Keine aktiven Sessions</h3>
-                <p className="text-sm text-muted-foreground">
+          <TabsContent value="active" className="mt-4">
+            {isLoading ? (
+              <div className="py-8 text-center text-[13.5px] text-muted-foreground">Lade Sessions...</div>
+            ) : activeSessions.length === 0 ? (
+              <div className="flex flex-col items-center rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.02] px-4 py-12 text-center">
+                <span className="mb-4 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
+                  <Video className="h-4 w-4" />
+                </span>
+                <h3 className="mb-1 text-sm font-semibold text-foreground">Keine aktiven Sessions</h3>
+                <p className="text-xs text-muted-foreground">
                   Wenn ein Match gestartet wird, erscheint es hier
                 </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {activeSessions.map((session) => (
-                <SessionCard key={session.id} session={session} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-[9px]">
+                {activeSessions.map((session) => (
+                  <SessionCard key={session.id} session={session} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-        <TabsContent value="history" className="mt-4">
-          {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Lade Sessions...</div>
-          ) : completedSessions.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <Video className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-medium mb-2">Keine abgeschlossenen Sessions</h3>
-                <p className="text-sm text-muted-foreground">
+          <TabsContent value="history" className="mt-4">
+            {isLoading ? (
+              <div className="py-8 text-center text-[13.5px] text-muted-foreground">Lade Sessions...</div>
+            ) : completedSessions.length === 0 ? (
+              <div className="flex flex-col items-center rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.02] px-4 py-12 text-center">
+                <span className="mb-4 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
+                  <Video className="h-4 w-4" />
+                </span>
+                <h3 className="mb-1 text-sm font-semibold text-foreground">Keine abgeschlossenen Sessions</h3>
+                <p className="text-xs text-muted-foreground">
                   Abgeschlossene Matches erscheinen hier
                 </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-4">
-              {completedSessions.map((session) => (
-                <SessionCard key={session.id} session={session} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </div>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-[9px]">
+                {completedSessions.map((session) => (
+                  <SessionCard key={session.id} session={session} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </Card>
   );
 }
 
 function SessionCard({ session }: { session: CameraSession }) {
-  const status = statusConfig[session.status] || { label: session.status, variant: "secondary" as const };
+  const status = statusConfig[session.status] || {
+    label: session.status,
+    className: "border-[hsl(0_0%_16%)] bg-white/5 text-muted-foreground",
+  };
   const playerCount = session.camera_session_players?.length || 0;
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Video className="h-4 w-4 text-muted-foreground" />
-              <CardTitle className="text-base">
-                {session.courts?.name || "Court"}
-              </CardTitle>
-              <Badge variant={status.variant}>{status.label}</Badge>
-            </div>
-            <CardDescription>
-              {session.courts?.locations?.name || "Standort"} • Session: {session.session_id.substring(0, 16)}...
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Users className="h-4 w-4" />
-              <span>{playerCount}/4</span>
-            </div>
-          </div>
+    <div className="flex flex-col gap-2 rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-3.5 py-[13px]">
+      <div className="flex items-center gap-3">
+        <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[10px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
+          <Video className="h-[15px] w-[15px]" />
+        </span>
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="truncate text-[13.5px] font-semibold text-foreground">
+            {session.courts?.name || "Court"}
+          </span>
+          <span className="truncate font-mono text-[11px] text-muted-foreground">
+            {session.courts?.locations?.name || "Standort"} • Session: {session.session_id.substring(0, 16)}...
+          </span>
         </div>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            {session.started_at && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span>
-                  Gestartet {formatDistanceToNow(new Date(session.started_at), { 
-                    addSuffix: true, 
-                    locale: de 
-                  })}
-                </span>
-              </div>
-            )}
-            {session.ended_at && (
-              <span>
-                Beendet: {format(new Date(session.ended_at), "HH:mm", { locale: de })}
-              </span>
-            )}
-          </div>
+        <span className="inline-flex flex-none items-center gap-1 font-mono text-[11.5px] text-muted-foreground">
+          <Users className="h-3.5 w-3.5" />
+          {playerCount}/4
+        </span>
+        <Badge
+          variant="outline"
+          className={cn(
+            "flex-none whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-bold",
+            status.className
+          )}
+        >
+          {status.label}
+        </Badge>
+      </div>
+      {(session.started_at || session.ended_at || session.error_message) && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground sm:pl-[46px]">
+          {session.started_at && (
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              Gestartet {formatDistanceToNow(new Date(session.started_at), {
+                addSuffix: true,
+                locale: de
+              })}
+            </span>
+          )}
+          {session.ended_at && (
+            <span>
+              Beendet: {format(new Date(session.ended_at), "HH:mm", { locale: de })}
+            </span>
+          )}
           {session.error_message && (
-            <span className="text-sm text-destructive">{session.error_message}</span>
+            <span className="text-[#FF6B6B]">{session.error_message}</span>
           )}
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

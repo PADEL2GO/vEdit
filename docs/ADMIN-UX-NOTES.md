@@ -83,6 +83,10 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 
 Voller Abgleich aller `site_visuals`-Einträge gegen echte Nutzung (Web-Code-Grep + **Live-Tabellen-Abgleich** via Management-API): Web zeigt genau **10 Keys** (fuer-spieler.hero.image/video, home.network.courts/events, home.verein-steps.step-1..6). **Wichtige Erkenntnis:** Die iOS-App besitzt 8 eigene `app.*`-Visuals (app.auth.backdrop, app.booking.header, app.events.header, app.home.*, app.market.header, app.news.header), die NUR live existieren (nie in Migrationen) — bei künftigen Cleanups immer ganz `app.%` ausnehmen! **✅ AUSGEFÜHRT 2026-08-07 (live):** 4 Web-Waisen gelöscht — fuer-spieler.ki.video-1, fuer-spieler.marketplace.banner, home.fuer-wen.background, fuer-spieler.wingfield.action (dessen Lösch-Migration 20260414110000 lief live nie). Endstand: 15 app-Zeilen + 10 Web-Zeilen. Migration `20260807120000_cleanup_unused_site_visuals.sql` liegt fürs Repo/andere Umgebungen bei (idempotent). Storage-Dateien gelöschter Einträge bleiben liegen (nur Speicher, unkritisch).
 
+## Kind-Komponenten Welle 1 — erledigt 2026-08-10
+
+BookingWeekCalendar + BookingDetailDrawer, AdminLocationCard + AdminCourtCard + CourtPriceDialog, LocationAnalyticsTab + 3 Kamera-Komponenten, TranslatableField (geteilt, wirkt auf 5 Seiten). Dabei: **Club-Farbe plattformweit auf #7FD4FF vereinheitlicht** (Kalender, Legende, Zähler, Listen-Badges — Punkt aus Bug-Liste #3 erledigt); halbstündige Buchungen sitzen im Kalender jetzt minutengenau (vorher auf volle Stunde gerendert). Neue Funde: LocationAnalyticsTab rechnet „Auslastung" mit 12h/Tag-Annahme — weicht von AdminUtilization ab (zwei verschiedene Auslastungs-Zahlen im Admin → konsolidieren); CameraApiKeysTab nutzt `confirm()` + Dialog-X resettet Formular-State nicht; `Booking`-Interface in beiden Buchungs-Komponenten dupliziert.
+
 ## Folge-Pass: Kind-Komponenten (Design da, Komponente noch alt)
 
 - `BookingWeekCalendar.tsx`, `BookingDetailDrawer.tsx` (aus Admin 02)

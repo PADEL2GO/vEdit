@@ -540,9 +540,9 @@ Masken:
 Masken:
 - [x] Kopf mit Ansichts-Umschalter
 - [x] Filter-Panel (Woche, Standort, Status, Club)
-- [ ] Kalender-Wochenansicht → Kind-Komponente `BookingWeekCalendar.tsx` (Folge-Pass)
+- [x] Kalender-Wochenansicht (Folge-Pass 2026-08-10: Mono-Stundenachse, minutengenaue Blöcke, Club jetzt einheitlich #7FD4FF)
 - [x] Buchungsliste-Tabelle mit Suche
-- [ ] Buchungsdetail-Drawer → Kind-Komponente `BookingDetailDrawer.tsx` (Folge-Pass)
+- [x] Buchungsdetail-Drawer (Folge-Pass 2026-08-10: Gradient-Panel, Feldliste, Club-Box blau)
 - [x] Stornieren-Bestätigungsdialog
 - [x] Buchungen-Reset-Dialog
 
@@ -554,10 +554,10 @@ Masken:
 Masken:
 - [x] Kopf mit Statistik und Neuer-Standort-Button
 - [x] Standort-Formular-Dialog (Rahmen; `LocationForm` unangetastet)
-- [x] Standorte-Tab (Karten-Grid) — Karten selbst: `AdminLocationCard.tsx` (Folge-Pass)
-- [x] Courts-Tab (Karten-Grid) — Karten selbst: `AdminCourtCard.tsx` (Folge-Pass)
-- [ ] Analytics-Tab → Kind-Komponente `LocationAnalyticsTab.tsx` (Folge-Pass)
-- [x] KI-Kameras-Tab (Zweispalter-Layout; Camera-Komponenten-Innenleben: Folge-Pass)
+- [x] Standorte-Tab (Karten-Grid) inkl. Karten (Folge-Pass 2026-08-10: Bild-Header, Feature-Chips, Switch-Panel, AlertDialog)
+- [x] Courts-Tab (Karten-Grid) inkl. Karten (Folge-Pass 2026-08-10: Bild-Pills, kompakter Body)
+- [x] Analytics-Tab (Folge-Pass 2026-08-10: KPI-Kacheln, CSS-Charts statt Recharts, Donut)
+- [x] KI-Kameras-Tab komplett (Folge-Pass 2026-08-10: Sessions, API-Keys, Simulator im neuen Look)
 - [x] Loading-Skeletons und Empty-States
 
 > **Umgesetzt 2026-08-04** aus `Admin 03 Courts.dc.html` (Seiten-Datei). Nebenbei: toter `xs:`-Breakpoint in Tab-Labels auf `sm:` korrigiert.

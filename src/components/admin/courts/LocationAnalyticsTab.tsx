@@ -1,15 +1,14 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-import { Calendar, TrendingUp, Users, Euro, Clock, CheckCircle, XCircle, Building2 } from "lucide-react";
-import { format, subDays, differenceInHours, startOfDay, parseISO } from "date-fns";
+import { CalendarCheck, Clock, Activity, Euro, Gauge, XCircle } from "lucide-react";
+import { format, subDays, differenceInHours, startOfDay } from "date-fns";
 import { de } from "date-fns/locale";
 import { Location } from "./types";
 import { cn } from "@/lib/utils";
@@ -31,6 +30,9 @@ interface Booking {
   created_at: string;
   courts: { name: string } | null;
 }
+
+const TABLE_HEAD_CLASSES =
+  "h-auto whitespace-nowrap px-0 pb-3 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground";
 
 export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
   const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
@@ -84,8 +86,8 @@ export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
     const totalRevenue = confirmed.reduce((sum, b) => sum + (b.price_cents || 0), 0) / 100;
     const revenue7Days = last7Days.reduce((sum, b) => sum + (b.price_cents || 0), 0) / 100;
 
-    const cancellationRate = bookings.length > 0 
-      ? (cancelled.length / bookings.length) * 100 
+    const cancellationRate = bookings.length > 0
+      ? (cancelled.length / bookings.length) * 100
       : 0;
 
     // Calculate total booked hours
@@ -203,212 +205,279 @@ export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { className: string; label: string }> = {
-      confirmed: { className: "bg-primary/20 text-primary", label: "Bestätigt" },
-      completed: { className: "bg-green-500/20 text-green-500", label: "Abgeschlossen" },
-      cancelled: { className: "bg-destructive/20 text-destructive", label: "Storniert" },
-      pending: { className: "bg-muted text-muted-foreground", label: "Ausstehend" },
-      pending_payment: { className: "bg-yellow-500/20 text-yellow-500", label: "Zahlung" },
+      confirmed: { className: "border-primary/[0.28] bg-primary/[0.09] text-primary", label: "Bestätigt" },
+      completed: { className: "border-[hsl(142_76%_36%/0.4)] bg-[hsl(142_76%_36%/0.12)] text-[hsl(142_70%_52%)]", label: "Abgeschlossen" },
+      cancelled: { className: "border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]", label: "Storniert" },
+      pending: { className: "border-[hsl(0_0%_16%)] bg-white/5 text-muted-foreground", label: "Ausstehend" },
+      pending_payment: { className: "border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] text-[#FFC44D]", label: "Zahlung" },
     };
-    const v = variants[status] || { className: "bg-muted", label: status };
-    return <Badge className={v.className}>{v.label}</Badge>;
+    const v = variants[status] || { className: "border-[hsl(0_0%_16%)] bg-white/5 text-muted-foreground", label: status };
+    return (
+      <Badge
+        variant="outline"
+        className={cn(
+          "whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-bold",
+          v.className
+        )}
+      >
+        {v.label}
+      </Badge>
+    );
   };
 
+  // Präsentation: Balken-Skalierung + Label-Dichte
+  const maxDayCount = Math.max(...bookingsPerDay.map((d) => d.count), 1);
+  const maxDayRevenue = Math.max(...bookingsPerDay.map((d) => d.revenue), 1);
+  const dense = bookingsPerDay.length > 10;
+  const labelEvery = Math.max(1, Math.ceil(bookingsPerDay.length / 8));
+
+  // Präsentation: conic-gradient Segmente für die Status-Verteilung
+  const statusTotal = statusDistribution.reduce((sum, e) => sum + e.value, 0);
+  let statusAcc = 0;
+  const statusStops = statusDistribution
+    .map((e) => {
+      const from = (statusAcc / Math.max(statusTotal, 1)) * 360;
+      statusAcc += e.value;
+      const to = (statusAcc / Math.max(statusTotal, 1)) * 360;
+      return `${e.color} ${from}deg ${to}deg`;
+    })
+    .join(", ");
+
   return (
-    <div className="space-y-6">
-      {/* Filters */}
-      <Card className="bg-card border-border">
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <label className="text-sm text-muted-foreground mb-2 block">Standort</label>
-              <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Standort wählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle Standorte</SelectItem>
-                  {locations.map((location) => (
-                    <SelectItem key={location.id} value={location.id}>
-                      {location.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground mb-2 block">Zeitraum</label>
-              <div className="flex gap-2">
-                {(["7", "30", "90", "all"] as TimeRange[]).map((range) => (
-                  <Button
-                    key={range}
-                    variant={timeRange === range ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setTimeRange(range)}
-                    className="min-w-[60px]"
-                  >
-                    {range === "all" ? "Alle" : `${range}T`}
-                  </Button>
+    <div className="flex flex-col gap-[18px]">
+      {/* Filter */}
+      <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex w-full min-w-0 flex-col gap-[7px] sm:w-auto sm:min-w-[230px]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Standort
+            </span>
+            <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
+              <SelectTrigger className="h-[38px] w-full rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold text-foreground">
+                <SelectValue placeholder="Standort wählen" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle Standorte</SelectItem>
+                {locations.map((location) => (
+                  <SelectItem key={location.id} value={location.id}>
+                    {location.name}
+                  </SelectItem>
                 ))}
-              </div>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-[7px]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Zeitraum
+            </span>
+            <div className="flex gap-[3px] rounded-[11px] border border-[hsl(0_0%_14%)] bg-white/[0.04] p-[3px]">
+              {(["7", "30", "90", "all"] as TimeRange[]).map((range) => (
+                <Button
+                  key={range}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setTimeRange(range)}
+                  className={cn(
+                    "h-[30px] rounded-lg px-3 text-[12.5px] font-bold sm:px-[15px]",
+                    timeRange === range
+                      ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                      : "text-[hsl(0_0%_62%)] hover:bg-transparent hover:text-foreground"
+                  )}
+                >
+                  {range === "all" ? "Alle" : `${range}T`}
+                </Button>
+              ))}
             </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
 
-      {/* KPI Cards */}
+      {/* KPI-Kacheln */}
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(190px,100%),1fr))] gap-3.5">
           {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-lg" />
+            <Skeleton key={i} className="h-[110px] rounded-2xl" />
           ))}
         </div>
       ) : kpis ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(190px,100%),1fr))] gap-3.5">
           <KpiCard
-            icon={Calendar}
+            icon={CalendarCheck}
             label="Buchungen gesamt"
-            value={kpis.totalBookings}
-            color="text-primary"
-          />
-          <KpiCard
-            icon={TrendingUp}
-            label="Letzte 7 Tage"
-            value={kpis.bookings7Days}
-            color="text-blue-500"
+            value={kpis.totalBookings.toLocaleString("de-DE")}
+            valueClass="text-foreground"
           />
           <KpiCard
             icon={Clock}
+            label="Letzte 7 Tage"
+            value={kpis.bookings7Days.toLocaleString("de-DE")}
+            valueClass="text-foreground"
+          />
+          <KpiCard
+            icon={Activity}
             label="Letzte 3 Tage"
-            value={kpis.bookings3Days}
-            color="text-cyan-500"
+            value={kpis.bookings3Days.toLocaleString("de-DE")}
+            valueClass="text-foreground"
           />
           <KpiCard
             icon={Euro}
             label="Umsatz gesamt"
             value={formatCurrency(kpis.totalRevenue)}
-            color="text-green-500"
+            valueClass="text-primary"
           />
           <KpiCard
-            icon={Users}
+            icon={Gauge}
             label="Auslastung"
-            value={`${kpis.utilization.toFixed(1)}%`}
-            color="text-orange-500"
+            value={`${kpis.utilization.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`}
+            valueClass="text-primary"
           />
           <KpiCard
             icon={XCircle}
             label="Storno-Rate"
-            value={`${kpis.cancellationRate.toFixed(1)}%`}
-            color="text-destructive"
+            value={`${kpis.cancellationRate.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`}
+            valueClass="text-[#FFC44D]"
           />
         </div>
       ) : null}
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bookings per Day */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="text-base font-medium">Buchungen pro Tag</CardTitle>
-          </CardHeader>
-          <CardContent>
+      {/* Charts Reihe 1 */}
+      <div className="grid grid-cols-1 items-start gap-[18px] lg:grid-cols-2">
+        {/* Buchungen pro Tag */}
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-5">
+            <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+              Buchungen pro Tag
+            </h2>
             {isLoading ? (
-              <Skeleton className="h-[200px]" />
+              <Skeleton className="h-[212px] rounded-xl" />
             ) : (
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={bookingsPerDay}>
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                  />
-                  <YAxis 
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                    labelStyle={{ color: "hsl(var(--foreground))" }}
-                  />
-                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="flex h-[212px] items-end gap-[clamp(2px,1vw,14px)] px-0.5 pt-[22px]">
+                {bookingsPerDay.map((d, i) => (
+                  <div
+                    key={`${d.date}-${i}`}
+                    title={`${d.date} · ${d.count} Buchungen`}
+                    className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-[7px]"
+                  >
+                    {!dense && (
+                      <span
+                        className={cn(
+                          "font-mono text-[11.5px] font-bold",
+                          d.count > 0 ? "text-primary" : "text-[hsl(0_0%_45%)]"
+                        )}
+                      >
+                        {d.count}
+                      </span>
+                    )}
+                    <div
+                      className="w-full max-w-[52px] rounded-t-lg"
+                      style={{
+                        height: `${d.count > 0 ? Math.max(8, Math.round((d.count / maxDayCount) * 150)) : 3}px`,
+                        background:
+                          d.count > 0
+                            ? "linear-gradient(180deg, #C7F011, hsl(71 91% 51% / 0.25))"
+                            : "hsl(0 0% 20%)",
+                      }}
+                    />
+                    <span
+                      className={cn(
+                        "whitespace-nowrap font-mono text-[10px] text-muted-foreground",
+                        i % labelEvery !== 0 && "invisible"
+                      )}
+                    >
+                      {d.date}
+                    </span>
+                  </div>
+                ))}
+              </div>
             )}
-          </CardContent>
+          </div>
         </Card>
 
-        {/* Revenue Trend */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="text-base font-medium">Umsatz-Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* Umsatz-Trend */}
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-5">
+            <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+              Umsatz-Trend
+            </h2>
             {isLoading ? (
-              <Skeleton className="h-[200px]" />
+              <Skeleton className="h-[212px] rounded-xl" />
             ) : (
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={bookingsPerDay}>
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                  />
-                  <YAxis 
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                    tickFormatter={(v) => `€${v}`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                    labelStyle={{ color: "hsl(var(--foreground))" }}
-                    formatter={(value: number) => [formatCurrency(value), "Umsatz"]}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="hsl(142, 76%, 36%)" 
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <div className="flex h-[212px] items-end gap-[clamp(2px,1vw,14px)] px-0.5 pt-[22px]">
+                {bookingsPerDay.map((d, i) => (
+                  <div
+                    key={`${d.date}-${i}`}
+                    title={`${d.date} · ${formatCurrency(d.revenue)}`}
+                    className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-[7px]"
+                  >
+                    {!dense && (
+                      <span
+                        className={cn(
+                          "font-mono text-[11px] font-bold",
+                          d.revenue > 0 ? "text-primary" : "text-[hsl(0_0%_45%)]"
+                        )}
+                      >
+                        {d.revenue.toLocaleString("de-DE", { maximumFractionDigits: 0 })} €
+                      </span>
+                    )}
+                    <div
+                      className="w-full max-w-[52px] rounded-t-lg"
+                      style={{
+                        height: `${d.revenue > 0 ? Math.max(8, Math.round((d.revenue / maxDayRevenue) * 150)) : 3}px`,
+                        background:
+                          d.revenue > 0
+                            ? "linear-gradient(180deg, #C7F011, hsl(71 91% 51% / 0.25))"
+                            : "hsl(0 0% 20%)",
+                      }}
+                    />
+                    <span
+                      className={cn(
+                        "whitespace-nowrap font-mono text-[10px] text-muted-foreground",
+                        i % labelEvery !== 0 && "invisible"
+                      )}
+                    >
+                      {d.date}
+                    </span>
+                  </div>
+                ))}
+              </div>
             )}
-          </CardContent>
+          </div>
         </Card>
       </div>
 
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bookings per Court */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="text-base font-medium">Buchungen pro Court</CardTitle>
-          </CardHeader>
-          <CardContent>
+      {/* Charts Reihe 2 */}
+      <div className="grid grid-cols-1 items-start gap-[18px] lg:grid-cols-2">
+        {/* Buchungen pro Court */}
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-5">
+            <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+              Buchungen pro Court
+            </h2>
             {isLoading ? (
-              <Skeleton className="h-[200px]" />
+              <Skeleton className="h-[200px] rounded-xl" />
             ) : bookingsPerCourt.length > 0 ? (
-              <div className="space-y-3">
+              <div className="flex flex-col gap-3.5">
                 {bookingsPerCourt.slice(0, 6).map((court, index) => {
                   const maxCount = bookingsPerCourt[0]?.count || 1;
                   const percentage = (court.count / maxCount) * 100;
                   return (
-                    <div key={index} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-foreground">{court.name}</span>
-                        <span className="text-muted-foreground">{court.count}</span>
+                    <div key={index} className="flex flex-col gap-[7px]">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="min-w-0 truncate text-[13px] font-semibold text-foreground">
+                          {court.name}
+                        </span>
+                        <span className="flex-none font-mono text-[13px] font-bold text-primary">
+                          {court.count.toLocaleString("de-DE")}
+                        </span>
                       </div>
-                      <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div className="h-[9px] overflow-hidden rounded-full bg-[hsl(0_0%_12%)]">
                         <div
-                          className="h-full bg-primary rounded-full transition-all duration-500"
-                          style={{ width: `${percentage}%` }}
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${percentage}%`,
+                            background:
+                              "linear-gradient(90deg, hsl(71 91% 51% / 0.3), #C7F011)",
+                          }}
                         />
                       </div>
                     </div>
@@ -416,102 +485,107 @@ export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
                 })}
               </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+              <div className="flex h-[200px] items-center justify-center text-[13px] text-muted-foreground">
                 Keine Daten vorhanden
               </div>
             )}
-          </CardContent>
+          </div>
         </Card>
 
-        {/* Status Distribution */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="text-base font-medium">Status-Verteilung</CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* Status-Verteilung */}
+        <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+          <div className="flex flex-col gap-5">
+            <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+              Status-Verteilung
+            </h2>
             {isLoading ? (
-              <Skeleton className="h-[200px]" />
+              <Skeleton className="h-[200px] rounded-xl" />
             ) : statusDistribution.length > 0 ? (
-              <div className="flex items-center gap-6">
-                <ResponsiveContainer width={150} height={150}>
-                  <PieChart>
-                    <Pie
-                      data={statusDistribution}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={40}
-                      outerRadius={70}
-                      dataKey="value"
-                    >
-                      {statusDistribution.map((entry, index) => (
-                        <Cell key={index} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex-1 space-y-2">
+              <div className="flex flex-wrap items-center gap-6 sm:gap-8">
+                <div
+                  className="relative h-[150px] w-[150px] flex-none rounded-full"
+                  style={{ background: `conic-gradient(${statusStops})` }}
+                >
+                  <div className="absolute inset-[30px] flex items-center justify-center rounded-full bg-[hsl(0_0%_5%)]">
+                    <span className="font-mono text-lg font-bold text-foreground">
+                      {statusTotal.toLocaleString("de-DE")}
+                    </span>
+                  </div>
+                </div>
+                <div className="min-w-[180px] flex-1 space-y-2.5">
                   {statusDistribution.map((entry, index) => (
-                    <div key={index} className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
+                    <div key={index} className="flex items-center justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span
+                          className="h-2.5 w-2.5 flex-none rounded-[3px]"
                           style={{ backgroundColor: entry.color }}
                         />
-                        <span className="text-foreground">{entry.name}</span>
+                        <span className="truncate text-[13px] font-semibold text-foreground">
+                          {entry.name}
+                        </span>
                       </div>
-                      <span className="text-muted-foreground">{entry.value}</span>
+                      <span className="flex-none font-mono text-[12.5px] font-bold text-muted-foreground">
+                        {entry.value.toLocaleString("de-DE")}
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+              <div className="flex h-[200px] items-center justify-center text-[13px] text-muted-foreground">
                 Keine Daten vorhanden
               </div>
             )}
-          </CardContent>
+          </div>
         </Card>
       </div>
 
-      {/* Recent Bookings Table */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-base font-medium">Letzte Buchungen</CardTitle>
-        </CardHeader>
-        <CardContent>
+      {/* Letzte Buchungen */}
+      <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
+        <div className="flex flex-col gap-4">
+          <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+            Letzte Buchungen
+          </h2>
           {isLoading ? (
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-12" />
+                <Skeleton key={i} className="h-12 rounded-xl" />
               ))}
             </div>
           ) : recentBookings.length > 0 ? (
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[600px]">
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Court</TableHead>
-                    <TableHead>Datum</TableHead>
-                    <TableHead>Uhrzeit</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Preis</TableHead>
+                  <TableRow className="border-[hsl(0_0%_12%)] hover:bg-transparent">
+                    <TableHead className={TABLE_HEAD_CLASSES}>Court</TableHead>
+                    <TableHead className={TABLE_HEAD_CLASSES}>Datum</TableHead>
+                    <TableHead className={TABLE_HEAD_CLASSES}>Uhrzeit</TableHead>
+                    <TableHead className={TABLE_HEAD_CLASSES}>Status</TableHead>
+                    <TableHead className={cn(TABLE_HEAD_CLASSES, "pr-0 text-right")}>
+                      Preis
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {recentBookings.map((booking) => (
-                    <TableRow key={booking.id}>
-                      <TableCell className="font-medium">
+                    <TableRow
+                      key={booking.id}
+                      className="border-[hsl(0_0%_12%)] hover:bg-white/[0.02]"
+                    >
+                      <TableCell className="whitespace-nowrap px-0 py-3 pr-3.5 text-[13px] font-semibold text-foreground">
                         {booking.courts?.name || "—"}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap px-0 py-3 pr-3.5 font-mono text-[12.5px] text-[hsl(0_0%_78%)]">
                         {format(new Date(booking.start_time), "dd.MM.yyyy", { locale: de })}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap px-0 py-3 pr-3.5 font-mono text-[12.5px] text-[hsl(0_0%_78%)]">
                         {format(new Date(booking.start_time), "HH:mm")} -{" "}
                         {format(new Date(booking.end_time), "HH:mm")}
                       </TableCell>
-                      <TableCell>{getStatusBadge(booking.status)}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="px-0 py-3 pr-3.5">
+                        {getStatusBadge(booking.status)}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap px-0 py-3 pr-0 text-right font-mono text-[12.5px] text-foreground">
                         {booking.price_cents
                           ? formatCurrency(booking.price_cents / 100)
                           : "—"}
@@ -522,11 +596,11 @@ export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
               </Table>
             </div>
           ) : (
-            <div className="py-8 text-center text-muted-foreground">
+            <div className="py-8 text-center text-[13.5px] text-muted-foreground">
               Keine Buchungen vorhanden
             </div>
           )}
-        </CardContent>
+        </div>
       </Card>
     </div>
   );
@@ -537,26 +611,27 @@ function KpiCard({
   icon: Icon,
   label,
   value,
-  color,
+  valueClass,
 }: {
   icon: React.ElementType;
   label: string;
   value: string | number;
-  color: string;
+  valueClass: string;
 }) {
   return (
-    <Card className="bg-card border-border">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3">
-          <div className={cn("p-2 rounded-lg bg-secondary/50", color)}>
-            <Icon className="h-4 w-4" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs text-muted-foreground truncate">{label}</p>
-            <p className="text-lg font-semibold text-foreground truncate">{value}</p>
-          </div>
-        </div>
-      </CardContent>
+    <Card className="rounded-2xl border-border bg-gradient-card p-5">
+      <div className="flex flex-col gap-[9px]">
+        <Icon className="h-4 w-4 text-[hsl(0_0%_58%)]" />
+        <span
+          className={cn(
+            "truncate font-mono text-2xl font-bold leading-none",
+            valueClass
+          )}
+        >
+          {value}
+        </span>
+        <span className="truncate text-[12.5px] text-muted-foreground">{label}</span>
+      </div>
     </Card>
   );
 }

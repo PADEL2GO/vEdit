@@ -36,36 +36,42 @@ export const TranslatableField = ({
   disabled = false,
 }: TranslatableFieldProps) => {
   const TextComponent = multiline ? Textarea : Input;
-  const commonClass = "text-sm";
+  const deFieldClass = "rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]";
+  const enFieldClass = "rounded-[10px] border-[hsl(200_100%_75%/0.16)] bg-[hsl(200_100%_75%/0.04)] text-[13px]";
   return (
     <div className="space-y-2">
-      <div className="grid sm:grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
-            <span className="px-1.5 py-0.5 rounded bg-primary/15 text-primary text-[10px] font-bold">DE</span>
-            {label}
-          </Label>
+      <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+        {label}
+      </Label>
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <div className="flex min-h-[22px] items-center">
+            <span className="whitespace-nowrap rounded-full border border-primary/30 bg-primary/10 px-2 py-[3px] font-mono text-[9.5px] uppercase tracking-[0.1em] text-primary">
+              DE
+            </span>
+          </div>
           <TextComponent
             value={deValue}
             onChange={(e) => onDeChange((e.target as HTMLInputElement | HTMLTextAreaElement).value)}
             placeholder={placeholder}
             rows={multiline ? rows : undefined}
             disabled={disabled}
-            className={commonClass}
+            className={deFieldClass}
           />
         </div>
-        <div className="space-y-1">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
-              <span className="px-1.5 py-0.5 rounded bg-[#0F2B46]/15 text-[#0F2B46] dark:text-white dark:bg-white/15 text-[10px] font-bold">EN</span>
-              {label}
+        <div className="space-y-1.5">
+          <div className="flex min-h-[22px] flex-wrap items-center justify-between gap-x-2 gap-y-1">
+            <span className="inline-flex min-w-0 items-center gap-1.5">
+              <span className="whitespace-nowrap rounded-full border border-[hsl(200_100%_75%/0.28)] bg-[hsl(200_100%_75%/0.1)] px-2 py-[3px] font-mono text-[9.5px] uppercase tracking-[0.1em] text-[#7FD4FF]">
+                EN · DeepL
+              </span>
               {!locked && !enValue && (
-                <span className="text-[10px] text-muted-foreground inline-flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" />
+                <span className="inline-flex items-center gap-1 whitespace-nowrap text-[10px] text-muted-foreground/80">
+                  <Sparkles className="h-3 w-3" />
                   auto-translate
                 </span>
               )}
-            </Label>
+            </span>
             <button
               type="button"
               onClick={() => onLockedChange(!locked)}
@@ -75,14 +81,14 @@ export const TranslatableField = ({
                   ? "Manuell gesperrt — beim nächsten Speichern nicht überschrieben. Klicken zum Entsperren."
                   : "Automatisch übersetzt — beim nächsten Speichern überschrieben. Klicken zum Sperren."
               }
-              className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded transition-colors ${
+              className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-[3px] text-[10.5px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                 locked
-                  ? "bg-amber-500/15 text-amber-600 hover:bg-amber-500/25"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  ? "border-primary/30 bg-primary/10 text-primary hover:bg-primary/[0.16]"
+                  : "border-[hsl(0_0%_16%)] bg-white/[0.05] text-muted-foreground hover:border-primary/40 hover:text-primary"
               }`}
             >
-              {locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
-              {locked ? "gesperrt" : "auto"}
+              {locked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+              {locked ? "gesperrt" : "frei"}
             </button>
           </div>
           <TextComponent
@@ -91,7 +97,7 @@ export const TranslatableField = ({
             placeholder={locked ? placeholder : "Wird nach dem Speichern automatisch befüllt"}
             rows={multiline ? rows : undefined}
             disabled={disabled || (!locked && !enValue)}
-            className={`${commonClass} ${!locked && !enValue ? "italic text-muted-foreground" : ""}`}
+            className={`${enFieldClass} ${!locked && !enValue ? "italic text-muted-foreground" : "text-[hsl(0_0%_82%)]"}`}
           />
         </div>
       </div>
