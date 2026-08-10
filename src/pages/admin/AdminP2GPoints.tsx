@@ -169,8 +169,9 @@ function P2GExchangeRateCard() {
           <Input
             type="number"
             min={1}
-            value={creditsPerEuro}
-            onChange={(e) => setCreditsPerEuro(Number(e.target.value))}
+            value={creditsPerEuro === 0 ? "" : creditsPerEuro}
+            placeholder="0"
+            onChange={(e) => setCreditsPerEuro(Number(e.target.value) || 0)}
             className="h-[42px] rounded-[11px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-[15px] font-bold"
           />
           <p className="text-[11.5px] text-muted-foreground">
@@ -186,8 +187,9 @@ function P2GExchangeRateCard() {
             type="number"
             min={1}
             max={100}
-            value={creditsMaxPercent}
-            onChange={(e) => setCreditsMaxPercent(Number(e.target.value))}
+            value={creditsMaxPercent === 0 ? "" : creditsMaxPercent}
+            placeholder="0"
+            onChange={(e) => setCreditsMaxPercent(Number(e.target.value) || 0)}
             className="h-[42px] rounded-[11px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-[15px] font-bold"
           />
           <p className="text-[11.5px] leading-relaxed text-muted-foreground">
@@ -295,7 +297,8 @@ function P2GPaybackRatesCard() {
                   id={row.id}
                   type="number"
                   min={0}
-                  value={row.value}
+                  value={row.value === 0 ? "" : row.value}
+                  placeholder="0"
                   onChange={(e) => row.setValue(parseInt(e.target.value) || 0)}
                   className="h-[38px] w-24 rounded-[10px] border-[hsl(0_0%_16%)] bg-white/[0.05] pr-8 font-mono text-sm font-bold [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 />

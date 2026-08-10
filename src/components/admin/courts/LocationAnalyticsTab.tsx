@@ -327,7 +327,7 @@ export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
           />
           <KpiCard
             icon={Gauge}
-            label="Auslastung"
+            label="Auslastung (Basis 12 h/Tag)"
             value={`${kpis.utilization.toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`}
             valueClass="text-primary"
           />

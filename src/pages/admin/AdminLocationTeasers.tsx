@@ -406,7 +406,8 @@ export default function AdminLocationTeasers() {
                 </Label>
                 <Input
                   type="number"
-                  value={form.sort_order}
+                  value={form.sort_order === 0 ? "" : form.sort_order}
+                  placeholder="0"
                   onChange={(e) => setForm((f) => ({ ...f, sort_order: parseInt(e.target.value) || 0 }))}
                   className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-sm font-bold"
                 />

@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, GripVertical, Instagram, Music2, Globe, Image as ImageIcon, X } from "lucide-react";
+import { Plus, Trash2, Instagram, Music2, Globe, Image as ImageIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -121,7 +121,6 @@ export function ArtistManager({ artists, onChange }: ArtistManagerProps) {
               className="flex flex-col gap-4 rounded-[13px] border border-[hsl(0_0%_13%)] bg-white/[0.03] p-[13px]"
             >
               <div className="flex items-start gap-3">
-                <GripVertical className="mt-2.5 h-4 w-4 shrink-0 cursor-grab text-[hsl(0_0%_45%)]" />
 
                 {/* Image Upload */}
                 <div className="shrink-0">

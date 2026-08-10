@@ -258,9 +258,13 @@ const AdminPartnerTiles = () => {
                       <div className="flex flex-col gap-1.5">
                         <label className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-muted-foreground">Sort</label>
                         <Input
+                          key={`${tile.id}-${tile.sort_order ?? 0}`}
                           type="number"
-                          value={tile.sort_order ?? 0}
-                          onChange={e => handleSortChange(tile.id, parseInt(e.target.value) || 0)}
+                          defaultValue={tile.sort_order ?? 0}
+                          onBlur={e => {
+                            const v = parseInt(e.target.value) || 0;
+                            if (v !== (tile.sort_order ?? 0)) handleSortChange(tile.id, v);
+                          }}
                           className="h-9 w-16 rounded-[9px] border-[hsl(0_0%_16%)] bg-white/5 text-center font-mono text-[13px] font-bold"
                         />
                       </div>
