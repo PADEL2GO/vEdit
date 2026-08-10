@@ -11,8 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Image as ImageIcon, X } from "lucide-react";
+import { ImagePlus, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -171,7 +170,7 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
       if (eventId) {
         // Delete existing artists
         await supabase.from("event_artists").delete().eq("event_id", eventId);
-        
+
         // Insert new artists
         if (artists.length > 0) {
           const artistPayload = artists
@@ -196,7 +195,7 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
 
         // Delete existing brands
         await supabase.from("event_brands").delete().eq("event_id", eventId);
-        
+
         // Insert new brands
         if (brands.length > 0) {
           const brandPayload = brands
@@ -270,34 +269,34 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
   const isValid = formData.title.trim() && formData.location_id;
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-[22px]">
       {/* Image Upload */}
-      <div className="space-y-2">
-        <Label>Event-Bild</Label>
+      <div className="flex flex-col gap-[9px]">
+        <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+          Event-Bild
+        </Label>
         {imageUrl ? (
-          <div className="relative w-full h-48 rounded-lg overflow-hidden">
-            <img src={imageUrl} alt="Event" className="w-full h-full object-cover" />
+          <div className="relative h-48 w-full overflow-hidden rounded-[15px] border border-[hsl(0_0%_14%)]">
+            <img src={imageUrl} alt="Event" className="h-full w-full object-cover" />
             <Button
               variant="destructive"
               size="icon"
-              className="absolute top-2 right-2"
+              className="absolute right-2 top-2 h-8 w-8 rounded-[9px] bg-[#FF6B6B] text-[#0A0A0A] hover:bg-[#FF6B6B]/90"
               onClick={removeImage}
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              {uploading ? (
-                <div className="animate-pulse text-muted-foreground">Hochladen...</div>
-              ) : (
-                <>
-                  <ImageIcon className="w-10 h-10 mb-3 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Klicken zum Hochladen</p>
-                </>
-              )}
-            </div>
+          <label className="flex h-[130px] w-full cursor-pointer items-center justify-center gap-[11px] rounded-[15px] border border-dashed border-[hsl(0_0%_20%)] bg-white/[0.028] transition-colors hover:border-primary/50">
+            {uploading ? (
+              <div className="animate-pulse text-[13px] text-muted-foreground">Hochladen...</div>
+            ) : (
+              <>
+                <ImagePlus className="h-5 w-5 text-[hsl(0_0%_58%)]" />
+                <p className="text-[13px] text-[hsl(0_0%_65%)]">Klicken zum Hochladen</p>
+              </>
+            )}
             <input
               type="file"
               className="hidden"
@@ -309,10 +308,12 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
         )}
       </div>
 
-      {/* Basic Info Row */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="location">Standort *</Label>
+      {/* Fields */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-[13px]">
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="location" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Standort<span className="text-primary"> *</span>
+          </Label>
           <Select
             value={formData.location_id}
             onValueChange={(v) => {
@@ -329,10 +330,10 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
               }));
             }}
           >
-            <SelectTrigger className="bg-background border-border">
+            <SelectTrigger className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]">
               <SelectValue placeholder="Standort wählen" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl border-[hsl(0_0%_15%)] bg-[hsl(0_0%_6%)]">
               {locations.map((loc) => (
                 <SelectItem key={loc.id} value={loc.id}>
                   {loc.name}
@@ -341,16 +342,18 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="event_type">Event-Typ</Label>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="event_type" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Event-Typ
+          </Label>
           <Select
             value={formData.event_type}
             onValueChange={(v) => setFormData((p) => ({ ...p, event_type: v }))}
           >
-            <SelectTrigger className="bg-background border-border">
+            <SelectTrigger className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl border-[hsl(0_0%_15%)] bg-[hsl(0_0%_6%)]">
               {EVENT_TYPES.map((type) => (
                 <SelectItem key={type.value} value={type.value}>
                   {type.label}
@@ -359,185 +362,180 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      {/* Title & Slug */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="title">Titel *</Label>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="title" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Titel<span className="text-primary"> *</span>
+          </Label>
           <Input
             id="title"
             value={formData.title}
             onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
             placeholder="Event-Titel"
-            className="bg-background border-border"
+            className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]"
           />
         </div>
         {isEditing && event?.slug && (
-          <div className="space-y-2">
-            <Label>Slug (auto-generiert)</Label>
+          <div className="flex flex-col gap-[7px]">
+            <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Slug (auto-generiert)
+            </Label>
             <Input
               value={event.slug}
               readOnly
-              className="bg-secondary/50 border-border text-muted-foreground"
+              className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-[12.5px] text-muted-foreground"
             />
           </div>
         )}
-      </div>
-
-      {/* Venue Name */}
-      <div className="space-y-2">
-        <Label htmlFor="venue_name">Venue / Location Name</Label>
-        <Input
-          id="venue_name"
-          value={formData.venue_name}
-          onChange={(e) => setFormData((p) => ({ ...p, venue_name: e.target.value }))}
-          placeholder="z.B. Padel Club Berlin"
-          className="bg-background border-border"
-        />
-      </div>
-
-      {/* Description */}
-      <div className="space-y-2">
-        <Label htmlFor="description">Beschreibung</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
-          placeholder="Beschreibung des Events..."
-          className="bg-background border-border min-h-[100px]"
-        />
-      </div>
-
-      {/* Address */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="address">Adresse</Label>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="venue_name" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Venue / Location Name
+          </Label>
+          <Input
+            id="venue_name"
+            value={formData.venue_name}
+            onChange={(e) => setFormData((p) => ({ ...p, venue_name: e.target.value }))}
+            placeholder="z.B. Padel Club Berlin"
+            className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]"
+          />
+        </div>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="address" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Adresse
+          </Label>
           <Input
             id="address"
             value={formData.address_line1}
             onChange={(e) => setFormData((p) => ({ ...p, address_line1: e.target.value }))}
             placeholder="Straße und Hausnummer"
-            className="bg-background border-border"
+            className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="postal_code">PLZ</Label>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="postal_code" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            PLZ
+          </Label>
           <Input
             id="postal_code"
             value={formData.postal_code}
             onChange={(e) => setFormData((p) => ({ ...p, postal_code: e.target.value }))}
             placeholder="12345"
-            className="bg-background border-border"
+            className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]"
           />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="city">Stadt</Label>
-        <Input
-          id="city"
-          value={formData.city}
-          onChange={(e) => setFormData((p) => ({ ...p, city: e.target.value }))}
-          placeholder="Stadt"
-          className="bg-background border-border"
-        />
-      </div>
-
-      {/* Dates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="start_at">Startdatum</Label>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="city" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Stadt
+          </Label>
+          <Input
+            id="city"
+            value={formData.city}
+            onChange={(e) => setFormData((p) => ({ ...p, city: e.target.value }))}
+            placeholder="Stadt"
+            className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]"
+          />
+        </div>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="start_at" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Startdatum
+          </Label>
           <Input
             id="start_at"
             type="datetime-local"
             value={formData.start_at}
             onChange={(e) => setFormData((p) => ({ ...p, start_at: e.target.value }))}
-            className="bg-background border-border"
+            className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-[13px]"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="end_at">Enddatum</Label>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="end_at" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Enddatum
+          </Label>
           <Input
             id="end_at"
             type="datetime-local"
             value={formData.end_at}
             onChange={(e) => setFormData((p) => ({ ...p, end_at: e.target.value }))}
-            className="bg-background border-border"
+            className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-[13px]"
           />
         </div>
-      </div>
-
-      {/* Tickets & Capacity */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="ticket_url">Externer Ticket-Link (optional)</Label>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="ticket_url" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Externer Ticket-Link (optional)
+          </Label>
           <Input
             id="ticket_url"
             type="url"
             value={formData.ticket_url}
             onChange={(e) => setFormData((p) => ({ ...p, ticket_url: e.target.value }))}
             placeholder="Leer lassen = Buchung über die Plattform"
-            className="bg-background border-border"
+            className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]"
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11.5px] leading-snug text-[hsl(0_0%_58%)]">
             Ohne Link wird das Event direkt über PADEL2GO gebucht (kein externer Anbieter).
           </p>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="capacity">Kapazität</Label>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="capacity" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Kapazität
+          </Label>
           <Input
             id="capacity"
             type="number"
             value={formData.capacity}
             onChange={(e) => setFormData((p) => ({ ...p, capacity: e.target.value }))}
             placeholder="100"
-            className="bg-background border-border"
+            className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] font-mono text-sm font-bold"
+          />
+        </div>
+        <div className="flex flex-col gap-[7px]">
+          <Label htmlFor="price_label" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+            Preis-Anzeige
+          </Label>
+          <Input
+            id="price_label"
+            value={formData.price_label}
+            onChange={(e) => setFormData((p) => ({ ...p, price_label: e.target.value }))}
+            placeholder="z.B. €15 / Gratis für Members"
+            className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]"
           />
         </div>
       </div>
 
-      {/* Price Label */}
-      <div className="space-y-2">
-        <Label htmlFor="price_label">Preis-Anzeige</Label>
-        <Input
-          id="price_label"
-          value={formData.price_label}
-          onChange={(e) => setFormData((p) => ({ ...p, price_label: e.target.value }))}
-          placeholder="z.B. €15 / Gratis für Members"
-          className="bg-background border-border"
+      {/* Description */}
+      <div className="flex flex-col gap-[7px]">
+        <Label htmlFor="description" className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+          Beschreibung
+        </Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData((p) => ({ ...p, description: e.target.value }))}
+          placeholder="Beschreibung des Events..."
+          className="min-h-[100px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] leading-relaxed"
         />
       </div>
-
-      <Separator className="my-6" />
 
       {/* Highlights */}
       <HighlightsInput highlights={highlights} onChange={setHighlights} />
 
-      <Separator className="my-6" />
-
       {/* Artists */}
       {loadingRelated ? (
-        <div className="text-center py-4 text-muted-foreground">Lade Artists & Brands...</div>
+        <div className="py-4 text-center text-sm text-muted-foreground">Lade Artists & Brands...</div>
       ) : (
         <>
           <ArtistManager artists={artists} onChange={setArtists} />
-
-          <Separator className="my-6" />
 
           {/* Brands */}
           <BrandManager brands={brands} onChange={setBrands} />
         </>
       )}
 
-      <Separator className="my-6" />
-
       {/* Featured & Published */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between p-4 bg-primary/10 border border-primary/20 rounded-lg">
-          <div>
-            <Label htmlFor="featured" className="text-foreground">Featured Event</Label>
-            <p className="text-sm text-muted-foreground">
+      <div className="flex flex-col gap-[11px]">
+        <div className="flex items-center gap-3.5 rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-[15px] py-3.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <Label htmlFor="featured" className="text-[13.5px] font-bold text-foreground">Featured Event</Label>
+            <p className="text-xs text-muted-foreground">
               Wird als Haupt-Event auf der Events-Seite hervorgehoben
             </p>
           </div>
@@ -547,10 +545,10 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
             onCheckedChange={(checked) => setFormData((p) => ({ ...p, featured: checked }))}
           />
         </div>
-        <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
-          <div>
-            <Label htmlFor="is_published" className="text-foreground">Veröffentlicht</Label>
-            <p className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-3.5 rounded-[14px] border border-[hsl(0_0%_12%)] bg-white/[0.028] px-[15px] py-3.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <Label htmlFor="is_published" className="text-[13.5px] font-bold text-foreground">Veröffentlicht</Label>
+            <p className="text-xs text-muted-foreground">
               Event wird im Frontend angezeigt
             </p>
           </div>
@@ -563,17 +561,19 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
       </div>
 
       {/* Submit */}
-      <Button
-        className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-        onClick={() => createEventMutation.mutate()}
-        disabled={!isValid || createEventMutation.isPending}
-      >
-        {createEventMutation.isPending
-          ? "Speichern..."
-          : isEditing
-          ? "Event aktualisieren"
-          : "Event erstellen"}
-      </Button>
+      <div className="border-t border-[hsl(0_0%_12%)] pt-[18px]">
+        <Button
+          className="h-[42px] w-full rounded-[11px] bg-gradient-lime text-[13.5px] font-bold text-primary-foreground shadow-[0_0_22px_hsl(71_91%_51%/0.25)] hover:opacity-90"
+          onClick={() => createEventMutation.mutate()}
+          disabled={!isValid || createEventMutation.isPending}
+        >
+          {createEventMutation.isPending
+            ? "Speichern..."
+            : isEditing
+            ? "Event aktualisieren"
+            : "Event erstellen"}
+        </Button>
+      </div>
     </div>
   );
 }

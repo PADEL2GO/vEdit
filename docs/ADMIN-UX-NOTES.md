@@ -87,7 +87,11 @@ Voller Abgleich aller `site_visuals`-Einträge gegen echte Nutzung (Web-Code-Gre
 
 BookingWeekCalendar + BookingDetailDrawer, AdminLocationCard + AdminCourtCard + CourtPriceDialog, LocationAnalyticsTab + 3 Kamera-Komponenten, TranslatableField (geteilt, wirkt auf 5 Seiten). Dabei: **Club-Farbe plattformweit auf #7FD4FF vereinheitlicht** (Kalender, Legende, Zähler, Listen-Badges — Punkt aus Bug-Liste #3 erledigt); halbstündige Buchungen sitzen im Kalender jetzt minutengenau (vorher auf volle Stunde gerendert). Neue Funde: LocationAnalyticsTab rechnet „Auslastung" mit 12h/Tag-Annahme — weicht von AdminUtilization ab (zwei verschiedene Auslastungs-Zahlen im Admin → konsolidieren); CameraApiKeysTab nutzt `confirm()` + Dialog-X resettet Formular-State nicht; `Booking`-Interface in beiden Buchungs-Komponenten dupliziert.
 
-## Folge-Pass: Kind-Komponenten (Design da, Komponente noch alt)
+## Kind-Komponenten Welle 2 — erledigt 2026-08-10 · FOLGE-PASS KOMPLETT ✅
+
+EventForm + Artist/Brand/Highlights (inkl. Mobile-Fixes der harten 3-Spalten-Grids), MarketplaceOrdersSection + CatalogManagerDialog, P2GWalletsTab + P2GExpertLevelsTab, WritingStyleManager + VoiceInArticle. Damit ist der GESAMTE Admin (Seiten + Masken) im neuen Design. Neue Funde: Schreibstil-Löschen ohne Bestätigung (Ein-Klick-Delete); Grip-Icons in Artist/Brand-Manager sind Deko ohne DnD; `instagram_url`-Felder speichern teils Handles statt URLs; Katalog-Dialog + Expert-Level-Delete nutzen noch `confirm()` → gehören in den confirm()→AlertDialog-Sweep.
+
+## Folge-Pass: Kind-Komponenten (Design da, Komponente noch alt) — ✅ komplett erledigt (s. o.)
 
 - `BookingWeekCalendar.tsx`, `BookingDetailDrawer.tsx` (aus Admin 02)
 - `AdminLocationCard.tsx`, `AdminCourtCard.tsx`, `LocationAnalyticsTab.tsx`, Camera-Komponenten, `CourtPriceDialog` (aus Admin 03)

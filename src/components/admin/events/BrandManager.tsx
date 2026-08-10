@@ -91,52 +91,58 @@ export function BrandManager({ brands, onChange }: BrandManagerProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label className="text-base font-semibold">Partner & Brands</Label>
-        <Button type="button" variant="outline" size="sm" onClick={addBrand}>
-          <Plus className="h-4 w-4 mr-1" />
+    <div className="flex flex-col gap-3 rounded-[15px] border border-[hsl(0_0%_12%)] bg-white/[0.025] p-[17px]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Label className="font-display text-sm font-bold tracking-tight text-foreground">Partner & Brands</Label>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addBrand}
+          className="h-8 gap-1.5 rounded-[9px] border-primary/30 bg-primary/[0.09] px-3 text-[12.5px] font-bold text-primary hover:bg-primary/[0.18] hover:text-primary"
+        >
+          <Plus className="h-3.5 w-3.5" />
           Brand hinzufügen
         </Button>
       </div>
 
       {brands.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-lg">
+        <div className="rounded-[13px] border border-dashed border-[hsl(0_0%_20%)] py-8 text-center text-sm text-muted-foreground">
           Noch keine Brands hinzugefügt
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-3">
           {brands.map((brand, index) => (
             <div
               key={index}
-              className="p-4 rounded-lg border border-border bg-background/50 space-y-4"
+              className="flex flex-col gap-4 rounded-[13px] border border-[hsl(0_0%_13%)] bg-white/[0.03] p-[13px]"
             >
               <div className="flex items-start gap-3">
-                <GripVertical className="h-5 w-5 text-muted-foreground mt-2 cursor-grab" />
+                <GripVertical className="mt-2.5 h-4 w-4 shrink-0 cursor-grab text-[hsl(0_0%_45%)]" />
 
                 {/* Logo Upload */}
                 <div className="shrink-0">
                   {brand.logo_url ? (
-                    <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-white p-1">
+                    <div className="relative h-16 w-16 overflow-hidden rounded-[11px] bg-[#F5F5F3] p-1">
                       <img
                         src={brand.logo_url}
                         alt={brand.name}
-                        className="w-full h-full object-contain"
+                        className="h-full w-full object-contain"
                       />
                       <button
                         type="button"
                         onClick={() => updateBrand(index, "logo_url", null)}
-                        className="absolute top-0 right-0 p-1 bg-destructive text-destructive-foreground rounded-bl"
+                        className="absolute right-0 top-0 rounded-bl-[9px] bg-[#FF6B6B] p-1 text-[#0A0A0A]"
                       >
                         <X className="h-3 w-3" />
                       </button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-16 h-16 border border-dashed border-border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <label className="flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-[11px] bg-[#F5F5F3] transition-opacity hover:opacity-85">
                       {uploadingIndex === index ? (
-                        <div className="animate-pulse text-xs text-muted-foreground">...</div>
+                        <div className="animate-pulse text-xs text-[hsl(0_0%_45%)]">...</div>
                       ) : (
-                        <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                        <ImageIcon className="h-5 w-5 text-[hsl(0_0%_45%)]" />
                       )}
                       <input
                         type="file"
@@ -150,26 +156,28 @@ export function BrandManager({ brands, onChange }: BrandManagerProps) {
                 </div>
 
                 {/* Name & Type */}
-                <div className="flex-1 grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Name *</Label>
+                <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="flex flex-col gap-[6px]">
+                    <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Name<span className="text-primary"> *</span>
+                    </Label>
                     <Input
                       placeholder="Brand Name"
                       value={brand.name}
                       onChange={(e) => updateBrand(index, "name", e.target.value)}
-                      className="bg-background border-border"
+                      className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Typ</Label>
+                  <div className="flex flex-col gap-[6px]">
+                    <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Typ</Label>
                     <Select
                       value={brand.brand_type}
                       onValueChange={(v) => updateBrand(index, "brand_type", v)}
                     >
-                      <SelectTrigger className="bg-background border-border">
+                      <SelectTrigger className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="rounded-xl border-[hsl(0_0%_15%)] bg-[hsl(0_0%_6%)]">
                         {BRAND_TYPES.map((type) => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
@@ -184,35 +192,35 @@ export function BrandManager({ brands, onChange }: BrandManagerProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="text-destructive shrink-0"
+                  className="h-[30px] w-[30px] shrink-0 rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
                   onClick={() => removeBrand(index)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
 
               {/* Links */}
-              <div className="grid grid-cols-2 gap-3 pl-11">
-                <div className="space-y-1">
-                  <Label className="text-xs flex items-center gap-1">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:pl-11">
+                <div className="flex flex-col gap-[6px]">
+                  <Label className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                     <Globe className="h-3 w-3" /> Website
                   </Label>
                   <Input
                     placeholder="https://..."
                     value={brand.website_url || ""}
                     onChange={(e) => updateBrand(index, "website_url", e.target.value || null)}
-                    className="bg-background border-border text-sm"
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]"
                   />
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs flex items-center gap-1">
+                <div className="flex flex-col gap-[6px]">
+                  <Label className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                     <Instagram className="h-3 w-3" /> Instagram
                   </Label>
                   <Input
                     placeholder="@brandname"
                     value={brand.instagram_url || ""}
                     onChange={(e) => updateBrand(index, "instagram_url", e.target.value || null)}
-                    className="bg-background border-border text-sm"
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]"
                   />
                 </div>
               </div>

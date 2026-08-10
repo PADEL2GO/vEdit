@@ -32,6 +32,14 @@ interface Props {
 
 type Row = MarketplaceCategoryRow | MarketplaceBrandRow;
 
+// ── Styling-Tokens des neuen Designs (identisch zu AdminMarketplace.tsx) ──
+const FIELD_LABEL = "font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground";
+const FIELD_INPUT = "h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]";
+const ICON_BTN =
+  "h-7 w-7 rounded-lg border border-[hsl(0_0%_16%)] bg-white/[0.05] text-[hsl(0_0%_78%)] hover:border-primary/40 hover:bg-white/[0.05] hover:text-primary";
+const ICON_BTN_DANGER =
+  "h-7 w-7 rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]";
+
 export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
   const isCategory = kind === "category";
   const catQuery = useAdminCatalogCategories();
@@ -132,10 +140,13 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-h-[85vh] max-w-lg gap-[18px] overflow-y-auto rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))]">
+        <DialogHeader className="gap-[5px] space-y-0 text-left">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">Katalog</span>
+          <DialogTitle className="font-display text-xl font-extrabold tracking-tight text-foreground">
+            {title}
+          </DialogTitle>
+          <DialogDescription className="text-[12.5px] leading-normal text-muted-foreground">
             {isCategory
               ? "Produktkategorien für den Shop (z.B. Schläger, Bälle, Bekleidung)."
               : "Marken für die Produkte (z.B. Adidas, Babolat, Bullpadel). Klick auf den Kreis lädt ein Logo hoch — es erscheint auf den Produktkarten und der Produktseite."}
@@ -148,39 +159,44 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
 
         {/* Add new */}
         <div className="flex items-end gap-2">
-          <div className="flex-1 space-y-1">
-            <Label>Neuer Eintrag</Label>
+          <div className="flex-1 space-y-1.5">
+            <Label className={FIELD_LABEL}>Neuer Eintrag</Label>
             <Input
               value={newName}
               placeholder={placeholder}
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              className={FIELD_INPUT}
             />
           </div>
-          <Button onClick={handleAdd} disabled={!newName.trim() || upsert.isPending}>
+          <Button
+            onClick={handleAdd}
+            disabled={!newName.trim() || upsert.isPending}
+            className="h-10 w-10 flex-none rounded-[10px] bg-gradient-lime p-0 text-primary-foreground transition-opacity hover:opacity-90"
+          >
             {upsert.isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Plus className="w-4 h-4" />
+              <Plus className="h-4 w-4" />
             )}
           </Button>
         </div>
 
         {/* List */}
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {query.isLoading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">
+            <p className="py-6 text-center text-sm text-muted-foreground">
               Noch keine Einträge.
             </p>
           ) : (
             rows.map((row) => (
               <div
                 key={row.id}
-                className="flex items-center gap-2 rounded-lg border border-border/60 px-3 py-2"
+                className="flex items-center gap-2 rounded-xl border border-[hsl(0_0%_12%)] bg-white/[0.028] px-3 py-[11px]"
               >
                 {editingId === row.id ? (
                   <>
@@ -188,14 +204,24 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && saveEdit(row)}
-                      className="h-8 flex-1"
+                      className="h-9 flex-1 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04]"
                       autoFocus
                     />
-                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => saveEdit(row)}>
-                      <Check className="w-4 h-4 text-primary" />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 rounded-lg border border-primary/30 bg-primary/10 text-primary hover:bg-primary/[0.18] hover:text-primary"
+                      onClick={() => saveEdit(row)}
+                    >
+                      <Check className="h-3.5 w-3.5" />
                     </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditingId(null)}>
-                      <X className="w-4 h-4" />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className={ICON_BTN}
+                      onClick={() => setEditingId(null)}
+                    >
+                      <X className="h-3.5 w-3.5" />
                     </Button>
                   </>
                 ) : (
@@ -206,28 +232,28 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
                         onClick={() => pickLogo(row.id)}
                         disabled={logoUploading}
                         title="Logo hochladen/ändern"
-                        className="w-9 h-9 rounded-full overflow-hidden border border-border/70 bg-muted shrink-0 flex items-center justify-center hover:border-primary/60 transition-colors"
+                        className="flex h-[34px] w-[34px] flex-none items-center justify-center overflow-hidden rounded-full bg-[#F5F5F3] text-[hsl(0_0%_45%)] transition-shadow hover:ring-2 hover:ring-primary/50 disabled:opacity-60"
                       >
                         {(row as MarketplaceBrandRow).logo_url ? (
-                          <img src={(row as MarketplaceBrandRow).logo_url!} alt="" className="w-full h-full object-cover" />
+                          <img src={(row as MarketplaceBrandRow).logo_url!} alt="" className="h-full w-full object-cover" />
                         ) : (
-                          <ImagePlus className="w-4 h-4 text-muted-foreground" />
+                          <ImagePlus className="h-3.5 w-3.5" />
                         )}
                       </button>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{row.name}</div>
-                      <div className="text-xs text-muted-foreground font-mono truncate">{row.slug}</div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[13.5px] font-semibold text-foreground">{row.name}</div>
+                      <div className="truncate font-mono text-[11px] text-muted-foreground">/{row.slug}</div>
                     </div>
                     {!isCategory && (row as MarketplaceBrandRow).logo_url && (
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-8 w-8"
+                        className={ICON_BTN}
                         title="Logo entfernen"
                         onClick={() => saveLogo(row, null)}
                       >
-                        <ImageOff className="w-4 h-4" />
+                        <ImageOff className="h-3.5 w-3.5" />
                       </Button>
                     )}
                     <Switch
@@ -242,18 +268,18 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
                         })
                       }
                     />
-                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => startEdit(row)}>
-                      <Pencil className="w-4 h-4" />
+                    <Button size="icon" variant="ghost" className={ICON_BTN} onClick={() => startEdit(row)}>
+                      <Pencil className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      className={ICON_BTN_DANGER}
                       onClick={() => {
                         if (confirm(`"${row.name}" wirklich löschen?`)) del.mutate(row.id);
                       }}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </>
                 )}

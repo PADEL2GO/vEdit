@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Mic, MicOff, Sparkles, Loader2 } from "lucide-react";
+import { Mic, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -165,28 +164,30 @@ export function VoiceInArticle({ onGenerated }: VoiceInArticleProps) {
   };
 
   return (
-    <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <Label className="text-sm font-semibold flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          Per Sprache diktieren (KI)
-        </Label>
+    <div className="flex flex-col gap-3 rounded-[15px] border border-primary/[0.24] bg-[linear-gradient(135deg,hsl(71_91%_51%/0.07),hsl(71_91%_51%/0.01))] p-[17px]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-primary/[0.32] bg-primary/[0.12] text-primary">
+            <Mic className="h-[15px] w-[15px]" />
+          </span>
+          <span className="font-display text-sm font-bold text-foreground">Per Sprache diktieren (KI)</span>
+        </div>
         <Button
           type="button"
-          variant={listening ? "destructive" : "outline"}
+          variant="outline"
           size="sm"
           onClick={toggleMic}
           disabled={!speechSupported || generating}
+          className={
+            listening
+              ? "h-[34px] gap-[7px] whitespace-nowrap rounded-[9px] border-[hsl(0_100%_71%/0.32)] bg-[hsl(0_100%_71%/0.1)] px-[13px] text-[12.5px] font-bold text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
+              : "h-[34px] gap-[7px] whitespace-nowrap rounded-[9px] border-primary/[0.32] bg-primary/10 px-[13px] text-[12.5px] font-bold text-primary hover:bg-primary/[0.16] hover:text-primary"
+          }
         >
-          {listening ? (
-            <>
-              <MicOff className="h-4 w-4 mr-1.5" /> Stopp
-            </>
-          ) : (
-            <>
-              <Mic className="h-4 w-4 mr-1.5" /> Aufnahme starten
-            </>
-          )}
+          <span
+            className={`h-2 w-2 flex-none rounded-full ${listening ? "animate-pulse bg-[#FF6B6B]" : "bg-primary"}`}
+          />
+          {listening ? "Stopp" : "Aufnahme starten"}
         </Button>
       </div>
 
@@ -199,10 +200,11 @@ export function VoiceInArticle({ onGenerated }: VoiceInArticleProps) {
             ? "Mikrofon-Aufnahme erscheint hier — du kannst den Text auch korrigieren oder direkt eingeben."
             : "Spracherkennung in diesem Browser nicht verfügbar — bitte den Text direkt eingeben."
         }
+        className="rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-[13px] py-[11px] text-[13px] leading-[1.55] text-foreground focus-visible:ring-1 focus-visible:ring-primary"
       />
 
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[11px] text-[hsl(0_0%_58%)]">
           {speechSupported
             ? "Sprache: Deutsch. Funktioniert am besten in Chrome/Edge."
             : "Tipp: Chrome oder Edge nutzen, um den Mikrofon-Modus zu aktivieren."}
@@ -212,14 +214,15 @@ export function VoiceInArticle({ onGenerated }: VoiceInArticleProps) {
           size="sm"
           onClick={generate}
           disabled={generating || transcript.trim().length < 10}
+          className="h-9 rounded-[10px] bg-gradient-lime px-[15px] text-[12.5px] font-bold text-primary-foreground hover:opacity-90"
         >
           {generating ? (
             <>
-              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> Erstelle Artikel…
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Erstelle Artikel…
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4 mr-1.5" /> Artikel mit KI erstellen
+              <Sparkles className="mr-1.5 h-4 w-4" /> Artikel mit KI erstellen
             </>
           )}
         </Button>

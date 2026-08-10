@@ -94,52 +94,58 @@ export function ArtistManager({ artists, onChange }: ArtistManagerProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label className="text-base font-semibold">Artists & Performer</Label>
-        <Button type="button" variant="outline" size="sm" onClick={addArtist}>
-          <Plus className="h-4 w-4 mr-1" />
+    <div className="flex flex-col gap-3 rounded-[15px] border border-[hsl(0_0%_12%)] bg-white/[0.025] p-[17px]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Label className="font-display text-sm font-bold tracking-tight text-foreground">Artists & Performer</Label>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addArtist}
+          className="h-8 gap-1.5 rounded-[9px] border-primary/30 bg-primary/[0.09] px-3 text-[12.5px] font-bold text-primary hover:bg-primary/[0.18] hover:text-primary"
+        >
+          <Plus className="h-3.5 w-3.5" />
           Artist hinzufügen
         </Button>
       </div>
 
       {artists.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-lg">
+        <div className="rounded-[13px] border border-dashed border-[hsl(0_0%_20%)] py-8 text-center text-sm text-muted-foreground">
           Noch keine Artists hinzugefügt
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-3">
           {artists.map((artist, index) => (
             <div
               key={index}
-              className="p-4 rounded-lg border border-border bg-background/50 space-y-4"
+              className="flex flex-col gap-4 rounded-[13px] border border-[hsl(0_0%_13%)] bg-white/[0.03] p-[13px]"
             >
               <div className="flex items-start gap-3">
-                <GripVertical className="h-5 w-5 text-muted-foreground mt-2 cursor-grab" />
-                
+                <GripVertical className="mt-2.5 h-4 w-4 shrink-0 cursor-grab text-[hsl(0_0%_45%)]" />
+
                 {/* Image Upload */}
                 <div className="shrink-0">
                   {artist.image_url ? (
-                    <div className="relative w-16 h-16 rounded-lg overflow-hidden">
+                    <div className="relative h-16 w-16 overflow-hidden rounded-[11px] border border-[hsl(0_0%_16%)]">
                       <img
                         src={artist.image_url}
                         alt={artist.name}
-                        className="w-full h-full object-cover"
+                        className="h-full w-full object-cover"
                       />
                       <button
                         type="button"
                         onClick={() => updateArtist(index, "image_url", null)}
-                        className="absolute top-0 right-0 p-1 bg-destructive text-destructive-foreground rounded-bl"
+                        className="absolute right-0 top-0 rounded-bl-[9px] bg-[#FF6B6B] p-1 text-[#0A0A0A]"
                       >
                         <X className="h-3 w-3" />
                       </button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-16 h-16 border border-dashed border-border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <label className="flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-[11px] border border-dashed border-[hsl(0_0%_20%)] bg-white/5 transition-colors hover:border-primary/50">
                       {uploadingIndex === index ? (
                         <div className="animate-pulse text-xs text-muted-foreground">...</div>
                       ) : (
-                        <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                        <ImageIcon className="h-5 w-5 text-[hsl(0_0%_55%)]" />
                       )}
                       <input
                         type="file"
@@ -153,26 +159,28 @@ export function ArtistManager({ artists, onChange }: ArtistManagerProps) {
                 </div>
 
                 {/* Name & Role */}
-                <div className="flex-1 grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Name *</Label>
+                <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="flex flex-col gap-[6px]">
+                    <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Name<span className="text-primary"> *</span>
+                    </Label>
                     <Input
                       placeholder="Artist Name"
                       value={artist.name}
                       onChange={(e) => updateArtist(index, "name", e.target.value)}
-                      className="bg-background border-border"
+                      className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Rolle</Label>
+                  <div className="flex flex-col gap-[6px]">
+                    <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Rolle</Label>
                     <Select
                       value={artist.role}
                       onValueChange={(v) => updateArtist(index, "role", v)}
                     >
-                      <SelectTrigger className="bg-background border-border">
+                      <SelectTrigger className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="rounded-xl border-[hsl(0_0%_15%)] bg-[hsl(0_0%_6%)]">
                         {ARTIST_ROLES.map((role) => (
                           <SelectItem key={role.value} value={role.value}>
                             {role.label}
@@ -187,46 +195,46 @@ export function ArtistManager({ artists, onChange }: ArtistManagerProps) {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="text-destructive shrink-0"
+                  className="h-[30px] w-[30px] shrink-0 rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
                   onClick={() => removeArtist(index)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
 
               {/* Social Links */}
-              <div className="grid grid-cols-3 gap-3 pl-11">
-                <div className="space-y-1">
-                  <Label className="text-xs flex items-center gap-1">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:pl-11">
+                <div className="flex flex-col gap-[6px]">
+                  <Label className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                     <Instagram className="h-3 w-3" /> Instagram
                   </Label>
                   <Input
                     placeholder="@username"
                     value={artist.instagram_url || ""}
                     onChange={(e) => updateArtist(index, "instagram_url", e.target.value || null)}
-                    className="bg-background border-border text-sm"
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]"
                   />
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs flex items-center gap-1">
+                <div className="flex flex-col gap-[6px]">
+                  <Label className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                     <Music2 className="h-3 w-3" /> Spotify
                   </Label>
                   <Input
                     placeholder="Spotify URL"
                     value={artist.spotify_url || ""}
                     onChange={(e) => updateArtist(index, "spotify_url", e.target.value || null)}
-                    className="bg-background border-border text-sm"
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]"
                   />
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-xs flex items-center gap-1">
+                <div className="flex flex-col gap-[6px]">
+                  <Label className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                     <Globe className="h-3 w-3" /> Website
                   </Label>
                   <Input
                     placeholder="https://..."
                     value={artist.website_url || ""}
                     onChange={(e) => updateArtist(index, "website_url", e.target.value || null)}
-                    className="bg-background border-border text-sm"
+                    className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13px]"
                   />
                 </div>
               </div>

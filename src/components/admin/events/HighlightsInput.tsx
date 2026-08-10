@@ -51,22 +51,24 @@ export function HighlightsInput({ highlights, onChange }: HighlightsInputProps) 
   );
 
   return (
-    <div className="space-y-3">
-      <Label className="text-base font-semibold">Highlights & Features</Label>
-      
+    <div className="flex flex-col gap-[11px] rounded-[15px] border border-[hsl(0_0%_12%)] bg-white/[0.025] p-[17px]">
+      <Label className="font-display text-sm font-bold tracking-tight text-foreground">
+        Highlights & Features
+      </Label>
+
       {/* Current Highlights */}
       {highlights.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-[7px]">
           {highlights.map((highlight) => (
             <Badge
               key={highlight}
-              className="bg-primary/20 text-primary border-primary/30 pl-3 pr-1 py-1"
+              className="gap-[7px] whitespace-nowrap rounded-full border border-primary/[0.32] bg-primary/10 py-1.5 pl-[11px] pr-2 text-xs font-semibold text-primary hover:bg-primary/10"
             >
               {highlight}
               <button
                 type="button"
                 onClick={() => removeHighlight(highlight)}
-                className="ml-2 hover:bg-primary/30 rounded p-0.5"
+                className="flex rounded-full text-primary/70 transition-colors hover:text-primary"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -83,7 +85,7 @@ export function HighlightsInput({ highlights, onChange }: HighlightsInputProps) 
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 px-3 py-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+          className="h-[38px] min-w-0 flex-1 rounded-[10px] border border-[hsl(0_0%_15%)] bg-white/[0.04] px-[13px] text-[13px] text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary"
         />
         <Button
           type="button"
@@ -91,6 +93,7 @@ export function HighlightsInput({ highlights, onChange }: HighlightsInputProps) 
           size="sm"
           onClick={() => addHighlight(inputValue)}
           disabled={!inputValue.trim()}
+          className="h-[38px] w-[38px] shrink-0 rounded-[10px] border-primary/30 bg-primary/[0.09] p-0 text-primary hover:bg-primary/[0.18] hover:text-primary"
         >
           <Plus className="h-4 w-4" />
         </Button>
@@ -98,15 +101,15 @@ export function HighlightsInput({ highlights, onChange }: HighlightsInputProps) 
 
       {/* Suggestions */}
       {availableSuggestions.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs text-muted-foreground">Vorschläge:</p>
-          <div className="flex flex-wrap gap-1">
+        <div className="flex flex-col gap-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(0_0%_58%)]">Vorschläge</p>
+          <div className="flex flex-wrap gap-[7px]">
             {availableSuggestions.slice(0, 8).map((suggestion) => (
               <button
                 key={suggestion}
                 type="button"
                 onClick={() => addHighlight(suggestion)}
-                className="px-2 py-1 text-xs rounded-md border border-border hover:bg-secondary/50 transition-colors"
+                className="whitespace-nowrap rounded-full border border-[hsl(0_0%_16%)] bg-white/5 px-[11px] py-1.5 text-xs font-semibold text-[hsl(0_0%_78%)] transition-colors hover:border-primary/40 hover:bg-primary/[0.08] hover:text-primary"
               >
                 + {suggestion}
               </button>

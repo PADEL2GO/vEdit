@@ -573,7 +573,7 @@ Masken:
 - [x] Event-Löschen-Bestätigung
 - [x] Empty- und Loading-State
 
-> **Umgesetzt 2026-08-04** aus `Admin 07 Events.dc.html`. Dialog-RAHMEN neu; `EventForm.tsx` + ArtistManager/BrandManager/HighlightsInput = Folge-Pass. Nebenbei behoben: toter Ticket-Link bei Events ohne URL (jetzt konditional „über P2G"). Bekannter Bug notiert: Edit-Dialog schließt nach Speichern nicht (unkontrolliert).
+> **Umgesetzt 2026-08-04** aus `Admin 07 Events.dc.html`. Dialog komplett inkl. Formular-Innenleben (Folge-Pass 2026-08-10: EventForm + Artist/Brand/Highlights im neuen Look, Mobile-Grid-Fixes). Nebenbei behoben: toter Ticket-Link bei Events ohne URL (jetzt konditional „über P2G"). Bekannter Bug notiert: Edit-Dialog schließt nach Speichern nicht (unkontrolliert).
 
 ### ✅ AdminMarketplace — `/admin/marketplace`
 `src/pages/admin/AdminMarketplace.tsx` · Marktplatz-Produkte und Umsätze verwalten
@@ -587,7 +587,7 @@ Masken:
 - [x] Produkt-Formular-Dialog mit Bild-Upload
 - [x] Produkt-Löschen-Bestätigung
 
-> **Umgesetzt 2026-08-04** aus `Admin 08 Marketplace.dc.html` (inkl. komplettem Produkt-Dialog mit GPSR/SEO). Folge-Pass: `MarketplaceOrdersSection.tsx` + `CatalogManagerDialog.tsx` (noch alter Stil). Backend-Wiring offen: KPI-Trends, Tab-Counts Bestellungen/Retouren.
+> **Umgesetzt 2026-08-04** aus `Admin 08 Marketplace.dc.html` (inkl. komplettem Produkt-Dialog mit GPSR/SEO). Folge-Pass 2026-08-10 erledigt: Bestellungen/Retouren + Katalog-Dialog im neuen Look (Segmented-Filter, Status-Pills, Storno-AlertDialog). Backend-Wiring offen: KPI-Trends, Tab-Counts Bestellungen/Retouren.
 
 ### ✅ AdminP2GPoints — `/admin/p2g-points`
 `src/pages/admin/AdminP2GPoints.tsx` · P2G-Punkte, Wallets und Rewards verwalten
@@ -597,9 +597,9 @@ Masken:
 - [x] Tab-Navigation
 - [x] Punktewert-Wechselkurs-Karte
 - [x] Übersicht-Tab (Dashboard)
-- [ ] Wallets-Tab → Kind-Komponente `P2GWalletsTab.tsx` (Folge-Pass)
+- [x] Wallets-Tab (Folge-Pass 2026-08-10: Tabelle + Detail-Panel + Credits-Dialog)
 - [x] Freigaben-/Einlösungen-Tabs
-- [ ] Rewards-/Expert-Levels-Tabs → Kind-Komponente `P2GExpertLevelsTab.tsx` (Folge-Pass)
+- [x] Rewards-/Expert-Levels-Tabs (Folge-Pass 2026-08-10: Tabelle + Level-Dialog mit Live-Preview)
 
 > **Umgesetzt 2026-08-04** aus `Admin 09 P2G Points.dc.html` (Seiten-Datei: Tabs, Punktewert- + Payback-Karten).
 
@@ -809,7 +809,7 @@ Masken:
 - [x] KI-Voice-In-Generierungsbereich
 - [x] Formularfelder mit Titelbild und Editor
 
-> **Umgesetzt 2026-08-04** aus `Admin 16 News.dc.html` (Seitenkopf, KI-Generator, Autoren, Filter+Liste, kompletter Artikel-Dialog). Nebenbei behoben: Filter-Chips verschwanden bei 0 Treffern (Filter war nicht zurücksetzbar). Folge-Pass: `WritingStyleManager.tsx`, `VoiceInArticle.tsx`. Offen: `confirm()` → AlertDialog.
+> **Umgesetzt 2026-08-04** aus `Admin 16 News.dc.html` (Seitenkopf, KI-Generator, Autoren, Filter+Liste, kompletter Artikel-Dialog). Nebenbei behoben: Filter-Chips verschwanden bei 0 Treffern (Filter war nicht zurücksetzbar). Folge-Pass 2026-08-10 erledigt: Schreibstil-Dialog + Diktat-Box im neuen Look. Offen: `confirm()` → AlertDialog.
 
 ### ✅ AdminSettings — `/admin/settings`
 `src/pages/admin/AdminSettings.tsx` · System- und App-Einstellungen umschalten
