@@ -773,7 +773,7 @@ serve(async (req) => {
             if (!isGuestWebhook) try {
               const { data: bk } = await supabaseAdmin
                 .from("bookings")
-                .select("start_time, end_time, user_id, status, play_credits_awarded, payment_mode, reserved_voucher_id")
+                .select("court_id, start_time, end_time, user_id, status, play_credits_awarded, payment_mode, reserved_voucher_id")
                 .eq("id", bookingId)
                 .single();
 
@@ -787,12 +787,14 @@ serve(async (req) => {
               // play_credits_awarded wieder auf 0, ein verspäteter Webhook-Retry darf das
               // Payback dann nicht erneut gutschreiben.
               if (bk && bk.play_credits_awarded === 0 && bk.user_id && !usedVoucher && (bk as any).status !== "cancelled") {
-                // ── P2G Payback = round(fixedRate(duration) * expert-level multiplier) ──
+                // ── P2G Payback = round(fixedRate(duration) * band * expert-level multiplier) ──
                 // Fixed points per booking length (60 vs 120 min), admin-configurable in
-                // site_settings; the multiplier comes from the user's expert level.
+                // site_settings; the band factor comes from the time-window pricing bands,
+                // the level multiplier from the user's expert level.
                 const durationMin = Math.round(
                   (new Date(bk.end_time).getTime() - new Date(bk.start_time).getTime()) / 60000,
                 );
+                const durationBucket = durationMin >= 120 ? 120 : durationMin >= 90 ? 90 : 60;
 
                 const { data: settings } = await supabaseAdmin
                   .from("site_settings")
@@ -804,12 +806,34 @@ serve(async (req) => {
                 const rate120 = Number((settings as any)?.payback_points_120min ?? 200) || 0;
                 const base = durationMin >= 120 ? rate120 : durationMin >= 90 ? rate90 : rate60;
 
+                // Band is resolved for the booking's START time, never for the payment time —
+                // paying a 7am slot in the evening must still earn the 7am rate.
+                let bandMultiplier = 1;
+                let pointsBandName: string | null = null;
+                try {
+                  const { data: rateRows, error: rateError } = await supabaseAdmin.rpc("resolve_booking_rate", {
+                    p_court_id: (bk as any).court_id,
+                    p_start: bk.start_time,
+                    p_duration_minutes: durationBucket,
+                  });
+                  if (rateError) {
+                    logStep("Payback: band lookup failed — continuing with x1.0", { bookingId, error: rateError.message });
+                  } else {
+                    const rate = Array.isArray(rateRows) ? (rateRows as any[])[0] : (rateRows as any);
+                    const rawMult = Number(rate?.points_multiplier);
+                    if (Number.isFinite(rawMult) && rawMult >= 0) bandMultiplier = rawMult;
+                    pointsBandName = (rate?.points_band_name as string | null) ?? null;
+                  }
+                } catch (rateErr) {
+                  logStep("Payback: band lookup failed — continuing with x1.0", { bookingId, error: (rateErr as Error).message });
+                }
+
                 const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
                   p_user_id: bk.user_id,
                 });
                 const levelMultiplier = Number(multData ?? 1) || 1;
 
-                const creditsToAward = Math.round(base * levelMultiplier);
+                const creditsToAward = Math.round(base * bandMultiplier * levelMultiplier);
 
                 if (creditsToAward > 0) {
                   // Award atomically (signed delta) so a concurrent reserve/refund can't clobber it.
@@ -825,7 +849,7 @@ serve(async (req) => {
                     await supabaseAdmin.from("bookings")
                       .update({ play_credits_awarded: creditsToAward })
                       .eq("id", bookingId);
-                    logStep("Payback credits awarded", { bookingId, creditsToAward, durationMin, base, levelMultiplier });
+                    logStep("Payback credits awarded", { bookingId, creditsToAward, durationMin, base, bandMultiplier, pointsBandName, levelMultiplier });
                   }
                 }
               } else if (usedVoucher) {

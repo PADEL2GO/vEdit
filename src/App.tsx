@@ -66,6 +66,7 @@ const ClubUtilization = lazy(() => import("./pages/club/ClubUtilization"));
 const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
 const AdminBookings = lazy(() => import("./pages/admin/AdminBookings"));
 const AdminCourts = lazy(() => import("./pages/admin/AdminCourts"));
+const AdminPricing = lazy(() => import("./pages/admin/AdminPricing"));
 const AdminEvents = lazy(() => import("./pages/admin/AdminEvents"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
@@ -196,6 +197,7 @@ const App = () => (
                 <Route path="/admin" element={<AdminOverview />} />
                 <Route path="/admin/bookings" element={<AdminBookings />} />
                 <Route path="/admin/courts" element={<AdminCourts />} />
+                <Route path="/admin/pricing" element={<AdminPricing />} />
                 <Route path="/admin/events" element={<AdminEvents />} />
                 <Route path="/admin/marketplace" element={<AdminMarketplace />} />
                 <Route path="/admin/p2g-points" element={<AdminP2GPoints />} />

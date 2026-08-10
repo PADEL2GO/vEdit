@@ -94,22 +94,25 @@ Deno.serve(async (req) => {
     const endTime = new Date(booking.end_time);
     const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / 60000);
 
-    // Server-recomputed price (court-specific, then global fallback) — never trust the
-    // client-inserted booking.price_cents.
-    let priceCents: number | null = null;
-    const { data: courtPrice } = await supabaseAdmin
-      .from("court_prices").select("price_cents")
-      .eq("court_id", booking.court_id).eq("duration_minutes", durationMinutes).maybeSingle();
-    if (courtPrice) {
-      priceCents = courtPrice.price_cents;
-    } else {
-      const { data: globalPrice } = await supabaseAdmin
-        .from("court_prices").select("price_cents")
-        .is("court_id", null).eq("duration_minutes", durationMinutes).maybeSingle();
-      if (!globalPrice) throw new Error(`No price configured for duration (${durationMinutes} min)`);
-      priceCents = globalPrice.price_cents;
+    // Server-recomputed price via resolve_booking_rate (Zeitfenster-Band schlägt
+    // court_prices) — never trust the client-inserted booking.price_cents.
+    const { data: rateData, error: rateError } = await supabaseAdmin.rpc("resolve_booking_rate", {
+      p_court_id: booking.court_id,
+      p_start: booking.start_time,
+      p_duration_minutes: durationMinutes,
+    });
+    if (rateError) {
+      logStep("Error resolving booking rate", { error: rateError.message });
+      throw new Error("Failed to fetch price");
     }
-    let amountCents = priceCents!;
+    const rate = (Array.isArray(rateData) ? rateData[0] : rateData) as {
+      price_cents: number | null;
+      price_band_name: string | null;
+    } | null;
+    const priceCents: number | null = rate?.price_cents ?? null;
+    if (priceCents === null) throw new Error(`No price configured for duration (${durationMinutes} min)`);
+    logStep("Rate resolved", { priceCents, priceBand: rate?.price_band_name ?? null });
+    let amountCents = priceCents;
 
     // Partial voucher discount — identical semantics to create-checkout-session
     // (fully-free vouchers must go through voucher-redeem, sub-minimum clamps to 50c).

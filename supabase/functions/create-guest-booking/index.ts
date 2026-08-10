@@ -161,35 +161,28 @@ serve(async (req) => {
       }
     }
 
-    // ── Fetch price (court-specific, fallback to global) ──────────────────────
-    let priceCents: number | null = null;
+    // ── Fetch price via resolve_booking_rate (Band schlägt court_prices) ──────
+    const { data: rateData, error: rateError } = await supabaseAdmin.rpc("resolve_booking_rate", {
+      p_court_id: court_id,
+      p_start: start_time,
+      p_duration_minutes: durationMinutes,
+    });
 
-    const { data: courtPrice } = await supabaseAdmin
-      .from("court_prices")
-      .select("price_cents")
-      .eq("court_id", court_id)
-      .eq("duration_minutes", durationMinutes)
-      .maybeSingle();
-
-    if (courtPrice) {
-      priceCents = courtPrice.price_cents;
-      log("Using court-specific price", { priceCents });
-    } else {
-      const { data: globalPrice } = await supabaseAdmin
-        .from("court_prices")
-        .select("price_cents")
-        .is("court_id", null)
-        .eq("duration_minutes", durationMinutes)
-        .maybeSingle();
-      if (globalPrice) {
-        priceCents = globalPrice.price_cents;
-        log("Using global fallback price", { priceCents });
-      }
+    if (rateError) {
+      log("Error resolving booking rate", { error: rateError.message });
     }
+
+    const rate = (Array.isArray(rateData) ? rateData[0] : rateData) as {
+      price_cents: number | null;
+      price_band_name: string | null;
+    } | null;
+    const priceCents: number | null = rate?.price_cents ?? null;
 
     if (!priceCents) {
       throw new Error(`No price configured for ${durationMinutes}-minute slot`);
     }
+
+    log("Rate resolved", { priceCents, priceBand: rate?.price_band_name ?? null });
 
     // ── Check for overlapping bookings ────────────────────────────────────────
     // We rely on the DB exclusion constraint (no_overlapping_bookings) to be the

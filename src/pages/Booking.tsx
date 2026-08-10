@@ -13,6 +13,7 @@ import { LocationCard } from "@/components/booking/LocationCard";
 import { MyBookings } from "@/components/booking/MyBookings";
 import { useAuth } from "@/hooks/useAuth";
 import { useCourtsVisibility } from "@/hooks/useCourtsVisibility";
+import { fetchLocationMinPriceCents } from "@/hooks/useCourtPrices";
 import type { DbLocation } from "@/types/database";
 
 interface LocationWithAvailability extends DbLocation {
@@ -76,20 +77,10 @@ const Booking = () => {
 
           const courtIds = courts?.map(c => c.id) || [];
 
-          // Get minimum price for this location
+          // Günstigster Preis inkl. Zeitfenster-Bänder (aufgelöst in der DB)
           let minPriceCents: number | null = globalMinPrice;
           if (courtIds.length > 0) {
-            const { data: courtPrices } = await supabase
-              .from("court_prices")
-              .select("price_cents")
-              .in("court_id", courtIds)
-              .eq("duration_minutes", 60)
-              .order("price_cents", { ascending: true })
-              .limit(1);
-
-            if (courtPrices && courtPrices.length > 0) {
-              minPriceCents = courtPrices[0].price_cents;
-            }
+            minPriceCents = (await fetchLocationMinPriceCents(courtIds)) ?? minPriceCents;
           }
 
           if (!hours) {

@@ -11,6 +11,7 @@ interface EstimateRequest {
   price_cents?: number;
   start_time?: string;
   end_time?: string;
+  court_id?: string;
 }
 
 interface RewardBreakdown {
@@ -60,18 +61,23 @@ serve(async (req) => {
     // ── Determine booking duration in hours ──────────────────────────────
     let startTime = requestData.start_time;
     let endTime = requestData.end_time;
-    if (requestData.booking_id && (!startTime || !endTime)) {
+    let courtId = requestData.court_id;
+    if (requestData.booking_id) {
       const { data: bk } = await supabaseAdmin
         .from("bookings")
-        .select("start_time, end_time")
+        .select("court_id, start_time, end_time")
         .eq("id", requestData.booking_id)
         .maybeSingle();
-      if (bk) { startTime = (bk as any).start_time; endTime = (bk as any).end_time; }
+      if (bk) {
+        courtId = courtId ?? (bk as any).court_id;
+        if (!startTime || !endTime) { startTime = (bk as any).start_time; endTime = (bk as any).end_time; }
+      }
     }
     let durationMin = 60;
     if (startTime && endTime) {
       durationMin = Math.round((new Date(endTime).getTime() - new Date(startTime).getTime()) / 60000);
     }
+    const durationBucket = durationMin >= 120 ? 120 : durationMin >= 90 ? 90 : 60;
 
     // ── Admin-configurable fixed payback per booking length (60 / 90 / 120 min) ──
     const { data: settings } = await supabaseAdmin
@@ -83,6 +89,31 @@ serve(async (req) => {
     const rate90 = Number((settings as any)?.payback_points_90min ?? 150) || 0;
     const rate120 = Number((settings as any)?.payback_points_120min ?? 200) || 0;
     const base = durationMin >= 120 ? rate120 : durationMin >= 90 ? rate90 : rate60;
+
+    // ── Time-window band factor, resolved for the booking START time ──────
+    // Same resolution as the payback credit in stripe-webhook, so the preview
+    // can never differ from what is credited after payment.
+    let bandMultiplier = 1;
+    let pointsBandName: string | null = null;
+    if (courtId && startTime) {
+      try {
+        const { data: rateRows, error: rateError } = await supabaseAdmin.rpc("resolve_booking_rate", {
+          p_court_id: courtId,
+          p_start: startTime,
+          p_duration_minutes: durationBucket,
+        });
+        if (rateError) {
+          logStep("Band lookup failed — continuing with x1.0", { error: rateError.message });
+        } else {
+          const rate = Array.isArray(rateRows) ? (rateRows as any[])[0] : (rateRows as any);
+          const rawMult = Number(rate?.points_multiplier);
+          if (Number.isFinite(rawMult) && rawMult >= 0) bandMultiplier = rawMult;
+          pointsBandName = (rate?.points_band_name as string | null) ?? null;
+        }
+      } catch (rateErr) {
+        logStep("Band lookup failed — continuing with x1.0", { error: (rateErr as Error).message });
+      }
+    }
 
     // ── Expert-level multiplier (based on user's lifetime credits) ────────
     const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
@@ -107,21 +138,34 @@ serve(async (req) => {
       .maybeSingle();
     const levelName = (lvl as any)?.name as string | undefined;
 
-    const total_points = Math.round(base * multiplier);
+    const total_points = Math.round(base * bandMultiplier * multiplier);
+
+    // Deltas are derived from the running subtotal so the rows always add up to total_points.
+    const withBand = Math.round(base * bandMultiplier);
+    const bandDelta = withBand - base;
+    const levelDelta = total_points - withBand;
 
     const breakdown: RewardBreakdown[] = [
       {
         key: "BOOKING_PAYBACK",
         title: "Buchungs-Payback",
         points: base,
-        description: `${durationMin >= 120 ? "120" : durationMin >= 90 ? "90" : "60"} Min Buchung`,
+        description: `${durationBucket} Min Buchung`,
       },
     ];
-    if (multiplier !== 1 && total_points - base !== 0) {
+    if (bandDelta !== 0) {
+      breakdown.push({
+        key: "TIME_BAND",
+        title: `Zeitfenster-Bonus ×${bandMultiplier}${pointsBandName ? ` (${pointsBandName})` : ""}`,
+        points: bandDelta,
+        description: "Bonus für dieses Zeitfenster",
+      });
+    }
+    if (multiplier !== 1 && levelDelta !== 0) {
       breakdown.push({
         key: "LEVEL_MULTIPLIER",
         title: `Level-Bonus ×${multiplier}${levelName ? ` (${levelName})` : ""}`,
-        points: total_points - base,
+        points: levelDelta,
         description: "Dein Expert-Level-Multiplikator",
       });
     }
@@ -138,7 +182,7 @@ serve(async (req) => {
       multiplier,
       level_name: levelName,
     };
-    logStep("Estimate complete", { total_points, multiplier, levelName });
+    logStep("Estimate complete", { total_points, base, bandMultiplier, pointsBandName, multiplier, levelName });
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

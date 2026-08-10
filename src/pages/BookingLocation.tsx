@@ -40,6 +40,7 @@ const BookingLocation = () => {
     priceCents,
     hasPrices,
     courtPrices,
+    ratesByStart,
     user,
     lobbyEnabled,
     lobbySettings,
@@ -162,6 +163,7 @@ const BookingLocation = () => {
                 availableSlots={availableSlots}
                 loadingSlots={loadingSlots}
                 courtPrices={courtPrices}
+                ratesByStart={ratesByStart}
               />
 
               <BookingSummary

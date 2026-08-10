@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -10,8 +11,16 @@ export interface CourtPrice {
   price_cents: number;
 }
 
+// Noch nicht in queryKeys.ts gepflegt — bewusst lokal gehalten.
+const BOOKING_RATES_QUERY_KEY = "booking-rates";
+const COURT_MIN_PRICE_QUERY_KEY = "court-min-price";
+
 /**
  * Fetch global fallback prices (court_id = null)
+ *
+ * Altlast: `court_prices.court_id` ist seit Migration 20251219134814 NOT NULL —
+ * diese Abfrage kann nie treffen. Die "global"-Rolle übernehmen jetzt Bänder
+ * mit `court_id IS NULL` (siehe useResolvedBookingRates / useCourtMinPrice).
  */
 export function useGlobalPrices() {
   return useQuery({
@@ -190,4 +199,170 @@ export function getPriceFromList(prices: CourtPrice[] | undefined, durationMinut
   }
   const price = prices.find(p => p.duration_minutes === durationMinutes);
   return price?.price_cents ?? null;
+}
+
+/**
+ * Preis + Punkte-Faktor eines Slots, aufgelöst durch die Datenbank
+ * (Zeitfenster-Band schlägt court_prices, sonst heutiges Verhalten).
+ */
+export interface ResolvedBookingRate {
+  /** Startzeitpunkt wie von der DB zurückgegeben (ISO). */
+  startTime: string;
+  /** null = weder Band noch court_prices liefern einen Preis. */
+  priceCents: number | null;
+  /** 1 = kein Punkte-Band aktiv. */
+  pointsMultiplier: number;
+  priceBandName: string | null;
+  pointsBandName: string | null;
+}
+
+interface RawBookingRateRow {
+  start_time: string;
+  price_cents: number | null;
+  points_multiplier: number | string | null;
+  price_band_name: string | null;
+  points_band_name: string | null;
+}
+
+function toIso(value: string | Date): string {
+  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
+}
+
+function localDateKey(value: string | Date): string {
+  const d = value instanceof Date ? value : new Date(value);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/**
+ * Löst Preis + Punkte-Faktor für ALLE Slots eines Tages in EINEM Request auf
+ * (RPC `resolve_booking_rates_batch`). Die Bandlogik bleibt in der Datenbank,
+ * damit Anzeige und Checkout nicht auseinanderlaufen.
+ */
+export function useResolvedBookingRates({
+  courtId,
+  startTimes,
+  durationMinutes,
+}: {
+  courtId: string | null;
+  /** Startzeitpunkte aller Slots des angezeigten Tages. */
+  startTimes: Array<string | Date>;
+  durationMinutes: number;
+}) {
+  const startIsos = useMemo(() => startTimes.map(toIso), [startTimes]);
+  const dateKey = startIsos.length > 0 ? localDateKey(startIsos[0]) : null;
+
+  const query = useQuery({
+    queryKey: [BOOKING_RATES_QUERY_KEY, courtId, dateKey, durationMinutes],
+    queryFn: async (): Promise<ResolvedBookingRate[]> => {
+      const { data, error } = await (supabase as any).rpc("resolve_booking_rates_batch", {
+        p_court_id: courtId,
+        p_starts: startIsos,
+        p_duration_minutes: durationMinutes,
+      });
+
+      if (error) throw error;
+
+      return ((data ?? []) as RawBookingRateRow[]).map((row) => ({
+        startTime: row.start_time,
+        priceCents: row.price_cents ?? null,
+        // Kein `|| 1`: ein Band mit Multiplikator 0 (= keine Punkte) ist erlaubt und
+        // wuerde davon faelschlich zu x1. Gleiche Pruefung wie in den Edge Functions.
+        pointsMultiplier: (() => {
+          const raw = Number(row.points_multiplier ?? 1);
+          return Number.isFinite(raw) && raw >= 0 ? raw : 1;
+        })(),
+        priceBandName: row.price_band_name,
+        pointsBandName: row.points_band_name,
+      }));
+    },
+    enabled: !!courtId && startIsos.length > 0 && durationMinutes > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  /** Lookup über den Zeitstempel — String-Vergleich scheitert an DB-Formatierung. */
+  const ratesByStart = useMemo(() => {
+    const map = new Map<number, ResolvedBookingRate>();
+    for (const rate of query.data ?? []) {
+      map.set(new Date(rate.startTime).getTime(), rate);
+    }
+    return map;
+  }, [query.data]);
+
+  return {
+    rates: query.data,
+    ratesByStart,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    error: query.error,
+  };
+}
+
+/**
+ * Rate eines einzelnen Slots aus dem Ergebnis von `useResolvedBookingRates`.
+ * `undefined` = noch nicht geladen -> Aufrufer bleibt beim bisherigen Preis.
+ */
+export function getRateForStart(
+  ratesByStart: Map<number, ResolvedBookingRate>,
+  start: string | Date,
+): ResolvedBookingRate | undefined {
+  return ratesByStart.get(new Date(start).getTime());
+}
+
+/** "2" bzw. "1,5" — de-DE, ohne überflüssige Nachkommastellen. */
+export function formatPointsMultiplier(multiplier: number): string {
+  return new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 }).format(multiplier);
+}
+
+/**
+ * Günstigster Preis eines Courts über alle Dauern UND aktiven Bänder
+ * (RPC `court_min_price_cents`) — hält die "ab X €"-Anzeige ehrlich.
+ */
+export function useCourtMinPrice(courtId: string | null) {
+  return useQuery({
+    queryKey: [COURT_MIN_PRICE_QUERY_KEY, courtId],
+    queryFn: async (): Promise<number | null> => {
+      const { data, error } = await (supabase as any).rpc("court_min_price_cents", {
+        p_court_id: courtId,
+      });
+
+      if (error) throw error;
+      return (data as number | null) ?? null;
+    },
+    enabled: !!courtId,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+/**
+ * Günstigster Preis über alle Courts eines Standorts, inkl. Bänder.
+ * Liefert die RPC nichts, greift das bisherige Verhalten (günstigster
+ * 60-Minuten-Preis aus court_prices) statt einer leeren Anzeige.
+ */
+export async function fetchLocationMinPriceCents(courtIds: string[]): Promise<number | null> {
+  if (courtIds.length === 0) return null;
+
+  const results = await Promise.all(
+    courtIds.map(async (courtId) => {
+      const { data, error } = await (supabase as any).rpc("court_min_price_cents", {
+        p_court_id: courtId,
+      });
+      if (error) return null;
+      return (data as number | null) ?? null;
+    }),
+  );
+
+  const bandAware = results.filter((p): p is number => p !== null);
+  if (bandAware.length > 0) {
+    return Math.min(...bandAware);
+  }
+
+  const { data: courtPrices } = await supabase
+    .from("court_prices")
+    .select("price_cents")
+    .in("court_id", courtIds)
+    .eq("duration_minutes", 60)
+    .order("price_cents", { ascending: true })
+    .limit(1);
+
+  return courtPrices?.[0]?.price_cents ?? null;
 }

@@ -197,46 +197,43 @@ serve(async (req) => {
     const endTime = new Date(booking.end_time);
     const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / 60000);
 
-    // Get court-specific price from database, with fallback to global price
-    let priceCents: number | null = null;
+    // Preis UND Punkte-Faktor kommen aus resolve_booking_rate — der einzigen Wahrheit.
+    // Greift ein Zeitfenster-Band, gewinnt dessen Preis; sonst der court_prices-Standard.
+    const { data: rateData, error: rateError } = await supabaseAdmin.rpc("resolve_booking_rate", {
+      p_court_id: booking.court_id,
+      p_start: booking.start_time,
+      p_duration_minutes: durationMinutes,
+    });
 
-    // Try court-specific price first
-    const { data: courtPrice, error: courtPriceError } = await supabaseAdmin
-      .from("court_prices")
-      .select("price_cents")
-      .eq("court_id", booking.court_id)
-      .eq("duration_minutes", durationMinutes)
-      .maybeSingle();
-
-    if (courtPriceError) {
-      logStep("Error fetching court price", { error: courtPriceError.message });
+    if (rateError) {
+      logStep("Error resolving booking rate", { error: rateError.message });
+      throw new Error("Failed to fetch price");
     }
 
-    if (courtPrice) {
-      priceCents = courtPrice.price_cents;
-      logStep("Using court-specific price", { court_id: booking.court_id, priceCents });
-    } else {
-      // Fallback to global price
-      const { data: globalPrice, error: globalPriceError } = await supabaseAdmin
-        .from("court_prices")
-        .select("price_cents")
-        .is("court_id", null)
-        .eq("duration_minutes", durationMinutes)
-        .maybeSingle();
+    const rate = (Array.isArray(rateData) ? rateData[0] : rateData) as {
+      price_cents: number | null;
+      points_multiplier: number | string | null;
+      price_band_name: string | null;
+      points_band_name: string | null;
+    } | null;
 
-      if (globalPriceError) {
-        logStep("Error fetching global price", { error: globalPriceError.message });
-        throw new Error("Failed to fetch price");
-      }
+    const priceCents: number | null = rate?.price_cents ?? null;
+    // Kein `|| 1`: ein Band darf bewusst 0 setzen ("hier gibt es keine Punkte").
+    const rawMultiplier = Number(rate?.points_multiplier ?? 1);
+    const bandMultiplier = Number.isFinite(rawMultiplier) ? rawMultiplier : 1;
 
-      if (globalPrice) {
-        priceCents = globalPrice.price_cents;
-        logStep("Using global fallback price", { priceCents });
-      } else {
-        logStep("No price configured for duration", { duration: durationMinutes });
-        throw new Error(`No price configured for duration (${durationMinutes} min)`);
-      }
+    if (priceCents === null) {
+      logStep("No price configured for duration", { duration: durationMinutes });
+      throw new Error(`No price configured for duration (${durationMinutes} min)`);
     }
+
+    logStep("Rate resolved", {
+      court_id: booking.court_id,
+      priceCents,
+      priceBand: rate?.price_band_name ?? null,
+      pointsBand: rate?.points_band_name ?? null,
+      bandMultiplier,
+    });
 
     // Always charge the server-recomputed price — booking.price_cents may be client-inserted
     if (booking.price_cents !== priceCents) {
@@ -249,7 +246,7 @@ serve(async (req) => {
         .update({ price_cents: priceCents })
         .eq("id", booking.id);
     }
-    const totalPriceCents = priceCents!;
+    const totalPriceCents = priceCents;
     logStep("Price determined", { totalPriceCents });
 
     // Serialize checkout per booking so only ONE attempt can ever hold a points reserve
@@ -672,7 +669,8 @@ serve(async (req) => {
             p_user_id: bk.user_id,
           });
           const levelMultiplier = Number(multData ?? 1) || 1;
-          const creditsToAward = Math.round(base * levelMultiplier);
+          // Band-Faktor zählt mit, sonst weicht die Gutschrift von der Vorschau ab.
+          const creditsToAward = Math.round(base * bandMultiplier * levelMultiplier);
 
           if (creditsToAward > 0) {
             const { error: awardError } = await supabaseAdmin.rpc("increment_play_and_lifetime", {
@@ -686,7 +684,7 @@ serve(async (req) => {
               await supabaseAdmin.from("bookings")
                 .update({ play_credits_awarded: creditsToAward })
                 .eq("id", booking.id);
-              logStep("Free path: play credits awarded", { bookingId: booking.id, creditsToAward, durationMin, base, levelMultiplier });
+              logStep("Free path: play credits awarded", { bookingId: booking.id, creditsToAward, durationMin, base, bandMultiplier, pointsBand: rate?.points_band_name ?? null, levelMultiplier });
             }
           }
         }

@@ -1,11 +1,17 @@
 import { Loader2, AlertCircle, Check, ArrowRight, LayoutGrid, Calendar, Hourglass, Clock, type LucideIcon } from "lucide-react";
-import { format, startOfDay, addDays, isSameDay, isAfter } from "date-fns";
+import { format, startOfDay, addDays, isSameDay, isAfter, setHours, setMinutes } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
 import type { Court, TimeSlot } from "./types";
 import { SLOT_DURATIONS } from "@/types/constants";
-import { getPriceFromList, type CourtPrice } from "@/hooks/useCourtPrices";
+import {
+  getPriceFromList,
+  getRateForStart,
+  formatPointsMultiplier,
+  type CourtPrice,
+  type ResolvedBookingRate,
+} from "@/hooks/useCourtPrices";
 import { formatPrice } from "@/lib/pricing";
 
 interface BookingSlotPickerProps {
@@ -22,6 +28,16 @@ interface BookingSlotPickerProps {
   loadingSlots: boolean;
   /** Echte Preise (pro Dauer) für den gewählten Court; zeigt Preis auf den Dauer-Buttons. */
   courtPrices?: CourtPrice[];
+  /** Von der DB aufgelöste Preise/Punkte je Slot-Start (Zeitfenster-Bänder). */
+  ratesByStart?: Map<number, ResolvedBookingRate>;
+}
+
+const EMPTY_RATES = new Map<number, ResolvedBookingRate>();
+
+/** Muss exakt der Umrechnung in useBookingLocation/handleBooking entsprechen. */
+function slotStart(date: Date, time: string): Date {
+  const [hours, minutes] = time.split(':').map(Number);
+  return setMinutes(setHours(date, hours), minutes);
 }
 
 const CARD = "rounded-2xl border border-border/60 bg-gradient-card p-[22px]";
@@ -84,6 +100,7 @@ export function BookingSlotPicker({
   availableSlots,
   loadingSlots,
   courtPrices,
+  ratesByStart = EMPTY_RATES,
 }: BookingSlotPickerProps) {
   const { t, i18n } = useTranslation("booking");
   const dateLocale = i18n.language === "en" ? enUS : de;
@@ -95,6 +112,11 @@ export function BookingSlotPicker({
 
   const freeCount = availableSlots.filter((s) => s.available).length;
   const hasSlots = availableSlots.length > 0;
+
+  // Gilt nur für die aktuell gewählte Dauer — die Rates werden je Dauer aufgelöst.
+  const selectedSlotRate = selectedSlot
+    ? getRateForStart(ratesByStart, slotStart(selectedDate, selectedSlot.time))
+    : undefined;
 
   return (
     <div className="flex flex-col gap-4 min-w-0">
@@ -191,7 +213,10 @@ export function BookingSlotPicker({
           <div className="grid grid-cols-3 gap-2.5">
             {SLOT_DURATIONS.map((duration) => {
               const on = selectedDuration === duration;
-              const durationPrice = getPriceFromList(courtPrices, duration);
+              // Für die gewählte Dauer zählt der aufgelöste Bandpreis des Slots,
+              // damit die Anzeige nicht vom Checkout abweicht.
+              const resolvedPrice = on ? selectedSlotRate?.priceCents ?? null : null;
+              const durationPrice = resolvedPrice ?? getPriceFromList(courtPrices, duration);
               return (
                 <button
                   key={duration}
@@ -262,13 +287,15 @@ export function BookingSlotPicker({
               <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2">
                 {availableSlots.map((slot, index) => {
                   const on = selectedSlot?.time === slot.time;
+                  const rate = getRateForStart(ratesByStart, slotStart(selectedDate, slot.time));
+                  const pointsBonus = rate && rate.pointsMultiplier > 1 ? rate.pointsMultiplier : null;
                   return (
                     <button
                       key={index}
                       type="button"
                       disabled={!slot.available}
                       onClick={() => setSelectedSlot(slot)}
-                      className={`h-12 rounded-xl font-stat text-[13.5px] font-semibold transition-all ${
+                      className={`h-12 rounded-xl font-stat text-[13.5px] font-semibold transition-all flex flex-col items-center justify-center gap-0.5 ${
                         on
                           ? "bg-primary text-black border border-transparent shadow-[0_0_20px_hsl(var(--primary)/0.4)]"
                           : !slot.available
@@ -276,7 +303,18 @@ export function BookingSlotPicker({
                             : "bg-white/[0.03] text-foreground border border-[hsl(0_0%_16%)] hover:border-primary/55"
                       }`}
                     >
-                      {slot.time}
+                      <span>{slot.time}</span>
+                      {pointsBonus !== null && (
+                        <span
+                          className={`no-underline font-stat text-[10px] font-bold leading-none whitespace-nowrap rounded-full px-1.5 py-[3px] ${
+                            on
+                              ? "bg-black/85 text-primary"
+                              : "bg-primary/[0.12] text-primary border border-primary/30"
+                          }`}
+                        >
+                          ×{formatPointsMultiplier(pointsBonus)} Punkte
+                        </span>
+                      )}
                     </button>
                   );
                 })}

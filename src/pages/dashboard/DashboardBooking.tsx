@@ -39,6 +39,7 @@ import {
   EyeOff
 } from "lucide-react";
 import { useCourtsVisibility } from "@/hooks/useCourtsVisibility";
+import { fetchLocationMinPriceCents } from "@/hooks/useCourtPrices";
 import { format, isPast, parseISO } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
@@ -173,19 +174,10 @@ const DashboardBooking = () => {
 
             const courtIds = courts?.map(c => c.id) || [];
 
+            // Günstigster Preis inkl. Zeitfenster-Bänder (aufgelöst in der DB)
             let minPriceCents: number | null = globalMinPrice;
             if (courtIds.length > 0) {
-              const { data: courtPrices } = await supabase
-                .from("court_prices")
-                .select("price_cents")
-                .in("court_id", courtIds)
-                .eq("duration_minutes", 60)
-                .order("price_cents", { ascending: true })
-                .limit(1);
-
-              if (courtPrices && courtPrices.length > 0) {
-                minPriceCents = courtPrices[0].price_cents;
-              }
+              minPriceCents = (await fetchLocationMinPriceCents(courtIds)) ?? minPriceCents;
             }
 
             if (!hours) {

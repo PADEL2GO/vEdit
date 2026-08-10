@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { setHours, setMinutes, addMinutes } from "date-fns";
 import { useBookingSlots } from "@/hooks/useBookingSlots";
-import { useCourtPricesWithFallback, getPriceFromList } from "@/hooks/useCourtPrices";
+import { useCourtPricesWithFallback, getPriceFromList, useResolvedBookingRates } from "@/hooks/useCourtPrices";
 import { invokeEdgeFunction } from "@/lib/edgeFunctionUtils";
 import type { Court, TimeSlot } from "@/components/booking/types";
 import type { DbLocation } from "@/types/database";
@@ -43,6 +43,23 @@ export function useBookingLocation(slug: string | undefined) {
   // Calculate price from court-specific prices
   const priceCents = getPriceFromList(courtPrices, selectedDuration);
   const hasPrices = priceCents !== null;
+
+  // Identische Umrechnung wie in handleBooking — Anzeige und Buchung müssen
+  // denselben Zeitpunkt meinen, sonst greift ein anderes Zeitfenster-Band.
+  const slotStartTimes = useMemo(
+    () =>
+      availableSlots.map((slot) => {
+        const [hours, minutes] = slot.time.split(':').map(Number);
+        return setMinutes(setHours(selectedDate, hours), minutes);
+      }),
+    [availableSlots, selectedDate]
+  );
+
+  const { ratesByStart } = useResolvedBookingRates({
+    courtId: selectedCourt,
+    startTimes: slotStartTimes,
+    durationMinutes: selectedDuration,
+  });
 
   const fetchLocation = useCallback(async () => {
     if (!slug) return;
@@ -255,6 +272,7 @@ export function useBookingLocation(slug: string | undefined) {
     priceCents,
     hasPrices,
     courtPrices,
+    ratesByStart,
     user,
     lobbyEnabled,
     lobbySettings,

@@ -9,6 +9,7 @@ import {
   Gauge,
   Calendar,
   MapPin,
+  CalendarClock,
   Building2,
   KeyRound,
   Ticket,
@@ -50,6 +51,7 @@ const NAV_GROUPS = [
     items: [
       { title: "Buchungen", url: "/admin/bookings", icon: Calendar },
       { title: "Courts & Standorte", url: "/admin/courts", icon: MapPin },
+      { title: "Preise & Punkte", url: "/admin/pricing", icon: CalendarClock },
       { title: "Clubs", url: "/admin/clubs", icon: Building2 },
       { title: "Club Owners", url: "/admin/club-owners", icon: KeyRound },
       { title: "Events", url: "/admin/events", icon: Ticket },
