@@ -5,15 +5,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Select, 
   SelectContent, 
@@ -47,7 +57,8 @@ import {
   Mail,
   UserPlus,
   UserMinus,
-  X
+  X,
+  AlertTriangle
 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
@@ -114,6 +125,8 @@ export default function AdminClubs() {
   const [isCourtDialogOpen, setIsCourtDialogOpen] = useState(false);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [editingClub, setEditingClub] = useState<Club | null>(null);
+  const [pendingDeleteClub, setPendingDeleteClub] = useState<Club | null>(null);
+  const [pendingRemoveUser, setPendingRemoveUser] = useState<ClubUser | null>(null);
   
   // Club form state
   const [clubName, setClubName] = useState("");
@@ -682,11 +695,7 @@ export default function AdminClubs() {
                       variant="outline"
                       size="sm"
                       className="h-9 w-9 rounded-[10px] border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] p-0 text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
-                      onClick={() => {
-                        if (confirm("Club wirklich löschen? Alle Zuweisungen werden entfernt.")) {
-                          deleteClubMutation.mutate(selectedClub.id);
-                        }
-                      }}
+                      onClick={() => setPendingDeleteClub(selectedClub)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -1097,11 +1106,7 @@ export default function AdminClubs() {
                                       variant="ghost"
                                       size="icon"
                                       className="h-[30px] w-[30px] rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
-                                      onClick={() => {
-                                        if (confirm("Benutzer wirklich aus dem Club entfernen?")) {
-                                          removeUserMutation.mutate(clubUser.id);
-                                        }
-                                      }}
+                                      onClick={() => setPendingRemoveUser(clubUser)}
                                       disabled={removeUserMutation.isPending}
                                     >
                                       <UserMinus className="h-3.5 w-3.5" />
@@ -1155,6 +1160,68 @@ export default function AdminClubs() {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={!!pendingDeleteClub} onOpenChange={(open) => { if (!open) setPendingDeleteClub(null); }}>
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Club wirklich löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              <strong className="text-foreground">{pendingDeleteClub?.name}</strong> wird gelöscht.
+              Alle Court-Zuweisungen und Mitglieder werden entfernt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDeleteClub) deleteClubMutation.mutate(pendingDeleteClub.id);
+              }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!pendingRemoveUser} onOpenChange={(open) => { if (!open) setPendingRemoveUser(null); }}>
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Benutzer wirklich aus dem Club entfernen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              <strong className="text-foreground">
+                {pendingRemoveUser?.profile?.display_name || pendingRemoveUser?.profile?.username || "Der Benutzer"}
+              </strong>{" "}
+              verliert den Zugriff auf das Club-Portal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingRemoveUser) removeUserMutation.mutate(pendingRemoveUser.id);
+              }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Entfernen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

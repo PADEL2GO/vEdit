@@ -8,8 +8,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { TranslatableField } from "@/components/admin/TranslatableField";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { ImagePlus, Trash2, Plus, ImageIcon } from "lucide-react";
+import { ImagePlus, Trash2, Plus, ImageIcon, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -23,6 +33,7 @@ const AdminTouchpointSlides = () => {
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [creating, setCreating] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<PartnerTouchpointSlide | null>(null);
 
   const runTranslate = (id: string) => {
     translateRow({ table: "partner_touchpoint_slides", id, fields: TRANSLATABLE_FIELDS }).then((result) => {
@@ -91,8 +102,7 @@ const AdminTouchpointSlides = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Slide wirklich löschen?")) return;
+  const confirmDelete = async (id: string) => {
     try {
       await deleteMutation.mutateAsync(id);
       toast.success("Slide gelöscht");
@@ -219,7 +229,7 @@ const AdminTouchpointSlides = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDelete(slide.id)}
+                      onClick={() => setPendingDelete(slide)}
                       className="ml-auto h-[34px] w-[34px] rounded-[9px] border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] p-0 text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B] sm:ml-0 sm:self-start"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -238,6 +248,36 @@ const AdminTouchpointSlides = () => {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Slide wirklich löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              <strong className="text-foreground">{pendingDelete?.title}</strong> wird gelöscht.
+              Der Slide verschwindet aus dem Karussell.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDelete) confirmDelete(pendingDelete.id);
+              }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };

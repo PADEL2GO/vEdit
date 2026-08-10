@@ -12,7 +12,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AlertTriangle, ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export interface WritingStyle {
@@ -46,6 +56,7 @@ export function WritingStyleManager({
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState<WritingStyle | null>(null);
   const [creating, setCreating] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<WritingStyle | null>(null);
   const [name, setName] = useState("");
   const [sample, setSample] = useState("");
 
@@ -104,6 +115,7 @@ export function WritingStyleManager({
   });
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[88vh] w-[calc(100vw-32px)] max-w-[560px] gap-[17px] overflow-y-auto rounded-[20px] border-[hsl(0_0%_15%)] bg-[linear-gradient(180deg,hsl(0_0%_7%),hsl(0_0%_4%))] p-6">
         <DialogHeader className="space-y-0 pr-8 text-left">
@@ -204,7 +216,7 @@ export function WritingStyleManager({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => deleteMutation.mutate(s.id)}
+                    onClick={() => setPendingDelete(s)}
                     disabled={deleteMutation.isPending}
                     title="Löschen"
                     className="h-[30px] w-[30px] flex-none rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
@@ -226,5 +238,41 @@ export function WritingStyleManager({
         )}
       </DialogContent>
     </Dialog>
+
+    <AlertDialog
+      open={!!pendingDelete}
+      onOpenChange={(o) => {
+        if (!o) setPendingDelete(null);
+      }}
+    >
+      <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+        <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+          <AlertTriangle className="h-5 w-5" />
+        </span>
+        <AlertDialogHeader className="space-y-[7px] text-left">
+          <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+            Schreibstil wirklich löschen?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+            Der Stil <strong className="text-foreground">„{pendingDelete?.name}“</strong> wird
+            gelöscht und steht dem KI-Generator nicht mehr als Vorlage zur Verfügung.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2.5">
+          <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+            Abbrechen
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              if (pendingDelete) deleteMutation.mutate(pendingDelete.id);
+            }}
+            className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+          >
+            Löschen
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

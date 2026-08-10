@@ -400,7 +400,7 @@ function MarketplaceReturnsSection() {
   const [notes, setNotes] = useState<Record<string, string>>({});
 
   const list = returns ?? [];
-  const openReturns = list.filter((r) => r.status === "requested").length;
+  const openReturns = list.filter((r) => r.status === "requested" || r.status === "received").length;
 
   const saveNote = (id: string, current: string | null) => {
     const value = notes[id];

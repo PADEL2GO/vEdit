@@ -14,6 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -23,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertTriangle,
   ChevronDown,
   Eye,
   FileUp,
@@ -155,6 +166,7 @@ function AuthorManager() {
   const deleteMutation = useDeleteNewsAuthor();
   const [newName, setNewName] = useState("");
   const [newRole, setNewRole] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<NewsAuthor | null>(null);
 
   const save = (a: NewsAuthor, patch: Partial<NewsAuthor>) =>
     saveMutation.mutate({
@@ -272,9 +284,7 @@ function AuthorManager() {
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 flex-none rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
-                onClick={() => {
-                  if (confirm(`Autor „${a.name}" löschen? Artikel behalten dann keinen Autor.`)) deleteMutation.mutate(a.id);
-                }}
+                onClick={() => setPendingDelete(a)}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -306,6 +316,41 @@ function AuthorManager() {
           </Button>
         </div>
       </div>
+
+      <AlertDialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+      >
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Autor wirklich löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              <strong className="text-foreground">„{pendingDelete?.name}“</strong> wird gelöscht.
+              Artikel behalten dann keinen Autor.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDelete) deleteMutation.mutate(pendingDelete.id);
+              }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
@@ -411,6 +456,7 @@ export default function AdminNews() {
   const [styleManagerOpen, setStyleManagerOpen] = useState(false);
   const { data: writingStyles = [] } = useWritingStyles();
   const [translatingId, setTranslatingId] = useState<string | null>(null);
+  const [pendingDeleteArticle, setPendingDeleteArticle] = useState<Article | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | "live" | "draft">("all");
   const [topicFilter, setTopicFilter] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -1056,9 +1102,7 @@ export default function AdminNews() {
                           variant="outline"
                           size="icon"
                           className="h-[30px] w-[30px] rounded-lg border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
-                          onClick={() => {
-                            if (confirm("Artikel wirklich löschen?")) deleteMutation.mutate(a.id);
-                          }}
+                          onClick={() => setPendingDeleteArticle(a)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -1557,6 +1601,41 @@ export default function AdminNews() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={!!pendingDeleteArticle}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteArticle(null);
+        }}
+      >
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Artikel wirklich löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              Der Artikel <strong className="text-foreground">„{pendingDeleteArticle?.title}“</strong>{" "}
+              wird dauerhaft gelöscht.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDeleteArticle) deleteMutation.mutate(pendingDeleteArticle.id);
+              }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

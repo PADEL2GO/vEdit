@@ -19,7 +19,7 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 
 ## Bugs / Inkonsistenzen
 
-1. **AdminSettings: Platzhalter ohne Backend** — „Allgemeine Einstellungen" (App Name, Zeitzone), „Wartungsmodus", „Benachrichtigungen" (3 Schalter) und „Sicherheit" (2FA, Session-Timeout) haben **kein** Backend: kein `app_name`-/Maintenance-Flag in Migrationen oder Code gefunden, die Schalter sind unkontrolliert (Zustand geht beim Reload verloren). Seit dem Redesign sichtbar als „UI-Platzhalter · ohne Backend" markiert. **Entscheidung nötig:** verdrahten (in `site_settings`) oder entfernen — sonst entsteht falsches Vertrauen (v. a. bei „Zwei-Faktor-Authentifizierung").
+1. ✅ **ENTSCHIEDEN + UMGESETZT (2026-08-10, Florians Entscheid: entfernen):** Die Platzhalter-Karten (App Name, Zeitzone, Wartungsmodus, Benachrichtigungen, 2FA, Session-Timeout) sind von der Einstellungen-Seite entfernt, bis die Features existieren. Nur die echten PIN-Sperren bleiben. Ursprünglicher Fund: **AdminSettings: Platzhalter ohne Backend** — „Allgemeine Einstellungen" (App Name, Zeitzone), „Wartungsmodus", „Benachrichtigungen" (3 Schalter) und „Sicherheit" (2FA, Session-Timeout) haben **kein** Backend: kein `app_name`-/Maintenance-Flag in Migrationen oder Code gefunden, die Schalter sind unkontrolliert (Zustand geht beim Reload verloren). Seit dem Redesign sichtbar als „UI-Platzhalter · ohne Backend" markiert. **Entscheidung nötig:** verdrahten (in `site_settings`) oder entfernen — sonst entsteht falsches Vertrauen (v. a. bei „Zwei-Faktor-Authentifizierung").
 2. **AdminOverview:** „Buchungen heute/Woche" zählen nur `status=confirmed`, die Liste „Letzte Buchungen" zeigt alle Status — Zahlen wirken inkonsistent zueinander. Court-Filter wechselt zudem das Limit (10 gefiltert vs. 5 ungefiltert). Kontingent-Minuten ohne Tausenderpunkt („8160 / 12000 Min").
 3. **AdminBookings:** Status-Filter-Default „Bestätigt" versteckt stornierte/ausstehende Buchungen beim ersten Öffnen. Suchfeld ist nur in der Listenansicht sichtbar, filtert aber unsichtbar auch den Kalender mit. Club-Farbe inkonsistent (Kalender violett, Design blau, alte Tabelle lime) → plattformweit vereinheitlichen. Nebenbei behoben: invalides nested-`<p>` im Reset-Dialog (React-Hydration-Warnung).
 4. **AdminCourts:** Toter `xs:`-Breakpoint — `xs` ist in tailwind.config.ts nicht definiert, `hidden xs:inline`-Labels wurden nie angezeigt (auf `sm:` korrigiert). Projekt-weiter Grep nach `xs:` lohnt.
@@ -32,7 +32,7 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 
 10. **AdminVouchers:** ✅ **Zeitzonen-Bug BEHOBEN 2026-08-04** — Befüllen konvertiert UTC→lokal (`date-fns format`), Speichern lokal→UTC (`toISOString()`), beide Richtungen für Create+Update. ✅ Ebenfalls behoben (2026-08-04): `toggleMutation` hat jetzt `onError`-Toast; `handleUpdate` meldet leeren Code. Offen: DB-Fehler landen roh/englisch im Toast.
 11. **AdminP2GPoints / LocationTeasers / SkyPadel:** `parseInt(...) || 0`-Muster macht Zahlenfelder beim Tippen nicht leerbar (springt auf 0) — betrifft mehrere Seiten. SkyPadel: `handleSortChange` feuert auch ohne Wertänderung; Datei-Input wird nach Upload nicht zurückgesetzt (gleiche Datei zweimal wählen geht nicht); Bild-Löschen entfernt nur die DB-Zeile, Storage-Datei bleibt verwaist.
-12. **`confirm()`-Dialoge vereinheitlichen:** LocationTeasers, SkyPadel, Clubs, ClubOwners (dort sogar ganz ohne Bestätigung) nutzen native/keine Dialoge, Events/Vouchers/Marketplace haben AlertDialogs → einheitlich AlertDialog.
+12. ✅ **confirm()→AlertDialog-Sweep KOMPLETT (2026-08-10):** Alle 15 nativen confirm()-Stellen (Clubs ×2, Teasers, SkyPadel, Slides, QR ×2, News ×2, Partner, Expert-Level, Katalog, Kamera-Keys, Newsletter-Reset als Amber-Variante) durch gestylte AlertDialogs ersetzt; Schreibstil-Löschen (vorher GANZ ohne Bestätigung) abgesichert. Kein natives confirm() mehr im Admin.
 13. **Geteilte `TranslatableField`-Komponente** hat noch den alten Stil (amber Lock-Badge; Design: lime DE / hellblau EN „DeepL") — zentraler Redesign-Pass wirkt auf viele Admin-Seiten.
 
 14. **AdminPartnerTiles:** ✅ try/catch + Fehler-Toast bei `handleSortChange` nachgerüstet (2026-08-04). Offen: feuert weiterhin pro Tastendruck (Debounce/onBlur wäre besser). Seitentext „alle Felder speichern sofort" stimmt für die Beschreibung nicht (speichert per Button).
@@ -75,7 +75,7 @@ Ziel: Admin-Bereich intuitiver machen + Bugs/Inkonsistenzen festhalten. Wird pro
 **Wichtige Semantik-Hinweise (von den Wiring-Agenten):**
 - Overview-Umsatz = berechneter Buchungswert; wenn Punkte-als-Rabatt live geht, wäre Cash-Umsatz über `payments.amount_total_cents` sauberer. Clientseitige Summierung deckelt theoretisch bei >1.000 Zeilen/Zeitraum → langfristig SQL-Aggregat-RPC.
 - Bookings „Zahlung" zeigt den Modus, nicht den Zahlungseingang.
-- Retouren-Pill zählt nur `requested` (Konvention der Bestellungen-Sektion); `received` mitzählen wäre eine Ein-Zeilen-Änderung.
+- ✅ Retouren-Zählung (2026-08-10, Florians Entscheid): `requested` + `received` zählen als offen — Tab-Pill und Sektions-Badge umgestellt.
 - Mitteilungen-Suche: Treffer erst ab 2 Zeichen; Sonderzeichen `% _ , ( )` werden aus dem Suchbegriff entfernt.
 - Buchungen-Reset erfordert jetzt zwingend das Tippen von „LÖSCHEN"; Standortwechsel resettet den Court-Filter.
 

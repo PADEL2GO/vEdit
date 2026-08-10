@@ -8,8 +8,18 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TranslatableField } from "@/components/admin/TranslatableField";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Upload, Trash2, Plus, ImageIcon } from "lucide-react";
+import { AlertTriangle, Upload, Trash2, Plus, ImageIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -21,6 +31,7 @@ const AdminPartnerTiles = () => {
   const [newName, setNewName] = useState("");
   const [newSlug, setNewSlug] = useState("");
   const [newType, setNewType] = useState<"equipment" | "local">("equipment");
+  const [pendingDelete, setPendingDelete] = useState<PartnerTile | null>(null);
 
   const runTranslate = (id: string) => {
     translateRow({ table: "partner_tiles", id, fields: ["description"] }).then((result) => {
@@ -81,8 +92,7 @@ const AdminPartnerTiles = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Partner wirklich löschen?")) return;
+  const confirmDelete = async (id: string) => {
     try {
       await deleteMutation.mutateAsync(id);
       toast.success("Partner gelöscht");
@@ -264,7 +274,7 @@ const AdminPartnerTiles = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(tile.id)}
+                          onClick={() => setPendingDelete(tile)}
                           className="h-[34px] w-[34px] flex-none rounded-[9px] border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] p-0 text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -308,6 +318,41 @@ const AdminPartnerTiles = () => {
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+      >
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Partner wirklich löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              Der Partner <strong className="text-foreground">{pendingDelete?.name}</strong>{" "}
+              verschwindet von der Homepage.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDelete) confirmDelete(pendingDelete.id);
+              }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };

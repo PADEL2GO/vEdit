@@ -6,11 +6,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Plus, Trash2, Check, X, Pencil, ImagePlus, ImageOff } from "lucide-react";
+import { AlertTriangle, Loader2, Plus, Trash2, Check, X, Pencil, ImagePlus, ImageOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -54,6 +64,7 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<Row | null>(null);
   const [logoUploadId, setLogoUploadId] = useState<string | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -275,9 +286,7 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
                       size="icon"
                       variant="ghost"
                       className={ICON_BTN_DANGER}
-                      onClick={() => {
-                        if (confirm(`"${row.name}" wirklich löschen?`)) del.mutate(row.id);
-                      }}
+                      onClick={() => setPendingDelete(row)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -287,6 +296,35 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
             ))
           )}
         </div>
+
+        {/* Lösch-Bestätigung — rendert via Radix-Portal über dem offenen Dialog */}
+        <AlertDialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+          <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+            <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+              <AlertTriangle className="h-5 w-5" />
+            </span>
+            <AlertDialogHeader className="space-y-[7px] text-left">
+              <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+                {isCategory ? "Kategorie wirklich löschen?" : "Marke wirklich löschen?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+                <strong className="text-foreground">{pendingDelete?.name}</strong> wird dauerhaft aus dem
+                Katalog entfernt.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2.5">
+              <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+                Abbrechen
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => { if (pendingDelete) del.mutate(pendingDelete.id); }}
+                className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+              >
+                Löschen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );

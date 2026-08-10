@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  AlertTriangle,
   Send,
   Save,
   Loader2,
@@ -396,14 +397,12 @@ export default function AdminNewsletter() {
     }
   };
 
+  // Reset-Bestätigung läuft über das amber AlertDialog unten; pendingReset hält
+  // die Kampagne bis zur Bestätigung. Bewusst ohne busyRef-Guard — resetCampaign
+  // hatte nie einen.
+  const [pendingReset, setPendingReset] = useState<Campaign | null>(null);
+
   const resetCampaign = async (id: string) => {
-    if (
-      !window.confirm(
-        "Kampagne wirklich auf Entwurf zurücksetzen? Ein erneutes Senden kann bereits beschickte Empfänger doppelt erreichen.",
-      )
-    ) {
-      return;
-    }
     const { error } = await db.from("newsletter_campaigns").update({ status: "draft" }).eq("id", id);
     if (error) {
       toast.error("Zurücksetzen fehlgeschlagen");
@@ -814,7 +813,7 @@ export default function AdminNewsletter() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => resetCampaign(c.id)}
+                            onClick={() => setPendingReset(c)}
                             className="h-7 flex-none gap-1.5 rounded-lg border border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.09)] px-[11px] text-[11.5px] font-bold text-[#FFC44D] hover:bg-[hsl(41_100%_65%/0.18)] hover:text-[#FFC44D]"
                           >
                             <RotateCcw className="h-3 w-3" /> Zurücksetzen
@@ -838,6 +837,36 @@ export default function AdminNewsletter() {
             </Card>
           </div>
         </div>
+
+        {/* Reset-Bestätigung (amber Warn-Variante, ersetzt window.confirm) */}
+        <AlertDialog open={!!pendingReset} onOpenChange={(open) => { if (!open) setPendingReset(null); }}>
+          <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+            <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(41_100%_65%/0.3)] bg-[hsl(41_100%_65%/0.1)] text-[#FFC44D]">
+              <AlertTriangle className="h-5 w-5" />
+            </span>
+            <AlertDialogHeader className="space-y-[7px] text-left">
+              <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+                Kampagne auf Entwurf zurücksetzen?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+                <strong className="text-foreground">{pendingReset?.subject || "(kein Betreff)"}</strong>{" "}
+                wird wieder zum Entwurf. Ein erneutes Senden kann bereits beschickte Empfänger doppelt
+                erreichen.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2.5">
+              <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+                Abbrechen
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => { if (pendingReset) resetCampaign(pendingReset.id); }}
+                className="h-10 rounded-[11px] bg-[#FFC44D] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ffd27a]"
+              >
+                Zurücksetzen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );

@@ -5,12 +5,22 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Loader2, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Pencil, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface ExpertLevel {
@@ -53,6 +63,7 @@ export function P2GExpertLevelsTab() {
   const queryClient = useQueryClient();
   const [editingLevel, setEditingLevel] = useState<ExpertLevel | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<ExpertLevel | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     minPoints: 0,
@@ -285,9 +296,7 @@ export function P2GExpertLevelsTab() {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 rounded-lg border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
-                          onClick={() => {
-                            if (confirm(`Level "${level.name}" wirklich löschen?`)) deleteMutation.mutate(level.id);
-                          }}
+                          onClick={() => setPendingDelete(level)}
                         >
                           <Trash2 className="h-[13px] w-[13px]" />
                         </Button>
@@ -509,6 +518,35 @@ export function P2GExpertLevelsTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Lösch-Bestätigung */}
+      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Level wirklich löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              Das Expert Level <strong className="text-foreground">{pendingDelete?.name}</strong> wird
+              dauerhaft entfernt. Diese Aktion kann nicht rückgängig gemacht werden.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { if (pendingDelete) deleteMutation.mutate(pendingDelete.id); }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -263,7 +263,7 @@ const AdminMarketplace = () => {
       const { count, error } = await (supabase as any)
         .from("marketplace_returns")
         .select("*", { count: "exact", head: true })
-        .eq("status", "requested");
+        .in("status", ["requested", "received"]);
       if (error) throw error;
       return (count as number | null) ?? 0;
     },

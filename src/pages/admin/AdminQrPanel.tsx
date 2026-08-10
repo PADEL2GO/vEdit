@@ -4,6 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { TranslatableField } from "@/components/admin/TranslatableField";
 import { useTranslateContent, toastTranslateResult } from "@/hooks/useTranslateContent";
 import {
@@ -16,6 +26,7 @@ import {
 } from "@/hooks/useQrSections";
 import { toast } from "sonner";
 import {
+  AlertTriangle,
   Plus,
   Trash2,
   ChevronUp,
@@ -74,6 +85,7 @@ const SectionEditor = ({
   });
   const [saving, setSaving] = useState(false);
   const [uploadingLang, setUploadingLang] = useState<QrLang | null>(null);
+  const [pendingRemoveFile, setPendingRemoveFile] = useState<QrLang | null>(null);
   const fileInputDe = useRef<HTMLInputElement | null>(null);
   const fileInputEn = useRef<HTMLInputElement | null>(null);
 
@@ -150,10 +162,15 @@ const SectionEditor = ({
     }
   };
 
-  const handleRemoveFile = async (lang: QrLang) => {
+  const handleRemoveFile = (lang: QrLang) => {
     const url = lang === "de" ? section.file_de_url : section.file_en_url;
     if (!url) return;
-    if (!confirm(`Datei (${lang.toUpperCase()}) wirklich entfernen?`)) return;
+    setPendingRemoveFile(lang);
+  };
+
+  const confirmRemoveFile = async (lang: QrLang) => {
+    const url = lang === "de" ? section.file_de_url : section.file_en_url;
+    if (!url) return;
     try {
       await updateSection.mutateAsync(
         lang === "de"
@@ -365,6 +382,44 @@ const SectionEditor = ({
           </div>
         </div>
       </div>
+
+      <AlertDialog
+        open={!!pendingRemoveFile}
+        onOpenChange={(open) => {
+          if (!open) setPendingRemoveFile(null);
+        }}
+      >
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Datei wirklich entfernen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              Die Datei{" "}
+              <strong className="text-foreground">
+                {(pendingRemoveFile === "de" ? section.file_de_name : section.file_en_name) ?? "Datei"}
+              </strong>{" "}
+              ({pendingRemoveFile?.toUpperCase()}) wird aus dieser Sektion entfernt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingRemoveFile) confirmRemoveFile(pendingRemoveFile);
+              }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Entfernen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
@@ -374,6 +429,7 @@ const AdminQrPanel = () => {
     useQrSections(true);
   const [newTitle, setNewTitle] = useState("");
   const [creating, setCreating] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<QrSection | null>(null);
 
   const handleCreate = async () => {
     if (!newTitle.trim()) return;
@@ -402,8 +458,7 @@ const AdminQrPanel = () => {
     }
   };
 
-  const handleDelete = async (section: QrSection) => {
-    if (!confirm(`Sektion "${section.title}" wirklich löschen? Dateien werden mit entfernt.`)) return;
+  const confirmDelete = async (section: QrSection) => {
     try {
       await deleteSection.mutateAsync(section);
       toast.success("Sektion gelöscht");
@@ -485,12 +540,47 @@ const AdminQrPanel = () => {
                 isLast={index === sections.length - 1}
                 onMoveUp={() => handleMove(index, -1)}
                 onMoveDown={() => handleMove(index, 1)}
-                onDelete={() => handleDelete(section)}
+                onDelete={() => setPendingDelete(section)}
               />
             ))}
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+      >
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Sektion wirklich löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              Die Sektion <strong className="text-foreground">„{pendingDelete?.title}“</strong> wird
+              gelöscht. Hochgeladene Dateien werden mit entfernt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDelete) confirmDelete(pendingDelete);
+              }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };

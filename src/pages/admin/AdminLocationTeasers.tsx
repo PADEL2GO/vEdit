@@ -10,9 +10,19 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { TranslatableField } from "@/components/admin/TranslatableField";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, MapPin, Image as ImageIcon, ImagePlus, CalendarClock } from "lucide-react";
+import { Plus, Pencil, Trash2, MapPin, Image as ImageIcon, ImagePlus, CalendarClock, AlertTriangle } from "lucide-react";
 
 interface TeaserForm {
   title: string;
@@ -62,6 +72,7 @@ export default function AdminLocationTeasers() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<TeaserForm>(emptyForm);
   const [uploading, setUploading] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<LocationTeaser | null>(null);
 
   const runTranslate = (id: string) => {
     translateRow({ table: "location_teasers", id, fields: TRANSLATABLE_FIELDS }).then((result) => {
@@ -265,9 +276,7 @@ export default function AdminLocationTeasers() {
                       variant="outline"
                       size="icon"
                       className="h-9 w-9 rounded-[10px] border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
-                      onClick={() => {
-                        if (confirm("Teaser wirklich löschen?")) deleteMutation.mutate(t.id);
-                      }}
+                      onClick={() => setPendingDelete(t)}
                     >
                       <Trash2 className="h-[15px] w-[15px]" />
                     </Button>
@@ -427,6 +436,36 @@ export default function AdminLocationTeasers() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Teaser wirklich löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              <strong className="text-foreground">{pendingDelete?.title}</strong> wird gelöscht und
+              verschwindet von der Homepage.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDelete) deleteMutation.mutate(pendingDelete.id);
+              }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

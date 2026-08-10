@@ -7,8 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { TranslatableField } from "@/components/admin/TranslatableField";
 import { toast } from "sonner";
-import { Upload, Trash2, GripVertical, ImageIcon, ExternalLink } from "lucide-react";
+import { Upload, Trash2, GripVertical, ImageIcon, ExternalLink, AlertTriangle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -18,6 +28,7 @@ const AdminSkyPadelGallery = () => {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<SkyPadelGalleryImage | null>(null);
 
   const runTranslate = (id: string) => {
     translateRow({ table: "skypadel_gallery", id, fields: ["alt_text"] }).then((result) => {
@@ -43,8 +54,7 @@ const AdminSkyPadelGallery = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bild wirklich löschen?")) return;
+  const confirmDelete = async (id: string) => {
     try {
       await deleteMutation.mutateAsync(id);
       toast.success("Bild gelöscht");
@@ -167,7 +177,7 @@ const AdminSkyPadelGallery = () => {
                       variant="ghost"
                       size="icon"
                       title="Bild löschen"
-                      onClick={() => handleDelete(img.id)}
+                      onClick={() => setPendingDelete(img)}
                       className="mt-[18px] h-[34px] w-[34px] flex-none rounded-[9px] border border-[hsl(0_100%_71%/0.26)] bg-[hsl(0_100%_71%/0.07)] text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.16)] hover:text-[#FF6B6B]"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -179,6 +189,36 @@ const AdminSkyPadelGallery = () => {
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+        <AlertDialogContent className="gap-4 rounded-[20px] border-[hsl(0_0%_15%)] bg-gradient-to-b from-[hsl(0_0%_7%)] to-[hsl(0_0%_4%)] p-6 sm:max-w-[430px] sm:rounded-[20px]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[13px] border border-[hsl(0_100%_71%/0.3)] bg-[hsl(0_100%_71%/0.1)] text-[#FF6B6B]">
+            <AlertTriangle className="h-5 w-5" />
+          </span>
+          <AlertDialogHeader className="space-y-[7px] text-left">
+            <AlertDialogTitle className="font-display text-[19px] font-extrabold tracking-tight text-foreground">
+              Bild wirklich löschen?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-[1.55] text-[hsl(0_0%_68%)]">
+              Das Bild wird aus der Galerie der „Für Vereine“-Seite entfernt. Die Datei bleibt im
+              Storage erhalten.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2.5">
+            <AlertDialogCancel className="h-10 rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5 px-4 text-[13.5px] font-bold text-[hsl(0_0%_80%)] hover:bg-white/10 hover:text-foreground">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingDelete) confirmDelete(pendingDelete.id);
+              }}
+              className="h-10 rounded-[11px] bg-[#FF6B6B] px-[18px] text-[13.5px] font-bold text-[#0A0A0A] hover:bg-[#ff8585]"
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 };
