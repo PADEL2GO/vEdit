@@ -10,6 +10,117 @@ const logStep = (step: string, details?: Record<string, unknown>) => {
   console.log(`[admin-credits] ${step}`, details ? JSON.stringify(details) : "");
 };
 
+// ── LAUNCH-RESET ──────────────────────────────────────────────────────────────
+// Wipes test data before go-live. Master data and content (courts, locations,
+// court_prices, clubs, marketplace items/categories/brands, articles, events,
+// teasers, site_settings, reward/skill config, voucher_codes, profiles,
+// user_roles and the newsletter tables) are deliberately absent from this map
+// and are therefore never touched. Table names come EXCLUSIVELY from here — the
+// request only selects category keys, never table names.
+// Order inside a category is FK-safe: children before parents.
+type LaunchResetEntry = {
+  table: string;
+  label: string;
+  /** Primary key column used as an always-true delete filter. Default "id". */
+  pk?: string;
+  /** Present => rows are KEPT and these columns are reset instead of deleted. */
+  zero?: Record<string, unknown>;
+  /** Columns that must be > 0 for a row to count as affected (zero entries). */
+  nonZero?: string[];
+};
+
+const LAUNCH_RESET_CATEGORIES: Record<
+  string,
+  { label: string; hint: string; entries: LaunchResetEntry[] }
+> = {
+  bookings: {
+    label: "Buchungen",
+    hint: "Platzbuchungen inkl. Teilnehmer, Zahlungen, Gutschein-Einlösungen und Vereins-Kontingent. Plätze, Standorte und Preise bleiben.",
+    entries: [
+      { table: "booking_participants", label: "Buchungs-Teilnehmer" },
+      { table: "booking_players", label: "Buchungs-Spieler" },
+      { table: "payments", label: "Zahlungen" },
+      { table: "voucher_redemptions", label: "Gutschein-Einlösungen" },
+      { table: "club_quota_ledger", label: "Vereins-Kontingent" },
+      { table: "bookings", label: "Buchungen" },
+    ],
+  },
+  marketplace: {
+    label: "Bestellungen",
+    hint: "Shop-Bestellungen, Retouren und Preishistorie. Produkte, Kategorien, Marken und Bilder bleiben.",
+    entries: [
+      { table: "marketplace_returns", label: "Retouren" },
+      { table: "marketplace_price_history", label: "Preishistorie" },
+      { table: "marketplace_redemptions", label: "Bestellungen" },
+    ],
+  },
+  points: {
+    label: "Punkte & Rewards",
+    hint: "Punkte-Ledger, Reward-Instanzen, Freunde-Boni und Streaks. Wallets werden NICHT gelöscht, sondern auf 0 gesetzt.",
+    entries: [
+      { table: "points_ledger", label: "Punkte-Ledger" },
+      { table: "reward_instances", label: "Reward-Instanzen" },
+      { table: "friend_reward_grants", label: "Freunde-Bonus-Vergaben", pk: "user_lo" },
+      { table: "user_streaks", label: "Streaks" },
+      {
+        table: "wallets",
+        label: "Wallets auf 0 setzen",
+        zero: { play_credits: 0, reward_credits: 0, lifetime_credits: 0 },
+        nonZero: ["play_credits", "reward_credits", "lifetime_credits"],
+      },
+      {
+        // Only relevant when bookings survive — otherwise the rows are gone anyway.
+        table: "bookings",
+        label: "Buchungs-Payback auf 0 setzen",
+        zero: { play_credits_awarded: 0 },
+        nonZero: ["play_credits_awarded"],
+      },
+    ],
+  },
+  receipts: {
+    label: "Belege",
+    hint: "Belege löschen und den Nummernkreis zurücksetzen, damit der erste echte Beleg nach dem Launch die Nummer 1 trägt (GoBD).",
+    entries: [
+      { table: "receipts", label: "Belege" },
+      {
+        table: "receipt_counters",
+        label: "Beleg-Nummernkreis auf 0",
+        pk: "year",
+        zero: { last_number: 0 },
+        nonZero: ["last_number"],
+      },
+    ],
+  },
+  social: {
+    label: "Social",
+    hint: "Lobbys inkl. Einladungen und Mitglieder, Freundschaften, Chat-Nachrichten und News-Likes. Artikel bleiben.",
+    entries: [
+      { table: "lobby_invites", label: "Lobby-Einladungen" },
+      { table: "lobby_events", label: "Lobby-Verlauf" },
+      { table: "lobby_members", label: "Lobby-Mitglieder" },
+      { table: "lobbies", label: "Lobbys" },
+      { table: "friendships", label: "Freundschaften" },
+      { table: "chat_messages", label: "Chat-Nachrichten" },
+      { table: "news_likes", label: "News-Likes" },
+    ],
+  },
+  events: {
+    label: "Event-Anmeldungen",
+    hint: "Nur die Anmeldungen — die Events selbst bleiben unverändert bestehen.",
+    entries: [{ table: "event_registrations", label: "Event-Anmeldungen" }],
+  },
+  logs: {
+    label: "Logs & Benachrichtigungen",
+    hint: "Benachrichtigungen, Admin-Aktivitätslog, Rate-Limit-Log und Push-Tokens.",
+    entries: [
+      { table: "notifications", label: "Benachrichtigungen" },
+      { table: "admin_activity_log", label: "Admin-Aktivitätslog" },
+      { table: "rate_limit_log", label: "Rate-Limit-Log" },
+      { table: "device_tokens", label: "Push-Tokens" },
+    ],
+  },
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -2030,6 +2141,173 @@ serve(async (req) => {
         deleted_players: deletedPlayers?.length || 0,
         deleted_payments: deletedPayments?.length || 0,
         message: `${bookingIds.length} Buchungen wurden gelöscht.`,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // LAUNCH-RESET — preview counts only, execute wipes the selected categories.
+    if (action === "launch_reset_preview" || action === "launch_reset_execute") {
+      const isExecute = action === "launch_reset_execute";
+
+      const pkOf = (entry: LaunchResetEntry) => entry.pk ?? "id";
+      // "column.gt.0,other.gt.0" — matches every row that is not already at zero.
+      const nonZeroFilter = (entry: LaunchResetEntry) =>
+        (entry.nonZero ?? []).map((c) => `${c}.gt.0`).join(",");
+
+      // A table that does not exist yet (migration not run) must not break the
+      // whole preview — it is reported as unavailable instead.
+      const countEntry = async (entry: LaunchResetEntry) => {
+        let query = supabaseAdmin.from(entry.table).select("*", { count: "exact", head: true });
+        if (entry.zero) query = query.or(nonZeroFilter(entry));
+        const { count, error } = await query;
+        if (error) return { count: 0, available: false, error: error.message };
+        return { count: count ?? 0, available: true, error: null as string | null };
+      };
+
+      if (!isExecute) {
+        const categories = [];
+        for (const [key, cat] of Object.entries(LAUNCH_RESET_CATEGORIES)) {
+          const tables = [];
+          let total = 0;
+          for (const entry of cat.entries) {
+            const res = await countEntry(entry);
+            total += res.count;
+            tables.push({
+              table: entry.table,
+              label: entry.label,
+              mode: entry.zero ? "reset" : "delete",
+              count: res.count,
+              available: res.available,
+              error: res.error,
+            });
+          }
+          categories.push({ key, label: cat.label, hint: cat.hint, total, tables });
+        }
+
+        logStep("Launch reset preview", {
+          totals: categories.map((c) => `${c.key}:${c.total}`).join(" "),
+        });
+
+        return new Response(JSON.stringify({ success: true, categories }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      const { categories: requestedCategories, confirmPhrase } = body;
+
+      if (confirmPhrase !== "RESET") throw new Error("Confirmation phrase 'RESET' required");
+      if (!Array.isArray(requestedCategories) || requestedCategories.length === 0) {
+        throw new Error("categories required");
+      }
+
+      const selected = requestedCategories.map((c: unknown) => String(c));
+      const unknown = selected.filter((k) => !(k in LAUNCH_RESET_CATEGORIES));
+      if (unknown.length > 0) throw new Error(`Unknown categories: ${unknown.join(", ")}`);
+
+      logStep("Starting launch reset", { categories: selected, adminId: user.id });
+
+      const now = new Date().toISOString();
+      const results: { category: string; table: string; label: string; mode: string; rows: number }[] = [];
+      const errors: { table: string; message: string }[] = [];
+      let totalRows = 0;
+
+      // Iterating the map (not the request) keeps the FK-safe category order.
+      for (const [key, cat] of Object.entries(LAUNCH_RESET_CATEGORIES)) {
+        if (!selected.includes(key)) continue;
+
+        // points_ledger is append-only (trg_points_ledger_guard blocks every DELETE,
+        // service_role included) and reward_instances is pinned by a NO ACTION FK from
+        // it. The dedicated SECURITY DEFINER function is the only sanctioned way past
+        // the guard; it wipes both in the required order inside one transaction.
+        if (key === "points") {
+          const { data: wiped, error: wipeError } = await supabaseAdmin.rpc("launch_reset_wipe_points");
+
+          if (wipeError) {
+            logStep("Launch reset: points wipe failed", { error: wipeError.message });
+            errors.push({ table: "points_ledger", message: wipeError.message });
+          } else {
+            for (const row of (wiped ?? []) as { table_name: string; deleted: number }[]) {
+              const label =
+                cat.entries.find((e) => e.table === row.table_name)?.label ?? row.table_name;
+              const rows = Number(row.deleted) || 0;
+              totalRows += rows;
+              results.push({ category: key, table: row.table_name, label, mode: "delete", rows });
+            }
+          }
+        }
+
+        for (const entry of cat.entries) {
+          // Bookings that are deleted anyway need no payback reset.
+          if (key === "points" && entry.table === "bookings" && selected.includes("bookings")) continue;
+          // Already handled above via launch_reset_wipe_points.
+          if (key === "points" && (entry.table === "points_ledger" || entry.table === "reward_instances")) continue;
+
+          const pk = pkOf(entry);
+
+          if (entry.zero) {
+            const patch: Record<string, unknown> = { ...entry.zero };
+            if (entry.table === "wallets") patch.updated_at = now;
+
+            const { data, error } = await supabaseAdmin
+              .from(entry.table)
+              .update(patch)
+              .or(nonZeroFilter(entry))
+              .select(pk);
+
+            if (error) {
+              logStep("Launch reset: reset failed", { table: entry.table, error: error.message });
+              errors.push({ table: entry.table, message: error.message });
+              continue;
+            }
+
+            const rows = data?.length ?? 0;
+            totalRows += rows;
+            results.push({ category: key, table: entry.table, label: entry.label, mode: "reset", rows });
+            continue;
+          }
+
+          // Count first — the delete itself does not return the rows (they can be many).
+          const { count } = await supabaseAdmin
+            .from(entry.table)
+            .select("*", { count: "exact", head: true });
+
+          const { error } = await supabaseAdmin.from(entry.table).delete().not(pk, "is", null);
+
+          if (error) {
+            logStep("Launch reset: delete failed", { table: entry.table, error: error.message });
+            errors.push({ table: entry.table, message: error.message });
+            continue;
+          }
+
+          const rows = count ?? 0;
+          totalRows += rows;
+          results.push({ category: key, table: entry.table, label: entry.label, mode: "delete", rows });
+        }
+      }
+
+      // Written AFTER the deletion so the entry survives a run including "logs".
+      await supabaseAdmin.from("admin_activity_log").insert({
+        admin_user_id: user.id,
+        action: "LAUNCH_RESET",
+        target_type: "launch_reset",
+        target_id: null,
+        details: { categories: selected, total_rows: totalRows, results, errors, reset_at: now },
+      });
+
+      logStep("Launch reset complete", { categories: selected, totalRows, errors: errors.length });
+
+      return new Response(JSON.stringify({
+        success: true,
+        categories: selected,
+        total_rows: totalRows,
+        results,
+        errors,
+        message: errors.length > 0
+          ? `${totalRows} Zeilen bereinigt — ${errors.length} Tabelle(n) konnten nicht geleert werden.`
+          : `${totalRows} Zeilen wurden bereinigt.`,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,

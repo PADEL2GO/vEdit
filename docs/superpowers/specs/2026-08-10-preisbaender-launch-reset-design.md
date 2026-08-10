@@ -79,6 +79,11 @@ Karte in **Admin → Einstellungen**: Vorschau mit exakten Zeilenzahlen je Kateg
 | Event-Anmeldungen | event_registrations |
 | Benachrichtigungen & Logs | notifications, admin_activity_log, rate_limit_log, device_tokens |
 
+### Append-Only-Hürde beim Punkte-Ledger (nachträglich gelöst)
+`points_ledger` ist per Trigger `trg_points_ledger_guard` append-only — er blockt **jedes** DELETE, auch für service_role, und `reward_instances` hängt über einen NO-ACTION-Fremdschlüssel daran. Der Reset wäre an dieser Kategorie gescheitert.
+
+Gelöst über eine eng begrenzte Ausnahme (Migration `20260810140000_launch_reset_points_bypass.sql`) statt einer Aufweichung des Schutzes: Der Guard erlaubt DELETE zusätzlich, wenn das **transaktionslokale** Flag `app.launch_reset` gesetzt ist. Setzen kann es ausschließlich die SECURITY-DEFINER-Funktion `launch_reset_wipe_points()`, für die nur `service_role` Ausführungsrecht hat. Da `set_config(..., is_local => true)` mit der Transaktion endet, kann das Flag nicht nachwirken. Verifiziert: ein normales DELETE scheitert weiterhin mit `points_ledger is append-only`.
+
 ### Zwei bewusste Entscheidungen
 - **Wallets werden auf 0 gesetzt, nicht gelöscht** — sonst stünde ein Nutzer ohne Wallet-Zeile da.
 - **Belegzähler wird zurückgesetzt**, damit der erste echte Beleg nach dem Launch die Nummer 1 trägt (GoBD-relevante Sequenz).
