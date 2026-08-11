@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { setHours, setMinutes, addMinutes } from "date-fns";
 import { useBookingSlots } from "@/hooks/useBookingSlots";
-import { useCourtPricesWithFallback, getPriceFromList, useResolvedBookingRates } from "@/hooks/useCourtPrices";
+import { useCourtPricesWithFallback, getPriceFromList, useResolvedBookingRates, getRateForStart } from "@/hooks/useCourtPrices";
 import { invokeEdgeFunction } from "@/lib/edgeFunctionUtils";
 import type { Court, TimeSlot } from "@/components/booking/types";
 import type { DbLocation } from "@/types/database";
@@ -187,6 +187,13 @@ export function useBookingLocation(slug: string | undefined) {
       const endTime = addMinutes(startTime, selectedDuration);
       const holdExpiresAt = addMinutes(new Date(), 15);
 
+      // Preis fuer GENAU diesen Slot (Zeitfenster-Band); ohne Band identisch zu priceCents.
+      // Die Buchungszeile muss den echten Preis tragen: voucher-redeem entscheidet ueber
+      // `discount_value >= booking.price_cents`, ob ein Fixbetrag-Gutschein voll deckt.
+      // Mit einem veralteten Standardpreis wuerde ein Band diese Entscheidung verfaelschen.
+      const slotRate = getRateForStart(ratesByStart, startTime);
+      const effectivePriceCents = slotRate?.priceCents ?? priceCents!;
+
       const { data, error } = await supabase
         .from("bookings")
         .insert({
@@ -196,7 +203,7 @@ export function useBookingLocation(slug: string | undefined) {
           start_time: startTime.toISOString(),
           end_time: endTime.toISOString(),
           status: "pending_payment",
-          price_cents: priceCents!,
+          price_cents: effectivePriceCents,
           currency: "EUR",
           hold_expires_at: holdExpiresAt.toISOString(),
         })
@@ -226,7 +233,7 @@ export function useBookingLocation(slug: string | undefined) {
               court_id: selectedCourt,
               start_time: startTime.toISOString(),
               end_time: endTime.toISOString(),
-              price_total_cents: priceCents,
+              price_total_cents: effectivePriceCents,
               capacity: lobbySettings.capacity,
               skill_min: lobbySettings.skillRange[0],
               skill_max: lobbySettings.skillRange[1],
