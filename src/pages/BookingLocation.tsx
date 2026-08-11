@@ -12,6 +12,7 @@ import { BookingStepper } from "@/components/booking/BookingStepper";
 import { BookingLocationHeader } from "@/components/booking/BookingLocationHeader";
 import { BookingSlotPicker } from "@/components/booking/BookingSlotPicker";
 import { BookingSummary } from "@/components/booking/BookingSummary";
+import { BookingTennisTeaser } from "@/components/booking/BookingTennisTeaser";
 import { GuestCheckoutModal } from "@/components/booking/GuestCheckoutModal";
 import { useBookingLocation } from "@/hooks/useBookingLocation";
 import { useCourtsVisibility } from "@/hooks/useCourtsVisibility";
@@ -29,6 +30,10 @@ const BookingLocation = () => {
   const {
     location,
     courts,
+    visibleCourts,
+    availableSports,
+    hasTennisCourts,
+    selectedSport,
     loading,
     selectedDate,
     selectedCourt,
@@ -53,6 +58,7 @@ const BookingLocation = () => {
     setLobbyEnabled,
     setLobbySettings,
     setShowGuestModal,
+    changeSport,
     handleBooking,
     handleGuestBooking,
   } = useBookingLocation(slug);
@@ -144,27 +150,39 @@ const BookingLocation = () => {
               </div>
             )}
 
-            <BookingLocationHeader location={location} />
+            <BookingLocationHeader location={location} sport={selectedSport} />
 
             <div
               id="bk-detail"
               className="grid gap-5 items-start min-[980px]:grid-cols-[minmax(0,1fr)_384px]"
             >
-              <BookingSlotPicker
-                courts={courts}
-                selectedCourt={selectedCourt}
-                setSelectedCourt={setSelectedCourt}
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                selectedDuration={selectedDuration}
-                setSelectedDuration={setSelectedDuration}
-                selectedSlot={selectedSlot}
-                setSelectedSlot={setSelectedSlot}
-                availableSlots={availableSlots}
-                loadingSlots={loadingSlots}
-                courtPrices={courtPrices}
-                ratesByStart={ratesByStart}
-              />
+              <div className="flex min-w-0 flex-col gap-4">
+                <BookingSlotPicker
+                  courts={visibleCourts}
+                  sport={selectedSport}
+                  availableSports={availableSports}
+                  onSportChange={changeSport}
+                  selectedCourt={selectedCourt}
+                  setSelectedCourt={setSelectedCourt}
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  selectedDuration={selectedDuration}
+                  setSelectedDuration={setSelectedDuration}
+                  selectedSlot={selectedSlot}
+                  setSelectedSlot={setSelectedSlot}
+                  availableSlots={availableSlots}
+                  loadingSlots={loadingSlots}
+                  courtPrices={courtPrices}
+                  ratesByStart={ratesByStart}
+                />
+
+                {hasTennisCourts && selectedSport === "padel" && (
+                  <BookingTennisTeaser
+                    vendingEnabled={location.vending_enabled}
+                    onShowTennis={() => changeSport("tennis")}
+                  />
+                )}
+              </div>
 
               <BookingSummary
                 location={location}

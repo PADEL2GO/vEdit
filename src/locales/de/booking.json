@@ -171,7 +171,21 @@
     "durationStep": "{{n}}. Dauer wählen",
     "timeSlotStep": "{{n}}. Zeitslot wählen",
     "durationMinutes": "{{count}} Minuten",
-    "noSlots": "Keine Slots verfügbar für dieses Datum."
+    "noSlots": "Keine Slots verfügbar für dieses Datum.",
+    "sportLabel": "Sportart",
+    "sport": {
+      "padel": "Padel",
+      "tennis": "Tennis"
+    },
+    "tennisDurationHint": "Tennis wird in festen 60-Minuten-Blöcken gebucht."
+  },
+  "tennisTeaser": {
+    "badge": "Auch Tennis",
+    "title": "Nach dem Padeln noch Lust auf Tennis?",
+    "body": "An diesem Standort kannst du auch Tennis buchen – Verleihschläger gibt's vor Ort.",
+    "vending": "Schläger und Bälle bekommst du direkt am Automaten.",
+    "cta": "Tennis-Courts ansehen",
+    "imageAlt": "Tennisplatz am Standort"
   },
   "summary": {
     "title": "Buchungsübersicht",
@@ -238,6 +252,9 @@
     "fromPrice": "ab {{price}}€",
     "occupancy": "{{percent}}% belegt",
     "vending": "Automat",
+    "tennis": "Auch Tennis",
+    "courts": "Courts",
+    "padelCourts": "Padel-Courts",
     "today": "Heute:",
     "slots": "{{count}} Slots",
     "hoursRange": "{{open}} - {{close}} Uhr",

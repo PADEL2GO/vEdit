@@ -3,7 +3,8 @@ import { format, startOfDay, addDays, isSameDay, isAfter, setHours, setMinutes }
 import { de, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";
-import type { Court, TimeSlot } from "./types";
+import type { Court, CourtSport, TimeSlot } from "./types";
+import { TENNIS_DURATION_MINUTES } from "./types";
 import { SLOT_DURATIONS } from "@/types/constants";
 import {
   getPriceFromList,
@@ -15,7 +16,13 @@ import {
 import { formatPrice } from "@/lib/pricing";
 
 interface BookingSlotPickerProps {
+  /** Nur die Courts der gewählten Sportart. */
   courts: Court[];
+  /** Gewählte Sportart (Standard: Padel). */
+  sport: CourtSport;
+  /** Sportarten, die dieser Standort anbietet — Umschalter nur ab zwei Einträgen. */
+  availableSports: CourtSport[];
+  onSportChange: (sport: CourtSport) => void;
   selectedCourt: string | null;
   setSelectedCourt: (id: string) => void;
   selectedDate: Date;
@@ -89,6 +96,9 @@ function StepHeader({
 
 export function BookingSlotPicker({
   courts,
+  sport,
+  availableSports,
+  onSportChange,
   selectedCourt,
   setSelectedCourt,
   selectedDate,
@@ -106,6 +116,11 @@ export function BookingSlotPicker({
   const dateLocale = i18n.language === "en" ? enUS : de;
   const stepOffset = courts.length > 1 ? 1 : 0;
 
+  // Tennis läuft ausschließlich in 60-Minuten-Blöcken — der Schritt bleibt
+  // erhalten (sonst würde die Nummerierung springen), zeigt aber nur 60 Min.
+  const isTennis = sport === "tennis";
+  const durations: readonly number[] = isTennis ? [TENNIS_DURATION_MINUTES] : SLOT_DURATIONS;
+
   const today = startOfDay(new Date());
   const maxDate = addDays(today, 14);
   const dateChips = Array.from({ length: 15 }, (_, i) => addDays(today, i));
@@ -120,6 +135,35 @@ export function BookingSlotPicker({
 
   return (
     <div className="flex flex-col gap-4 min-w-0">
+      {/* Sportart — kein nummerierter Schritt, damit die Padel-Strecke unverändert bleibt */}
+      {availableSports.length > 1 && (
+        <div className="rounded-2xl border border-border/60 bg-gradient-card px-[22px] py-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <span className="font-stat text-[10.5px] tracking-[0.16em] text-[hsl(0_0%_50%)] uppercase">
+            {t("slotPicker.sportLabel")}
+          </span>
+          <div className="inline-flex gap-1 rounded-full border border-[hsl(0_0%_15%)] bg-white/[0.03] p-1">
+            {availableSports.map((option) => {
+              const on = option === sport;
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => onSportChange(option)}
+                  className={`rounded-full px-[18px] py-2 min-h-[38px] text-[13px] font-bold tracking-tight transition-all ${
+                    on
+                      ? "bg-primary text-black shadow-[0_0_18px_hsl(var(--primary)/0.3)]"
+                      : "text-[hsl(0_0%_62%)] hover:text-foreground"
+                  }`}
+                >
+                  {t(`slotPicker.sport.${option}`)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Step 1: Court Selection */}
       {courts.length > 1 && (
         <div className={CARD}>
@@ -211,7 +255,7 @@ export function BookingSlotPicker({
             <CheckBadge done={!!selectedDuration} />
           </StepHeader>
           <div className="grid grid-cols-3 gap-2.5">
-            {SLOT_DURATIONS.map((duration) => {
+            {durations.map((duration) => {
               const on = selectedDuration === duration;
               // Für die gewählte Dauer zählt der aufgelöste Bandpreis des Slots,
               // damit die Anzeige nicht vom Checkout abweicht.
@@ -243,6 +287,11 @@ export function BookingSlotPicker({
               );
             })}
           </div>
+          {isTennis && (
+            <span className="text-[12.5px] leading-[1.5] text-[hsl(0_0%_50%)]">
+              {t("slotPicker.tennisDurationHint")}
+            </span>
+          )}
         </div>
       </div>
 

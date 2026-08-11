@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { QUERY_KEYS, createQueryKey } from "@/lib/queryKeys";
+import type { CourtSport } from "@/components/booking/types";
 
 export interface CourtPrice {
   id: string;
@@ -334,15 +335,35 @@ export function useCourtMinPrice(courtId: string | null) {
 }
 
 /**
- * Günstigster Preis über alle Courts eines Standorts, inkl. Bänder.
+ * Günstigster Preis über die Courts EINER Sportart an einem Standort, inkl. Bänder.
  * Liefert die RPC nichts, greift das bisherige Verhalten (günstigster
  * 60-Minuten-Preis aus court_prices) statt einer leeren Anzeige.
+ *
+ * Die Sportart ist entscheidend: ohne Filter würde ein günstiger Tennis-Court
+ * als Padel-"ab X €" auf der Standortkarte landen.
  */
-export async function fetchLocationMinPriceCents(courtIds: string[]): Promise<number | null> {
+export async function fetchLocationMinPriceCents(
+  courtIds: string[],
+  sport: CourtSport = "padel",
+): Promise<number | null> {
   if (courtIds.length === 0) return null;
 
+  // `sport` fehlt noch in den generierten Typen -> Client-Cast wie anderswo im Repo.
+  const { data: sportCourts, error: sportError } = await (supabase as any)
+    .from("courts")
+    .select("id")
+    .in("id", courtIds)
+    .eq("sport", sport);
+
+  // Fehler (z. B. Spalte noch nicht vorhanden): lieber der bisherige Preis als gar keiner.
+  const scopedIds = sportError
+    ? courtIds
+    : ((sportCourts ?? []) as { id: string }[]).map((court) => court.id);
+
+  if (scopedIds.length === 0) return null;
+
   const results = await Promise.all(
-    courtIds.map(async (courtId) => {
+    scopedIds.map(async (courtId) => {
       const { data, error } = await (supabase as any).rpc("court_min_price_cents", {
         p_court_id: courtId,
       });
@@ -359,7 +380,7 @@ export async function fetchLocationMinPriceCents(courtIds: string[]): Promise<nu
   const { data: courtPrices } = await supabase
     .from("court_prices")
     .select("price_cents")
-    .in("court_id", courtIds)
+    .in("court_id", scopedIds)
     .eq("duration_minutes", 60)
     .order("price_cents", { ascending: true })
     .limit(1);

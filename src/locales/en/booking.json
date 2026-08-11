@@ -171,7 +171,21 @@
     "durationStep": "{{n}}. Choose duration",
     "timeSlotStep": "{{n}}. Choose time slot",
     "durationMinutes": "{{count}} minutes",
-    "noSlots": "No slots available for this date."
+    "noSlots": "No slots available for this date.",
+    "sportLabel": "Sport",
+    "sport": {
+      "padel": "Padel",
+      "tennis": "Tennis"
+    },
+    "tennisDurationHint": "Tennis is booked in fixed 60-minute blocks."
+  },
+  "tennisTeaser": {
+    "badge": "Tennis too",
+    "title": "Fancy some tennis after padel?",
+    "body": "You can book tennis courts at this location as well – rental rackets are available on site.",
+    "vending": "Rackets and balls are available straight from the vending machine.",
+    "cta": "View tennis courts",
+    "imageAlt": "Tennis court at the location"
   },
   "summary": {
     "title": "Booking summary",
@@ -238,6 +252,9 @@
     "fromPrice": "from €{{price}}",
     "occupancy": "{{percent}}% booked",
     "vending": "Vending",
+    "tennis": "Tennis too",
+    "courts": "courts",
+    "padelCourts": "padel courts",
     "today": "Today:",
     "slots": "{{count}} slots",
     "hoursRange": "{{open}} - {{close}}",

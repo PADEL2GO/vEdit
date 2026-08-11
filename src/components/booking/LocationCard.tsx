@@ -7,6 +7,7 @@ import {
   Trophy,
   Brain,
   ShoppingCart,
+  CircleDot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
@@ -18,11 +19,15 @@ interface LocationCardProps {
   occupancyPercent: number;
   index?: number;
   minPriceCents?: number | null;
+  /** Padel-Courts — die Karte spricht in erster Linie von Padel. */
   courtCount?: number;
+  /** > 0 blendet den Chip „Auch Tennis" ein. */
+  tennisCourtCount?: number;
 }
 
-export function LocationCard({ location, todayFreeSlots, occupancyPercent, index = 0, minPriceCents, courtCount }: LocationCardProps) {
+export function LocationCard({ location, todayFreeSlots, occupancyPercent, index = 0, minPriceCents, courtCount, tennisCourtCount = 0 }: LocationCardProps) {
   const { t } = useTranslation("booking");
+  const hasTennis = tennisCourtCount > 0;
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const todayName = dayNames[new Date().getDay()];
   const hours = location.opening_hours_json?.[todayName];
@@ -108,7 +113,8 @@ export function LocationCard({ location, todayFreeSlots, occupancyPercent, index
                 {location.city && !!courtCount ? " · " : ""}
                 {!!courtCount && (
                   <>
-                    <span className="font-stat">{courtCount}</span> Courts
+                    <span className="font-stat">{courtCount}</span>{" "}
+                    {hasTennis ? t("locationCard.padelCourts") : t("locationCard.courts")}
                   </>
                 )}
               </span>
@@ -117,7 +123,7 @@ export function LocationCard({ location, todayFreeSlots, occupancyPercent, index
         </div>
 
         {/* Feature-Chips */}
-        {(location.rewards_enabled || location.ai_analysis_enabled || location.vending_enabled) && (
+        {(location.rewards_enabled || location.ai_analysis_enabled || location.vending_enabled || hasTennis) && (
           <div className="flex flex-wrap gap-[7px]">
             {location.rewards_enabled && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(0_0%_15%)] bg-white/5 px-2.5 py-1 text-xs font-semibold text-[hsl(0_0%_75%)]">
@@ -132,6 +138,11 @@ export function LocationCard({ location, todayFreeSlots, occupancyPercent, index
             {location.vending_enabled && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(0_0%_15%)] bg-white/5 px-2.5 py-1 text-xs font-semibold text-[hsl(0_0%_75%)]">
                 <ShoppingCart className="w-3 h-3" /> {t("locationCard.vending")}
+              </span>
+            )}
+            {hasTennis && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[hsl(0_0%_15%)] bg-white/5 px-2.5 py-1 text-xs font-semibold text-[hsl(0_0%_75%)]">
+                <CircleDot className="w-3 h-3" /> {t("locationCard.tennis")}
               </span>
             )}
           </div>

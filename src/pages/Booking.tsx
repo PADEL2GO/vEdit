@@ -20,7 +20,9 @@ interface LocationWithAvailability extends DbLocation {
   todayFreeSlots: number;
   occupancyPercent: number;
   minPriceCents: number | null;
+  /** Padel-Courts — die Karte spricht in erster Linie von Padel. */
   courtCount: number;
+  tennisCourtCount: number;
 }
 
 const Booking = () => {
@@ -69,22 +71,33 @@ const Booking = () => {
           const hours = (loc.opening_hours_json as Record<string, { open: string; close: string } | undefined>)?.[todayName];
           
           // Get courts for this location
-          const { data: courts } = await supabase
+          // `sport` fehlt noch in den generierten Typen -> Client-Cast wie anderswo im Repo.
+          const { data: courts } = await (supabase as any)
             .from("courts")
-            .select("id")
+            .select("id, sport")
             .eq("location_id", loc.id)
             .eq("is_active", true);
 
-          const courtIds = courts?.map(c => c.id) || [];
+          const courtRows = (courts ?? []) as { id: string; sport?: string | null }[];
+          const courtIds = courtRows.map(c => c.id);
+          const tennisCourtCount = courtRows.filter(c => c.sport === "tennis").length;
+          const padelCourtCount = courtIds.length - tennisCourtCount;
 
-          // Günstigster Preis inkl. Zeitfenster-Bänder (aufgelöst in der DB)
+          // Günstigster PADEL-Preis inkl. Zeitfenster-Bänder (aufgelöst in der DB)
           let minPriceCents: number | null = globalMinPrice;
           if (courtIds.length > 0) {
             minPriceCents = (await fetchLocationMinPriceCents(courtIds)) ?? minPriceCents;
           }
 
           if (!hours) {
-            return { ...loc, todayFreeSlots: 0, occupancyPercent: 0, minPriceCents, courtCount: courtIds.length };
+            return {
+              ...loc,
+              todayFreeSlots: 0,
+              occupancyPercent: 0,
+              minPriceCents,
+              courtCount: padelCourtCount,
+              tennisCourtCount,
+            };
           }
 
           // Calculate total available minutes today
@@ -123,7 +136,8 @@ const Booking = () => {
             todayFreeSlots: freeSlots,
             occupancyPercent: Math.min(100, occupancyPercent),
             minPriceCents,
-            courtCount: courtIds.length,
+            courtCount: padelCourtCount,
+            tennisCourtCount,
           };
         })
       );
@@ -229,6 +243,7 @@ const Booking = () => {
                       index={index}
                       minPriceCents={location.minPriceCents}
                       courtCount={location.courtCount}
+                      tennisCourtCount={location.tennisCourtCount}
                     />
                   ))}
                 </div>

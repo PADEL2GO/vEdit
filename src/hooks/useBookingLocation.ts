@@ -7,7 +7,8 @@ import { setHours, setMinutes, addMinutes } from "date-fns";
 import { useBookingSlots } from "@/hooks/useBookingSlots";
 import { useCourtPricesWithFallback, getPriceFromList, useResolvedBookingRates, getRateForStart } from "@/hooks/useCourtPrices";
 import { invokeEdgeFunction } from "@/lib/edgeFunctionUtils";
-import type { Court, TimeSlot } from "@/components/booking/types";
+import type { Court, CourtSport, TimeSlot } from "@/components/booking/types";
+import { DEFAULT_COURT_SPORT, TENNIS_DURATION_MINUTES, courtSport } from "@/components/booking/types";
 import type { DbLocation } from "@/types/database";
 import type { LobbySettings } from "@/types/lobby";
 import { DEFAULT_LOBBY_SETTINGS } from "@/types/lobby";
@@ -21,6 +22,7 @@ export function useBookingLocation(slug: string | undefined) {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedCourt, setSelectedCourt] = useState<string | null>(null);
+  const [selectedSport, setSelectedSport] = useState<CourtSport>(DEFAULT_COURT_SPORT);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number>(60);
   const [booking, setBooking] = useState(false);
@@ -79,19 +81,29 @@ export function useBookingLocation(slug: string | undefined) {
 
       setLocation(locationData as unknown as DbLocation);
 
-      const { data: courtsData, error: courtsError } = await supabase
+      // `sport` fehlt noch in den generierten Typen -> Client-Cast wie anderswo im Repo.
+      const { data: courtsData, error: courtsError } = await (supabase as any)
         .from("courts")
-        .select("*")
+        .select("id, name, is_active, label, sport")
         .eq("location_id", locationData.id)
         .eq("is_active", true);
 
       if (courtsError) throw courtsError;
-      
-      const courtsList = courtsData || [];
+
+      const courtsList: Court[] = ((courtsData ?? []) as any[]).map((court) => ({
+        ...court,
+        sport: courtSport(court),
+      }));
       setCourts(courtsList);
-      
-      if (courtsList.length > 0) {
-        setSelectedCourt(courtsList[0].id);
+
+      // Padel bleibt der Einstieg. Nur ein Standort ganz ohne Padel-Court
+      // startet in der Tennis-Ansicht.
+      const padelCourts = courtsList.filter((court) => courtSport(court) === "padel");
+      const startCourts = padelCourts.length > 0 ? padelCourts : courtsList;
+
+      if (startCourts.length > 0) {
+        setSelectedSport(courtSport(startCourts[0]));
+        setSelectedCourt(startCourts[0].id);
       }
     } catch (error) {
       console.error("Error fetching location:", error);
@@ -106,6 +118,36 @@ export function useBookingLocation(slug: string | undefined) {
       fetchLocation();
     }
   }, [slug, fetchLocation]);
+
+  /** Sportarten, die dieser Standort tatsaechlich anbietet — Padel immer zuerst. */
+  const availableSports = useMemo<CourtSport[]>(() => {
+    const sports: CourtSport[] = [];
+    if (courts.some((court) => courtSport(court) === "padel")) sports.push("padel");
+    if (courts.some((court) => courtSport(court) === "tennis")) sports.push("tennis");
+    return sports;
+  }, [courts]);
+
+  const hasTennisCourts = availableSports.includes("tennis");
+
+  /** Nur die Courts der gewaehlten Sportart erscheinen in der Auswahl. */
+  const visibleCourts = useMemo(
+    () => courts.filter((court) => courtSport(court) === selectedSport),
+    [courts, selectedSport]
+  );
+
+  const changeSport = useCallback(
+    (sport: CourtSport) => {
+      if (sport === selectedSport) return;
+      setSelectedSport(sport);
+      setSelectedSlot(null);
+      const firstCourt = courts.find((court) => courtSport(court) === sport);
+      setSelectedCourt(firstCourt?.id ?? null);
+      if (sport === "tennis") {
+        setSelectedDuration(TENNIS_DURATION_MINUTES);
+      }
+    },
+    [courts, selectedSport]
+  );
 
   // Guest booking handler — called after the GuestCheckoutModal is submitted
   const handleGuestBooking = useCallback(async (guestName: string, guestEmail: string, guestPhone: string) => {
@@ -268,6 +310,10 @@ export function useBookingLocation(slug: string | undefined) {
     // State
     location,
     courts,
+    visibleCourts,
+    availableSports,
+    hasTennisCourts,
+    selectedSport,
     loading,
     selectedDate,
     selectedCourt,
@@ -296,6 +342,7 @@ export function useBookingLocation(slug: string | undefined) {
     setShowGuestModal,
 
     // Actions
+    changeSport,
     handleBooking,
     handleGuestBooking,
   };

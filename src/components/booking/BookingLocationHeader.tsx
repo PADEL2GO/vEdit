@@ -2,12 +2,15 @@ import { MapPin, Clock, Trophy, Brain, ShoppingCart, ExternalLink } from "lucide
 import { useTranslation } from "react-i18next";
 import type { DbLocation } from "@/types/database";
 import { COURT_FEATURES, extractFeatures } from "@/lib/courtFeatures";
+import { DEFAULT_COURT_SPORT, type CourtSport } from "./types";
 
 interface BookingLocationHeaderProps {
   location: DbLocation;
+  /** Gewählte Sportart — steuert nur das Hero-Bild. */
+  sport?: CourtSport;
 }
 
-export function BookingLocationHeader({ location }: BookingLocationHeaderProps) {
+export function BookingLocationHeader({ location, sport = DEFAULT_COURT_SPORT }: BookingLocationHeaderProps) {
   const { t } = useTranslation("booking");
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const todayName = dayNames[new Date().getDay()];
@@ -27,6 +30,10 @@ export function BookingLocationHeader({ location }: BookingLocationHeaderProps) 
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
     : null;
 
+  // `tennis_image_url` fehlt noch in den generierten Typen -> Cast wie anderswo im Repo.
+  const tennisImageUrl = (location as any).tennis_image_url as string | null | undefined;
+  const heroImageUrl = (sport === "tennis" ? tennisImageUrl : null) || location.main_image_url;
+
   const openingLabel = location.is_24_7
     ? t("locationHeader.open247")
     : hours
@@ -40,9 +47,9 @@ export function BookingLocationHeader({ location }: BookingLocationHeaderProps) 
     <div className="rounded-2xl overflow-hidden border border-border/60 bg-gradient-card">
       <div className="relative">
       {/* Hero Image */}
-      {location.main_image_url ? (
+      {heroImageUrl ? (
         <img
-          src={location.main_image_url}
+          src={heroImageUrl}
           alt={location.name}
           className="block w-full h-[236px] object-cover"
         />
