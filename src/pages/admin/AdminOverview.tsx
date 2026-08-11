@@ -50,6 +50,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  SportScopeTabs,
+  sportOf,
+  type SportScope,
+} from "@/components/admin/SportScopeTabs";
+import { SPORT_LABEL, courtSport } from "@/components/admin/courts/types";
+import { useSportCourtIds } from "@/hooks/useSportCourtIds";
 
 const STATUS_PILL: Record<string, string> = {
   confirmed: "border-primary/30 bg-primary/10 text-primary",
@@ -58,6 +65,22 @@ const STATUS_PILL: Record<string, string> = {
 };
 
 type RangeKey = "today" | "week" | "month";
+
+/** Court-Eintrag im Court-Dropdown (Sportart wird serverseitig gefiltert). */
+type CourtOption = {
+  id: string;
+  name: string;
+  location_id: string | null;
+  locations: { name: string } | null;
+};
+
+/** Standort samt Courts für das Standorte-Panel. */
+type OverviewLocation = {
+  id: string;
+  name: string;
+  address: string | null;
+  courts: { id: string; name: string; is_active: boolean; sport: string | null }[] | null;
+};
 
 const RANGE_OPTIONS: { key: RangeKey; label: string }[] = [
   { key: "today", label: "Heute" },
@@ -110,6 +133,16 @@ function trendPct(current: number | undefined, previous: number | undefined): nu
   return Math.round(((current - previous) / previous) * 100);
 }
 
+/**
+ * Beim Zeitraum-Wechsel bleiben die alten Zahlen kurz stehen (kein Flackern) —
+ * beim Sport-Wechsel ausdrücklich nicht: unter „Tennis" dürfen keinen Moment
+ * lang die Padel-Zahlen stehen. Der Scope steckt an Index 2 des Query-Keys.
+ */
+function keepWithinSport<T>(scope: SportScope) {
+  return (previous: T | undefined, previousQuery?: { queryKey: readonly unknown[] }) =>
+    previousQuery?.queryKey[2] === scope ? previous : undefined;
+}
+
 function initialsOf(name: string) {
   return name
     .split(/\s+/)
@@ -123,19 +156,47 @@ export default function AdminOverview() {
   const today = new Date();
   const [selectedCourtId, setSelectedCourtId] = useState<string | null>(null);
   const [range, setRange] = useState<RangeKey>("today");
+  const [sportScope, setSportScope] = useState<SportScope>("all");
   const period = getPeriod(range, today);
+
+  const sport = sportOf(sportScope);
+  const sportLabel = sport ? SPORT_LABEL[sport] : null;
+
+  /**
+   * Court-IDs der gewählten Sportart. `bookings` trägt keine Sportart, deshalb
+   * läuft der Filter über die Courts. `null` = nicht einschränken; ein LEERES
+   * Array heißt „diese Sportart hat keine Courts" und muss 0 Treffer liefern —
+   * dafür brechen die Queries unten vor dem DB-Aufruf ab.
+   */
+  const { data: sportCourtIds } = useSportCourtIds(sportScope);
+  const courtIds = sportCourtIds ?? null;
+  const noCourtsForSport = courtIds !== null && courtIds.length === 0;
+  // Erst rechnen, wenn die Court-IDs da sind — sonst zählte ein Wimpernschlag
+  // lang die andere Sportart mit.
+  const scopeReady = sportScope === "all" || Array.isArray(sportCourtIds);
+
+  const handleSportChange = (scope: SportScope) => {
+    setSportScope(scope);
+    // Der gewählte Court gehört womöglich zur anderen Sportart — der Filter
+    // bliebe sonst unsichtbar aktiv und die Liste dauerhaft leer.
+    setSelectedCourtId(null);
+  };
 
   // Fetch confirmed bookings count for selected range (+ previous period for trend)
   const { data: bookingStats } = useQuery({
-    queryKey: ["admin-bookings-count", range],
+    queryKey: ["admin-bookings-count", range, sportScope],
+    enabled: scopeReady,
     queryFn: async () => {
+      if (noCourtsForSport) return { current: 0, previous: 0 };
       const countIn = async (from: Date, to: Date) => {
-        const { count } = await supabase
+        let query = supabase
           .from("bookings")
           .select("*", { count: "exact", head: true })
           .gte("start_time", from.toISOString())
           .lte("start_time", to.toISOString())
           .eq("status", "confirmed");
+        if (courtIds) query = query.in("court_id", courtIds);
+        const { count } = await query;
         return count || 0;
       };
       const [current, previous] = await Promise.all([
@@ -144,16 +205,20 @@ export default function AdminOverview() {
       ]);
       return { current, previous };
     },
-    placeholderData: keepPreviousData,
+    placeholderData: keepWithinSport(sportScope),
   });
 
   // Fetch booking revenue for selected range: confirmed, paid bookings only
   // (excludes free club allocations; price_cents reflects the charged amount)
   const { data: revenueStats } = useQuery({
-    queryKey: ["admin-revenue", range],
+    queryKey: ["admin-revenue", range, sportScope],
+    enabled: scopeReady,
     queryFn: async () => {
+      if (noCourtsForSport) {
+        return { current: { sum: 0, count: 0 }, previous: { sum: 0, count: 0 } };
+      }
       const sumIn = async (from: Date, to: Date) => {
-        const { data, error } = await supabase
+        let query = supabase
           .from("bookings")
           .select("price_cents")
           .eq("status", "confirmed")
@@ -161,6 +226,8 @@ export default function AdminOverview() {
           .not("price_cents", "is", null)
           .gte("start_time", from.toISOString())
           .lte("start_time", to.toISOString());
+        if (courtIds) query = query.in("court_id", courtIds);
+        const { data, error } = await query;
         if (error) throw error;
         const rows = data || [];
         return {
@@ -174,7 +241,7 @@ export default function AdminOverview() {
       ]);
       return { current, previous };
     },
-    placeholderData: keepPreviousData,
+    placeholderData: keepWithinSport(sportScope),
   });
 
   // Fetch new registrations in selected range
@@ -213,56 +280,77 @@ export default function AdminOverview() {
     },
   });
 
-  // Fetch total courts count
-  const { data: totalCourts } = useQuery({
-    queryKey: ["admin-courts-total"],
+  // Fetch active courts of the selected sport (+ the locations they stand at)
+  const { data: courtScopeStats } = useQuery({
+    queryKey: ["admin-courts-total", sportScope],
     queryFn: async () => {
-      const { count } = await supabase
+      // `sport` steht noch nicht in types.ts
+      let query = (supabase as any)
         .from("courts")
-        .select("*", { count: "exact", head: true })
+        .select("id, location_id")
         .eq("is_active", true);
-      return count || 0;
+      if (sport) query = query.eq("sport", sport);
+      const { data, error } = await query;
+      if (error) throw error;
+      const rows = (data ?? []) as { id: string; location_id: string | null }[];
+      return {
+        courts: rows.length,
+        locations: new Set(rows.map((r) => r.location_id).filter(Boolean)).size,
+      };
     },
   });
 
   // Fetch club bookings today
   const { data: clubBookingsToday } = useQuery({
-    queryKey: ["admin-club-bookings-today"],
+    queryKey: ["admin-club-bookings-today", sportScope],
+    enabled: scopeReady,
     queryFn: async () => {
-      const { count } = await supabase
+      if (noCourtsForSport) return 0;
+      let query = supabase
         .from("bookings")
         .select("*", { count: "exact", head: true })
         .not("club_id", "is", null)
         .gte("start_time", startOfDay(today).toISOString())
         .lte("start_time", endOfDay(today).toISOString())
         .eq("status", "confirmed");
+      if (courtIds) query = query.in("court_id", courtIds);
+      const { count } = await query;
       return count || 0;
     },
   });
 
   // Fetch club bookings this week
   const { data: clubBookingsWeek } = useQuery({
-    queryKey: ["admin-club-bookings-week"],
+    queryKey: ["admin-club-bookings-week", sportScope],
+    enabled: scopeReady,
     queryFn: async () => {
-      const { count } = await supabase
+      if (noCourtsForSport) return 0;
+      let query = supabase
         .from("bookings")
         .select("*", { count: "exact", head: true })
         .not("club_id", "is", null)
         .gte("start_time", startOfWeek(today, { locale: de }).toISOString())
         .lte("start_time", endOfWeek(today, { locale: de }).toISOString())
         .eq("status", "confirmed");
+      if (courtIds) query = query.in("court_id", courtIds);
+      const { count } = await query;
       return count || 0;
     },
   });
 
   // Fetch club quota usage stats
   const { data: clubQuotaStats } = useQuery({
-    queryKey: ["admin-club-quota-stats"],
+    queryKey: ["admin-club-quota-stats", sportScope],
+    enabled: scopeReady,
     queryFn: async () => {
+      if (noCourtsForSport) return { used: 0, total: 0, percentage: 0 };
+
       // Get all active club court assignments with their quotas
-      const { data: assignments } = await supabase
+      let assignmentQuery = supabase
         .from("club_court_assignments")
         .select("club_id, court_id, monthly_free_minutes");
+      if (courtIds) assignmentQuery = assignmentQuery.in("court_id", courtIds);
+      const { data: assignments } = await assignmentQuery;
 
       if (!assignments || assignments.length === 0) return { used: 0, total: 0, percentage: 0 };
 
@@ -271,10 +359,12 @@ export default function AdminOverview() {
       const monthStartStr = format(monthStart, "yyyy-MM-dd");
 
       // Get usage for current month
-      const { data: ledger } = await supabase
+      let ledgerQuery = supabase
         .from("club_quota_ledger")
         .select("minutes_used, minutes_refunded")
         .eq("month_start_date", monthStartStr);
+      if (courtIds) ledgerQuery = ledgerQuery.in("court_id", courtIds);
+      const { data: ledger } = await ledgerQuery;
 
       const totalMinutesUsed = (ledger || []).reduce(
         (sum, entry) => sum + (entry.minutes_used || 0) - (entry.minutes_refunded || 0),
@@ -297,21 +387,26 @@ export default function AdminOverview() {
 
   // Fetch all courts grouped by location for dropdown
   const { data: allCourts } = useQuery({
-    queryKey: ["admin-courts-all"],
+    queryKey: ["admin-courts-all", sportScope],
     queryFn: async () => {
-      const { data } = await supabase
+      // `sport` steht noch nicht in types.ts
+      let query = (supabase as any)
         .from("courts")
         .select("id, name, is_active, location_id, locations(name)")
         .eq("is_active", true)
         .order("name");
-      return data || [];
+      if (sport) query = query.eq("sport", sport);
+      const { data } = await query;
+      return (data || []) as CourtOption[];
     },
   });
 
   // Fetch recent bookings with optional court filter (incl. player + amount)
   const { data: recentBookings } = useQuery({
-    queryKey: ["admin-recent-bookings", selectedCourtId],
+    queryKey: ["admin-recent-bookings", selectedCourtId, sportScope],
+    enabled: scopeReady,
     queryFn: async () => {
+      if (noCourtsForSport) return [];
       let query = supabase
         .from("bookings")
         .select(`
@@ -329,6 +424,10 @@ export default function AdminOverview() {
           locations (name)
         `)
         .order("created_at", { ascending: false });
+
+      if (courtIds) {
+        query = query.in("court_id", courtIds);
+      }
 
       if (selectedCourtId) {
         query = query.eq("court_id", selectedCourtId);
@@ -405,14 +504,19 @@ export default function AdminOverview() {
       title: "Registrierte Benutzer",
       value: (totalUsers ?? 0).toLocaleString("de-DE"),
       icon: Users,
-      description: newUsers !== undefined ? `+${newUsers} ${RANGE_WORD[range]}` : "Gesamt Spieler",
+      // Nutzer hängen an keiner Sportart — bleibt auch im Sport-Blick konsolidiert
+      description: `${
+        newUsers !== undefined ? `+${newUsers} ${RANGE_WORD[range]}` : "Gesamt Spieler"
+      }${sportLabel ? " · sportartübergreifend" : ""}`,
       trend: null as number | null,
     },
     {
       title: "Aktive Courts",
-      value: (totalCourts ?? 0).toLocaleString("de-DE"),
+      value: (courtScopeStats?.courts ?? 0).toLocaleString("de-DE"),
       icon: LayoutGrid,
-      description: `an ${totalLocations ?? 0} Standorten`,
+      description: `${sportLabel ? `${sportLabel} · ` : ""}an ${
+        sport ? courtScopeStats?.locations ?? 0 : totalLocations ?? 0
+      } Standorten`,
       trend: null as number | null,
     },
   ];
@@ -454,21 +558,24 @@ export default function AdminOverview() {
             <h2 className="font-display text-base font-bold tracking-tight text-foreground">
               Plattform
             </h2>
-            <div className="flex gap-[3px] rounded-[11px] border border-[hsl(0_0%_14%)] bg-white/[0.04] p-[3px]">
-              {RANGE_OPTIONS.map((option) => (
-                <button
-                  key={option.key}
-                  type="button"
-                  onClick={() => setRange(option.key)}
-                  className={`rounded-lg px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-                    range === option.key
-                      ? "bg-primary text-[#0A0A0A]"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-2.5">
+              <SportScopeTabs value={sportScope} onChange={handleSportChange} />
+              <div className="flex gap-[3px] rounded-[11px] border border-[hsl(0_0%_14%)] bg-white/[0.04] p-[3px]">
+                {RANGE_OPTIONS.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => setRange(option.key)}
+                    className={`rounded-lg px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
+                      range === option.key
+                        ? "bg-primary text-[#0A0A0A]"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(224px,100%),1fr))] gap-4">
@@ -521,7 +628,9 @@ export default function AdminOverview() {
             <h2 className="font-display text-base font-bold tracking-tight text-foreground">
               Clubs
             </h2>
-            <span className="text-xs text-muted-foreground">Buchungen &amp; Kontingente</span>
+            <span className="text-xs text-muted-foreground">
+              Buchungen &amp; Kontingente{sportLabel ? ` · nur ${sportLabel}-Courts` : ""}
+            </span>
           </div>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] gap-4">
             {clubKpiCards.map((card) => (
@@ -567,6 +676,7 @@ export default function AdminOverview() {
                   </h2>
                   <span className="text-xs text-muted-foreground">
                     {recentBookings?.length ?? 0} Buchungen
+                    {sportLabel ? ` · nur ${sportLabel}-Courts` : ""}
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5">
@@ -730,10 +840,17 @@ export default function AdminOverview() {
           {/* Standorte */}
           <Card className="rounded-2xl border-border bg-gradient-card p-5 sm:p-6">
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-display text-base font-bold tracking-tight text-foreground">
-                  Standorte
-                </h2>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-baseline gap-2.5">
+                  <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                    Standorte
+                  </h2>
+                  {sportLabel && (
+                    <span className="text-xs text-muted-foreground">
+                      nur {sportLabel}-Courts
+                    </span>
+                  )}
+                </div>
                 <Link
                   to="/admin/courts"
                   className="inline-flex items-center gap-1.5 whitespace-nowrap text-[13px] font-semibold text-primary transition-colors hover:text-primary/80"
@@ -741,7 +858,7 @@ export default function AdminOverview() {
                   Verwalten <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
-              <LocationsOverview />
+              <LocationsOverview sport={sport} />
             </div>
           </Card>
         </section>
@@ -750,20 +867,21 @@ export default function AdminOverview() {
   );
 }
 
-function LocationsOverview() {
+function LocationsOverview({ sport }: { sport: "padel" | "tennis" | null }) {
   const { data: locations } = useQuery({
     queryKey: ["admin-locations-overview"],
     queryFn: async () => {
-      const { data } = await supabase
+      // `sport` steht noch nicht in types.ts
+      const { data } = await (supabase as any)
         .from("locations")
         .select(`
           id,
           name,
           slug,
           address,
-          courts (id, name, is_active)
+          courts (id, name, is_active, sport)
         `);
-      return data || [];
+      return (data || []) as OverviewLocation[];
     },
   });
 
@@ -771,17 +889,23 @@ function LocationsOverview() {
     return <p className="text-sm text-muted-foreground">Keine Standorte konfiguriert</p>;
   }
 
+  // Sportart wird hier im Client gefiltert: die Standortliste selbst bleibt
+  // vollständig, nur die Court-Zahl je Standort folgt dem Sport-Blick.
+  const activeCourtsOf = (location: OverviewLocation) =>
+    (location.courts || []).filter(
+      (c) => c.is_active && (!sport || courtSport(c) === sport)
+    ).length;
+
   const totalActiveCourts = locations.reduce(
-    (sum: number, location: any) =>
-      sum + (location.courts?.filter((c: any) => c.is_active).length || 0),
+    (sum: number, location) => sum + activeCourtsOf(location),
     0
   );
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-[9px]">
-        {locations.map((location: any) => {
-          const activeCourts = location.courts?.filter((c: any) => c.is_active).length || 0;
+        {locations.map((location) => {
+          const activeCourts = activeCourtsOf(location);
           return (
             <div
               key={location.id}
@@ -818,7 +942,8 @@ function LocationsOverview() {
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[hsl(0_0%_13%)] pt-3.5">
         <span className="text-xs text-muted-foreground">
-          {locations.length} Standorte · {totalActiveCourts} Courts aktiv
+          {locations.length} Standorte · {totalActiveCourts}{" "}
+          {sport ? `${SPORT_LABEL[sport]}-Courts` : "Courts"} aktiv
         </span>
         <Button asChild variant="outline" size="sm" className="rounded-[10px]">
           <Link to="/admin/courts">Neuer Standort</Link>

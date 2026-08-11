@@ -5,26 +5,59 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { de } from "date-fns/locale";
+import { useState } from "react";
+import {
+  SportScopeTabs,
+  sportOf,
+  type SportScope,
+} from "@/components/admin/SportScopeTabs";
+import { SPORT_LABEL } from "@/components/admin/courts/types";
+import { useSportCourtIds } from "@/hooks/useSportCourtIds";
 
 const COLORS = ["hsl(71, 91%, 51%)", "hsl(0, 0%, 40%)", "hsl(0, 84%, 60%)"];
 
 export default function AdminAnalytics() {
+  const [sportScope, setSportScope] = useState<SportScope>("all");
+
+  const sport = sportOf(sportScope);
+  const sportLabel = sport ? SPORT_LABEL[sport] : null;
+
+  /**
+   * Court-IDs der gewählten Sportart. `bookings` trägt keine Sportart, deshalb
+   * läuft der Filter über die Courts. `null` = nicht einschränken; ein LEERES
+   * Array heißt „diese Sportart hat keine Courts" und muss 0 Treffer liefern —
+   * dafür bleiben die Zähler unten ohne DB-Aufruf bei 0.
+   */
+  const { data: sportCourtIds } = useSportCourtIds(sportScope);
+  const courtIds = sportCourtIds ?? null;
+  const noCourtsForSport = courtIds !== null && courtIds.length === 0;
+  // Erst zählen, wenn die Court-IDs da sind — sonst flackerte kurz die andere
+  // Sportart durch.
+  const scopeReady = sportScope === "all" || Array.isArray(sportCourtIds);
+
   // Bookings per day for last 7 days
   const { data: bookingsPerDay } = useQuery({
-    queryKey: ["admin-analytics-bookings-per-day"],
+    queryKey: ["admin-analytics-bookings-per-day", sportScope],
+    enabled: scopeReady,
     queryFn: async () => {
       const days = [];
       for (let i = 6; i >= 0; i--) {
         const date = subDays(new Date(), i);
-        const { count } = await supabase
-          .from("bookings")
-          .select("*", { count: "exact", head: true })
-          .gte("start_time", startOfDay(date).toISOString())
-          .lte("start_time", endOfDay(date).toISOString());
+        let bookings = 0;
+        if (!noCourtsForSport) {
+          let query = supabase
+            .from("bookings")
+            .select("*", { count: "exact", head: true })
+            .gte("start_time", startOfDay(date).toISOString())
+            .lte("start_time", endOfDay(date).toISOString());
+          if (courtIds) query = query.in("court_id", courtIds);
+          const { count } = await query;
+          bookings = count || 0;
+        }
         days.push({
           date: format(date, "EEE", { locale: de }),
           fullDate: format(date, "dd.MM"),
-          bookings: count || 0,
+          bookings,
         });
       }
       return days;
@@ -33,18 +66,25 @@ export default function AdminAnalytics() {
 
   // Bookings by status
   const { data: bookingsByStatus } = useQuery({
-    queryKey: ["admin-analytics-bookings-by-status"],
+    queryKey: ["admin-analytics-bookings-by-status", sportScope],
+    enabled: scopeReady,
     queryFn: async () => {
       const statuses = ["confirmed", "pending", "cancelled"] as const;
       const result = [];
       for (const status of statuses) {
-        const { count } = await supabase
-          .from("bookings")
-          .select("*", { count: "exact", head: true })
-          .eq("status", status);
+        let value = 0;
+        if (!noCourtsForSport) {
+          let query = supabase
+            .from("bookings")
+            .select("*", { count: "exact", head: true })
+            .eq("status", status);
+          if (courtIds) query = query.in("court_id", courtIds);
+          const { count } = await query;
+          value = count || 0;
+        }
         result.push({
           name: status === "confirmed" ? "Bestätigt" : status === "pending" ? "Ausstehend" : "Storniert",
-          value: count || 0,
+          value,
         });
       }
       return result;
@@ -53,26 +93,33 @@ export default function AdminAnalytics() {
 
   // Bookings by location
   const { data: bookingsByLocation } = useQuery({
-    queryKey: ["admin-analytics-bookings-by-location"],
+    queryKey: ["admin-analytics-bookings-by-location", sportScope],
+    enabled: scopeReady,
     queryFn: async () => {
       const { data: locations } = await supabase.from("locations").select("id, name");
       const result = [];
       for (const location of locations || []) {
-        const { count } = await supabase
-          .from("bookings")
-          .select("*", { count: "exact", head: true })
-          .eq("location_id", location.id)
-          .eq("status", "confirmed");
+        let bookings = 0;
+        if (!noCourtsForSport) {
+          let query = supabase
+            .from("bookings")
+            .select("*", { count: "exact", head: true })
+            .eq("location_id", location.id)
+            .eq("status", "confirmed");
+          if (courtIds) query = query.in("court_id", courtIds);
+          const { count } = await query;
+          bookings = count || 0;
+        }
         result.push({
           name: location.name.replace("PADEL2GO ", ""),
-          bookings: count || 0,
+          bookings,
         });
       }
       return result;
     },
   });
 
-  // User registrations per week
+  // User registrations per week — bewusst ohne Sport-Filter, siehe UI-Hinweis
   const { data: userGrowth } = useQuery({
     queryKey: ["admin-analytics-user-growth"],
     queryFn: async () => {
@@ -133,9 +180,12 @@ export default function AdminAnalytics() {
   return (
     <AdminLayout>
       <div className="flex animate-fade-up flex-col gap-[18px]">
-        <p className="text-sm text-muted-foreground">
-          Vier feste Auswertungen zu Buchungen und Nutzerwachstum — reine Lese-Ansicht.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            Vier feste Auswertungen zu Buchungen und Nutzerwachstum — reine Lese-Ansicht.
+          </p>
+          <SportScopeTabs value={sportScope} onChange={setSportScope} />
+        </div>
 
         <div className="grid grid-cols-1 items-start gap-[18px] min-[1080px]:grid-cols-2">
           {/* Buchungen (letzte 7 Tage) */}
@@ -145,9 +195,16 @@ export default function AdminAnalytics() {
                 <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-primary/30 bg-primary/10 text-primary">
                   <BarChart3 className="h-[15px] w-[15px]" />
                 </span>
-                <h2 className="font-display text-base font-bold tracking-tight text-foreground">
-                  Buchungen (letzte 7 Tage)
-                </h2>
+                <div className="flex flex-col gap-px">
+                  <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                    Buchungen (letzte 7 Tage)
+                  </h2>
+                  {sportLabel && (
+                    <span className="text-[11.5px] text-muted-foreground">
+                      nur {sportLabel}-Courts
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex h-[200px] items-end gap-2 px-0.5 pt-5 sm:gap-[22px]">
                 {week.map((d, i) => {
@@ -194,9 +251,16 @@ export default function AdminAnalytics() {
                 <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-primary/30 bg-primary/10 text-primary">
                   <PieChart className="h-[15px] w-[15px]" />
                 </span>
-                <h2 className="font-display text-base font-bold tracking-tight text-foreground">
-                  Buchungen nach Status
-                </h2>
+                <div className="flex flex-col gap-px">
+                  <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                    Buchungen nach Status
+                  </h2>
+                  {sportLabel && (
+                    <span className="text-[11.5px] text-muted-foreground">
+                      nur {sportLabel}-Courts
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex flex-wrap items-center justify-center gap-[26px]">
                 <div
@@ -245,7 +309,7 @@ export default function AdminAnalytics() {
                     Buchungen pro Standort
                   </h2>
                   <span className="text-[11.5px] text-muted-foreground">
-                    nur bestätigte Buchungen
+                    nur bestätigte Buchungen{sportLabel ? ` · nur ${sportLabel}-Courts` : ""}
                   </span>
                 </div>
               </div>
@@ -287,9 +351,14 @@ export default function AdminAnalytics() {
                 <span className="flex h-8 w-8 flex-none items-center justify-center rounded-[9px] border border-primary/30 bg-primary/10 text-primary">
                   <TrendingUp className="h-[15px] w-[15px]" />
                 </span>
-                <h2 className="font-display text-base font-bold tracking-tight text-foreground">
-                  Neue Benutzer pro Woche
-                </h2>
+                <div className="flex flex-col gap-px">
+                  <h2 className="font-display text-base font-bold tracking-tight text-foreground">
+                    Neue Benutzer pro Woche
+                  </h2>
+                  <span className="text-[11.5px] text-muted-foreground">
+                    immer sportartübergreifend — Nutzer hängen an keinem Court
+                  </span>
+                </div>
               </div>
               <div className="relative h-[224px]">
                 <svg
