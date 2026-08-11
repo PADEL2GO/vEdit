@@ -101,7 +101,7 @@ serve(async (req) => {
     // ── Verify court is active and belongs to location ───────────────────────
     const { data: court, error: courtError } = await supabaseAdmin
       .from("courts")
-      .select("id, is_active, location_id")
+      .select("id, is_active, location_id, sport")
       .eq("id", court_id)
       .eq("is_active", true)
       .maybeSingle();
@@ -124,6 +124,10 @@ serve(async (req) => {
     );
     if (durationMinutes <= 0 || durationMinutes > 240) {
       throw new Error(`Invalid booking duration: ${durationMinutes} min`);
+    }
+    // Tennis wird ausschließlich in 60-Minuten-Slots gespielt (Produktregel).
+    if ((court as any).sport === "tennis" && durationMinutes !== 60) {
+      throw new Error("Tennis-Plätze können nur für 60 Minuten gebucht werden");
     }
 
     // ── Booking window (REQ-G06): never in the past, never outside the

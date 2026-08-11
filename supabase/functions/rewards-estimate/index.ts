@@ -95,6 +95,7 @@ serve(async (req) => {
     // can never differ from what is credited after payment.
     let bandMultiplier = 1;
     let pointsBandName: string | null = null;
+    let courtSport: string | null = null;
     if (courtId && startTime) {
       try {
         const { data: rateRows, error: rateError } = await supabaseAdmin.rpc("resolve_booking_rate", {
@@ -109,11 +110,24 @@ serve(async (req) => {
           const rawMult = Number(rate?.points_multiplier);
           if (Number.isFinite(rawMult) && rawMult >= 0) bandMultiplier = rawMult;
           pointsBandName = (rate?.points_band_name as string | null) ?? null;
+          courtSport = (rate?.court_sport as string | null) ?? null;
         }
       } catch (rateErr) {
         logStep("Band lookup failed — continuing with x1.0", { error: (rateErr as Error).message });
       }
     }
+
+    // Sportart nie am Band-Lookup hängen lassen: schlägt die RPC fehl, wird sie
+    // direkt am Court gelesen — sonst verspräche die Vorschau Tennis Punkte.
+    if (courtId && !courtSport) {
+      const { data: courtRow } = await supabaseAdmin
+        .from("courts")
+        .select("sport")
+        .eq("id", courtId)
+        .maybeSingle();
+      courtSport = ((courtRow as any)?.sport as string | null) ?? null;
+    }
+    const isTennis = courtSport === "tennis";
 
     // ── Expert-level multiplier (based on user's lifetime credits) ────────
     const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
@@ -138,40 +152,51 @@ serve(async (req) => {
       .maybeSingle();
     const levelName = (lvl as any)?.name as string | undefined;
 
-    const total_points = Math.round(base * bandMultiplier * multiplier);
+    // Tennis sammelt keine P2G-Punkte (Produktregel) — nicht als Band-Faktor 0 darstellen.
+    const total_points = isTennis ? 0 : Math.round(base * bandMultiplier * multiplier);
 
-    // Deltas are derived from the running subtotal so the rows always add up to total_points.
-    const withBand = Math.round(base * bandMultiplier);
-    const bandDelta = withBand - base;
-    const levelDelta = total_points - withBand;
+    const breakdown: RewardBreakdown[] = [];
+    if (isTennis) {
+      breakdown.push({
+        key: "TENNIS_NO_PAYBACK",
+        title: "Kein P2G-Payback",
+        points: 0,
+        description: "Tennis-Buchungen sammeln keine P2G-Punkte",
+      });
+    } else {
+      // Deltas are derived from the running subtotal so the rows always add up to total_points.
+      const withBand = Math.round(base * bandMultiplier);
+      const bandDelta = withBand - base;
+      const levelDelta = total_points - withBand;
 
-    const breakdown: RewardBreakdown[] = [
-      {
+      breakdown.push({
         key: "BOOKING_PAYBACK",
         title: "Buchungs-Payback",
         points: base,
         description: `${durationBucket} Min Buchung`,
-      },
-    ];
-    if (bandDelta !== 0) {
-      breakdown.push({
-        key: "TIME_BAND",
-        title: `Zeitfenster-Bonus ×${bandMultiplier}${pointsBandName ? ` (${pointsBandName})` : ""}`,
-        points: bandDelta,
-        description: "Bonus für dieses Zeitfenster",
       });
-    }
-    if (multiplier !== 1 && levelDelta !== 0) {
-      breakdown.push({
-        key: "LEVEL_MULTIPLIER",
-        title: `Level-Bonus ×${multiplier}${levelName ? ` (${levelName})` : ""}`,
-        points: levelDelta,
-        description: "Dein Expert-Level-Multiplikator",
-      });
+      if (bandDelta !== 0) {
+        breakdown.push({
+          key: "TIME_BAND",
+          title: `Zeitfenster-Bonus ×${bandMultiplier}${pointsBandName ? ` (${pointsBandName})` : ""}`,
+          points: bandDelta,
+          description: "Bonus für dieses Zeitfenster",
+        });
+      }
+      if (multiplier !== 1 && levelDelta !== 0) {
+        breakdown.push({
+          key: "LEVEL_MULTIPLIER",
+          title: `Level-Bonus ×${multiplier}${levelName ? ` (${levelName})` : ""}`,
+          points: levelDelta,
+          description: "Dein Expert-Level-Multiplikator",
+        });
+      }
     }
 
     const disclaimers: string[] = [];
-    if (total_points > 0) {
+    if (isTennis) {
+      disclaimers.push("Für Tennis-Buchungen werden keine P2G-Punkte gesammelt.");
+    } else if (total_points > 0) {
       disclaimers.push("Punkte werden nach Zahlung automatisch gutgeschrieben.");
     }
 
@@ -182,7 +207,7 @@ serve(async (req) => {
       multiplier,
       level_name: levelName,
     };
-    logStep("Estimate complete", { total_points, base, bandMultiplier, pointsBandName, multiplier, levelName });
+    logStep("Estimate complete", { total_points, base, bandMultiplier, pointsBandName, multiplier, levelName, courtSport });
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

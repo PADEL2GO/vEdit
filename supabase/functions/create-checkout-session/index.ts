@@ -215,6 +215,7 @@ serve(async (req) => {
       points_multiplier: number | string | null;
       price_band_name: string | null;
       points_band_name: string | null;
+      court_sport: string | null;
     } | null;
 
     const priceCents: number | null = rate?.price_cents ?? null;
@@ -222,9 +223,28 @@ serve(async (req) => {
     const rawMultiplier = Number(rate?.points_multiplier ?? 1);
     const bandMultiplier = Number.isFinite(rawMultiplier) ? rawMultiplier : 1;
 
+    // Sportart nie allein aus der Rate ableiten: liefert sie keine, wird sie am Court
+    // gelesen — sie entscheidet über Payback UND erlaubte Buchungsdauer.
+    let courtSport: string | null = rate?.court_sport ?? null;
+    if (!courtSport) {
+      const { data: courtRow } = await supabaseAdmin
+        .from("courts")
+        .select("sport")
+        .eq("id", booking.court_id)
+        .maybeSingle();
+      courtSport = ((courtRow as any)?.sport as string | null) ?? null;
+    }
+
     if (priceCents === null) {
       logStep("No price configured for duration", { duration: durationMinutes });
       throw new Error(`No price configured for duration (${durationMinutes} min)`);
+    }
+
+    // Tennis wird ausschließlich in 60-Minuten-Slots gespielt — eine abweichende Dauer
+    // darf nicht still weiterberechnet werden.
+    if (courtSport === "tennis" && durationMinutes !== 60) {
+      logStep("Invalid tennis duration", { booking_id, duration: durationMinutes });
+      throw new Error("Tennis-Plätze können nur für 60 Minuten gebucht werden");
     }
 
     logStep("Rate resolved", {
@@ -233,6 +253,7 @@ serve(async (req) => {
       priceBand: rate?.price_band_name ?? null,
       pointsBand: rate?.points_band_name ?? null,
       bandMultiplier,
+      courtSport,
     });
 
     // Always charge the server-recomputed price — booking.price_cents may be client-inserted
@@ -650,8 +671,12 @@ serve(async (req) => {
           .eq("id", booking.id)
           .single();
 
-        // Same fixed-rate model as the webhook; no payback if a voucher was applied.
-        if (bk && bk.play_credits_awarded === 0 && bk.user_id && !appliedVoucherId) {
+        // Same fixed-rate model as the webhook; no payback if a voucher was applied
+        // and keines für Tennis (Produktregel) — play_credits_awarded bleibt dann 0,
+        // womit der Storno-Clawback automatisch stimmt.
+        if (courtSport === "tennis") {
+          logStep("Free path: payback skipped — tennis", { bookingId: booking.id, courtId: booking.court_id });
+        } else if (bk && bk.play_credits_awarded === 0 && bk.user_id && !appliedVoucherId) {
           const durationMin = Math.round(
             (new Date(bk.end_time).getTime() - new Date(bk.start_time).getTime()) / 60000,
           );
@@ -673,18 +698,21 @@ serve(async (req) => {
           const creditsToAward = Math.round(base * bandMultiplier * levelMultiplier);
 
           if (creditsToAward > 0) {
-            const { error: awardError } = await supabaseAdmin.rpc("increment_play_and_lifetime", {
-              p_user_id: bk.user_id,
-              p_play_delta: creditsToAward,
-              p_lifetime_delta: creditsToAward,
-            });
+            // Gutschrift + play_credits_awarded atomar; die RPC verweigert Tennis,
+            // Gaeste, Stornos und Doppelvergabe (siehe 20260812120000_tennis_hardening).
+            const { data: awardedRaw, error: awardError } = await supabaseAdmin.rpc(
+              "award_booking_payback",
+              { p_booking_id: booking.id, p_points: creditsToAward },
+            );
             if (awardError) {
               logStep("Free path: failed to award play credits", { bookingId: booking.id, error: awardError.message });
             } else {
-              await supabaseAdmin.from("bookings")
-                .update({ play_credits_awarded: creditsToAward })
-                .eq("id", booking.id);
-              logStep("Free path: play credits awarded", { bookingId: booking.id, creditsToAward, durationMin, base, bandMultiplier, pointsBand: rate?.points_band_name ?? null, levelMultiplier });
+              const awarded = Number(awardedRaw) || 0;
+              if (awarded > 0) {
+                logStep("Free path: play credits awarded", { bookingId: booking.id, creditsToAward: awarded, durationMin, base, bandMultiplier, pointsBand: rate?.points_band_name ?? null, levelMultiplier });
+              } else {
+                logStep("Free path: payback not awarded (already awarded, cancelled, guest or non-padel)", { bookingId: booking.id });
+              }
             }
           }
         }

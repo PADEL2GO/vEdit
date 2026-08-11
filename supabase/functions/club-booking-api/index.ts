@@ -226,7 +226,7 @@ async function handleCreateBooking(
   if (clubContext.clubId) {
     const { data: clubAssignment, error: clubAssignmentError } = await supabase
       .from("club_court_assignments")
-      .select("*, court:courts(id, location_id, name)")
+      .select("*, court:courts(id, location_id, name, sport)")
       .eq("club_id", clubContext.clubId)
       .eq("court_id", courtId)
       .maybeSingle();
@@ -245,7 +245,7 @@ async function handleCreateBooking(
   if (!assignment) {
     const { data: legacyAssignment, error: legacyError } = await supabase
       .from("club_owner_assignments")
-      .select("*, court:courts(id, location_id, name)")
+      .select("*, court:courts(id, location_id, name, sport)")
       .eq("user_id", userId)
       .eq("court_id", courtId)
       .maybeSingle();
@@ -263,6 +263,27 @@ async function handleCreateBooking(
   if (!assignment) {
     return new Response(JSON.stringify({ error: "No assignment for this court" }), {
       status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Tennis wird ausschließlich in 60-Minuten-Slots gespielt (Produktregel).
+  // Sportart aus dem Join; fehlt sie (kein Court-Datensatz im Join), wird sie
+  // nachgeladen, damit die Regel nicht still umgangen wird.
+  let courtSport: string | null = assignment.court?.sport ?? null;
+  if (!courtSport) {
+    const { data: courtRow } = await supabase
+      .from("courts")
+      .select("sport")
+      .eq("id", courtId)
+      .maybeSingle();
+    courtSport = courtRow?.sport ?? null;
+  }
+
+  if (courtSport === "tennis" && computedDuration !== 60) {
+    console.log("[handleCreateBooking] Invalid tennis duration:", computedDuration);
+    return new Response(JSON.stringify({ error: "Tennis-Plätze können nur für 60 Minuten gebucht werden" }), {
+      status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

@@ -95,7 +95,7 @@ serve(async (req) => {
     // Verify booking belongs to user and is pending_payment
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from("bookings")
-      .select("id, user_id, status, price_cents")
+      .select("id, user_id, status, price_cents, court_id, start_time, end_time")
       .eq("id", booking_id)
       .single();
 
@@ -118,6 +118,25 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
+    }
+
+    // Tennis wird ausschließlich in 60-Minuten-Slots gespielt (Produktregel) — eine
+    // abweichende Dauer darf auch nicht per Gutschein kostenlos bestätigt werden.
+    const { data: courtRow } = await supabaseAdmin
+      .from("courts")
+      .select("sport")
+      .eq("id", (booking as any).court_id)
+      .maybeSingle();
+    if ((courtRow as any)?.sport === "tennis") {
+      const durationMinutes = Math.round(
+        (new Date((booking as any).end_time).getTime() - new Date((booking as any).start_time).getTime()) / 60000,
+      );
+      if (durationMinutes !== 60) {
+        return new Response(JSON.stringify({ error: "Tennis-Plätze können nur für 60 Minuten gebucht werden" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        });
+      }
     }
 
     // Guard: this endpoint only handles fully-free vouchers.

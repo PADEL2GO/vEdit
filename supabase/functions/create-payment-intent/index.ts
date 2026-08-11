@@ -108,10 +108,28 @@ Deno.serve(async (req) => {
     const rate = (Array.isArray(rateData) ? rateData[0] : rateData) as {
       price_cents: number | null;
       price_band_name: string | null;
+      court_sport: string | null;
     } | null;
     const priceCents: number | null = rate?.price_cents ?? null;
     if (priceCents === null) throw new Error(`No price configured for duration (${durationMinutes} min)`);
-    logStep("Rate resolved", { priceCents, priceBand: rate?.price_band_name ?? null });
+
+    // Tennis wird ausschließlich in 60-Minuten-Slots gespielt — eine abweichende Dauer
+    // wird abgelehnt statt still bezahlt. Sportart notfalls direkt am Court lesen.
+    let courtSport: string | null = rate?.court_sport ?? null;
+    if (!courtSport) {
+      const { data: courtRow } = await supabaseAdmin
+        .from("courts")
+        .select("sport")
+        .eq("id", booking.court_id)
+        .maybeSingle();
+      courtSport = ((courtRow as any)?.sport as string | null) ?? null;
+    }
+    if (courtSport === "tennis" && durationMinutes !== 60) {
+      logStep("Invalid tennis duration", { booking_id, durationMinutes });
+      return json({ error: "Tennis-Plätze können nur für 60 Minuten gebucht werden" }, 409);
+    }
+
+    logStep("Rate resolved", { priceCents, priceBand: rate?.price_band_name ?? null, courtSport });
     let amountCents = priceCents;
 
     // Partial voucher discount — identical semantics to create-checkout-session

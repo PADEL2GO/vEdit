@@ -810,6 +810,7 @@ serve(async (req) => {
                 // paying a 7am slot in the evening must still earn the 7am rate.
                 let bandMultiplier = 1;
                 let pointsBandName: string | null = null;
+                let courtSport: string | null = null;
                 try {
                   const { data: rateRows, error: rateError } = await supabaseAdmin.rpc("resolve_booking_rate", {
                     p_court_id: (bk as any).court_id,
@@ -823,33 +824,57 @@ serve(async (req) => {
                     const rawMult = Number(rate?.points_multiplier);
                     if (Number.isFinite(rawMult) && rawMult >= 0) bandMultiplier = rawMult;
                     pointsBandName = (rate?.points_band_name as string | null) ?? null;
+                    courtSport = (rate?.court_sport as string | null) ?? null;
                   }
                 } catch (rateErr) {
                   logStep("Payback: band lookup failed — continuing with x1.0", { bookingId, error: (rateErr as Error).message });
                 }
 
-                const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
-                  p_user_id: bk.user_id,
-                });
-                const levelMultiplier = Number(multData ?? 1) || 1;
+                // Die Sportart darf nicht am Band-Lookup hängen: fällt die RPC aus, wird sie
+                // direkt am Court gelesen. Sonst bekäme Tennis bei einem RPC-Fehler Punkte.
+                if (!courtSport) {
+                  const { data: courtRow } = await supabaseAdmin
+                    .from("courts")
+                    .select("sport")
+                    .eq("id", (bk as any).court_id)
+                    .maybeSingle();
+                  courtSport = ((courtRow as any)?.sport as string | null) ?? null;
+                }
 
-                const creditsToAward = Math.round(base * bandMultiplier * levelMultiplier);
-
-                if (creditsToAward > 0) {
-                  // Award atomically (signed delta) so a concurrent reserve/refund can't clobber it.
-                  const { error: awardError } = await supabaseAdmin.rpc("increment_play_and_lifetime", {
+                if (courtSport === "tennis") {
+                  // Tennis sammelt keine P2G-Punkte (Produktregel) — play_credits_awarded
+                  // bleibt 0, damit der Storno-Clawback automatisch stimmt.
+                  logStep("Payback skipped — tennis", { bookingId, courtId: (bk as any).court_id });
+                } else {
+                  const { data: multData } = await supabaseAdmin.rpc("get_user_level_multiplier", {
                     p_user_id: bk.user_id,
-                    p_play_delta: creditsToAward,
-                    p_lifetime_delta: creditsToAward,
                   });
+                  const levelMultiplier = Number(multData ?? 1) || 1;
 
-                  if (awardError) {
-                    logStep("Failed to award payback credits", { bookingId, error: awardError.message });
-                  } else {
-                    await supabaseAdmin.from("bookings")
-                      .update({ play_credits_awarded: creditsToAward })
-                      .eq("id", bookingId);
-                    logStep("Payback credits awarded", { bookingId, creditsToAward, durationMin, base, bandMultiplier, pointsBandName, levelMultiplier });
+                  const creditsToAward = Math.round(base * bandMultiplier * levelMultiplier);
+
+                  if (creditsToAward > 0) {
+                    // Award atomically (signed delta) so a concurrent reserve/refund can't clobber it.
+                    // Gutschrift + play_credits_awarded in EINER Transaktion unter Row-Lock.
+                    // Vorher lief erst die Wallet-Gutschrift und danach das UPDATE: schlug
+                    // das UPDATE fehl, schrieb ein Stripe-Retry ERNEUT gut, und der
+                    // Storno-Clawback konnte es nie zurueckholen (er liest genau die Spalte).
+                    // Die RPC verweigert ausserdem Tennis, Gaeste, Stornos und Doppelvergabe.
+                    const { data: awardedRaw, error: awardError } = await supabaseAdmin.rpc(
+                      "award_booking_payback",
+                      { p_booking_id: bookingId, p_points: creditsToAward },
+                    );
+
+                    if (awardError) {
+                      logStep("Failed to award payback credits", { bookingId, error: awardError.message });
+                    } else {
+                      const awarded = Number(awardedRaw) || 0;
+                      if (awarded > 0) {
+                        logStep("Payback credits awarded", { bookingId, creditsToAward: awarded, durationMin, base, bandMultiplier, pointsBandName, levelMultiplier });
+                      } else {
+                        logStep("Payback not awarded (already awarded, cancelled, guest or non-padel)", { bookingId });
+                      }
+                    }
                   }
                 }
               } else if (usedVoucher) {
@@ -911,7 +936,7 @@ serve(async (req) => {
 
             if (!isGuestWebhook && userId && priceCents) {
               // ── Authenticated user: send confirmation ──
-              // (Payback points are awarded directly above via increment_play_and_lifetime;
+              // (Payback points are awarded directly above via award_booking_payback;
               //  the old rewards-trigger percentage award has been removed.)
               try {
                 const emailResp = await fetch(`${supabaseUrl}/functions/v1/send-booking-confirmation`, {

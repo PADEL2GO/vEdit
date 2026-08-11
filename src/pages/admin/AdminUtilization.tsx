@@ -30,6 +30,11 @@ import {
   TrendingDown,
 } from "lucide-react";
 import {
+  SportScopeTabs,
+  sportOf,
+  type SportScope,
+} from "@/components/admin/SportScopeTabs";
+import {
   useCourtUtilization,
   useNetworkUtilizationTrend,
 } from "@/hooks/useCourtUtilization";
@@ -62,15 +67,21 @@ const LEGEND = [
 
 type SortKey = "capacity" | "booked" | "revenue" | "name";
 
+const SPORT_LABEL: Record<string, string> = { padel: "Padel", tennis: "Tennis" };
+
 export default function AdminUtilization() {
   const today = startOfMonth(new Date());
   const [month, setMonth] = useState<Date>(today);
+  const [sportScope, setSportScope] = useState<SportScope>("all");
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [sortKey, setSortKey] = useState<SortKey>("capacity");
 
   const monthISO = monthStartISO(month);
-  const { data: rows = [], isLoading, isError } = useCourtUtilization(monthISO);
-  const { data: networkTrend = [] } = useNetworkUtilizationTrend(6);
+  const sport = sportOf(sportScope);
+  // Der Sport wird serverseitig gefiltert: die Kennzahlen unten summieren über
+  // die Zeilen, ein Frontend-Filter würde sie an der Tabelle vorbei verfälschen.
+  const { data: rows = [], isLoading, isError } = useCourtUtilization(monthISO, sport);
+  const { data: networkTrend = [] } = useNetworkUtilizationTrend(6, sport);
 
   const isCurrentMonth = isSameMonth(month, today);
 
@@ -333,6 +344,21 @@ export default function AdminUtilization() {
               <div className="flex w-full flex-col gap-[11px] sm:w-auto sm:flex-row">
                 <div className="flex min-w-0 flex-col gap-1.5">
                   <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Sportart
+                  </span>
+                  <SportScopeTabs
+                    value={sportScope}
+                    onChange={(scope) => {
+                      setSportScope(scope);
+                      // Ein Standort ohne Courts der neuen Sportart verschwindet
+                      // aus der Liste — der Filter bliebe sonst unsichtbar aktiv.
+                      setLocationFilter("all");
+                    }}
+                    className="self-start"
+                  />
+                </div>
+                <div className="flex min-w-0 flex-col gap-1.5">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                     Standort
                   </span>
                   <Select value={locationFilter} onValueChange={setLocationFilter}>
@@ -423,8 +449,15 @@ export default function AdminUtilization() {
                             ) : null}
                           </div>
                         </TableCell>
-                        <TableCell className="whitespace-nowrap px-0 py-3 pr-3.5 text-[13.5px] text-[hsl(0_0%_78%)]">
-                          {r.court_name}
+                        <TableCell className="px-0 py-3 pr-3.5">
+                          <div className="flex flex-col gap-px">
+                            <span className="whitespace-nowrap text-[13.5px] text-[hsl(0_0%_78%)]">
+                              {r.court_name}
+                            </span>
+                            <span className="whitespace-nowrap text-[11.5px] text-muted-foreground">
+                              {SPORT_LABEL[r.sport] ?? r.sport}
+                            </span>
+                          </div>
                         </TableCell>
                         <TableCell className="px-0 py-3 pr-3.5">
                           <div className="flex items-center gap-2.5">

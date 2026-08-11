@@ -4,9 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 // RPC return shapes. These functions are added by the
 // 20260620120000_court_utilization_rpcs.sql migration and are not yet in the
 // generated Supabase types, so the rpc calls are cast.
+
+/** Sportart-Filter der RPCs. `null` = alle Sportarten (konsolidiert). */
+export type UtilizationSport = "padel" | "tennis" | null;
+
 export interface CourtUtilizationRow {
   court_id: string;
   court_name: string;
+  sport: "padel" | "tennis";
   location_id: string;
   location_name: string;
   location_city: string | null;
@@ -27,13 +32,21 @@ export interface UtilizationTrendPoint {
   capacity_pct: number;
 }
 
-/** Per-court utilization for one month. Returns only the courts the caller may see. */
-export function useCourtUtilization(monthStartISO: string | null) {
+/**
+ * Per-court utilization for one month. Returns only the courts the caller may see.
+ * `sport` filtert serverseitig — die Seite summiert über die Zeilen, ein
+ * Frontend-Filter würde die Kennzahlen verfälschen.
+ */
+export function useCourtUtilization(
+  monthStartISO: string | null,
+  sport: UtilizationSport = null,
+) {
   return useQuery({
-    queryKey: ["utilization-courts", monthStartISO],
+    queryKey: ["utilization-courts", monthStartISO, sport],
     queryFn: async () => {
       const { data, error } = await (supabase as any).rpc("get_court_utilization", {
         p_month_start: monthStartISO,
+        p_sport: sport,
       });
       if (error) throw error;
       return (data ?? []) as CourtUtilizationRow[];
@@ -43,13 +56,18 @@ export function useCourtUtilization(monthStartISO: string | null) {
 }
 
 /** Monthly trend (last N months) for a single court. */
-export function useCourtUtilizationTrend(courtId: string | null, months = 6) {
+export function useCourtUtilizationTrend(
+  courtId: string | null,
+  months = 6,
+  sport: UtilizationSport = null,
+) {
   return useQuery({
-    queryKey: ["utilization-court-trend", courtId, months],
+    queryKey: ["utilization-court-trend", courtId, months, sport],
     queryFn: async () => {
       const { data, error } = await (supabase as any).rpc("get_court_utilization_trend", {
         p_court_id: courtId,
         p_months: months,
+        p_sport: sport,
       });
       if (error) throw error;
       return (data ?? []) as UtilizationTrendPoint[];
@@ -59,12 +77,13 @@ export function useCourtUtilizationTrend(courtId: string | null, months = 6) {
 }
 
 /** Network-wide monthly trend (admin only). */
-export function useNetworkUtilizationTrend(months = 6) {
+export function useNetworkUtilizationTrend(months = 6, sport: UtilizationSport = null) {
   return useQuery({
-    queryKey: ["utilization-network-trend", months],
+    queryKey: ["utilization-network-trend", months, sport],
     queryFn: async () => {
       const { data, error } = await (supabase as any).rpc("get_network_utilization_trend", {
         p_months: months,
+        p_sport: sport,
       });
       if (error) throw error;
       return (data ?? []) as UtilizationTrendPoint[];
