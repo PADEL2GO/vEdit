@@ -10,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CalendarCheck, Clock, Activity, Euro, Gauge, XCircle } from "lucide-react";
 import { format, subDays, differenceInHours, startOfDay } from "date-fns";
 import { de } from "date-fns/locale";
-import { Location } from "./types";
+import { Location, courtSport } from "./types";
+import { SportScopeTabs, type SportScope } from "@/components/admin/SportScopeTabs";
 import { cn } from "@/lib/utils";
 
 interface LocationAnalyticsTabProps {
@@ -37,12 +38,25 @@ const TABLE_HEAD_CLASSES =
 export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
   const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
   const [timeRange, setTimeRange] = useState<TimeRange>("7");
+  const [sportScope, setSportScope] = useState<SportScope>("all");
 
   const selectedLocation = locations.find((l) => l.id === selectedLocationId);
 
+  /**
+   * Court-IDs der gewählten Sportart. `bookings` trägt keine Sportart, deshalb
+   * wird über die Court-IDs gefiltert. `null` = nicht einschränken; ein LEERES
+   * Array heißt „diese Sportart hat keine Courts" und muss 0 Treffer liefern.
+   */
+  const scopedCourtIds = useMemo(() => {
+    if (sportScope === "all") return null;
+    return locations.flatMap((l) =>
+      (l.courts || []).filter((c) => courtSport(c) === sportScope).map((c) => c.id)
+    );
+  }, [locations, sportScope]);
+
   // Fetch bookings for analytics
   const { data: bookings, isLoading } = useQuery({
-    queryKey: ["admin-location-analytics", selectedLocationId, timeRange],
+    queryKey: ["admin-location-analytics", selectedLocationId, timeRange, sportScope],
     queryFn: async () => {
       let query = supabase
         .from("bookings")
@@ -61,6 +75,10 @@ export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
 
       if (selectedLocationId !== "all") {
         query = query.eq("location_id", selectedLocationId);
+      }
+
+      if (scopedCourtIds) {
+        query = query.in("court_id", scopedCourtIds);
       }
 
       if (timeRange !== "all") {
@@ -96,8 +114,17 @@ export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
     }, 0);
 
     // Calculate utilization (simplified: based on 12 hours/day per court)
+    // Nur Courts der gewählten Sportart zählen — sonst würden z. B. Tennis-Courts
+    // die Padel-Auslastung künstlich verwässern.
     const relevantLocations = selectedLocationId === "all" ? locations : [selectedLocation].filter(Boolean);
-    const totalCourts = relevantLocations.reduce((sum, l) => sum + (l?.courts?.length || 0), 0);
+    const totalCourts = relevantLocations.reduce(
+      (sum, l) =>
+        sum +
+        (l?.courts || []).filter(
+          (c) => sportScope === "all" || courtSport(c) === sportScope
+        ).length,
+      0
+    );
     const daysInRange = timeRange === "all" ? 90 : parseInt(timeRange);
     const availableHours = totalCourts * 12 * daysInRange; // 12 hours per day per court
     const utilization = availableHours > 0 ? (totalBookedHours / availableHours) * 100 : 0;
@@ -112,7 +139,7 @@ export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
       utilization: Math.min(utilization, 100),
       totalBookedHours,
     };
-  }, [bookings, locations, selectedLocationId, selectedLocation, timeRange]);
+  }, [bookings, locations, selectedLocationId, selectedLocation, timeRange, sportScope]);
 
   // Chart data: Bookings per day
   const bookingsPerDay = useMemo(() => {
@@ -265,6 +292,12 @@ export function LocationAnalyticsTab({ locations }: LocationAnalyticsTabProps) {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex flex-col gap-[7px]">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              Sportart
+            </span>
+            <SportScopeTabs value={sportScope} onChange={setSportScope} />
           </div>
           <div className="flex flex-col gap-[7px]">
             <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">

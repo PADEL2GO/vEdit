@@ -16,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { LocationForm, QUERY_KEY, Location, AdminLocationCard } from "@/components/admin/courts";
 import { AdminCourtCard } from "@/components/admin/courts/AdminCourtCard";
 import { LocationAnalyticsTab } from "@/components/admin/courts/LocationAnalyticsTab";
+import { courtSport } from "@/components/admin/courts/types";
+import { SportScopeTabs, type SportScope } from "@/components/admin/SportScopeTabs";
 import { CameraApiKeysTab, CameraSessionsTab, CameraTestSimulator } from "@/components/admin/cameras";
 
 const TAB_TRIGGER_CLASSES =
@@ -28,6 +30,7 @@ export default function AdminCourts() {
   const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("standorte");
+  const [courtScope, setCourtScope] = useState<SportScope>("all");
 
   const { data: locations, isLoading } = useQuery({
     queryKey: [QUERY_KEY],
@@ -49,13 +52,14 @@ export default function AdminCourts() {
           lat,
           lng,
           main_image_url,
+          tennis_image_url,
           gallery_image_urls,
           opening_hours_json,
           rewards_enabled,
           ai_analysis_enabled,
           vending_enabled,
           features_json,
-          courts (id, name, is_active, location_id, label)
+          courts (id, name, is_active, location_id, label, sport)
         `)
         .order("name");
       if (error) throw error;
@@ -71,6 +75,7 @@ export default function AdminCourts() {
         id: location.id,
         name: location.name,
         main_image_url: location.main_image_url,
+        tennis_image_url: location.tennis_image_url,
         city: location.city,
       }
     }))
@@ -80,6 +85,13 @@ export default function AdminCourts() {
   const onlineLocations = locations?.filter(l => l.is_online).length || 0;
   const totalCourts = allCourts.length;
   const activeCourts = allCourts.filter(c => c.court.is_active).length;
+  const tennisCourts = allCourts.filter(c => courtSport(c.court) === "tennis").length;
+  const padelCourts = totalCourts - tennisCourts;
+
+  const visibleCourts =
+    courtScope === "all"
+      ? allCourts
+      : allCourts.filter(c => courtSport(c.court) === courtScope);
 
   return (
     <AdminLayout>
@@ -92,6 +104,10 @@ export default function AdminCourts() {
             <span className="mx-1.5">•</span>
             <span className="font-bold text-foreground">{totalCourts} Courts</span>{" "}
             ({activeCourts} aktiv)
+            <span className="mx-1.5">·</span>
+            <span className="font-bold text-primary">{padelCourts} Padel</span>
+            <span className="mx-1.5">·</span>
+            <span className="font-bold text-[#7FD4FF]">{tennisCourts} Tennis</span>
           </p>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
@@ -132,7 +148,7 @@ export default function AdminCourts() {
               <Building2 className="h-4 w-4" />
               <span className="hidden sm:inline">Courts</span>
               <span className="sm:hidden">Cts.</span>
-              <span className={TAB_COUNT_CLASSES}>{totalCourts}</span>
+              <span className={TAB_COUNT_CLASSES}>{visibleCourts.length}</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className={TAB_TRIGGER_CLASSES}>
               <BarChart3 className="h-4 w-4" />
@@ -181,6 +197,15 @@ export default function AdminCourts() {
 
           {/* Courts Tab */}
           <TabsContent value="courts" className="mt-5">
+            <div className="mb-[18px] flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-bold text-foreground">
+                  {visibleCourts.length} Courts
+                </span>{" "}
+                ({visibleCourts.filter(c => c.court.is_active).length} aktiv)
+              </p>
+              <SportScopeTabs value={courtScope} onChange={setCourtScope} />
+            </div>
             {isLoading ? (
               <div className="grid grid-cols-[repeat(auto-fit,minmax(min(290px,100%),1fr))] items-start gap-[18px]">
                 {[...Array(4)].map((_, i) => (
@@ -194,9 +219,9 @@ export default function AdminCourts() {
                   </Card>
                 ))}
               </div>
-            ) : allCourts.length > 0 ? (
+            ) : visibleCourts.length > 0 ? (
               <div className="grid grid-cols-[repeat(auto-fit,minmax(min(290px,100%),1fr))] items-start gap-[18px]">
-                {allCourts.map(({ court, location }, index) => (
+                {visibleCourts.map(({ court, location }, index) => (
                   <AdminCourtCard
                     key={court.id}
                     court={court}
@@ -211,7 +236,13 @@ export default function AdminCourts() {
                   <span className="mb-4 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] border border-[hsl(0_0%_16%)] bg-white/5 text-[hsl(0_0%_72%)]">
                     <Building2 className="h-4 w-4" />
                   </span>
-                  <p className="text-sm text-muted-foreground">Keine Courts konfiguriert</p>
+                  <p className="text-sm text-muted-foreground">
+                    {courtScope === "tennis"
+                      ? "Keine Tennis-Courts konfiguriert"
+                      : courtScope === "padel"
+                        ? "Keine Padel-Courts konfiguriert"
+                        : "Keine Courts konfiguriert"}
+                  </p>
                 </div>
               </Card>
             )}

@@ -47,6 +47,7 @@ export function LocationForm({ location, onSuccess }: LocationFormProps) {
     features_json: extractFeatures(location?.features_json as Record<string, unknown> | null),
   });
   const [mainImageUrl, setMainImageUrl] = useState(location?.main_image_url || "");
+  const [tennisImageUrl, setTennisImageUrl] = useState(location?.tennis_image_url || "");
   const [galleryUrls, setGalleryUrls] = useState<string[]>(location?.gallery_image_urls || []);
   const [uploading, setUploading] = useState(false);
   
@@ -86,12 +87,15 @@ export function LocationForm({ location, onSuccess }: LocationFormProps) {
         amenities: [], // Deprecated - using features_json instead
         opening_hours_json: formData.opening_hours_json,
         main_image_url: mainImageUrl || null,
+        tennis_image_url: tennisImageUrl || null,
         gallery_image_urls: galleryUrls,
         rewards_enabled: formData.rewards_enabled,
         ai_analysis_enabled: formData.ai_analysis_enabled,
         vending_enabled: formData.vending_enabled,
         features_json: formData.features_json,
-      };
+        // `tennis_image_url` fehlt noch in den generierten Supabase-Typen
+        // (Migration 20260812100000) — daher der Cast wie bei `label` in courts.
+      } as any;
 
       if (isEditing) {
         const { error } = await supabase
@@ -122,7 +126,7 @@ export function LocationForm({ location, onSuccess }: LocationFormProps) {
 
   const handleImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: "main" | "gallery"
+    type: "main" | "tennis" | "gallery"
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -140,6 +144,8 @@ export function LocationForm({ location, onSuccess }: LocationFormProps) {
 
       if (type === "main") {
         setMainImageUrl(publicUrl.publicUrl);
+      } else if (type === "tennis") {
+        setTennisImageUrl(publicUrl.publicUrl);
       } else {
         setGalleryUrls((prev) => [...prev, publicUrl.publicUrl]);
       }
@@ -173,42 +179,87 @@ export function LocationForm({ location, onSuccess }: LocationFormProps) {
 
   return (
     <div className="space-y-6">
-      {/* Main Image */}
-      <div className="space-y-2">
-        <Label>Hauptbild</Label>
-        {mainImageUrl ? (
-          <div className="relative w-full h-48 rounded-lg overflow-hidden">
-            <img src={mainImageUrl} alt="Standort" className="w-full h-full object-cover" />
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute top-2 right-2"
-              onClick={() => setMainImageUrl("")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : (
-          <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              {uploading ? (
-                <div className="animate-pulse text-muted-foreground">Hochladen...</div>
-              ) : (
-                <>
-                  <ImageIcon className="w-10 h-10 mb-3 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">Hauptbild hochladen</p>
-                </>
-              )}
+      {/* Standort-Ansichten: Hauptbild = Padel, Tennis-Bild = Tennis */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Hauptbild (Padel-Ansicht)</Label>
+          {mainImageUrl ? (
+            <div className="relative w-full h-48 rounded-lg overflow-hidden">
+              <img src={mainImageUrl} alt="Padel-Ansicht" className="w-full h-full object-cover" />
+              <Button
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2"
+                onClick={() => setMainImageUrl("")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-            <input
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={(e) => handleImageUpload(e, "main")}
-              disabled={uploading}
-            />
-          </label>
-        )}
+          ) : (
+            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                {uploading ? (
+                  <div className="animate-pulse text-muted-foreground">Hochladen...</div>
+                ) : (
+                  <>
+                    <ImageIcon className="w-10 h-10 mb-3 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Hauptbild hochladen</p>
+                  </>
+                )}
+              </div>
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, "main")}
+                disabled={uploading}
+              />
+            </label>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Standardbild des Standorts — wird für Padel-Courts gezeigt.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Tennis-Bild (Tennis-Ansicht)</Label>
+          {tennisImageUrl ? (
+            <div className="relative w-full h-48 rounded-lg overflow-hidden">
+              <img src={tennisImageUrl} alt="Tennis-Ansicht" className="w-full h-full object-cover" />
+              <Button
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2"
+                onClick={() => setTennisImageUrl("")}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                {uploading ? (
+                  <div className="animate-pulse text-muted-foreground">Hochladen...</div>
+                ) : (
+                  <>
+                    <ImageIcon className="w-10 h-10 mb-3 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Tennis-Bild hochladen</p>
+                  </>
+                )}
+              </div>
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, "tennis")}
+                disabled={uploading}
+              />
+            </label>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Wird für Tennis-Courts gezeigt. Ohne Tennis-Bild gilt das Hauptbild.
+          </p>
+        </div>
       </div>
 
       {/* Gallery */}

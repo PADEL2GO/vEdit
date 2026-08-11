@@ -7,11 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { invokeEdgeFunction } from "@/lib/edgeFunctionUtils";
+import { CourtSport, courtSport } from "./types";
+import { SportSelect } from "./SportSelect";
 
 interface CourtCountSelectorProps {
   locationId: string;
   locationName: string;
-  currentCourts: { id: string; name: string; is_active: boolean }[];
+  currentCourts: { id: string; name: string; is_active: boolean; sport?: string | null }[];
   maxCourts?: number;
 }
 
@@ -26,14 +28,19 @@ export function CourtCountSelector({
   const activeCourts = currentCourts.filter((c) => c.is_active);
   const currentCount = activeCourts.length;
   const [isUpdating, setIsUpdating] = useState(false);
+  // Sportart der neu angelegten Courts — einmal wählen, gilt für alle in diesem Schritt.
+  const [newCourtSport, setNewCourtSport] = useState<CourtSport>("padel");
 
   const syncCourtsMutation = useMutation({
     mutationFn: async (targetCount: number) => {
       const activeCount = activeCourts.length;
 
       if (targetCount > activeCount) {
-        // First, try to reactivate inactive courts
-        const inactiveCourts = currentCourts.filter((c) => !c.is_active);
+        // Nur inaktive Courts der gewählten Sportart reaktivieren — sonst
+        // entstünde bei "Tennis" still ein wiederbelebter Padel-Court.
+        const inactiveCourts = currentCourts.filter(
+          (c) => !c.is_active && courtSport(c) === newCourtSport
+        );
         const courtsToReactivate = inactiveCourts.slice(0, targetCount - activeCount);
         
         if (courtsToReactivate.length > 0) {
@@ -61,9 +68,11 @@ export function CourtCountSelector({
               location_id: locationId,
               name: `Court ${highestNumber + i}`,
               is_active: true,
+              sport: newCourtSport,
             });
           }
-          const { error } = await supabase.from("courts").insert(courtsToAdd);
+          // `sport` fehlt noch in den generierten Supabase-Typen (Migration 20260812100000).
+          const { error } = await supabase.from("courts").insert(courtsToAdd as any);
           if (error) throw error;
         }
       } else if (targetCount < activeCount) {
@@ -145,34 +154,42 @@ export function CourtCountSelector({
   };
 
   return (
-    <div className="flex items-center gap-3">
-      <Label className="text-sm text-muted-foreground whitespace-nowrap">
-        Anzahl Courts:
-      </Label>
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-8 w-8 border-border"
-          onClick={() => handleChange(-1)}
-          disabled={currentCount <= 1 || isUpdating}
-        >
-          <Minus className="h-4 w-4" />
-        </Button>
-        <span className="w-8 text-center font-medium text-foreground">
-          {currentCount}
-        </span>
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-8 w-8 border-border"
-          onClick={() => handleChange(1)}
-          disabled={currentCount >= maxCourts || isUpdating}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
+    <div className="flex flex-col gap-2 sm:items-end">
+      <div className="flex items-center gap-3">
+        <Label className="text-sm text-muted-foreground whitespace-nowrap">
+          Anzahl Courts:
+        </Label>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 border-border"
+            onClick={() => handleChange(-1)}
+            disabled={currentCount <= 1 || isUpdating}
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+          <span className="w-8 text-center font-medium text-foreground">
+            {currentCount}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 border-border"
+            onClick={() => handleChange(1)}
+            disabled={currentCount >= maxCourts || isUpdating}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+        <span className="text-xs text-muted-foreground">(max. {maxCourts})</span>
       </div>
-      <span className="text-xs text-muted-foreground">(max. {maxCourts})</span>
+      <div className="flex items-center gap-2">
+        <span className="whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.1em] text-[hsl(0_0%_58%)]">
+          Neue Courts
+        </span>
+        <SportSelect value={newCourtSport} onChange={setNewCourtSport} size="sm" />
+      </div>
     </div>
   );
 }

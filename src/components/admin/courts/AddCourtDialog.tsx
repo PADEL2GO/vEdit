@@ -14,6 +14,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { QUERY_KEYS } from "@/lib/queryKeys";
+import { CourtSport, SPORT_LABEL } from "./types";
+import { SportSelect } from "./SportSelect";
 
 interface AddCourtDialogProps {
   locationId: string;
@@ -23,23 +25,28 @@ export function AddCourtDialog({ locationId }: AddCourtDialogProps) {
   const [open, setOpen] = useState(false);
   const [courtName, setCourtName] = useState("");
   const [courtLabel, setCourtLabel] = useState("");
+  const [sport, setSport] = useState<CourtSport>("padel");
   const queryClient = useQueryClient();
 
   const addCourtMutation = useMutation({
     mutationFn: async () => {
+      // `sport` fehlt noch in den generierten Supabase-Typen (Migration
+      // 20260812100000) — daher wie bei `label` per `as any`.
       const { error } = await supabase.from("courts").insert({
         location_id: locationId,
         name: courtName,
         is_active: true,
         label: courtLabel.trim() || null,
+        sport,
       } as any);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Court hinzugefügt");
+      toast.success(`${SPORT_LABEL[sport]}-Court hinzugefügt`);
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.adminLocations] });
       setCourtName("");
       setCourtLabel("");
+      setSport("padel");
       setOpen(false);
     },
     onError: () => {
@@ -60,6 +67,13 @@ export function AddCourtDialog({ locationId }: AddCourtDialogProps) {
           <DialogTitle className="text-foreground">Neuer Court</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Sportart</Label>
+            <SportSelect value={sport} onChange={setSport} className="flex" />
+            <p className="text-xs text-muted-foreground">
+              Bestimmt Preise, Auswertungen und die angezeigte Standort-Ansicht.
+            </p>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="court-name">Court Name</Label>
             <Input

@@ -25,7 +25,7 @@ import { COURT_FEATURES } from "@/lib/courtFeatures";
 import { useState } from "react";
 import { CourtPriceDialog } from "./CourtPriceDialog";
 import { useQueryClient } from "@tanstack/react-query";
-import { Location } from "./types";
+import { Location, SPORT_CHIP_CLASSES, SPORT_LABEL, courtSport } from "./types";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { LocationForm } from "./LocationForm";
 import { CourtCountSelector } from "./CourtCountSelector";
@@ -44,6 +44,10 @@ export function AdminLocationCard({ location }: AdminLocationCardProps) {
     toggleLocationFeature,
     deleteLocationMutation,
   } = useLocationMutations();
+
+  const courts = location.courts || [];
+  const tennisCourts = courts.filter((c) => courtSport(c) === "tennis").length;
+  const padelCourts = courts.length - tennisCourts;
 
   return (
     <Card className="overflow-hidden rounded-2xl border-border bg-gradient-card">
@@ -197,19 +201,27 @@ export function AdminLocationCard({ location }: AdminLocationCardProps) {
         <div className="flex flex-col gap-[9px] border-t border-[hsl(0_0%_12%)] pt-[13px]">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <h3 className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[hsl(0_0%_65%)]">
-              Courts ({location.courts?.length || 0})
+              Courts ({courts.length})
+              {tennisCourts > 0 && (
+                <>
+                  {" · "}
+                  <span className="text-primary">{padelCourts} Padel</span>
+                  {" · "}
+                  <span className="text-[#7FD4FF]">{tennisCourts} Tennis</span>
+                </>
+              )}
             </h3>
             <CourtCountSelector
               locationId={location.id}
               locationName={location.name}
-              currentCourts={location.courts || []}
+              currentCourts={courts}
               maxCourts={2}
             />
           </div>
-          {location.courts && location.courts.length > 0 && (
+          {courts.length > 0 && (
             <div className="grid grid-cols-1 gap-[9px]">
               {/* Show active courts first, then inactive */}
-              {[...location.courts]
+              {[...courts]
                 .sort((a, b) => (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0))
                 .map((court) => (
                 <div
@@ -224,6 +236,13 @@ export function AdminLocationCard({ location }: AdminLocationCardProps) {
                     court.is_active ? "text-foreground" : "text-muted-foreground"
                   }`}>
                     {court.name}
+                  </span>
+                  <span
+                    className={`flex-shrink-0 whitespace-nowrap rounded-[7px] border px-[7px] py-[3px] text-[10.5px] font-semibold ${
+                      SPORT_CHIP_CLASSES[courtSport(court)]
+                    }`}
+                  >
+                    {SPORT_LABEL[courtSport(court)]}
                   </span>
                   {!court.is_active && (
                     <span className="flex-shrink-0 whitespace-nowrap rounded-full bg-[hsl(0_100%_71%/0.1)] px-2 py-[3px] text-[10.5px] font-bold text-[#FF6B6B]">

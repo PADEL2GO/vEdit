@@ -16,6 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { toast } from "sonner";
+import { CourtSport, SPORT_LABEL, courtSport } from "./types";
+import { SportSelect } from "./SportSelect";
 
 interface Court {
   id: string;
@@ -23,6 +25,7 @@ interface Court {
   is_active: boolean;
   location_id: string;
   label?: string | null;
+  sport?: string | null;
 }
 
 interface AdminCourtEditDialogProps {
@@ -43,6 +46,7 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
   const [courtName, setCourtName] = useState(court.name);
   const [courtLabel, setCourtLabel] = useState(court.label ?? "");
   const [isActive, setIsActive] = useState(court.is_active);
+  const [sport, setSport] = useState<CourtSport>(courtSport(court));
   const [editedPrices, setEditedPrices] = useState<Record<number, number>>({
     60: 24,
     90: 36,
@@ -54,6 +58,7 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
     setCourtName(court.name);
     setCourtLabel(court.label ?? "");
     setIsActive(court.is_active);
+    setSport(courtSport(court));
   }, [court, open]);
 
   // Initialize prices from DB
@@ -68,10 +73,19 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
   }, [prices]);
 
   const updateCourtMutation = useMutation({
-    mutationFn: async ({ name, label }: { name: string; label: string | null }) => {
+    mutationFn: async ({
+      name,
+      label,
+      sport: nextSport,
+    }: {
+      name: string;
+      label: string | null;
+      sport: CourtSport;
+    }) => {
+      // `sport` fehlt noch in den generierten Supabase-Typen (Migration 20260812100000).
       const { error } = await supabase
         .from("courts")
-        .update({ name, label } as any)
+        .update({ name, label, sport: nextSport } as any)
         .eq("id", court.id);
       if (error) throw error;
     },
@@ -84,10 +98,14 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
   });
 
   const handleSave = async () => {
-    // Update court name/label if changed
+    // Update court name/label/sport if changed
     const newLabel = courtLabel.trim() || null;
-    if (courtName !== court.name || newLabel !== (court.label ?? null)) {
-      await updateCourtMutation.mutateAsync({ name: courtName, label: newLabel });
+    if (
+      courtName !== court.name ||
+      newLabel !== (court.label ?? null) ||
+      sport !== courtSport(court)
+    ) {
+      await updateCourtMutation.mutateAsync({ name: courtName, label: newLabel, sport });
     }
 
     // Update active status if changed
@@ -112,6 +130,7 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
 
   const hasPrices = prices && prices.length === 3;
   const isSaving = updateCourtMutation.isPending || upsertPrices.isPending;
+  const sportChanged = sport !== courtSport(court);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -129,6 +148,25 @@ export function AdminCourtEditDialog({ court, locationName, open, onOpenChange }
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Sportart */}
+            <div className="space-y-2">
+              <Label>Sportart</Label>
+              <SportSelect value={sport} onChange={setSport} className="flex" />
+              {sportChanged ? (
+                <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                  <p className="text-sm text-amber-400">
+                    Der Court zählt nach dem Speichern als {SPORT_LABEL[sport]}-Court:
+                    Preise und Auswertungen werden {SPORT_LABEL[sport]} zugeordnet.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Bestimmt Preise, Auswertungen und die angezeigte Standort-Ansicht.
+                </p>
+              )}
+            </div>
+
             {/* Court Name */}
             <div className="space-y-2">
               <Label htmlFor="court-name">Court Name</Label>

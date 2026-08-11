@@ -23,6 +23,7 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
 import { toast } from "sonner";
 import { useCourtSpecificPrices, getPriceFromList } from "@/hooks/useCourtPrices";
 import { invokeEdgeFunction } from "@/lib/edgeFunctionUtils";
+import { SPORT_LABEL, SPORT_PILL_CLASSES, courtSport } from "./types";
 
 interface AdminCourtCardProps {
   court: {
@@ -30,11 +31,13 @@ interface AdminCourtCardProps {
     name: string;
     is_active: boolean;
     location_id: string;
+    sport?: string | null;
   };
   location: {
     id: string;
     name: string;
     main_image_url: string | null;
+    tennis_image_url?: string | null;
     city: string | null;
   };
   index?: number;
@@ -48,6 +51,10 @@ export function AdminCourtCard({ court, location, index = 0 }: AdminCourtCardPro
 
   const price60 = getPriceFromList(prices, 60);
   const hasPrices = prices && prices.length >= 3;
+  const sport = courtSport(court);
+  // Tennis-Courts zeigen die Tennis-Ansicht des Standorts, sonst das Hauptbild.
+  const headerImageUrl =
+    (sport === "tennis" ? location.tennis_image_url : null) || location.main_image_url;
 
   const deleteCourtMutation = useMutation({
     mutationFn: async (courtId: string) => {
@@ -113,6 +120,14 @@ export function AdminCourtCard({ court, location, index = 0 }: AdminCourtCardPro
     </span>
   );
 
+  const sportPill = (
+    <span
+      className={`inline-flex items-center whitespace-nowrap rounded-full border bg-black/65 px-2.5 py-1 text-[10.5px] font-bold backdrop-blur-md ${SPORT_PILL_CLASSES[sport]}`}
+    >
+      {SPORT_LABEL[sport]}
+    </span>
+  );
+
   const pricePill = hasPrices && price60 ? (
     <span className="whitespace-nowrap rounded-full border border-white/20 bg-black/65 px-2.5 py-1 font-mono text-[11px] font-bold text-foreground backdrop-blur-md">
       ab {(price60 / 100).toFixed(0)}€
@@ -132,24 +147,30 @@ export function AdminCourtCard({ court, location, index = 0 }: AdminCourtCardPro
       >
         <Card className="group overflow-hidden rounded-2xl border-border bg-gradient-card transition-all hover:border-primary/30">
           {/* Image Header */}
-          {location.main_image_url ? (
+          {headerImageUrl ? (
             <div className="relative aspect-[21/9] w-full overflow-hidden">
               <img
-                src={location.main_image_url}
+                src={headerImageUrl}
                 alt={location.name}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(0_0%_0%/0.1),hsl(0_0%_0%/0.7))]" />
-              <div className="absolute left-[11px] right-[11px] top-[11px] flex items-center justify-between gap-2.5">
-                {statusPill}
+              <div className="absolute left-[11px] right-[11px] top-[11px] flex flex-wrap items-center justify-between gap-x-2.5 gap-y-1.5">
+                <div className="flex items-center gap-1.5">
+                  {statusPill}
+                  {sportPill}
+                </div>
                 {pricePill}
               </div>
             </div>
           ) : (
             <div className="relative flex aspect-[21/9] w-full items-center justify-center bg-gradient-to-br from-primary/20 via-secondary to-muted">
               <Building2 className="h-8 w-8 text-muted-foreground/50" />
-              <div className="absolute left-[11px] right-[11px] top-[11px] flex items-center justify-between gap-2.5">
-                {statusPill}
+              <div className="absolute left-[11px] right-[11px] top-[11px] flex flex-wrap items-center justify-between gap-x-2.5 gap-y-1.5">
+                <div className="flex items-center gap-1.5">
+                  {statusPill}
+                  {sportPill}
+                </div>
                 {pricePill}
               </div>
             </div>
