@@ -62,6 +62,12 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+import {
+  courtSport,
+  SPORT_CHIP_CLASSES,
+  SPORT_LABEL,
+  type CourtSport,
+} from "@/components/admin/courts/types";
 
 const WEEKDAYS = [
   { value: 0, label: "Sonntag" },
@@ -72,6 +78,15 @@ const WEEKDAYS = [
   { value: 5, label: "Freitag" },
   { value: 6, label: "Samstag" },
 ];
+
+/** Sportart-Chip wie in der Court-Verwaltung: Padel = Lime, Tennis = Hellblau. */
+const sportChip = (sport: CourtSport) => (
+  <span
+    className={`flex-none whitespace-nowrap rounded-full border px-[7px] py-[1px] font-mono text-[10px] font-bold uppercase tracking-[0.08em] ${SPORT_CHIP_CLASSES[sport]}`}
+  >
+    {SPORT_LABEL[sport]}
+  </span>
+);
 
 interface Club {
   id: string;
@@ -93,11 +108,20 @@ interface ClubCourtAssignment {
   court?: {
     id: string;
     name: string;
+    // courts.sport fehlt noch in den generierten Typen (Migration 20260812100000)
+    sport?: string | null;
     location?: {
       id: string;
       name: string;
     };
   };
+}
+
+interface AssignableCourt {
+  id: string;
+  name: string;
+  sport?: string | null;
+  location?: { id: string; name: string } | null;
 }
 
 interface ClubUser {
@@ -155,6 +179,7 @@ export default function AdminClubs() {
             court:courts (
               id,
               name,
+              sport,
               location:locations (
                 id,
                 name
@@ -200,6 +225,7 @@ export default function AdminClubs() {
     : null;
 
   // Fetch all courts for assignment
+  // courts.sport fehlt noch in den generierten Typen (types.ts) → Cast
   const { data: courts } = useQuery({
     queryKey: ["admin-all-courts"],
     queryFn: async () => {
@@ -208,6 +234,7 @@ export default function AdminClubs() {
         .select(`
           id,
           name,
+          sport,
           location:locations (
             id,
             name
@@ -216,7 +243,7 @@ export default function AdminClubs() {
         .eq("is_active", true);
 
       if (error) throw error;
-      return data;
+      return (data ?? []) as unknown as AssignableCourt[];
     },
   });
 
@@ -759,7 +786,10 @@ export default function AdminClubs() {
                                   <SelectContent>
                                     {availableCourts?.map((court) => (
                                       <SelectItem key={court.id} value={court.id}>
-                                        {court.name} ({court.location?.name})
+                                        <span className="flex items-center gap-2">
+                                          {court.name} ({court.location?.name})
+                                          {sportChip(courtSport(court))}
+                                        </span>
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
@@ -813,11 +843,12 @@ export default function AdminClubs() {
                         </div>
                       ) : (
                         <div className="overflow-x-auto">
-                        <Table className="min-w-[620px]">
+                        <Table className="min-w-[700px]">
                           <TableHeader>
                             <TableRow className="border-0 hover:bg-transparent">
                               <TableHead className="h-auto whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Court</TableHead>
                               <TableHead className="h-auto whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Standort</TableHead>
+                              <TableHead className="h-auto whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Sportart</TableHead>
                               <TableHead className="h-auto min-w-[210px] whitespace-nowrap pb-3 pl-0 pr-3.5 font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Kontingent</TableHead>
                               <TableHead className="h-auto w-[80px] whitespace-nowrap pb-3 pl-0 pr-0 text-right font-mono text-[10px] font-normal uppercase tracking-[0.16em] text-muted-foreground">Aktion</TableHead>
                             </TableRow>
@@ -830,6 +861,11 @@ export default function AdminClubs() {
                                 </TableCell>
                                 <TableCell className="whitespace-nowrap py-3 pl-0 pr-3.5 text-[13.5px] text-[hsl(0_0%_78%)]">
                                   {assignment.court?.location?.name}
+                                </TableCell>
+                                <TableCell className="whitespace-nowrap py-3 pl-0 pr-3.5">
+                                  {assignment.court && (
+                                    <span className="flex">{sportChip(courtSport(assignment.court))}</span>
+                                  )}
                                 </TableCell>
                                 <TableCell className="py-3 pl-0 pr-3.5">
                                   <div className="flex items-center gap-2">

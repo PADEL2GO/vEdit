@@ -48,10 +48,18 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  courtSport,
+  SPORT_CHIP_CLASSES,
+  SPORT_LABEL,
+  type CourtSport,
+} from "@/components/admin/courts/types";
+import { SportSelect } from "@/components/admin/courts/SportSelect";
 
 interface PricingBand {
   id: string;
   court_id: string | null;
+  sport: string;
   name: string;
   weekdays: number[];
   start_minute: number;
@@ -67,6 +75,7 @@ interface PricingBand {
 interface CourtRow {
   id: string;
   name: string;
+  sport?: string | null;
   is_active: boolean;
   locations: { name: string } | { name: string }[] | null;
 }
@@ -131,16 +140,64 @@ const courtLocationName = (court: CourtRow) => {
   return loc?.name ?? "";
 };
 
-/** Gleiche Stufe = gleicher Geltungsbereich + gleiche Priorität → Reihenfolge ist willkürlich. */
-const bandTier = (band: PricingBand) => `${band.court_id ? "court" : "global"}:${band.priority}`;
+/**
+ * Sportart eines Bandes. Wie bei Courts gilt alles außer Tennis als Padel —
+ * genau wie der DB-Default, damit ein noch nicht neu geladener Cache ohne
+ * `sport` nicht plötzlich als eigene Gruppe erscheint.
+ */
+const bandSport = (band: { sport?: string | null }): CourtSport => courtSport(band);
 
-/** Identisch zur Sortierung in resolve_booking_rate(). */
+/**
+ * Gleiche Stufe = gleiche Sportart + gleicher Geltungsbereich + gleiche Priorität
+ * → Reihenfolge ist willkürlich.
+ *
+ * Die Sportart MUSS Teil der Stufe sein: resolve_booking_rate() filtert mit
+ * `b.sport = v_sport`, zwei globale Bänder verschiedener Sportarten begegnen
+ * sich also nie. Ohne diese Dimension würden sie als Konflikt gemeldet.
+ */
+const bandTier = (band: PricingBand) =>
+  `${bandSport(band)}:${band.court_id ? "court" : "global"}:${band.priority}`;
+
+/**
+ * Identisch zur Sortierung in resolve_booking_rate() — dort läuft die Auflösung
+ * immer innerhalb EINER Sportart. Deshalb steht die Sportart hier als äußerstes
+ * Kriterium: Bänder verschiedener Sportarten konkurrieren nicht, sie werden nur
+ * stabil getrennt sortiert (relevant für die Legende).
+ */
 const compareBands = (a: PricingBand, b: PricingBand) => {
+  const sport = bandSport(a).localeCompare(bandSport(b));
+  if (sport !== 0) return sport;
   const scope = Number(!!b.court_id) - Number(!!a.court_id);
   if (scope !== 0) return scope;
   if (b.priority !== a.priority) return b.priority - a.priority;
   if (a.start_minute !== b.start_minute) return a.start_minute - b.start_minute;
   return a.id.localeCompare(b.id);
+};
+
+/** Rohe Postgres-Fehler der Sport-Invarianten in verständliches Deutsch übersetzen. */
+const bandErrorToast = (err: unknown) => {
+  const e = err as { message?: string; details?: string; hint?: string; code?: string };
+  const raw = [e?.message, e?.details, e?.hint].filter(Boolean).join(" ");
+
+  if (raw.includes("court_pricing_bands_court_sport_fkey")) {
+    toast.error("Sportart passt nicht zum Court", {
+      description:
+        "Ein Court-Band muss die Sportart seines Courts tragen. Bitte den Geltungsbereich prüfen.",
+    });
+    return;
+  }
+  if (raw.includes("court_pricing_bands_tennis_60_only")) {
+    toast.error("Tennis kennt nur 60 Minuten", {
+      description:
+        "Für Tennis-Bänder dürfen keine Preise für 90 oder 120 Minuten hinterlegt sein.",
+    });
+    return;
+  }
+  if (raw.includes("court_pricing_bands_sport_valid")) {
+    toast.error("Ungültige Sportart", { description: "Erlaubt sind nur Padel und Tennis." });
+    return;
+  }
+  toast.error("Fehler", { description: e?.message ?? "Unbekannter Fehler" });
 };
 
 interface ConflictPair {
@@ -176,10 +233,13 @@ export default function AdminPricing() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editBand, setEditBand] = useState<PricingBand | null>(null);
   const [selectedCourtId, setSelectedCourtId] = useState("");
-  const [previewScope, setPreviewScope] = useState("global");
+  // "global:padel" | "global:tennis" | <court-id>. Globale Bänder gelten seit
+  // Tennis nur noch innerhalb ihrer Sportart — die Vorschau muss das abbilden.
+  const [previewScope, setPreviewScope] = useState("global:padel");
 
   const [formName, setFormName] = useState("");
   const [formScope, setFormScope] = useState("global");
+  const [formSport, setFormSport] = useState<CourtSport>("padel");
   const [formWeekdays, setFormWeekdays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [formStart, setFormStart] = useState("06:00");
   const [formEnd, setFormEnd] = useState("09:00");
@@ -190,12 +250,13 @@ export default function AdminPricing() {
   const [formPriority, setFormPriority] = useState("0");
   const [formIsActive, setFormIsActive] = useState(true);
 
+  // courts.sport fehlt noch in den generierten Typen (types.ts) → Cast
   const { data: courts = [] } = useQuery({
     queryKey: ["admin-pricing-courts"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("courts")
-        .select("id, name, is_active, locations(name)")
+        .select("id, name, sport, is_active, locations(name)")
         .order("name");
       if (error) throw error;
       return (data ?? []) as unknown as CourtRow[];
@@ -208,7 +269,7 @@ export default function AdminPricing() {
       const { data, error } = await (supabase as any)
         .from("court_pricing_bands")
         .select(
-          "id, court_id, name, weekdays, start_minute, end_minute, price_cents_60, price_cents_90, price_cents_120, points_multiplier, priority, is_active"
+          "id, court_id, sport, name, weekdays, start_minute, end_minute, price_cents_60, price_cents_90, price_cents_120, points_multiplier, priority, is_active"
         )
         .order("priority", { ascending: false })
         .order("start_minute", { ascending: true });
@@ -231,7 +292,7 @@ export default function AdminPricing() {
       toast.success("Band erstellt");
       setDialogOpen(false);
     },
-    onError: (err: Error) => toast.error("Fehler", { description: err.message }),
+    onError: bandErrorToast,
   });
 
   const updateMutation = useMutation({
@@ -248,7 +309,7 @@ export default function AdminPricing() {
       setDialogOpen(false);
       setEditBand(null);
     },
-    onError: (err: Error) => toast.error("Fehler", { description: err.message }),
+    onError: bandErrorToast,
   });
 
   const deleteMutation = useMutation({
@@ -288,10 +349,26 @@ export default function AdminPricing() {
     return (id: string) => map.get(id) ?? BAND_COLORS[0];
   }, [bands]);
 
+  // Ein Court-Scope erbt die Sportart seines Courts, ein globaler Scope wählt sie.
+  const previewSelection = useMemo<{ courtId: string | null; sport: CourtSport }>(() => {
+    if (previewScope.startsWith("global:")) {
+      return {
+        courtId: null,
+        sport: previewScope === "global:tennis" ? "tennis" : "padel",
+      };
+    }
+    const court = courts.find((c) => c.id === previewScope);
+    return { courtId: previewScope, sport: court ? courtSport(court) : "padel" };
+  }, [previewScope, courts]);
+
   const previewBands = useMemo(() => {
-    if (previewScope === "global") return bands.filter((b) => !b.court_id);
-    return bands.filter((b) => !b.court_id || b.court_id === previewScope);
-  }, [bands, previewScope]);
+    const { courtId, sport } = previewSelection;
+    return bands.filter(
+      (b) =>
+        bandSport(b) === sport &&
+        (courtId ? !b.court_id || b.court_id === courtId : !b.court_id)
+    );
+  }, [bands, previewSelection]);
 
   const activePreviewBands = useMemo(() => previewBands.filter((b) => b.is_active), [previewBands]);
   const conflicts = useMemo(() => findConflicts(previewBands), [previewBands]);
@@ -343,9 +420,10 @@ export default function AdminPricing() {
       .map((band) => ({ band, shadowed: !visible.has(band.id) }));
   }, [topBandAt, activePreviewBands]);
 
-  const resetForm = (scope: string) => {
+  const resetForm = (scope: string, sport: CourtSport) => {
     setFormName("");
     setFormScope(scope);
+    setFormSport(sport);
     setFormWeekdays([1, 2, 3, 4, 5]);
     setFormStart("06:00");
     setFormEnd("09:00");
@@ -359,7 +437,9 @@ export default function AdminPricing() {
 
   const openCreate = (scope: string) => {
     setEditBand(null);
-    resetForm(scope);
+    // Court-Band: Die Sportart ist durch den Court vorgegeben (FK court_id+sport).
+    const court = courts.find((c) => c.id === scope);
+    resetForm(scope, court ? courtSport(court) : "padel");
     setDialogOpen(true);
   };
 
@@ -367,6 +447,7 @@ export default function AdminPricing() {
     setEditBand(band);
     setFormName(band.name);
     setFormScope(band.court_id ?? "global");
+    setFormSport(bandSport(band));
     setFormWeekdays([...band.weekdays].sort((a, b) => a - b));
     setFormStart(minutesToTime(band.start_minute));
     setFormEnd(band.end_minute >= DAY_END ? "00:00" : minutesToTime(band.end_minute));
@@ -385,6 +466,20 @@ export default function AdminPricing() {
     setFormWeekdays((prev) =>
       prev.includes(iso) ? prev.filter((d) => d !== iso) : [...prev, iso].sort((a, b) => a - b)
     );
+
+  const scopeCourt = formScope === "global" ? null : courts.find((c) => c.id === formScope) ?? null;
+
+  /**
+   * Sportart des Bandes. Bei einem Court-Band folgt sie zwingend dem Court —
+   * der zusammengesetzte Fremdschlüssel (court_id, sport) lässt nichts anderes zu.
+   */
+  const formEffectiveSport: CourtSport = scopeCourt ? courtSport(scopeCourt) : formSport;
+
+  const handleScopeChange = (value: string) => {
+    setFormScope(value);
+    const court = courts.find((c) => c.id === value);
+    if (court) setFormSport(courtSport(court));
+  };
 
   const buildPayload = (): Omit<PricingBand, "id"> | null => {
     const name = formName.trim();
@@ -410,12 +505,19 @@ export default function AdminPricing() {
       return null;
     }
 
+    // Tennis ist nur 60 Minuten buchbar — 90/120 werden nicht erfasst und
+    // dürfen laut CHECK court_pricing_bands_tennis_60_only auch nicht gesetzt sein.
+    const isTennis = formEffectiveSport === "tennis";
+    const priceInputs: [string, string][] = isTennis
+      ? [["60 Min", formPrice60]]
+      : [
+          ["60 Min", formPrice60],
+          ["90 Min", formPrice90],
+          ["120 Min", formPrice120],
+        ];
+
     const prices: (number | null)[] = [];
-    for (const [label, raw] of [
-      ["60 Min", formPrice60],
-      ["90 Min", formPrice90],
-      ["120 Min", formPrice120],
-    ] as const) {
+    for (const [label, raw] of priceInputs) {
       const parsed = parseEuroInput(raw);
       if (parsed === "invalid") {
         toast.error(`Preis ${label} ist ungültig`, { description: "Nur Beträge ab 0,00 €." });
@@ -442,13 +544,14 @@ export default function AdminPricing() {
 
     return {
       court_id: formScope === "global" ? null : formScope,
+      sport: formEffectiveSport,
       name,
       weekdays: [...formWeekdays].sort((a, b) => a - b),
       start_minute: start,
       end_minute: end,
       price_cents_60: prices[0],
-      price_cents_90: prices[1],
-      price_cents_120: prices[2],
+      price_cents_90: isTennis ? null : prices[1],
+      price_cents_120: isTennis ? null : prices[2],
       points_multiplier: multiplier,
       priority,
       is_active: formIsActive,
@@ -469,6 +572,31 @@ export default function AdminPricing() {
     const loc = courtLocationName(court);
     return loc ? `${court.name} · ${loc}` : court.name;
   };
+
+  const sportChip = (sport: CourtSport) => (
+    <span
+      className={`flex-none whitespace-nowrap rounded-full border px-[7px] py-[1px] font-mono text-[10px] font-bold uppercase tracking-[0.08em] ${SPORT_CHIP_CLASSES[sport]}`}
+    >
+      {SPORT_LABEL[sport]}
+    </span>
+  );
+
+  /** Court-Option mit Sportart — „Court 1" gibt es als Padel- und als Tennis-Platz. */
+  const courtOption = (court: CourtRow, withIcon = false) => (
+    <SelectItem key={court.id} value={court.id}>
+      <span className="flex items-center gap-2">
+        {withIcon && (
+          <MapPin
+            className={`h-4 w-4 ${
+              courtSport(court) === "tennis" ? "text-[#7FD4FF]" : "text-primary"
+            }`}
+          />
+        )}
+        {courtLabel(court.id)}
+        {sportChip(courtSport(court))}
+      </span>
+    </SelectItem>
+  );
 
   const bandSummary = (band: PricingBand) => {
     const parts: string[] = [];
@@ -505,7 +633,7 @@ export default function AdminPricing() {
       </span>
     );
 
-  const bandTable = (rows: PricingBand[], emptyText: string) => (
+  const bandTable = (rows: PricingBand[], emptyText: string, showSport = false) => (
     <Table className="min-w-[900px]">
       <TableHeader>
         <TableRow className="border-[hsl(0_0%_12%)] hover:bg-transparent">
@@ -549,6 +677,7 @@ export default function AdminPricing() {
                   <span className="block max-w-[190px] truncate text-[13.5px] font-bold text-foreground">
                     {band.name}
                   </span>
+                  {showSport && sportChip(bandSport(band))}
                 </div>
               </TableCell>
               <TableCell className="px-0 py-3 pr-3.5">{weekdayChips(band.weekdays)}</TableCell>
@@ -682,6 +811,13 @@ export default function AdminPricing() {
                 </span>
               </div>
               <div className="flex items-start gap-2.5 rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.03] px-[15px] py-[13px]">
+                <Globe className="mt-0.5 h-[15px] w-[15px] flex-none text-[hsl(0_0%_58%)]" />
+                <span className="text-[12.5px] leading-relaxed text-[hsl(0_0%_78%)]">
+                  Jedes Band gehört genau einer Sportart. „Global" heißt: global innerhalb dieser
+                  Sportart — ein Padel-Band greift nie auf einem Tennis-Court.
+                </span>
+              </div>
+              <div className="flex items-start gap-2.5 rounded-[13px] border border-[hsl(0_0%_12%)] bg-white/[0.03] px-[15px] py-[13px]">
                 <Sparkles className="mt-0.5 h-[15px] w-[15px] flex-none text-primary" />
                 <span className="text-[12.5px] leading-relaxed text-[hsl(0_0%_78%)]">
                   Punkte-Multiplikator wirkt zusätzlich zum Level-Multiplikator.
@@ -707,7 +843,7 @@ export default function AdminPricing() {
                     </span>
                   </h2>
                   <span className="text-xs leading-snug text-muted-foreground">
-                    Gelten für alle Courts.
+                    Gelten für alle Courts ihrer Sportart.
                   </span>
                 </div>
               </div>
@@ -720,7 +856,7 @@ export default function AdminPricing() {
                 Globales Band
               </Button>
             </div>
-            {bandTable(globalBands, "Noch keine globalen Bänder angelegt")}
+            {bandTable(globalBands, "Noch keine globalen Bänder angelegt", true)}
           </div>
         </Card>
 
@@ -750,11 +886,7 @@ export default function AdminPricing() {
                     <SelectValue placeholder="Court wählen" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-[hsl(0_0%_15%)] bg-[hsl(0_0%_6%)]">
-                    {courts.map((court) => (
-                      <SelectItem key={court.id} value={court.id}>
-                        {courtLabel(court.id)}
-                      </SelectItem>
-                    ))}
+                    {courts.map((court) => courtOption(court))}
                   </SelectContent>
                 </Select>
                 <Button
@@ -800,12 +932,19 @@ export default function AdminPricing() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-[hsl(0_0%_15%)] bg-[hsl(0_0%_6%)]">
-                  <SelectItem value="global">Nur globale Bänder</SelectItem>
-                  {courts.map((court) => (
-                    <SelectItem key={court.id} value={court.id}>
-                      {courtLabel(court.id)}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="global:padel">
+                    <span className="flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-primary" /> Nur globale Bänder
+                      {sportChip("padel")}
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="global:tennis">
+                    <span className="flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-[#7FD4FF]" /> Nur globale Bänder
+                      {sportChip("tennis")}
+                    </span>
+                  </SelectItem>
+                  {courts.map((court) => courtOption(court))}
                 </SelectContent>
               </Select>
             </div>
@@ -832,7 +971,8 @@ export default function AdminPricing() {
                         {c.toMinute >= DAY_END ? "24:00" : minutesToTime(c.toMinute)}
                       </span>
                       <span className="whitespace-nowrap font-mono text-[11px] text-[hsl(0_0%_52%)]">
-                        Prio {c.a.priority} · {c.a.court_id ? "Court" : "Global"}
+                        Prio {c.a.priority} · {c.a.court_id ? "Court" : "Global"} ·{" "}
+                        {SPORT_LABEL[bandSport(c.a)]}
                       </span>
                     </div>
                   ))}
@@ -989,25 +1129,40 @@ export default function AdminPricing() {
                 <Label className={labelClass}>
                   Geltungsbereich<span className="text-primary"> *</span>
                 </Label>
-                <Select value={formScope} onValueChange={setFormScope}>
+                <Select value={formScope} onValueChange={handleScopeChange}>
                   <SelectTrigger className="h-10 rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-[hsl(0_0%_15%)] bg-[hsl(0_0%_6%)]">
                     <SelectItem value="global">
                       <span className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-primary" /> Global (alle Courts)
+                        <Globe className="h-4 w-4 text-primary" /> Global (alle Courts der Sportart)
                       </span>
                     </SelectItem>
-                    {courts.map((court) => (
-                      <SelectItem key={court.id} value={court.id}>
-                        <span className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-[#7FD4FF]" /> {courtLabel(court.id)}
-                        </span>
-                      </SelectItem>
-                    ))}
+                    {courts.map((court) => courtOption(court, true))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="flex flex-col gap-[7px]">
+                <Label className={labelClass}>
+                  Sportart<span className="text-primary"> *</span>
+                </Label>
+                {scopeCourt ? (
+                  <div className="flex items-center gap-2.5 rounded-[10px] border border-[hsl(0_0%_15%)] bg-white/[0.04] px-3 py-2.5">
+                    {sportChip(formEffectiveSport)}
+                    <span className="text-[12px] leading-snug text-[hsl(0_0%_62%)]">
+                      Folgt dem gewählten Court und ist nicht änderbar.
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <SportSelect value={formSport} onChange={setFormSport} className="self-start" />
+                    <span className="text-[11.5px] leading-relaxed text-[hsl(0_0%_58%)]">
+                      Das Band gilt nur für Courts dieser Sportart.
+                    </span>
+                  </>
+                )}
               </div>
 
               <div className="flex flex-col gap-[7px]">
@@ -1088,12 +1243,13 @@ export default function AdminPricing() {
               </span>
 
               <div className="grid grid-cols-[repeat(auto-fit,minmax(min(140px,100%),1fr))] gap-3">
-                {(
-                  [
-                    ["Preis 60 Min", formPrice60, setFormPrice60],
-                    ["Preis 90 Min", formPrice90, setFormPrice90],
-                    ["Preis 120 Min", formPrice120, setFormPrice120],
-                  ] as const
+                {(formEffectiveSport === "tennis"
+                  ? ([["Preis 60 Min", formPrice60, setFormPrice60]] as const)
+                  : ([
+                      ["Preis 60 Min", formPrice60, setFormPrice60],
+                      ["Preis 90 Min", formPrice90, setFormPrice90],
+                      ["Preis 120 Min", formPrice120, setFormPrice120],
+                    ] as const)
                 ).map(([label, value, setter]) => (
                   <div key={label} className="flex flex-col gap-[7px]">
                     <Label className={labelClass}>{label}</Label>
@@ -1112,6 +1268,13 @@ export default function AdminPricing() {
               </div>
               <span className="-mt-[9px] text-[11.5px] leading-relaxed text-[hsl(0_0%_58%)]">
                 Leer lassen = Standardpreis des Courts bleibt gültig.
+                {formEffectiveSport === "tennis" && (
+                  <>
+                    {" "}
+                    Tennis ist nur 60 Minuten buchbar — 90- und 120-Minuten-Preise sind deshalb
+                    nicht möglich.
+                  </>
+                )}
               </span>
 
               <div className="grid grid-cols-[repeat(auto-fit,minmax(min(160px,100%),1fr))] gap-3">

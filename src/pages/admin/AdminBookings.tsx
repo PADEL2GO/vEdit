@@ -60,6 +60,9 @@ import { de } from "date-fns/locale";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { BookingWeekCalendar, BookingDetailDrawer, type Booking } from "@/components/admin/bookings";
+import { courtSport, SPORT_LABEL } from "@/components/admin/courts/types";
+import type { SportScope } from "@/components/admin/SportScopeTabs";
+import { useSportCourtIds } from "@/hooks/useSportCourtIds";
 
 const CALENDAR_LEGEND = [
   { label: "Spieler", dot: "bg-primary" },
@@ -68,12 +71,16 @@ const CALENDAR_LEGEND = [
   { label: "Storniert", dot: "bg-[#FF6B6B]" },
 ];
 
-// price_cents/payment_mode stehen in types.ts, credits_used noch nicht (Migration 20260412190000)
-type BookingListRow = Booking & {
+// price_cents/payment_mode stehen in types.ts, credits_used noch nicht (Migration 20260412190000).
+// courts.sport ebenfalls noch nicht (Migration 20260812100000) → optionales Feld.
+type BookingListRow = Omit<Booking, "courts"> & {
+  courts: { id: string; name: string; sport?: string | null } | null;
   price_cents: number | null;
   payment_mode: string | null;
   credits_used: number | null;
 };
+
+type CourtFilterRow = { id: string; name: string; sport?: string | null };
 
 const formatEuro = (cents: number) =>
   (cents / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" });
@@ -97,6 +104,7 @@ export default function AdminBookings() {
   const [selectedWeek, setSelectedWeek] = useState(new Date());
   const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
   const [courtFilter, setCourtFilter] = useState<string>("all");
+  const [sportFilter, setSportFilter] = useState<SportScope>("all");
   const [statusFilter, setStatusFilter] = useState<string>("confirmed");
   const [clubFilter, setClubFilter] = useState<string>("all");
   const [onlyClubBookings, setOnlyClubBookings] = useState(false);
@@ -127,18 +135,31 @@ export default function AdminBookings() {
   });
 
   // Fetch courts for filter (scoped to selected location)
-  const { data: courts } = useQuery({
+  // courts.sport fehlt noch in den generierten Typen (types.ts) → Cast
+  const { data: allCourts } = useQuery({
     queryKey: ["admin-courts-filter", selectedLocationId],
     queryFn: async () => {
-      let query = supabase.from("courts").select("id, name").order("name");
+      let query = supabase.from("courts").select("id, name, sport").order("name");
       if (selectedLocationId !== "all") {
         query = query.eq("location_id", selectedLocationId);
       }
       const { data, error } = await query;
       if (error) throw error;
-      return data || [];
+      return (data || []) as unknown as CourtFilterRow[];
     },
   });
+
+  const courts = useMemo(
+    () =>
+      sportFilter === "all"
+        ? allCourts
+        : allCourts?.filter((court) => courtSport(court) === sportFilter),
+    [allCourts, sportFilter]
+  );
+
+  // Court-IDs der gewählten Sportart. `null` = nicht einschränken, LEERES Array
+  // = diese Sportart hat keine Courts (dann muss die Buchungsliste leer bleiben).
+  const { data: sportCourtIds } = useSportCourtIds(sportFilter);
 
   // Fetch clubs for filter
   const { data: clubs } = useQuery({
@@ -155,8 +176,20 @@ export default function AdminBookings() {
   });
 
   // Fetch bookings for the selected week
-  const { data: bookings, isLoading } = useQuery({
-    queryKey: ["admin-week-bookings", weekStart.toISOString(), selectedLocationId, courtFilter, statusFilter, clubFilter, onlyClubBookings],
+  const { data: bookings, isLoading: bookingsLoading } = useQuery({
+    queryKey: [
+      "admin-week-bookings",
+      weekStart.toISOString(),
+      selectedLocationId,
+      courtFilter,
+      sportFilter,
+      statusFilter,
+      clubFilter,
+      onlyClubBookings,
+    ],
+    // Ohne die Court-IDs der Sportart würde die Query kurzzeitig ALLE Buchungen
+    // liefern — also erst starten, wenn der Filter wirklich anwendbar ist.
+    enabled: sportFilter === "all" || sportCourtIds !== undefined,
     queryFn: async () => {
       let query = supabase
         .from("bookings")
@@ -179,7 +212,7 @@ export default function AdminBookings() {
           price_cents,
           payment_mode,
           credits_used,
-          courts (id, name),
+          courts (id, name, sport),
           locations (id, name),
           club:clubs (id, name)
         `)
@@ -193,6 +226,11 @@ export default function AdminBookings() {
 
       if (courtFilter !== "all") {
         query = query.eq("court_id", courtFilter);
+      }
+
+      // bookings trägt keine Sportart → über die Courts der Sportart filtern
+      if (sportCourtIds) {
+        query = query.in("court_id", sportCourtIds);
       }
 
       if (statusFilter !== "all") {
@@ -275,6 +313,8 @@ export default function AdminBookings() {
     },
   });
 
+  const isLoading = bookingsLoading || (sportFilter !== "all" && sportCourtIds === undefined);
+
   // Filter bookings for list view
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
@@ -293,6 +333,24 @@ export default function AdminBookings() {
     );
   }, [bookings, searchQuery]);
 
+  // Court-Name für Kalender und Detail-Ansicht: "Court 1" gibt es sowohl als
+  // Padel- als auch als Tennis-Platz — ohne Sportart wären beide nicht
+  // unterscheidbar. Die Listenansicht zeigt die Sportart in einer eigenen Zeile.
+  const withSportInCourtName = (booking: BookingListRow): Booking => ({
+    ...booking,
+    courts: booking.courts
+      ? {
+          ...booking.courts,
+          name: `${booking.courts.name} · ${SPORT_LABEL[courtSport(booking.courts)]}`,
+        }
+      : null,
+  });
+
+  const calendarBookings = useMemo<Booking[]>(
+    () => filteredBookings.map(withSportInCourtName),
+    [filteredBookings]
+  );
+
   // Count club bookings
   const clubBookingsCount = useMemo(() => {
     return bookings?.filter(b => b.booking_origin === "club").length || 0;
@@ -300,6 +358,12 @@ export default function AdminBookings() {
 
   const handleLocationChange = (value: string) => {
     setSelectedLocationId(value);
+    setCourtFilter("all");
+  };
+
+  const handleSportChange = (value: string) => {
+    setSportFilter(value as SportScope);
+    // Der gewählte Court gehört evtl. zur anderen Sportart → Filter zurücksetzen
     setCourtFilter("all");
   };
 
@@ -420,6 +484,32 @@ export default function AdminBookings() {
 
               <div className="flex flex-col gap-[7px]">
                 <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Sportart
+                </Label>
+                <Select value={sportFilter} onValueChange={handleSportChange}>
+                  <SelectTrigger className="h-[38px] rounded-[10px] border-[hsl(0_0%_15%)] bg-white/[0.04] text-[13.5px] font-semibold">
+                    <SelectValue placeholder="Sportart wählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Sportarten</SelectItem>
+                    <SelectItem value="padel">
+                      <span className="flex items-center gap-2">
+                        <span className="h-[9px] w-[9px] rounded-[3px] bg-primary" />
+                        Padel
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="tennis">
+                      <span className="flex items-center gap-2">
+                        <span className="h-[9px] w-[9px] rounded-[3px] bg-[#7FD4FF]" />
+                        Tennis
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-[7px]">
+                <Label className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                   Court
                 </Label>
                 <Select value={courtFilter} onValueChange={setCourtFilter}>
@@ -430,7 +520,16 @@ export default function AdminBookings() {
                     <SelectItem value="all">Alle Courts</SelectItem>
                     {courts?.map((court) => (
                       <SelectItem key={court.id} value={court.id}>
-                        {court.name}
+                        <span className="flex items-center gap-2">
+                          {court.name}
+                          <span
+                            className={`font-mono text-[10.5px] ${
+                              courtSport(court) === "tennis" ? "text-[#7FD4FF]" : "text-primary"
+                            }`}
+                          >
+                            {SPORT_LABEL[courtSport(court)]}
+                          </span>
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -529,7 +628,7 @@ export default function AdminBookings() {
               ) : (
                 <BookingWeekCalendar
                   weekDays={weekDays}
-                  bookings={filteredBookings}
+                  bookings={calendarBookings}
                   onBookingClick={setSelectedBooking}
                 />
               )}
@@ -621,8 +720,21 @@ export default function AdminBookings() {
                             {booking.locations?.name}
                           </TableCell>
                           {/* Court */}
-                          <TableCell className="whitespace-nowrap text-[13px] font-semibold text-foreground">
-                            {booking.courts?.name}
+                          <TableCell className="whitespace-nowrap py-3 text-[13px] font-semibold text-foreground">
+                            <div className="flex flex-col gap-px">
+                              <span>{booking.courts?.name}</span>
+                              {booking.courts && (
+                                <span
+                                  className={`font-mono text-[11px] font-normal ${
+                                    courtSport(booking.courts) === "tennis"
+                                      ? "text-[#7FD4FF]"
+                                      : "text-primary"
+                                  }`}
+                                >
+                                  {SPORT_LABEL[courtSport(booking.courts)]}
+                                </span>
+                              )}
+                            </div>
                           </TableCell>
                           {/* User (Owner) / Gast */}
                           <TableCell>
@@ -752,7 +864,7 @@ export default function AdminBookings() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => setSelectedBooking(booking)}
+                                onClick={() => setSelectedBooking(withSportInCourtName(booking))}
                                 className="h-[30px] rounded-lg border border-[hsl(0_0%_16%)] bg-white/5 px-3 text-xs font-bold text-[hsl(0_0%_82%)] hover:border-primary/40 hover:bg-white/5 hover:text-primary"
                               >
                                 Details
