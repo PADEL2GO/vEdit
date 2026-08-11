@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useClubAuth } from "@/hooks/useClubAuth";
+import { useClubCourt } from "@/components/club/ClubCourtContext";
+import { SPORT_CHIP_CLASSES } from "@/components/admin/courts/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { format, addDays, startOfWeek, endOfWeek, isSameDay, addWeeks, subWeeks } from "date-fns";
@@ -16,7 +17,7 @@ const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 7:00 - 20:00
 export default function ClubCalendar() {
   const { t, i18n } = useTranslation("club");
   const dateLocale = i18n.language === "en" ? enUS : de;
-  const { primaryAssignment, courtName } = useClubAuth();
+  const { courtId, courtName, sport } = useClubCourt();
   const [currentWeekStart, setCurrentWeekStart] = useState(() => 
     startOfWeek(new Date(), { weekStartsOn: 1 })
   );
@@ -26,14 +27,14 @@ export default function ClubCalendar() {
 
   // Fetch bookings for the week
   const { data: bookings, isLoading } = useQuery({
-    queryKey: ["club-calendar-bookings", primaryAssignment?.court_id, currentWeekStart.toISOString()],
+    queryKey: ["club-calendar-bookings", courtId, currentWeekStart.toISOString()],
     queryFn: async () => {
-      if (!primaryAssignment?.court_id) return [];
+      if (!courtId) return [];
 
       const { data, error } = await supabase
         .from("bookings")
         .select("*")
-        .eq("court_id", primaryAssignment.court_id)
+        .eq("court_id", courtId)
         .gte("start_time", currentWeekStart.toISOString())
         .lte("start_time", weekEnd.toISOString())
         .neq("status", "cancelled")
@@ -43,7 +44,7 @@ export default function ClubCalendar() {
       if (error) throw error;
       return data;
     },
-    enabled: !!primaryAssignment?.court_id,
+    enabled: !!courtId,
   });
 
   const getBookingsForDay = (day: Date) => {
@@ -72,9 +73,16 @@ export default function ClubCalendar() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{t("calendar.title")}</h1>
-          <p className="text-muted-foreground">
-            {t("calendar.utilizationOf", { courtName })}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-muted-foreground">
+              {t("calendar.utilizationOf", { courtName })}
+            </p>
+            <span
+              className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold ${SPORT_CHIP_CLASSES[sport]}`}
+            >
+              {t(`common.sport.${sport}`)}
+            </span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button

@@ -40,12 +40,18 @@ import {
   formatHours,
   capacityTextClass,
 } from "@/lib/utilization";
+import { SPORT_CHIP_CLASSES } from "@/components/admin/courts/types";
+import { DEFAULT_COURT_SPORT, type CourtSport } from "@/components/booking/types";
 
 const TOOLTIP_STYLE = {
   backgroundColor: "hsl(0, 0%, 5%)",
   border: "1px solid hsl(0, 0%, 15%)",
   borderRadius: "8px",
 } as const;
+
+/** Altbestand ohne `sport` gilt — wie der DB-Default — als Padel. */
+const rowSport = (sport: string | null | undefined): CourtSport =>
+  sport === "tennis" ? "tennis" : DEFAULT_COURT_SPORT;
 
 export default function ClubUtilization() {
   const { t } = useTranslation("club");
@@ -155,7 +161,14 @@ export default function ClubUtilization() {
               <div key={r.court_id} className="space-y-2">
                 <div className="flex items-end justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-foreground">{r.court_name}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-foreground">{r.court_name}</p>
+                      <span
+                        className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold ${SPORT_CHIP_CLASSES[rowSport(r.sport)]}`}
+                      >
+                        {t(`common.sport.${rowSport(r.sport)}`)}
+                      </span>
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {r.location_name}
                       {r.location_city ? ` · ${r.location_city}` : ""}
@@ -196,7 +209,7 @@ export default function ClubUtilization() {
                 <SelectContent>
                   {rows.map((r) => (
                     <SelectItem key={r.court_id} value={r.court_id}>
-                      {r.court_name} · {r.location_name}
+                      {r.court_name} · {t(`common.sport.${rowSport(r.sport)}`)} · {r.location_name}
                     </SelectItem>
                   ))}
                 </SelectContent>

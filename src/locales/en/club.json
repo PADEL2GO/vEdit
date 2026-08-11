@@ -6,7 +6,16 @@
     "roleStaff": "Staff",
     "badgeClub": "Club",
     "badgePlayer": "Player",
-    "badgeUser": "User"
+    "badgeUser": "User",
+    "sport": {
+      "padel": "Padel",
+      "tennis": "Tennis"
+    }
+  },
+  "courtSwitcher": {
+    "label": "Active court",
+    "placeholder": "Select court",
+    "active": "Active"
   },
   "layout": {
     "noCourtTitle": "No court assigned",
@@ -25,6 +34,7 @@
     "quotaClub": "Your club allowance",
     "quotaMonthly": "Monthly allowance",
     "remainingThisMonth": "Remaining this month",
+    "remainingThisMonthForCourt": "Remaining this month for {{courtName}}",
     "myDashboard": "My dashboard",
     "toHomepage": "To homepage",
     "signOut": "Sign out"
@@ -41,7 +51,7 @@
     "statusExhausted": "Allowance exhausted",
     "resetInfo": "Reset: Monthly (1st of the month)",
     "assignedCourts": "Assigned courts",
-    "assignedCourtsDesc": "All courts assigned to your club",
+    "assignedCourtsDesc": "All courts assigned to your club — click to switch",
     "hoursPerMonth": "{{hours}}h/month",
     "actions": {
       "bookMembersTitle": "Book members",
@@ -75,6 +85,7 @@
     "selectDate": "Select date",
     "timeAndDuration": "Time & duration",
     "duration": "Duration",
+    "tennisDurationHint": "Tennis is booked in 60-minute blocks only.",
     "startTime": "Start time",
     "member": "Member",
     "memberNameLabel": "Member name (optional)",

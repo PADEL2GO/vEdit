@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useClubAuth } from "@/hooks/useClubAuth";
+import { useClubCourt } from "@/components/club/ClubCourtContext";
+import { SPORT_CHIP_CLASSES } from "@/components/admin/courts/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -27,7 +28,7 @@ interface PlatformFeatures {
 export default function ClubCourtFeatures() {
   const queryClient = useQueryClient();
   const { t } = useTranslation("club");
-  const { primaryAssignment, courtName, locationName } = useClubAuth();
+  const { courtId, courtName, locationName, sport } = useClubCourt();
   const [features, setFeatures] = useState<Record<CourtFeatureKey, boolean>>(DEFAULT_COURT_FEATURES);
   const [platformFeatures, setPlatformFeatures] = useState<PlatformFeatures>({
     rewards_enabled: true,
@@ -38,9 +39,9 @@ export default function ClubCourtFeatures() {
 
   // Fetch current court features
   const { data: courtData, isLoading } = useQuery({
-    queryKey: ["club-court-features", primaryAssignment?.court_id],
+    queryKey: ["club-court-features", courtId],
     queryFn: async () => {
-      if (!primaryAssignment?.court_id) return null;
+      if (!courtId) return null;
 
       const { data, error } = await supabase
         .from("courts")
@@ -56,13 +57,13 @@ export default function ClubCourtFeatures() {
             vending_enabled
           )
         `)
-        .eq("id", primaryAssignment.court_id)
+        .eq("id", courtId)
         .single();
 
       if (error) throw error;
       return data;
     },
-    enabled: !!primaryAssignment?.court_id,
+    enabled: !!courtId,
   });
 
   // Initialize features from location data
@@ -104,7 +105,7 @@ export default function ClubCourtFeatures() {
         },
         () => {
           queryClient.invalidateQueries({
-            queryKey: ["club-court-features", primaryAssignment?.court_id],
+            queryKey: ["club-court-features", courtId],
           });
         },
       )
@@ -113,7 +114,7 @@ export default function ClubCourtFeatures() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [courtData, primaryAssignment?.court_id, queryClient]);
+  }, [courtData, courtId, queryClient]);
 
   const toggleFeature = (key: CourtFeatureKey) => {
     setFeatures((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -128,7 +129,7 @@ export default function ClubCourtFeatures() {
   // Save features mutation via Edge Function
   const saveMutation = useMutation({
     mutationFn: async () => {
-      if (!primaryAssignment?.court_id) {
+      if (!courtId) {
         throw new Error(t("courtFeatures.error.noCourtAssignment"));
       }
 
@@ -136,7 +137,7 @@ export default function ClubCourtFeatures() {
         "club-court-update",
         {
           body: {
-            courtId: primaryAssignment.court_id,
+            courtId,
             features: features,
             platformFeatures: platformFeatures,
           },
@@ -198,9 +199,14 @@ export default function ClubCourtFeatures() {
       {/* Court Info */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex flex-wrap items-center gap-2">
             <MapPin className="h-4 w-4" />
             {courtName}
+            <span
+              className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold ${SPORT_CHIP_CLASSES[sport]}`}
+            >
+              {t(`common.sport.${sport}`)}
+            </span>
           </CardTitle>
           <CardDescription>{locationName}</CardDescription>
         </CardHeader>

@@ -24,6 +24,8 @@ export interface ClubCourtAssignment {
   court?: {
     id: string;
     name: string;
+    /** Sportart des Platzes; fehlt sie (Altbestand), gilt Padel — wie der DB-Default. */
+    sport: string | null;
     location_id: string;
     location?: {
       id: string;
@@ -127,6 +129,7 @@ export function useClubAuth() {
           court:courts (
             id,
             name,
+            sport,
             location_id,
             location:locations (
               id,
@@ -160,6 +163,7 @@ export function useClubAuth() {
           court:courts (
             id,
             name,
+            sport,
             location_id,
             location:locations (
               id,
@@ -187,6 +191,9 @@ export function useClubAuth() {
   // Determine effective values
   const isClubUser = !!clubMembership || isLegacyClubOwner === true;
   const effectiveAssignments = clubMembership ? (assignments ?? []) : (legacyAssignments ?? []);
+  // Rückfall für Aufrufer ohne Court-Auswahl (z. B. der Zugriffs-Guard im
+  // ClubLayout). Die Portal-Seiten arbeiten mit `useClubCourt()`, damit ein
+  // Verein mit Padel- UND Tennis-Courts bewusst umschalten kann.
   const primaryAssignment = effectiveAssignments[0] ?? null;
   const roleInClub = clubMembership?.role_in_club ?? (isLegacyClubOwner ? 'manager' : null);
 

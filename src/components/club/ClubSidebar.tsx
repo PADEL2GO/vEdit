@@ -16,7 +16,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useClubAuth } from "@/hooks/useClubAuth";
 import { useClubQuota } from "@/hooks/useClubQuota";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
+import { assignmentSport, SPORT_DOT_CLASSES, useClubCourt } from "./ClubCourtContext";
 
 const menuItems = [
   { titleKey: "sidebar.menu.overview", url: "/club", icon: Home },
@@ -31,11 +33,20 @@ export function ClubSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { club, clubId, courtName, locationName, primaryAssignment } = useClubAuth();
+  const { club, clubId } = useClubAuth();
+  const {
+    assignments,
+    courtId,
+    courtName,
+    locationName,
+    monthlyFreeMinutes,
+    canSwitch,
+    selectCourt,
+  } = useClubCourt();
   const { summary, remainingFormatted, allowanceFormatted } = useClubQuota(
     clubId,
-    primaryAssignment?.court_id ?? null,
-    primaryAssignment?.monthly_free_minutes ?? 2400,
+    courtId,
+    monthlyFreeMinutes,
     user?.id // Legacy fallback
   );
 
@@ -73,6 +84,36 @@ export function ClubSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {/* Court-Auswahl — nur wenn dem Verein mehr als ein Court zugewiesen ist */}
+        {canSwitch && (
+          <div className="border-b border-border/50 p-4">
+            <p className="mb-2 text-xs font-medium text-muted-foreground">
+              {t("courtSwitcher.label")}
+            </p>
+            <Select value={courtId ?? undefined} onValueChange={selectCourt}>
+              <SelectTrigger className="h-9 text-sm" aria-label={t("courtSwitcher.label")}>
+                <SelectValue placeholder={t("courtSwitcher.placeholder")} />
+              </SelectTrigger>
+              <SelectContent>
+                {assignments.map((assignment) => {
+                  const sport = assignmentSport(assignment);
+                  return (
+                    <SelectItem key={assignment.court_id} value={assignment.court_id}>
+                      <span className="flex items-center gap-2">
+                        <span className={`h-2 w-2 rounded-full ${SPORT_DOT_CLASSES[sport]}`} />
+                        <span>{assignment.court?.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {t(`common.sport.${sport}`)}
+                        </span>
+                      </span>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {/* Quota Display */}
         <div className="p-4 border-b border-border/50">
           <div className="space-y-2">
@@ -86,7 +127,9 @@ export function ClubSidebar() {
             </div>
             <Progress value={100 - summary.percentUsed} className="h-2" />
             <p className="text-xs text-muted-foreground">
-              {t("sidebar.remainingThisMonth")}
+              {canSwitch && courtName
+                ? t("sidebar.remainingThisMonthForCourt", { courtName })
+                : t("sidebar.remainingThisMonth")}
             </p>
           </div>
         </div>

@@ -6,7 +6,16 @@
     "roleStaff": "Staff",
     "badgeClub": "Club",
     "badgePlayer": "Spieler",
-    "badgeUser": "User"
+    "badgeUser": "User",
+    "sport": {
+      "padel": "Padel",
+      "tennis": "Tennis"
+    }
+  },
+  "courtSwitcher": {
+    "label": "Aktiver Court",
+    "placeholder": "Court wählen",
+    "active": "Aktiv"
   },
   "layout": {
     "noCourtTitle": "Kein Court zugewiesen",
@@ -25,6 +34,7 @@
     "quotaClub": "Euer Club-Kontingent",
     "quotaMonthly": "Monatskontingent",
     "remainingThisMonth": "Verbleibend diesen Monat",
+    "remainingThisMonthForCourt": "Verbleibend diesen Monat für {{courtName}}",
     "myDashboard": "Mein Dashboard",
     "toHomepage": "Zur Startseite",
     "signOut": "Abmelden"
@@ -41,7 +51,7 @@
     "statusExhausted": "Kontingent erschöpft",
     "resetInfo": "Reset: Monatlich (1. des Monats)",
     "assignedCourts": "Zugewiesene Courts",
-    "assignedCourtsDesc": "Alle Courts, die eurem Club zugewiesen sind",
+    "assignedCourtsDesc": "Alle Courts, die eurem Club zugewiesen sind — zum Umschalten anklicken",
     "hoursPerMonth": "{{hours}}h/Monat",
     "actions": {
       "bookMembersTitle": "Mitglieder buchen",
@@ -75,6 +85,7 @@
     "selectDate": "Datum wählen",
     "timeAndDuration": "Uhrzeit & Dauer",
     "duration": "Dauer",
+    "tennisDurationHint": "Tennis wird ausschließlich in 60-Minuten-Blöcken gebucht.",
     "startTime": "Startzeit",
     "member": "Mitglied",
     "memberNameLabel": "Name des Mitglieds (optional)",

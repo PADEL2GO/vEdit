@@ -7,16 +7,28 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { assignmentSport, useClubCourt } from "@/components/club/ClubCourtContext";
+import { SPORT_CHIP_CLASSES } from "@/components/admin/courts/types";
 
 export default function ClubDashboard() {
   const navigate = useNavigate();
   const { t } = useTranslation("club");
   const { user } = useAuth();
-  const { club, clubId, courtName, locationName, primaryAssignment, roleInClub, isManager, assignments } = useClubAuth();
+  const { club, clubId, roleInClub, isManager } = useClubAuth();
+  const {
+    assignments,
+    courtId,
+    courtName,
+    locationName,
+    sport,
+    monthlyFreeMinutes,
+    canSwitch,
+    selectCourt,
+  } = useClubCourt();
   const { summary, remainingFormatted, allowanceFormatted, hasQuotaAvailable } = useClubQuota(
     clubId,
-    primaryAssignment?.court_id ?? null,
-    primaryAssignment?.monthly_free_minutes ?? 2400,
+    courtId,
+    monthlyFreeMinutes,
     user?.id // Legacy fallback
   );
 
@@ -64,7 +76,20 @@ export default function ClubDashboard() {
                 </Badge>
               )}
             </div>
-            <p className="text-muted-foreground">{locationName}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-muted-foreground">{locationName}</p>
+              {canSwitch && courtName && (
+                <>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="text-sm font-medium text-foreground">{courtName}</span>
+                  <span
+                    className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold ${SPORT_CHIP_CLASSES[sport]}`}
+                  >
+                    {t(`common.sport.${sport}`)}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -131,7 +156,7 @@ export default function ClubDashboard() {
       </div>
 
       {/* Court Assignments (if multiple) */}
-      {assignments.length > 1 && (
+      {canSwitch && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">{t("dashboard.assignedCourts")}</CardTitle>
@@ -139,22 +164,45 @@ export default function ClubDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {assignments.map((assignment) => (
-                <div 
-                  key={assignment.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                >
-                  <div>
-                    <p className="font-medium">{assignment.court?.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {assignment.court?.location?.name}
-                    </p>
-                  </div>
-                  <Badge variant="outline">
-                    {t("dashboard.hoursPerMonth", { hours: Math.floor(assignment.monthly_free_minutes / 60) })}
-                  </Badge>
-                </div>
-              ))}
+              {assignments.map((assignment) => {
+                const rowSport = assignmentSport(assignment);
+                const isActive = assignment.court_id === courtId;
+                return (
+                  <button
+                    key={assignment.id}
+                    type="button"
+                    onClick={() => selectCourt(assignment.court_id)}
+                    aria-pressed={isActive}
+                    className={`flex w-full items-center justify-between gap-3 rounded-lg p-3 text-left transition-colors ${
+                      isActive
+                        ? "bg-primary/10 ring-1 ring-primary/40"
+                        : "bg-muted/50 hover:bg-muted"
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium">{assignment.court?.name}</p>
+                        <span
+                          className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold ${SPORT_CHIP_CLASSES[rowSport]}`}
+                        >
+                          {t(`common.sport.${rowSport}`)}
+                        </span>
+                        {isActive && (
+                          <span className="text-[11px] font-semibold text-primary">
+                            {t("courtSwitcher.active")}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {assignment.court?.location?.name}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="shrink-0">
+                      {t("dashboard.hoursPerMonth", { hours: Math.floor(assignment.monthly_free_minutes / 60) })}
+                    </Badge>
+                  </button>
+                );
+              })}
             </div>
           </CardContent>
         </Card>

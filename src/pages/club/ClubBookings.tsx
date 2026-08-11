@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,8 +31,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useClubCourt } from "@/components/club/ClubCourtContext";
+import { TENNIS_DURATION_MINUTES } from "@/components/booking/types";
+import { SLOT_DURATIONS } from "@/types/constants";
+import { SPORT_CHIP_CLASSES } from "@/components/admin/courts/types";
 
-const SLOT_DURATIONS = [60, 90, 120];
+const PADEL_SLOT_DURATIONS: readonly number[] = SLOT_DURATIONS;
+/**
+ * Tennis wird ausschliesslich in 60-Minuten-Bloecken gebucht (der Server lehnt
+ * alles andere ab). Modulkonstante, damit die Referenz stabil bleibt.
+ */
+const TENNIS_SLOT_DURATIONS: readonly number[] = [TENNIS_DURATION_MINUTES];
 
 const TIME_SLOTS = Array.from({ length: 28 }, (_, i) => {
   const hour = Math.floor(i / 2) + 7; // Start at 7:00
@@ -48,13 +57,17 @@ export default function ClubBookings() {
   const { t, i18n } = useTranslation("club");
   const dateLocale = i18n.language === "en" ? enUS : de;
   const { user } = useAuth();
-  const { club, clubId, courtName, locationName, primaryAssignment, isManager } = useClubAuth();
+  const { club, clubId, isManager } = useClubAuth();
+  const { courtId, courtName, locationName, sport, monthlyFreeMinutes } = useClubCourt();
   const { summary, remainingFormatted, allowanceFormatted, hasQuotaAvailable, refetch: refetchQuota } = useClubQuota(
     clubId,
-    primaryAssignment?.court_id ?? null,
-    primaryAssignment?.monthly_free_minutes ?? 2400,
+    courtId,
+    monthlyFreeMinutes,
     user?.id // Legacy fallback
   );
+
+  const isTennis = sport === "tennis";
+  const slotDurations = isTennis ? TENNIS_SLOT_DURATIONS : PADEL_SLOT_DURATIONS;
 
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>("");
@@ -63,12 +76,19 @@ export default function ClubBookings() {
   const [notes, setNotes] = useState("");
   const [activeTab, setActiveTab] = useState<"new" | "club" | "all">("new");
 
+  // Court gewechselt: Slot-Auswahl verwerfen (andere Belegung) und eine für die
+  // Sportart unzulässige Dauer auf den ersten erlaubten Wert zurücksetzen.
+  useEffect(() => {
+    setSelectedTime("");
+    setDuration((current) => (slotDurations.includes(current) ? current : slotDurations[0]));
+  }, [courtId, slotDurations]);
+
   // Fetch existing bookings for the selected date (for availability check)
   const { data: existingBookings } = useQuery({
-    queryKey: ["club-court-bookings", primaryAssignment?.court_id, selectedDate],
+    queryKey: ["club-court-bookings", courtId, selectedDate],
     queryFn: async () => {
-      if (!primaryAssignment?.court_id || !selectedDate) return [];
-      
+      if (!courtId || !selectedDate) return [];
+
       const startOfDay = new Date(selectedDate);
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(selectedDate);
@@ -77,7 +97,7 @@ export default function ClubBookings() {
       const { data, error } = await supabase
         .from("bookings")
         .select("*")
-        .eq("court_id", primaryAssignment.court_id)
+        .eq("court_id", courtId)
         .gte("start_time", startOfDay.toISOString())
         .lte("start_time", endOfDay.toISOString())
         .neq("status", "cancelled")
@@ -86,20 +106,20 @@ export default function ClubBookings() {
       if (error) throw error;
       return data;
     },
-    enabled: !!primaryAssignment?.court_id && !!selectedDate,
+    enabled: !!courtId && !!selectedDate,
   });
 
   // Fetch club bookings (all bookings from club members)
   const { data: clubBookings, refetch: refetchClubBookings } = useQuery({
-    queryKey: ["all-club-bookings", clubId, primaryAssignment?.court_id],
+    queryKey: ["all-club-bookings", clubId, courtId],
     queryFn: async () => {
-      if (!primaryAssignment?.court_id) return [];
+      if (!courtId) return [];
 
       // Build query based on whether we have clubId
       let query = supabase
         .from("bookings")
         .select("*")
-        .eq("court_id", primaryAssignment.court_id)
+        .eq("court_id", courtId)
         .eq("booking_origin", "club")
         .neq("status", "cancelled")
         .neq("status", "expired")
@@ -119,19 +139,19 @@ export default function ClubBookings() {
       if (error) throw error;
       return data;
     },
-    enabled: !!primaryAssignment?.court_id && (!!clubId || !!user?.id),
+    enabled: !!courtId && (!!clubId || !!user?.id),
   });
 
   // Fetch ALL court bookings (club + player bookings)
   const { data: allCourtBookings } = useQuery({
-    queryKey: ["all-court-bookings-overview", primaryAssignment?.court_id],
+    queryKey: ["all-court-bookings-overview", courtId],
     queryFn: async () => {
-      if (!primaryAssignment?.court_id) return [];
+      if (!courtId) return [];
 
       const { data, error } = await supabase
         .from("bookings")
         .select("*")
-        .eq("court_id", primaryAssignment.court_id)
+        .eq("court_id", courtId)
         .neq("status", "cancelled")
         .neq("status", "expired")
         .gte("start_time", new Date().toISOString())
@@ -141,7 +161,7 @@ export default function ClubBookings() {
       if (error) throw error;
       return data;
     },
-    enabled: !!primaryAssignment?.court_id,
+    enabled: !!courtId,
   });
 
   // Check if selected time slot is available
@@ -171,7 +191,7 @@ export default function ClubBookings() {
   // Create booking mutation (using Edge Function)
   const createBookingMutation = useMutation({
     mutationFn: async () => {
-      if (!user?.id || !primaryAssignment?.court_id || !selectedDate || !selectedTime) {
+      if (!user?.id || !courtId || !selectedDate || !selectedTime) {
         throw new Error(t("bookings.error.missingData"));
       }
 
@@ -188,7 +208,7 @@ export default function ClubBookings() {
       const { data, error } = await invokeEdgeFunction<{ success: boolean; booking: any; remainingQuota: number; error?: string }>("club-booking-api", {
         body: {
           action: "create",
-          courtId: primaryAssignment.court_id,
+          courtId,
           startTime: startTime.toISOString(),
           endTime: endTime.toISOString(),
           duration: duration,
@@ -313,9 +333,14 @@ export default function ClubBookings() {
             <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex flex-wrap items-center gap-2">
                     <MapPin className="h-4 w-4" />
                     {courtName}
+                    <span
+                      className={`inline-flex items-center whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold ${SPORT_CHIP_CLASSES[sport]}`}
+                    >
+                      {t(`common.sport.${sport}`)}
+                    </span>
                   </CardTitle>
                   <CardDescription>{locationName}</CardDescription>
                 </CardHeader>
@@ -350,18 +375,27 @@ export default function ClubBookings() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label>{t("bookings.duration")}</Label>
-                    <Select value={duration.toString()} onValueChange={(v) => setDuration(Number(v))}>
+                    <Select
+                      value={duration.toString()}
+                      onValueChange={(v) => setDuration(Number(v))}
+                      disabled={slotDurations.length === 1}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {SLOT_DURATIONS.map((value) => (
+                        {slotDurations.map((value) => (
                           <SelectItem key={value} value={value.toString()}>
                             {t(`bookings.durations.d${value}`)}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    {isTennis && (
+                      <p className="text-xs text-muted-foreground">
+                        {t("bookings.tennisDurationHint")}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
