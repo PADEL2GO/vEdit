@@ -10,7 +10,8 @@
     "sport": {
       "padel": "Padel",
       "tennis": "Tennis"
-    }
+    },
+    "badgeMember": "Member"
   },
   "courtSwitcher": {
     "label": "Active court",
@@ -158,7 +159,10 @@
     "weekStartFormat": "MMMM d",
     "weekEndFormat": "MMMM d, yyyy",
     "todayDateFormat": "MMMM d",
-    "dayNameFormat": "EEE"
+    "dayNameFormat": "EEE",
+    "legendMember": "Member booking",
+    "benefitQuota": "Allowance",
+    "benefitDiscount": "Discount"
   },
   "courtFeatures": {
     "title": "Court Features",

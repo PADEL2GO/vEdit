@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format, addMinutes, addDays, startOfDay, isSameDay, isPast } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
-import { Clock, Users, MapPin, AlertCircle, CheckCircle, Trash2, Building2, CalendarDays, User } from "lucide-react";
+import { Clock, Users, MapPin, AlertCircle, CheckCircle, Trash2, Building2, CalendarDays, User, UserCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -160,6 +160,30 @@ export default function ClubBookings() {
 
       if (error) throw error;
       return data;
+    },
+    enabled: !!courtId,
+  });
+
+  // Klarnamen der eigenen Vereinsmitglieder. Die Buchungszeile selbst trägt zwar
+  // member_club_id und die Vergünstigung, aber club_users dürfen keine fremden
+  // Profile lesen — den Namen liefert nur club_court_bookings (SECURITY DEFINER).
+  const { data: memberNames } = useQuery({
+    queryKey: ["club-court-member-names", courtId],
+    queryFn: async (): Promise<Map<string, string>> => {
+      if (!courtId) return new Map();
+
+      const { data, error } = await (supabase as any).rpc("club_court_bookings", {
+        p_court_id: courtId,
+        p_from: new Date().toISOString(),
+        p_to: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+      if (error) throw error;
+
+      const map = new Map<string, string>();
+      for (const row of (data ?? []) as Array<{ id: string; category: string; member_name: string | null }>) {
+        if (row.category === "member" && row.member_name) map.set(row.id, row.member_name);
+      }
+      return map;
     },
     enabled: !!courtId,
   });
@@ -576,6 +600,17 @@ export default function ClubBookings() {
                   {allCourtBookings.map((booking) => {
                     const isClubBooking = booking.booking_origin === "club";
                     const isOtherClub = isClubBooking && booking.club_id !== clubId;
+                    // Eigenes Vereinsmitglied hat selbst gebucht — weder Club- noch Fremdbuchung.
+                    const isMemberBooking =
+                      !isClubBooking && !!clubId && (booking as any).member_club_id === clubId;
+                    const memberName = isMemberBooking ? memberNames?.get(booking.id) : undefined;
+                    const memberBenefit = !isMemberBooking
+                      ? null
+                      : (booking as any).is_free_allocation
+                        ? t("calendar.benefitQuota")
+                        : ((booking as any).member_discount_cents ?? 0) > 0
+                          ? t("calendar.benefitDiscount")
+                          : null;
 
                     return (
                       <div 
@@ -586,6 +621,8 @@ export default function ClubBookings() {
                           <div className="mt-0.5">
                             {isClubBooking ? (
                               <Building2 className="h-4 w-4 text-primary" />
+                            ) : isMemberBooking ? (
+                              <UserCheck className="h-4 w-4 text-amber-500" />
                             ) : (
                               <User className="h-4 w-4 text-blue-500" />
                             )}
@@ -597,10 +634,25 @@ export default function ClubBookings() {
                               </p>
                               <Badge
                                 variant={isClubBooking ? "default" : "secondary"}
-                                className={isClubBooking ? "bg-primary/20 text-primary" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}
+                                className={
+                                  isClubBooking
+                                    ? "bg-primary/20 text-primary"
+                                    : isMemberBooking
+                                      ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+                                      : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                }
                               >
-                                {isClubBooking ? t("common.badgeClub") : t("common.badgePlayer")}
+                                {isClubBooking
+                                  ? t("common.badgeClub")
+                                  : isMemberBooking
+                                    ? t("common.badgeMember")
+                                    : t("common.badgePlayer")}
                               </Badge>
+                              {memberBenefit && (
+                                <Badge variant="outline" className="whitespace-nowrap text-xs">
+                                  {memberBenefit}
+                                </Badge>
+                              )}
                             </div>
                             <p className="text-sm text-muted-foreground">
                               {t("bookings.timeRange", { start: format(new Date(booking.start_time), "HH:mm"), end: format(new Date(booking.end_time), "HH:mm") })}
@@ -609,6 +661,11 @@ export default function ClubBookings() {
                             {isClubBooking && booking.booked_for_member_name && (
                               <p className="text-sm text-muted-foreground">
                                 {t("bookings.summaryFor", { name: isOtherClub ? t("bookings.otherClub") : booking.booked_for_member_name })}
+                              </p>
+                            )}
+                            {memberName && (
+                              <p className="text-sm text-muted-foreground">
+                                {t("bookings.summaryFor", { name: memberName })}
                               </p>
                             )}
                           </div>

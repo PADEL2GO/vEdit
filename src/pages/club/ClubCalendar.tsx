@@ -7,12 +7,42 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { format, addDays, startOfWeek, endOfWeek, isSameDay, addWeeks, subWeeks } from "date-fns";
 import { de, enUS } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Users, User, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users, User, UserCheck, Clock } from "lucide-react";
+import { formatPrice } from "@/lib/pricing";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
 
 const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 7:00 - 20:00
+
+interface CalendarBooking {
+  id: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  /** 'club' = über das Club-Portal, 'member' = eigenes Vereinsmitglied, 'user' = fremder Spieler */
+  category: "club" | "member" | "user";
+  /** Nur bei category = 'member' gesetzt. */
+  member_name: string | null;
+  /** Womit das Mitglied gebucht hat. */
+  member_benefit: "quota" | "discount" | "none" | null;
+  member_discount_cents: number;
+  allocation_minutes: number | null;
+  booked_for_member_name: string | null;
+}
+
+/** Ein Block je Kategorie — Grün Club, Bernstein Mitglied, Blau fremder Spieler. */
+const CATEGORY_BLOCK: Record<CalendarBooking["category"], string> = {
+  club: "bg-green-500/90 text-white",
+  member: "bg-amber-500/90 text-white",
+  user: "bg-blue-500/90 text-white",
+};
+
+const CATEGORY_DOT: Record<CalendarBooking["category"], string> = {
+  club: "bg-green-500",
+  member: "bg-amber-500",
+  user: "bg-blue-500",
+};
 
 export default function ClubCalendar() {
   const { t, i18n } = useTranslation("club");
@@ -25,34 +55,47 @@ export default function ClubCalendar() {
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
 
-  // Fetch bookings for the week
+  // Kalenderdaten über die RPC: club_users dürfen Buchungen ihrer Courts lesen,
+  // aber keine fremden Profile — den Klarnamen eigener Mitglieder liefert nur
+  // club_court_bookings (SECURITY DEFINER). Fremde Spieler bleiben anonym.
   const { data: bookings, isLoading } = useQuery({
     queryKey: ["club-calendar-bookings", courtId, currentWeekStart.toISOString()],
-    queryFn: async () => {
+    queryFn: async (): Promise<CalendarBooking[]> => {
       if (!courtId) return [];
 
-      const { data, error } = await supabase
-        .from("bookings")
-        .select("*")
-        .eq("court_id", courtId)
-        .gte("start_time", currentWeekStart.toISOString())
-        .lte("start_time", weekEnd.toISOString())
-        .neq("status", "cancelled")
-        .neq("status", "expired")
-        .order("start_time");
+      const { data, error } = await (supabase as any).rpc("club_court_bookings", {
+        p_court_id: courtId,
+        p_from: currentWeekStart.toISOString(),
+        p_to: weekEnd.toISOString(),
+      });
 
       if (error) throw error;
-      return data;
+      return (data ?? []) as CalendarBooking[];
     },
     enabled: !!courtId,
   });
 
-  const getBookingsForDay = (day: Date) => {
+  const getBookingsForDay = (day: Date): CalendarBooking[] => {
     if (!bookings) return [];
     return bookings.filter((b) => isSameDay(new Date(b.start_time), day));
   };
 
-  const getBookingStyle = (booking: any) => {
+  /** "Kontingent" / "Rabatt" — bei 'none' bewusst nichts, das wäre nur Rauschen. */
+  const benefitLabel = (booking: CalendarBooking): string | null => {
+    if (booking.category !== "member") return null;
+    if (booking.member_benefit === "quota") return t("calendar.benefitQuota");
+    if (booking.member_benefit === "discount") return t("calendar.benefitDiscount");
+    return null;
+  };
+
+  /** Zeile unter der Uhrzeit: Klarname beim Mitglied, Name des Gebuchten beim Club. */
+  const subLine = (booking: CalendarBooking): string | null => {
+    if (booking.category === "member") return booking.member_name;
+    if (booking.category === "club") return booking.booked_for_member_name;
+    return null;
+  };
+
+  const getBookingStyle = (booking: CalendarBooking) => {
     const start = new Date(booking.start_time);
     const end = new Date(booking.end_time);
     const startHour = start.getHours() + start.getMinutes() / 60;
@@ -66,7 +109,6 @@ export default function ClubCalendar() {
     };
   };
 
-  const isClubBooking = (booking: any) => booking.booking_origin === "club";
 
   return (
     <div className="space-y-6">
@@ -109,13 +151,17 @@ export default function ClubCalendar() {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded bg-green-500" />
+          <div className={`h-3 w-3 rounded ${CATEGORY_DOT.club}`} />
           <span className="text-sm text-muted-foreground">{t("calendar.legendClub")}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded bg-blue-500" />
+          <div className={`h-3 w-3 rounded ${CATEGORY_DOT.member}`} />
+          <span className="text-sm text-muted-foreground">{t("calendar.legendMember")}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className={`h-3 w-3 rounded ${CATEGORY_DOT.user}`} />
           <span className="text-sm text-muted-foreground">{t("calendar.legendUser")}</span>
         </div>
       </div>
@@ -192,31 +238,36 @@ export default function ClubCalendar() {
                           {/* Bookings */}
                           {dayBookings.map((booking) => {
                             const style = getBookingStyle(booking);
-                            const isClub = isClubBooking(booking);
+                            const name = subLine(booking);
+                            const benefit = benefitLabel(booking);
                             return (
                               <div
                                 key={booking.id}
-                                className={`absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-xs overflow-hidden ${
-                                  isClub
-                                    ? "bg-green-500/90 text-white"
-                                    : "bg-blue-500/90 text-white"
-                                }`}
+                                className={`absolute left-0.5 right-0.5 rounded px-1 py-0.5 text-xs overflow-hidden ${CATEGORY_BLOCK[booking.category]}`}
                                 style={style}
+                                title={[
+                                  format(new Date(booking.start_time), "HH:mm"),
+                                  name,
+                                  benefit,
+                                ].filter(Boolean).join(" · ")}
                               >
                                 <div className="flex items-center gap-1">
-                                  {isClub ? (
-                                    <Users className="h-3 w-3 flex-shrink-0" />
-                                  ) : (
+                                  {booking.category === "user" ? (
                                     <User className="h-3 w-3 flex-shrink-0" />
+                                  ) : booking.category === "member" ? (
+                                    <UserCheck className="h-3 w-3 flex-shrink-0" />
+                                  ) : (
+                                    <Users className="h-3 w-3 flex-shrink-0" />
                                   )}
                                   <span className="truncate">
                                     {format(new Date(booking.start_time), "HH:mm")}
                                   </span>
                                 </div>
-                                {isClub && booking.booked_for_member_name && (
-                                  <div className="truncate text-[10px] opacity-90">
-                                    {booking.booked_for_member_name}
-                                  </div>
+                                {name && (
+                                  <div className="truncate text-[10px] opacity-90">{name}</div>
+                                )}
+                                {benefit && (
+                                  <div className="truncate text-[10px] opacity-75">{benefit}</div>
                                 )}
                               </div>
                             );
@@ -252,28 +303,46 @@ export default function ClubCalendar() {
             }
             return (
               <div className="space-y-2">
-                {todayBookings.map((booking) => (
-                  <div
-                    key={booking.id}
-                    className="flex items-center justify-between p-3 rounded-lg border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Badge variant={isClubBooking(booking) ? "default" : "secondary"}>
-                        {isClubBooking(booking) ? t("common.badgeClub") : t("common.badgeUser")}
-                      </Badge>
-                      <div>
-                        <p className="font-medium">
-                          {format(new Date(booking.start_time), "HH:mm")} - {format(new Date(booking.end_time), "HH:mm")}
-                        </p>
-                        {isClubBooking(booking) && booking.booked_for_member_name && (
-                          <p className="text-sm text-muted-foreground">
-                            {booking.booked_for_member_name}
+                {todayBookings.map((booking) => {
+                  const name = subLine(booking);
+                  const benefit = benefitLabel(booking);
+                  return (
+                    <div
+                      key={booking.id}
+                      className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg border"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`h-2.5 w-2.5 flex-none rounded-full ${CATEGORY_DOT[booking.category]}`}
+                        />
+                        <Badge variant={booking.category === "user" ? "secondary" : "default"}>
+                          {booking.category === "club"
+                            ? t("common.badgeClub")
+                            : booking.category === "member"
+                              ? t("common.badgeMember")
+                              : t("common.badgeUser")}
+                        </Badge>
+                        <div>
+                          <p className="font-medium">
+                            {format(new Date(booking.start_time), "HH:mm")} - {format(new Date(booking.end_time), "HH:mm")}
                           </p>
-                        )}
+                          {name && <p className="text-sm text-muted-foreground">{name}</p>}
+                        </div>
                       </div>
+                      {benefit && (
+                        <Badge variant="outline" className="whitespace-nowrap text-xs">
+                          {benefit}
+                          {booking.member_benefit === "quota" && booking.allocation_minutes
+                            ? ` · ${booking.allocation_minutes} Min`
+                            : ""}
+                          {booking.member_benefit === "discount" && booking.member_discount_cents > 0
+                            ? ` · −${formatPrice(booking.member_discount_cents)}`
+                            : ""}
+                        </Badge>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             );
           })()}
