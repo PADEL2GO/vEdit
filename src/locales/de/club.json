@@ -27,6 +27,7 @@
     "menu": {
       "overview": "Übersicht",
       "bookMembers": "Mitglieder buchen",
+      "members": "Vereinsmitglieder",
       "calendar": "Kalender",
       "utilization": "Auslastung",
       "courtFeatures": "Court Features"
@@ -122,6 +123,27 @@
       "missingData": "Fehlende Daten",
       "notEnoughQuota": "Nicht genügend Kontingent verfügbar"
     }
+  },
+  "members": {
+    "title": "Vereinsmitglieder",
+    "subtitle": "Mitglieder von {{club}} verwalten und Buchungsvolumen im Blick behalten",
+    "inviteTitle": "Mitglieder hinzufügen",
+    "inviteHint": "Eine E-Mail-Adresse pro Zeile (Komma oder Semikolon gehen auch). Bestehende Konten sind sofort Mitglied, alle anderen bekommen die Rolle automatisch beim ersten Login.",
+    "inviteButton_one": "{{count}} Adresse hinzufügen",
+    "inviteButton_other": "{{count}} Adressen hinzufügen",
+    "pendingTitle_one": "{{count}} offene Einladung",
+    "pendingTitle_other": "{{count}} offene Einladungen",
+    "pendingHint": "Greift automatisch, sobald sich jemand mit dieser Adresse anmeldet.",
+    "revoke": "Zurückziehen",
+    "listTitle_one": "{{count}} Mitglied",
+    "listTitle_other": "{{count}} Mitglieder",
+    "empty": "Noch keine Vereinsmitglieder hinterlegt",
+    "statDiscounted_one": "{{count}} vergünstigt",
+    "statDiscounted_other": "{{count}} vergünstigt",
+    "statBookings_one": "{{count}} Buchung",
+    "statBookings_other": "{{count}} Buchungen",
+    "statTennis": "{{count}}× Tennis frei",
+    "statQuota": "{{minutes}} Min Kontingent"
   },
   "calendar": {
     "title": "Kalender",

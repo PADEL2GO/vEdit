@@ -27,6 +27,7 @@
     "menu": {
       "overview": "Overview",
       "bookMembers": "Book members",
+      "members": "Club members",
       "calendar": "Calendar",
       "utilization": "Utilization",
       "courtFeatures": "Court Features"
@@ -122,6 +123,27 @@
       "missingData": "Missing data",
       "notEnoughQuota": "Not enough allowance available"
     }
+  },
+  "members": {
+    "title": "Club members",
+    "subtitle": "Manage members of {{club}} and keep an eye on booking volume",
+    "inviteTitle": "Add members",
+    "inviteHint": "One email address per line (comma or semicolon work too). Existing accounts become members right away, everyone else gets the role automatically on first login.",
+    "inviteButton_one": "Add {{count}} address",
+    "inviteButton_other": "Add {{count}} addresses",
+    "pendingTitle_one": "{{count}} pending invite",
+    "pendingTitle_other": "{{count}} pending invites",
+    "pendingHint": "Applies automatically as soon as someone signs in with that address.",
+    "revoke": "Revoke",
+    "listTitle_one": "{{count}} member",
+    "listTitle_other": "{{count}} members",
+    "empty": "No club members yet",
+    "statDiscounted_one": "{{count}} discounted",
+    "statDiscounted_other": "{{count}} discounted",
+    "statBookings_one": "{{count}} booking",
+    "statBookings_other": "{{count}} bookings",
+    "statTennis": "{{count}}× tennis free",
+    "statQuota": "{{minutes}} min allowance"
   },
   "calendar": {
     "title": "Calendar",

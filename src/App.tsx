@@ -58,6 +58,7 @@ const DashboardChat = lazy(() => import("./pages/dashboard/DashboardChat"));
 // Club Pages
 const ClubDashboard = lazy(() => import("./pages/club/ClubDashboard"));
 const ClubBookings = lazy(() => import("./pages/club/ClubBookings"));
+const ClubMembers = lazy(() => import("./pages/club/ClubMembers"));
 const ClubCalendar = lazy(() => import("./pages/club/ClubCalendar"));
 const ClubCourtFeatures = lazy(() => import("./pages/club/ClubCourtFeatures"));
 const ClubUtilization = lazy(() => import("./pages/club/ClubUtilization"));
@@ -188,6 +189,7 @@ const App = () => (
                 <Route path="/club" element={<ClubLayout />}>
                   <Route index element={<ClubDashboard />} />
                   <Route path="bookings" element={<ClubBookings />} />
+                  <Route path="members" element={<ClubMembers />} />
                   <Route path="calendar" element={<ClubCalendar />} />
                   <Route path="utilization" element={<ClubUtilization />} />
                   <Route path="court" element={<ClubCourtFeatures />} />

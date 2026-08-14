@@ -14,6 +14,7 @@ import {
   type ResolvedBookingRate,
 } from "@/hooks/useCourtPrices";
 import { formatPrice } from "@/lib/pricing";
+import { useMyClubMembership } from "@/hooks/useClubMembership";
 
 interface BookingSlotPickerProps {
   /** Nur die Courts der gewählten Sportart. */
@@ -132,6 +133,19 @@ export function BookingSlotPicker({
   const selectedSlotRate = selectedSlot
     ? getRateForStart(ratesByStart, slotStart(selectedDate, selectedSlot.time))
     : undefined;
+
+  // Vereinsmitglieder: die Rate trägt bereits die Kondition. Als Referenz für die
+  // Anzeige nehmen wir irgendeinen aufgelösten Slot des Tages — Heim/Fremd und
+  // Limit gelten für alle Slots desselben Courts gleich.
+  const { data: membership } = useMyClubMembership();
+  const anyRate = selectedSlotRate ?? ratesByStart.values().next().value;
+  const memberScope = anyRate?.memberScope ?? null;
+  const memberLimitReached =
+    !!membership &&
+    memberScope !== null &&
+    anyRate?.memberDiscountCents === 0 &&
+    membership.monthlyDiscountLimit !== null &&
+    membership.discountUsedMonth >= membership.monthlyDiscountLimit;
 
   return (
     <div className="flex flex-col gap-4 min-w-0">
@@ -261,6 +275,11 @@ export function BookingSlotPicker({
               // damit die Anzeige nicht vom Checkout abweicht.
               const resolvedPrice = on ? selectedSlotRate?.priceCents ?? null : null;
               const durationPrice = resolvedPrice ?? getPriceFromList(courtPrices, duration);
+              // Externenpreis durchgestrichen daneben, sobald eine Kondition greift.
+              const basePrice =
+                on && (selectedSlotRate?.memberDiscountCents ?? 0) > 0
+                  ? selectedSlotRate?.basePriceCents ?? null
+                  : null;
               return (
                 <button
                   key={duration}
@@ -279,8 +298,13 @@ export function BookingSlotPicker({
                     {t("slotPicker.durationMinutes", { count: duration })}
                   </span>
                   {durationPrice !== null && (
-                    <span className={`font-stat text-[11px] ${on ? "text-black/70" : "text-primary"}`}>
-                      {formatPrice(durationPrice)}
+                    <span className={`font-stat text-[11px] flex items-center gap-1 ${on ? "text-black/70" : "text-primary"}`}>
+                      {basePrice !== null && basePrice > durationPrice && (
+                        <span className={`line-through ${on ? "text-black/45" : "text-[hsl(0_0%_45%)]"}`}>
+                          {formatPrice(basePrice)}
+                        </span>
+                      )}
+                      {durationPrice === 0 ? "kostenlos" : formatPrice(durationPrice)}
                     </span>
                   )}
                 </button>
@@ -291,6 +315,25 @@ export function BookingSlotPicker({
             <span className="text-[12.5px] leading-[1.5] text-[hsl(0_0%_50%)]">
               {t("slotPicker.tennisDurationHint")}
             </span>
+          )}
+          {membership && memberScope !== null && (
+            <div className="rounded-[14px] border border-primary/25 bg-primary/[0.06] px-4 py-3 flex flex-col gap-1">
+              <span className="font-stat text-[12.5px] font-bold text-primary">
+                {memberScope === "home"
+                  ? `Mitgliederpreis · ${membership.clubName}`
+                  : `Vereinsrabatt · ${membership.clubName}`}
+              </span>
+              <span className="text-[12.5px] leading-[1.5] text-[hsl(0_0%_58%)]">
+                {memberLimitReached
+                  ? "Dein Monatslimit an vergünstigten Buchungen ist erreicht — diese Buchung läuft zum regulären Preis."
+                  : membership.monthlyDiscountLimit === null
+                    ? "Deine Vereinskondition ist bereits eingerechnet."
+                    : `Noch ${Math.max(
+                        membership.monthlyDiscountLimit - membership.discountUsedMonth,
+                        0,
+                      )} von ${membership.monthlyDiscountLimit} vergünstigten Buchungen diesen Monat.`}
+              </span>
+            </div>
           )}
         </div>
       </div>

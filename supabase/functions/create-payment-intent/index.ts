@@ -96,10 +96,13 @@ Deno.serve(async (req) => {
 
     // Server-recomputed price via resolve_booking_rate (Zeitfenster-Band schlägt
     // court_prices) — never trust the client-inserted booking.price_cents.
+    // Mitglieder-Kondition inklusive; die Buchung zählt beim Monatslimit nicht sich selbst.
     const { data: rateData, error: rateError } = await supabaseAdmin.rpc("resolve_booking_rate", {
       p_court_id: booking.court_id,
       p_start: booking.start_time,
       p_duration_minutes: durationMinutes,
+      p_user_id: booking.user_id,
+      p_exclude_booking_id: booking.id,
     });
     if (rateError) {
       logStep("Error resolving booking rate", { error: rateError.message });
@@ -109,6 +112,8 @@ Deno.serve(async (req) => {
       price_cents: number | null;
       price_band_name: string | null;
       court_sport: string | null;
+      member_scope: string | null;
+      member_discount_cents: number | null;
     } | null;
     const priceCents: number | null = rate?.price_cents ?? null;
     if (priceCents === null) throw new Error(`No price configured for duration (${durationMinutes} min)`);
@@ -129,8 +134,25 @@ Deno.serve(async (req) => {
       return json({ error: "Tennis-Plätze können nur für 60 Minuten gebucht werden" }, 409);
     }
 
-    logStep("Rate resolved", { priceCents, priceBand: rate?.price_band_name ?? null, courtSport });
-    let amountCents = priceCents;
+    logStep("Rate resolved", {
+      priceCents,
+      priceBand: rate?.price_band_name ?? null,
+      courtSport,
+      memberScope: rate?.member_scope ?? null,
+      memberDiscountCents: rate?.member_discount_cents ?? 0,
+    });
+    // Kontingent-Buchung: claim_member_quota hat bereits auf 0 gesetzt und Minuten
+    // verbucht — der aufgelöste Preis darf das nicht rückgängig machen.
+    let amountCents = (booking as any).is_free_allocation === true ? 0 : priceCents;
+
+    // Kostenlose Buchung (Heim-Tennis eines Vereinsmitglieds oder Kontingent): hier gibt
+    // es nichts zu kassieren. Ohne diesen Ausstieg würde der Math.max(50, …) weiter unten
+    // 50 Cent auf eine 0-€-Buchung schlagen. Der Client bestätigt sie über
+    // create-checkout-session (Free-Path: settle + Bestätigungsmail).
+    if (amountCents <= 0) {
+      logStep("Free booking — no PaymentIntent needed", { booking_id: booking.id });
+      return json({ free: true, amount_cents: 0, publishable_key: publishableKey });
+    }
 
     // Partial voucher discount — identical semantics to create-checkout-session
     // (fully-free vouchers must go through voucher-redeem, sub-minimum clamps to 50c).

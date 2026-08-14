@@ -23,12 +23,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Offene Vereins-Einladungen auf die eigene Adresse einlösen — einmal je Konto
+    // und Session. Damit greift eine Einladung auch dann, wenn der Verein sie für
+    // jemanden hinterlegt hat, der sich erst danach registriert.
+    const claimedFor = new Set<string>();
+    const claimInvites = (userId: string | undefined) => {
+      if (!userId || claimedFor.has(userId)) return;
+      claimedFor.add(userId);
+      // Bewusst ohne await: ein Fehler hier darf den Login nie blockieren.
+      (supabase.rpc as any)("claim_club_member_invites").then(
+        () => undefined,
+        () => undefined,
+      );
+    };
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        claimInvites(session?.user?.id);
       }
     );
 
@@ -37,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      claimInvites(session?.user?.id);
     });
 
     return () => subscription.unsubscribe();

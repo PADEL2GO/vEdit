@@ -50,6 +50,7 @@ import {
   ChevronRight,
   ChevronDown,
   AlertTriangle,
+  Users,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -135,6 +136,9 @@ export default function AdminUsers() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [userToDelete, setUserToDelete] = useState<UserWithDetails | null>(null);
+  const [membershipUser, setMembershipUser] = useState<UserWithDetails | null>(null);
+  const [membershipClubId, setMembershipClubId] = useState("");
+  const [membershipValidUntil, setMembershipValidUntil] = useState("");
   const queryClient = useQueryClient();
 
   const PER_PAGE = 25;
@@ -232,6 +236,83 @@ export default function AdminUsers() {
       return { matches, bookings, ledger, skillStats, matchCount: matchCount ?? 0, bookingCount: bookingCount ?? 0 };
     },
     enabled: !!selectedUser?.user_id,
+  });
+
+  // Vereinsmitgliedschaften — eine Zeile je Nutzer (UNIQUE user_id in der DB).
+  const { data: memberships } = useQuery({
+    queryKey: ["admin-club-memberships"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("club_memberships")
+        .select("id, user_id, club_id, valid_until, source, clubs(name)");
+      if (error) throw error;
+      return (data ?? []) as Array<{
+        id: string;
+        user_id: string;
+        club_id: string;
+        valid_until: string | null;
+        source: string;
+        clubs: { name: string } | null;
+      }>;
+    },
+  });
+
+  const membershipByUser = new Map((memberships ?? []).map((m) => [m.user_id, m]));
+
+  const { data: clubs } = useQuery({
+    queryKey: ["admin-clubs-for-membership"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("clubs")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as Array<{ id: string; name: string }>;
+    },
+  });
+
+  const setMembershipMutation = useMutation({
+    mutationFn: async ({
+      userId,
+      clubId,
+      validUntil,
+    }: {
+      userId: string;
+      clubId: string;
+      validUntil: string | null;
+    }) => {
+      // Genau ein Verein pro Nutzer: upsert auf user_id statt Insert.
+      const { error } = await (supabase as any)
+        .from("club_memberships")
+        .upsert(
+          { user_id: userId, club_id: clubId, valid_until: validUntil, source: "admin", is_active: true },
+          { onConflict: "user_id" },
+        );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Vereinsmitgliedschaft gespeichert");
+      queryClient.invalidateQueries({ queryKey: ["admin-club-memberships"] });
+      setMembershipUser(null);
+    },
+    onError: (error: Error) => toast.error("Fehler: " + error.message),
+  });
+
+  const removeMembershipMutation = useMutation({
+    mutationFn: async (membershipId: string) => {
+      const { error } = await (supabase as any)
+        .from("club_memberships")
+        .delete()
+        .eq("id", membershipId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Vereinsmitgliedschaft entfernt");
+      queryClient.invalidateQueries({ queryKey: ["admin-club-memberships"] });
+      setMembershipUser(null);
+    },
+    onError: (error: Error) => toast.error("Fehler: " + error.message),
   });
 
   const toggleRoleMutation = useMutation({
@@ -457,7 +538,15 @@ export default function AdminUsers() {
                                   🎾 Club
                                 </Badge>
                               )}
-                              {user.roles.length === 0 && (
+                              {membershipByUser.get(user.user_id) && (
+                                <Badge
+                                  variant="outline"
+                                  className={`${ROLE_PILL} border-primary/35 bg-primary/[0.12] text-primary`}
+                                >
+                                  {membershipByUser.get(user.user_id)!.clubs?.name ?? "Verein"}
+                                </Badge>
+                              )}
+                              {user.roles.length === 0 && !membershipByUser.get(user.user_id) && (
                                 <Badge
                                   variant="outline"
                                   className={`${ROLE_PILL} border-[hsl(0_0%_18%)] bg-white/5 text-[hsl(0_0%_72%)]`}
@@ -539,6 +628,21 @@ export default function AdminUsers() {
                                   >
                                     <span className="mr-2">🎾</span>
                                     {user.roles.includes("club_owner") ? "Club Owner entfernen" : "Club Owner machen"}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      const existing = membershipByUser.get(user.user_id);
+                                      setMembershipUser(user);
+                                      setMembershipClubId(existing?.club_id ?? "");
+                                      setMembershipValidUntil(existing?.valid_until ?? "");
+                                    }}
+                                    className="text-primary"
+                                  >
+                                    <Users className="h-4 w-4 mr-2" />
+                                    {membershipByUser.get(user.user_id)
+                                      ? "Vereinsmitgliedschaft ändern"
+                                      : "Vereinsmitglied machen"}
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
@@ -1022,6 +1126,86 @@ export default function AdminUsers() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Vereinsmitgliedschaft — genau ein Verein pro Nutzer */}
+      <Dialog open={!!membershipUser} onOpenChange={(open) => !open && setMembershipUser(null)}>
+        <DialogContent className="rounded-2xl border-[hsl(0_0%_14%)] bg-[hsl(0_0%_6%)] sm:max-w-[440px]">
+          <DialogHeader>
+            <DialogTitle className="text-[17px] font-bold tracking-tight">
+              Vereinsmitgliedschaft
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-4 py-1">
+            <p className="text-[13px] leading-[1.5] text-[hsl(0_0%_60%)]">
+              {membershipUser?.display_name || membershipUser?.email} bucht damit zu den
+              Konditionen des gewählten Vereins. Ein Nutzer kann nur einem Verein angehören.
+            </p>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(0_0%_65%)]">
+                Verein
+              </label>
+              <select
+                value={membershipClubId}
+                onChange={(e) => setMembershipClubId(e.target.value)}
+                className="h-[42px] rounded-[11px] border border-[hsl(0_0%_16%)] bg-white/5 px-3 text-[13.5px] text-foreground"
+              >
+                <option value="">Verein wählen …</option>
+                {(clubs ?? []).map((club) => (
+                  <option key={club.id} value={club.id}>
+                    {club.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(0_0%_65%)]">
+                Gültig bis (optional)
+              </label>
+              <Input
+                type="date"
+                value={membershipValidUntil}
+                onChange={(e) => setMembershipValidUntil(e.target.value)}
+                className="h-[42px] rounded-[11px] border-[hsl(0_0%_16%)] bg-white/5"
+              />
+              <span className="text-[11.5px] text-[hsl(0_0%_50%)]">
+                Leer = unbefristet. Danach greifen wieder die Externenpreise.
+              </span>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:justify-between">
+            {membershipUser && membershipByUser.get(membershipUser.user_id) && (
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  removeMembershipMutation.mutate(membershipByUser.get(membershipUser.user_id)!.id)
+                }
+                disabled={removeMembershipMutation.isPending}
+                className="text-[#FF6B6B] hover:bg-[hsl(0_100%_71%/0.1)] hover:text-[#FF6B6B]"
+              >
+                Mitgliedschaft entfernen
+              </Button>
+            )}
+            <Button
+              variant="hero"
+              disabled={!membershipClubId || setMembershipMutation.isPending}
+              onClick={() =>
+                membershipUser &&
+                setMembershipMutation.mutate({
+                  userId: membershipUser.user_id,
+                  clubId: membershipClubId,
+                  validUntil: membershipValidUntil || null,
+                })
+              }
+            >
+              Speichern
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }

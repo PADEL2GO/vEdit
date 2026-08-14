@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { invokeEdgeFunction } from "@/lib/edgeFunctionUtils";
 import { applyVoucherDiscount } from "@/lib/pricing";
+import { useMemberQuota, useInvalidateMembership, type MemberQuotaSummary } from "@/hooks/useClubMembership";
 export interface BookingDetails {
   id: string;
   start_time: string;
@@ -17,6 +18,12 @@ export interface BookingDetails {
   court: { name: string };
   guest_name?: string | null;
   guest_email?: string | null;
+  court_id?: string | null;
+  /** Bereits vom Preis abgezogene Vereinskondition in Cent. */
+  member_discount_cents?: number;
+  member_scope?: "home" | "away" | null;
+  /** true = über das Freikontingent des Vereins gebucht (Preis 0). */
+  is_free_allocation?: boolean;
 }
 
 export interface RewardBreakdown {
@@ -64,7 +71,23 @@ export interface UseBookingCheckoutReturn {
   isGuest: boolean;
   handlePayment: () => Promise<void>;
   formatTimeLeft: (seconds: number) => string;
+  /** Freikontingent des Vereins auf diesem Court; null = nicht verfügbar. */
+  memberQuota: MemberQuotaSummary | null;
+  claimingQuota: boolean;
+  useMemberQuotaForBooking: () => Promise<void>;
 }
+
+/** Fehlermeldungen der claim_member_quota-RPC in Klartext. */
+const QUOTA_ERRORS: Record<string, string> = {
+  not_a_club_member: "Du bist keinem Verein zugeordnet.",
+  not_home_court: "Dieser Court gehört nicht zu deinem Verein.",
+  quota_not_enabled: "Dein Verein hat das Freikontingent nicht für Mitglieder freigegeben.",
+  club_quota_exhausted: "Das Freikontingent deines Vereins ist für diesen Monat aufgebraucht.",
+  member_quota_exhausted: "Dein persönliches Kontingent ist für diesen Monat aufgebraucht.",
+  tennis_already_free: "Tennis ist in deinem Verein ohnehin kostenlos.",
+  quota_already_used: "Diese Buchung läuft bereits über das Freikontingent.",
+  booking_not_pending: "Diese Buchung kann nicht mehr geändert werden.",
+};
 
 export function useBookingCheckout(): UseBookingCheckoutReturn {
   const [searchParams] = useSearchParams();
@@ -87,9 +110,18 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
     errorMessage: null,
   });
 
+  const [claimingQuota, setClaimingQuota] = useState(false);
+
   const bookingId = searchParams.get("booking_id");
   // Guest mode: booking was created without auth — no redirect, no user checks
   const isGuest = searchParams.get("guest") === "1";
+
+  // Freikontingent des eigenen Vereins für genau diesen Court und Monat.
+  const { data: memberQuota } = useMemberQuota(
+    booking?.court_id ?? null,
+    booking?.start_time ?? null,
+  );
+  const invalidateMembership = useInvalidateMembership();
 
   // Auth redirect: only when NOT a guest checkout
   useEffect(() => {
@@ -212,6 +244,10 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
             hold_expires_at,
             guest_name,
             guest_email,
+            court_id,
+            member_discount_cents,
+            member_scope,
+            is_free_allocation,
             location:locations (name, slug, address),
             court:courts (name)
           `)
@@ -404,6 +440,34 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
     window.location.assign(data.url);
   };
 
+  /**
+   * Buchung auf das Freikontingent des Vereins umstellen. Die RPC prüft unter
+   * Row-Lock den Vereins- UND den persönlichen Rest und setzt den Preis auf 0.
+   * Danach wird die Buchung neu geladen — bezahlt wird dann über den Free-Path
+   * von create-checkout-session.
+   */
+  const useMemberQuotaForBooking = async () => {
+    if (!booking || claimingQuota) return;
+
+    setClaimingQuota(true);
+    const { error: rpcError } = await (supabase.rpc as any)("claim_member_quota", {
+      p_booking_id: booking.id,
+    });
+    setClaimingQuota(false);
+
+    if (rpcError) {
+      const key = Object.keys(QUOTA_ERRORS).find((k) => rpcError.message?.includes(k));
+      toast.error("Freikontingent nicht nutzbar", {
+        description: key ? QUOTA_ERRORS[key] : "Bitte versuche es erneut.",
+      });
+      return;
+    }
+
+    invalidateMembership();
+    await fetchBooking();
+    toast.success("Freikontingent verwendet — die Buchung ist kostenlos.");
+  };
+
   const formatTimeLeft = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -424,5 +488,8 @@ export function useBookingCheckout(): UseBookingCheckoutReturn {
     isGuest,
     handlePayment,
     formatTimeLeft,
+    memberQuota: memberQuota ?? null,
+    claimingQuota,
+    useMemberQuotaForBooking,
   };
 }

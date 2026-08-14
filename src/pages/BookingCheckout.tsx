@@ -56,6 +56,9 @@ const BookingCheckout = () => {
     isGuest,
     handlePayment,
     formatTimeLeft,
+    memberQuota,
+    claimingQuota,
+    useMemberQuotaForBooking,
   } = useBookingCheckout();
 
   // Gutschein-Feld standardmäßig offen, damit es in der Bezahlmaske sofort sichtbar ist.
@@ -123,6 +126,20 @@ const BookingCheckout = () => {
   const effectivePrice = priceAfterVoucher;
   const isFullyFree = effectivePrice === 0;
   const detailPath = booking.location?.slug ? `/booking/locations/${booking.location.slug}` : undefined;
+
+  // Vereinskondition: booking.price_cents ist bereits der Mitgliederpreis, der
+  // Externenpreis ergibt sich aus Preis + gewährtem Abzug.
+  const memberDiscount = booking.member_discount_cents ?? 0;
+  const basePrice = booking.price_cents + memberDiscount;
+  const isQuotaBooking = booking.is_free_allocation === true;
+  // Kontingent anbieten, solange die Buchung noch etwas kostet und beide Töpfe reichen.
+  const canUseQuota =
+    !isGuest &&
+    !isQuotaBooking &&
+    !!memberQuota?.quotaEnabled &&
+    booking.price_cents > 0 &&
+    memberQuota.clubRemaining >= durationMinutes &&
+    memberQuota.memberRemaining >= durationMinutes;
 
   return (
     <>
@@ -360,11 +377,39 @@ const BookingCheckout = () => {
                       {t("checkout.price.totalCourtLabel")}
                     </h3>
 
-                    {/* Base price */}
+                    {/* Base price — bei Mitgliedern der Externenpreis vor Kondition */}
                     <div className="flex justify-between text-[13.5px] text-[hsl(0_0%_60%)]">
                       <span className="min-w-0 truncate pr-3">{booking.court?.name}</span>
-                      <span className="font-stat flex-none">{formatPrice(booking.price_cents, booking.currency)}</span>
+                      <span className="font-stat flex-none">{formatPrice(basePrice, booking.currency)}</span>
                     </div>
+
+                    {/* Vereinskondition */}
+                    {memberDiscount > 0 && (
+                      <div className="flex justify-between text-[13.5px] text-primary">
+                        <span className="inline-flex items-center gap-1.5 min-w-0 pr-3">
+                          <Users className="w-[13px] h-[13px] flex-none" />
+                          <span className="truncate">
+                            {booking.member_scope === "home" ? "Mitgliederpreis" : "Vereinsrabatt"}
+                          </span>
+                        </span>
+                        <span className="font-stat flex-none">
+                          −{formatPrice(memberDiscount, booking.currency)}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Freikontingent verbraucht */}
+                    {isQuotaBooking && (
+                      <div className="flex justify-between text-[13.5px] text-primary">
+                        <span className="inline-flex items-center gap-1.5 min-w-0 pr-3">
+                          <Users className="w-[13px] h-[13px] flex-none" />
+                          <span className="truncate">
+                            Freikontingent{memberQuota?.clubName ? ` · ${memberQuota.clubName}` : ""}
+                          </span>
+                        </span>
+                        <span className="font-stat flex-none">{durationMinutes} Min</span>
+                      </div>
+                    )}
 
                     {/* Voucher discount */}
                     {isVoucherApplied && (
@@ -393,6 +438,35 @@ const BookingCheckout = () => {
                         <span className="text-[11px] text-[hsl(0_0%_50%)]">inkl. MwSt.</span>
                       </span>
                     </div>
+
+                    {/* Freikontingent des Vereins — bewusste Entscheidung, kein Automatismus */}
+                    {canUseQuota && memberQuota && (
+                      <div className="rounded-[14px] border border-primary/25 bg-primary/[0.06] px-[14px] py-[13px] flex flex-col gap-2.5">
+                        <div className="flex items-center gap-2.5">
+                          <Users className="h-[19px] w-[19px] text-primary flex-none" />
+                          <span className="font-semibold text-primary text-sm">
+                            Freikontingent {memberQuota.clubName}
+                          </span>
+                        </div>
+                        <span className="text-[12.5px] leading-[1.5] text-[hsl(0_0%_58%)]">
+                          Verein: noch {memberQuota.clubRemaining} Min auf diesem Court · dein Anteil:
+                          noch {memberQuota.memberRemaining} Min diesen Monat.
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={claimingQuota}
+                          onClick={() => useMemberQuotaForBooking()}
+                          className="border-primary/40 text-primary hover:bg-primary/10"
+                        >
+                          {claimingQuota ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            `Kontingent nutzen (${durationMinutes} Min · 0 €)`
+                          )}
+                        </Button>
+                      </div>
+                    )}
 
                     {/* Rewards estimate (logged-in) */}
                     {!isGuest && !isVoucherApplied && rewardsEstimate && rewardsEstimate.total_points > 0 && (

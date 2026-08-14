@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { QUERY_KEYS, createQueryKey } from "@/lib/queryKeys";
+import { useAuth } from "@/hooks/useAuth";
 import type { CourtSport } from "@/components/booking/types";
 
 export interface CourtPrice {
@@ -209,12 +210,20 @@ export function getPriceFromList(prices: CourtPrice[] | undefined, durationMinut
 export interface ResolvedBookingRate {
   /** Startzeitpunkt wie von der DB zurückgegeben (ISO). */
   startTime: string;
-  /** null = weder Band noch court_prices liefern einen Preis. */
+  /** Der zu zahlende Preis — bei Vereinsmitgliedern bereits die Mitglieder-Kondition. */
   priceCents: number | null;
   /** 1 = kein Punkte-Band aktiv. */
   pointsMultiplier: number;
   priceBandName: string | null;
   pointsBandName: string | null;
+  /** Externenpreis vor Mitglieder-Kondition. Gleich priceCents, wenn kein Vorteil greift. */
+  basePriceCents: number | null;
+  /** 'home' = Court des eigenen Vereins, 'away' = fremder Court, null = kein Mitglied. */
+  memberScope: "home" | "away" | null;
+  /** Tatsächlich gewährter Abzug in Cent (0 = keiner, z.B. weil das Monatslimit erschöpft ist). */
+  memberDiscountCents: number;
+  /** Verbleibende vergünstigte Buchungen im Monat; null = unbegrenzt oder kein Mitglied. */
+  memberLimitRemaining: number | null;
 }
 
 interface RawBookingRateRow {
@@ -223,6 +232,10 @@ interface RawBookingRateRow {
   points_multiplier: number | string | null;
   price_band_name: string | null;
   points_band_name: string | null;
+  base_price_cents: number | null;
+  member_scope: string | null;
+  member_discount_cents: number | null;
+  member_limit_remaining: number | null;
 }
 
 function toIso(value: string | Date): string {
@@ -249,11 +262,14 @@ export function useResolvedBookingRates({
   startTimes: Array<string | Date>;
   durationMinutes: number;
 }) {
+  const { user } = useAuth();
   const startIsos = useMemo(() => startTimes.map(toIso), [startTimes]);
   const dateKey = startIsos.length > 0 ? localDateKey(startIsos[0]) : null;
 
   const query = useQuery({
-    queryKey: [BOOKING_RATES_QUERY_KEY, courtId, dateKey, durationMinutes],
+    // Der Preis hängt seit den Mitglieder-Konditionen am angemeldeten Nutzer —
+    // ohne user.id im Schlüssel würde nach dem Login der Gastpreis weiter angezeigt.
+    queryKey: [BOOKING_RATES_QUERY_KEY, courtId, dateKey, durationMinutes, user?.id ?? "anon"],
     queryFn: async (): Promise<ResolvedBookingRate[]> => {
       const { data, error } = await (supabase as any).rpc("resolve_booking_rates_batch", {
         p_court_id: courtId,
@@ -274,6 +290,13 @@ export function useResolvedBookingRates({
         })(),
         priceBandName: row.price_band_name,
         pointsBandName: row.points_band_name,
+        basePriceCents: row.base_price_cents ?? row.price_cents ?? null,
+        memberScope: (row.member_scope as "home" | "away" | null) ?? null,
+        memberDiscountCents: Number(row.member_discount_cents ?? 0) || 0,
+        memberLimitRemaining:
+          row.member_limit_remaining === null || row.member_limit_remaining === undefined
+            ? null
+            : Number(row.member_limit_remaining),
       }));
     },
     enabled: !!courtId && startIsos.length > 0 && durationMinutes > 0,

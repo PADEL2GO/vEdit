@@ -42,6 +42,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { ClubMemberTerms } from "@/components/admin/clubs/ClubMemberTerms";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -743,9 +744,21 @@ export default function AdminClubs() {
                         className="gap-2 rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-[11px] pt-0 text-[13.5px] font-bold text-muted-foreground shadow-none data-[state=active]:-mb-px data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
                       >
                         <Users className="h-[15px] w-[15px]" />
-                        Mitglieder ({selectedClub.club_users?.filter(u => u.is_active)?.length ?? 0})
+                        Portal-Zugänge ({selectedClub.club_users?.filter(u => u.is_active)?.length ?? 0})
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="member-terms"
+                        className="gap-2 rounded-none border-b-2 border-transparent bg-transparent px-0.5 pb-[11px] pt-0 text-[13.5px] font-bold text-muted-foreground shadow-none data-[state=active]:-mb-px data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                      >
+                        <Users className="h-[15px] w-[15px]" />
+                        Vereinsmitglieder
                       </TabsTrigger>
                     </TabsList>
+
+                    {/* Vereinsmitglieder: Konditionen + Mitgliederliste */}
+                    <TabsContent value="member-terms" className="mt-4">
+                      <ClubMemberTerms clubId={selectedClub.id} />
+                    </TabsContent>
 
                     {/* Courts Tab */}
                     <TabsContent value="courts" className="mt-4 space-y-3.5">

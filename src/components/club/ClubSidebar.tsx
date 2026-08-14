@@ -10,7 +10,7 @@ import {
   SidebarMenuButton, 
   SidebarMenuItem 
 } from "@/components/ui/sidebar";
-import { CalendarDays, Home, Settings, LogOut, CircleDot, Users, Building2, LayoutDashboard, BarChart3 } from "lucide-react";
+import { CalendarDays, Home, Settings, LogOut, CircleDot, Users, UserCheck, Building2, LayoutDashboard, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useClubAuth } from "@/hooks/useClubAuth";
@@ -23,6 +23,7 @@ import { assignmentSport, SPORT_DOT_CLASSES, useClubCourt } from "./ClubCourtCon
 const menuItems = [
   { titleKey: "sidebar.menu.overview", url: "/club", icon: Home },
   { titleKey: "sidebar.menu.bookMembers", url: "/club/bookings", icon: Users },
+  { titleKey: "sidebar.menu.members", url: "/club/members", icon: UserCheck },
   { titleKey: "sidebar.menu.calendar", url: "/club/calendar", icon: CalendarDays },
   { titleKey: "sidebar.menu.utilization", url: "/club/utilization", icon: BarChart3 },
   { titleKey: "sidebar.menu.courtFeatures", url: "/club/court", icon: Settings },

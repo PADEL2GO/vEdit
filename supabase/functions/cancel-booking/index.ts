@@ -214,6 +214,17 @@ serve(async (req) => {
     }
     logStep("Booking cancelled", { bookingId, creditsRefunded });
 
+    // Hat ein Vereinsmitglied Freikontingent verbraucht, gehen die Minuten zurück an den
+    // Verein. Idempotent — eine bereits gutgeschriebene Buchung wird nicht doppelt erstattet.
+    const { data: quotaRefunded, error: quotaError } = await supabaseAdmin.rpc("refund_member_quota", {
+      p_booking_id: bookingId,
+    });
+    if (quotaError) {
+      logStep("Member quota refund failed", { bookingId, error: quotaError.message });
+    } else if (Number(quotaRefunded ?? 0) > 0) {
+      logStep("Member quota refunded", { bookingId, minutes: quotaRefunded });
+    }
+
     // ── Notify the user ───────────────────────────────────────────────────────
     try {
       const startDate = new Date(booking.start_time);

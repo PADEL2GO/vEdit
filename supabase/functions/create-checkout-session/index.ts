@@ -199,10 +199,15 @@ serve(async (req) => {
 
     // Preis UND Punkte-Faktor kommen aus resolve_booking_rate — der einzigen Wahrheit.
     // Greift ein Zeitfenster-Band, gewinnt dessen Preis; sonst der court_prices-Standard.
+    // p_user_id: Vereinsmitglieder zahlen ihre Kondition (Heim/Fremd) statt des Externenpreises.
+    // p_exclude_booking_id: DIESE Buchung darf sich beim Monatslimit nicht selbst mitzählen —
+    // sonst fände der Checkout das Limit erschöpft und höbe den Preis nachträglich an.
     const { data: rateData, error: rateError } = await supabaseAdmin.rpc("resolve_booking_rate", {
       p_court_id: booking.court_id,
       p_start: booking.start_time,
       p_duration_minutes: durationMinutes,
+      p_user_id: booking.user_id,
+      p_exclude_booking_id: booking.id,
     });
 
     if (rateError) {
@@ -216,9 +221,14 @@ serve(async (req) => {
       price_band_name: string | null;
       points_band_name: string | null;
       court_sport: string | null;
+      base_price_cents: number | null;
+      member_club_id: string | null;
+      member_scope: string | null;
+      member_discount_cents: number | null;
     } | null;
 
     const priceCents: number | null = rate?.price_cents ?? null;
+    const memberDiscountCents = Number(rate?.member_discount_cents ?? 0) || 0;
     // Kein `|| 1`: ein Band darf bewusst 0 setzen ("hier gibt es keine Punkte").
     const rawMultiplier = Number(rate?.points_multiplier ?? 1);
     const bandMultiplier = Number.isFinite(rawMultiplier) ? rawMultiplier : 1;
@@ -250,25 +260,42 @@ serve(async (req) => {
     logStep("Rate resolved", {
       court_id: booking.court_id,
       priceCents,
+      basePriceCents: rate?.base_price_cents ?? null,
+      memberScope: rate?.member_scope ?? null,
+      memberDiscountCents,
       priceBand: rate?.price_band_name ?? null,
       pointsBand: rate?.points_band_name ?? null,
       bandMultiplier,
       courtSport,
     });
 
+    // Kontingent-Buchung: claim_member_quota hat den Preis bereits auf 0 gesetzt und
+    // Minuten aus dem Vereinskontingent verbucht. Der aufgelöste Preis darf das nicht
+    // überschreiben — sonst würde eine bereits bezahlte Kontingent-Buchung erneut belastet.
+    const isQuotaBooking = (booking as any).is_free_allocation === true;
+
     // Always charge the server-recomputed price — booking.price_cents may be client-inserted
-    if (booking.price_cents !== priceCents) {
-      logStep("WARNING: booking price differs from server price — overriding", {
+    if (!isQuotaBooking && (
+      booking.price_cents !== priceCents ||
+      Number((booking as any).member_discount_cents ?? 0) !== memberDiscountCents
+    )) {
+      logStep("Booking price/member discount differs from server value — overriding", {
         bookingPriceCents: booking.price_cents,
         serverPriceCents: priceCents,
+        memberDiscountCents,
       });
       await supabaseAdmin
         .from("bookings")
-        .update({ price_cents: priceCents })
+        .update({
+          price_cents: priceCents,
+          member_club_id: rate?.member_club_id ?? null,
+          member_scope: rate?.member_scope ?? null,
+          member_discount_cents: memberDiscountCents,
+        })
         .eq("id", booking.id);
     }
-    const totalPriceCents = priceCents;
-    logStep("Price determined", { totalPriceCents });
+    const totalPriceCents = isQuotaBooking ? 0 : priceCents;
+    logStep("Price determined", { totalPriceCents, isQuotaBooking });
 
     // Serialize checkout per booking so only ONE attempt can ever hold a points reserve
     // on this booking. claim_checkout runs the check+set under one row-locked txn, so a
@@ -676,6 +703,10 @@ serve(async (req) => {
         // womit der Storno-Clawback automatisch stimmt.
         if (courtSport === "tennis") {
           logStep("Free path: payback skipped — tennis", { bookingId: booking.id, courtId: booking.court_id });
+        } else if (isQuotaBooking) {
+          // Kontingent-Buchung: kein Geld geflossen, also auch kein Payback —
+          // dieselbe Regel wie bei Club-Portal-Buchungen.
+          logStep("Free path: payback skipped — club quota booking", { bookingId: booking.id });
         } else if (bk && bk.play_credits_awarded === 0 && bk.user_id && !appliedVoucherId) {
           const durationMin = Math.round(
             (new Date(bk.end_time).getTime() - new Date(bk.start_time).getTime()) / 60000,
