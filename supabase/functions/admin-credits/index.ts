@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { hasAdminAccess, isFullAdmin } from "../_shared/adminAccess.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -146,22 +147,35 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // Check if user is admin (user_roles row OR superadmin email bypass)
-    const { data: adminRole } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .single();
-
-    const isSuperadmin = user.email === "fsteinfelder@padel2go.eu";
-
-    if (!adminRole && !isSuperadmin) {
-      throw new Error("Admin access required");
-    }
-
     const body = await req.json();
     const { action } = body;
+
+    // Zugriff: Vollzugriff darf alles. Eine eigene Admin-Rolle darf nur die
+    // LESENDEN Aktionen ihrer Seite — alles, was Guthaben bewegt, Konten löscht
+    // oder Bestände zurücksetzt, bleibt ausschliesslich dem Vollzugriff
+    // vorbehalten. Das deckt sich mit der Tabellen-Zuordnung, in der wallets und
+    // points_ledger fuer die Seite p2g-points auf 'read' stehen.
+    const PAGE_ACTIONS: Record<string, string[]> = {
+      overview:     ["stats"],
+      bookings:     ["stats"],
+      analytics:    ["stats", "marketplace_analytics"],
+      marketplace:  ["marketplace_analytics", "stats"],
+      "p2g-points": ["list_wallets", "get_wallet", "list_match_analyses", "list_pending_approvals", "stats"],
+    };
+
+    let allowed = await isFullAdmin(supabaseAdmin, user);
+    if (!allowed) {
+      for (const [page, actions] of Object.entries(PAGE_ACTIONS)) {
+        if (!actions.includes(action)) continue;
+        if (await hasAdminAccess(supabaseAdmin, user, page)) {
+          allowed = true;
+          break;
+        }
+      }
+    }
+    if (!allowed) {
+      throw new Error("Admin access required");
+    }
 
     logStep("Request", { action, adminId: user.id });
 

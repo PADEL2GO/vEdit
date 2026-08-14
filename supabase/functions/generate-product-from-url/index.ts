@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { safeFetch } from "../_shared/safeFetch.ts";
+import { hasAdminAccess } from "../_shared/adminAccess.ts";
 
 // AI product importer for the marketplace admin: takes one product URL (manufacturer
 // or shop page) OR an uploaded product file (PDF datasheet / saved HTML page),
@@ -210,13 +211,7 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     if (authError || !user) return json({ error: "Nicht autorisiert" }, 401);
 
-    const { data: adminRole } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!adminRole && user.email !== SUPERADMIN_EMAIL) {
+    if (!(await hasAdminAccess(supabaseAdmin, user, "marketplace"))) {
       return json({ error: "Keine Admin-Berechtigung" }, 403);
     }
 

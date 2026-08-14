@@ -1,6 +1,7 @@
 import Stripe from "npm:stripe@18.5.0";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { resolveResendKey, brandedEmailHtml, sendBrandedEmail } from "../_shared/email.ts";
+import { hasAdminAccess } from "../_shared/adminAccess.ts";
 
 // Admin-only refund/cancellation for a paid marketplace order.
 // Flow (idempotent + retry-safe):
@@ -42,13 +43,7 @@ Deno.serve(async (req) => {
     const user = userData?.user;
     if (authError || !user) return json({ error: "Nicht autorisiert" }, 401);
 
-    const { data: adminRole } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!adminRole && user.email !== SUPERADMIN_EMAIL) {
+    if (!(await hasAdminAccess(supabaseAdmin, user, "marketplace"))) {
       return json({ error: "Keine Admin-Berechtigung" }, 403);
     }
 

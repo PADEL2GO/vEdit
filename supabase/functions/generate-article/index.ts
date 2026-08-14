@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { stripUnsafeHtml } from "../_shared/stripUnsafeHtml.ts";
+import { hasAdminAccess } from "../_shared/adminAccess.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -62,14 +63,9 @@ serve(async (req) => {
     if (authError || !user) throw new Error("Unauthorized");
 
     // 2. Admin role check (user_roles row OR superadmin email bypass)
-    const { data: adminRole } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    const isSuperadmin = user.email === "fsteinfelder@padel2go.eu";
-    if (!adminRole && !isSuperadmin) throw new Error("Admin access required");
+    if (!(await hasAdminAccess(supabaseAdmin, user, "news"))) {
+      throw new Error("Admin access required");
+    }
 
     // 3. Parse transcript
     const body = await req.json().catch(() => ({}));

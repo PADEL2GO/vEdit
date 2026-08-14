@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { Resend } from "npm:resend@4.0.0";
 import { resolveResendKey, DEFAULT_FROM, REPLY_TO_EMAIL } from "../_shared/email.ts";
 import { renderNewsletterHtml } from "../_shared/newsletter.ts";
+import { hasAdminAccess } from "../_shared/adminAccess.ts";
 
 const APP = "https://www.padel2go-official.de";
 const BATCH = 100;
@@ -28,8 +29,9 @@ serve(async (req) => {
       const { data: u } = await anon.auth.getUser(authHeader.replace("Bearer ", ""));
       const user = u?.user;
       if (!user) return new Response(JSON.stringify({ error: "Nicht autorisiert" }), { status: 401, headers: H });
-      const { data: role } = await admin.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
-      if (!role && user.email !== SUPERADMIN) return new Response(JSON.stringify({ error: "Keine Admin-Berechtigung" }), { status: 403, headers: H });
+      if (!(await hasAdminAccess(admin, user, "newsletter"))) {
+        return new Response(JSON.stringify({ error: "Keine Admin-Berechtigung" }), { status: 403, headers: H });
+      }
     }
 
     const { campaign_id, test_to, _continue } = await req.json().catch(() => ({}));

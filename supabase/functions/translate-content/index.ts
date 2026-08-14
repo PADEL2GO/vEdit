@@ -25,6 +25,7 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { stripUnsafeHtml } from "../_shared/stripUnsafeHtml.ts";
+import { hasAdminAccess } from "../_shared/adminAccess.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -137,14 +138,14 @@ serve(async (req) => {
   const { data: { user }, error: authError } = await anonClient.auth.getUser(token);
   if (authError || !user) return json(401, { error: "Unauthorized" });
 
-  const { data: adminRole } = await client
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("role", "admin")
-    .maybeSingle();
-  const isSuperadmin = user.email === "fsteinfelder@padel2go.eu";
-  if (!adminRole && !isSuperadmin) return json(403, { error: "Admin access required" });
+  // Geteiltes Werkzeug: wird aus mehreren Redaktionsseiten heraus aufgerufen.
+  const TRANSLATE_PAGES = [
+    "news", "events", "marketplace", "location-teasers",
+    "partner-tiles", "touchpoint-slides", "skypadel-gallery", "qr-panel",
+  ];
+  if (!(await hasAdminAccess(client, user, TRANSLATE_PAGES))) {
+    return json(403, { error: "Admin access required" });
+  }
 
   const apiKey = await resolveDeeplKey(client);
   if (!apiKey) {

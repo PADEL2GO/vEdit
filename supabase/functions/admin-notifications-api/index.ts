@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2.57.2";
+import { hasAdminAccess } from "../_shared/adminAccess.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -53,24 +54,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check if user is admin (has_role OR superadmin email bypass)
-    const { data: isAdmin } = await supabaseUser.rpc("has_role", {
-      _user_id: user.id,
-      _role: "admin",
-    });
+    // Service-Rolle: fuer die Rechtepruefung UND die eigentlichen Operationen.
+    // Muss vor der Pruefung stehen — has_admin_page liest die Rollentabellen.
+    const supabase: SupabaseClientAny = createClient(supabaseUrl, supabaseServiceKey);
 
-    const isSuperadmin = user.email === "fsteinfelder@padel2go.eu";
-
-    if (!isAdmin && !isSuperadmin) {
-      console.error("User is not admin:", user.id);
+    // Vollzugriff ODER eigene Rolle mit der Seite "Mitteilungen"
+    if (!(await hasAdminAccess(supabase, user, "notifications"))) {
+      console.error("No admin access:", user.id);
       return new Response(
         JSON.stringify({ error: "Forbidden - Admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    // Use service role client for operations
-    const supabase: SupabaseClientAny = createClient(supabaseUrl, supabaseServiceKey);
 
     const body: BroadcastRequest = await req.json();
     console.log("Admin notifications request:", { action: body.action });
