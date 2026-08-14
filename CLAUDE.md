@@ -105,8 +105,9 @@ supabase/
 ---
 
 ## Git
-- Remote `origin` → https://github.com/PADEL2GO/vEdit.git
-- Remote `padel2go` → https://github.com/PADEL2GO/padel2go-edit-8beb07f0.git
+- Remote `origin` → https://github.com/TrinityStudiosGmbH/padel2go_live.git
+- Remote `padel2go` → https://github.com/TrinityStudiosGmbH/padel2go-edit-8beb07f0.git
+- Beide Repos sind aus der Org `PADEL2GO` nach `TrinityStudiosGmbH` umgezogen (URLs am 2026-08-14 nachgezogen)
 - Push to both after significant changes
 - Use `/commit` for structured commit messages
 
