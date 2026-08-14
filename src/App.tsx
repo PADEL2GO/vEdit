@@ -70,6 +70,7 @@ const AdminCourts = lazy(() => import("./pages/admin/AdminCourts"));
 const AdminPricing = lazy(() => import("./pages/admin/AdminPricing"));
 const AdminEvents = lazy(() => import("./pages/admin/AdminEvents"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminRoles = lazy(() => import("./pages/admin/AdminRoles"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminUtilization = lazy(() => import("./pages/admin/AdminUtilization"));
 const AdminVisuals = lazy(() => import("./pages/admin/AdminVisuals"));
@@ -204,6 +205,7 @@ const App = () => (
                 <Route path="/admin/marketplace" element={<AdminMarketplace />} />
                 <Route path="/admin/p2g-points" element={<AdminP2GPoints />} />
                 <Route path="/admin/users" element={<AdminUsers />} />
+                <Route path="/admin/roles" element={<AdminRoles />} />
                 <Route path="/admin/notifications" element={<AdminNotifications />} />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 <Route path="/admin/utilization" element={<AdminUtilization />} />

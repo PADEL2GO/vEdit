@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminHeader } from "./AdminHeader";
@@ -12,7 +12,8 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const { isAdmin, loading, user } = useAdminAuth();
+  const { isAdmin, hasAdminAccess, pages, loading, user } = useAdminAuth();
+  const { pathname } = useLocation();
 
   if (loading) {
     return (
@@ -26,8 +27,19 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (!isAdmin) {
+  if (!hasAdminAccess) {
     return <Navigate to="/" replace />;
+  }
+
+  // Eigene Rolle: nur die zugewiesenen Seiten. Wer eine fremde Seite direkt
+  // aufruft, landet auf seiner ersten erlaubten — kein Sackgassen-Fehler.
+  // Der Vollzugriff überspringt diese Prüfung.
+  if (!isAdmin) {
+    const allowed = pages.some((p) => p.route === pathname);
+    if (!allowed) {
+      const fallback = pages[0]?.route;
+      return <Navigate to={fallback ?? "/"} replace />;
+    }
   }
 
   return (

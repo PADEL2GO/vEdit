@@ -259,6 +259,33 @@ export default function AdminUsers() {
 
   const membershipByUser = new Map((memberships ?? []).map((m) => [m.user_id, m]));
 
+  // Eigene Admin-Rollen je Nutzer — ein Nutzer kann mehrere gleichzeitig haben.
+  const { data: adminRoleMap } = useQuery({
+    queryKey: ["admin-user-roles-map"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("user_admin_roles")
+        .select("user_id, admin_roles(id, name, admin_role_pages(page_key))");
+      if (error) throw error;
+
+      const map = new Map<string, Array<{ id: string; name: string; pageCount: number }>>();
+      for (const row of (data ?? []) as Array<{
+        user_id: string;
+        admin_roles: { id: string; name: string; admin_role_pages: Array<{ page_key: string }> } | null;
+      }>) {
+        if (!row.admin_roles) continue;
+        const list = map.get(row.user_id) ?? [];
+        list.push({
+          id: row.admin_roles.id,
+          name: row.admin_roles.name,
+          pageCount: row.admin_roles.admin_role_pages?.length ?? 0,
+        });
+        map.set(row.user_id, list);
+      }
+      return map;
+    },
+  });
+
   const { data: clubs } = useQuery({
     queryKey: ["admin-clubs-for-membership"],
     queryFn: async () => {
@@ -538,6 +565,16 @@ export default function AdminUsers() {
                                   🎾 Club
                                 </Badge>
                               )}
+                              {(adminRoleMap?.get(user.user_id) ?? []).map((role) => (
+                                <Badge
+                                  key={role.id}
+                                  variant="outline"
+                                  className={`${ROLE_PILL} border-[hsl(258_90%_70%/0.35)] bg-[hsl(258_90%_70%/0.12)] text-[#B197FC]`}
+                                  title={`Eigene Rolle · ${role.pageCount} Seiten`}
+                                >
+                                  {role.name} · {role.pageCount}
+                                </Badge>
+                              ))}
                               {membershipByUser.get(user.user_id) && (
                                 <Badge
                                   variant="outline"
@@ -546,7 +583,9 @@ export default function AdminUsers() {
                                   {membershipByUser.get(user.user_id)!.clubs?.name ?? "Verein"}
                                 </Badge>
                               )}
-                              {user.roles.length === 0 && !membershipByUser.get(user.user_id) && (
+                              {user.roles.length === 0 &&
+                                !membershipByUser.get(user.user_id) &&
+                                (adminRoleMap?.get(user.user_id) ?? []).length === 0 && (
                                 <Badge
                                   variant="outline"
                                   className={`${ROLE_PILL} border-[hsl(0_0%_18%)] bg-white/5 text-[hsl(0_0%_72%)]`}

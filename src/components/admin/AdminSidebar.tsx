@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
+  ShieldCheck,
   ChartLine,
   Gauge,
   Calendar,
@@ -35,6 +36,7 @@ import {
   Search,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import p2gIcon from "@/assets/p2g-icon-clean.png";
 
 const NAV_GROUPS = [
@@ -82,6 +84,7 @@ const NAV_GROUPS = [
     label: "System",
     items: [
       { title: "Benutzer", url: "/admin/users", icon: Users },
+      { title: "Rollen & Rechte", url: "/admin/roles", icon: ShieldCheck },
       { title: "Mitteilungen", url: "/admin/notifications", icon: Bell },
       { title: "Newsletter", url: "/admin/newsletter", icon: Mail },
       { title: "Integrationen", url: "/admin/integrations", icon: Plug },
@@ -101,6 +104,7 @@ const COUNT_HINTS: Record<string, string> = {
 export function AdminSidebar() {
   const location = useLocation();
   const { signOut } = useAuth();
+  const { isAdmin, pages } = useAdminAuth();
   const [query, setQuery] = useState("");
 
   const isActive = (url: string) => {
@@ -139,13 +143,23 @@ export function AdminSidebar() {
     },
   });
 
+  // Eine eigene Rolle sieht ausschließlich ihre Seiten — ein Link, der ohnehin
+  // umleiten würde, gehört nicht ins Menü. Vollzugriff sieht alles.
+  const allowedRoutes = new Set(pages.map((p) => p.route));
+  const visibleGroups = isAdmin
+    ? NAV_GROUPS
+    : NAV_GROUPS.map((group) => ({
+        ...group,
+        items: group.items.filter((item) => allowedRoutes.has(item.url)),
+      })).filter((group) => group.items.length > 0);
+
   const q = query.trim().toLowerCase();
   const groups = q
-    ? NAV_GROUPS.map((group) => ({
+    ? visibleGroups.map((group) => ({
         ...group,
         items: group.items.filter((item) => item.title.toLowerCase().includes(q)),
       })).filter((group) => group.items.length > 0)
-    : NAV_GROUPS;
+    : visibleGroups;
 
   return (
     <Sidebar className="border-r border-[hsl(0_0%_12%)]">
