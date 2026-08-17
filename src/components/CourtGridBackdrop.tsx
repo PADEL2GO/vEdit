@@ -1,9 +1,10 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 
 /**
- * Hero "Court Grid" — Court-Grundrisse als gekipptes Raster, einzelne Courts
- * leuchten auf ("hier wird gerade gebucht"), ein Scanband läuft durch und ein
- * Pointer-Parallax verschiebt die Ebene leicht. Vignette hält den Rand ruhig.
+ * Vollflächiger Court-Grid-Hintergrund einer Seite (Design "Hero Court Grid"):
+ * Court-Grundrisse als gekipptes Raster, einzelne Courts leuchten auf ("hier wird
+ * gerade gebucht"), ein Scanband läuft durch, Vignette hält den Rand ruhig. Am
+ * Viewport fixiert — der Seiteninhalt muss relativ positioniert sein (relative + z-[1]).
  */
 
 const COURT_PATH = "M20 20 H180 V100 H20 Z M100 20 V100 M44 20 V100 M156 20 V100 M44 60 H156";
@@ -31,25 +32,19 @@ const FLARES: [number, number, number][] = [
 const DRIFT = "p2gDrift var(--driftT, 116s) linear infinite";
 
 /** Verschiebt die Grafikebene sanft gegen den Zeiger (max. 12px). */
-function usePointerParallax(
-  host: React.RefObject<HTMLElement>,
-  layer: React.RefObject<HTMLElement>
-) {
+function usePointerParallax(layer: React.RefObject<HTMLElement>) {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const hostEl = host.current;
     const layerEl = layer.current;
-    if (!hostEl || !layerEl) return;
+    if (!layerEl) return;
 
     const MAX = 12;
     let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
 
     const onMove = (e: PointerEvent) => {
-      const r = hostEl.getBoundingClientRect();
-      tx = ((e.clientX - r.left) / r.width - 0.5) * -2 * MAX;
-      ty = ((e.clientY - r.top) / r.height - 0.5) * -2 * MAX;
+      tx = (e.clientX / window.innerWidth - 0.5) * -2 * MAX;
+      ty = (e.clientY / window.innerHeight - 0.5) * -2 * MAX;
     };
-    const onLeave = () => {tx = 0;ty = 0;};
     const tick = () => {
       cx += (tx - cx) * 0.045;
       cy += (ty - cy) * 0.045;
@@ -57,28 +52,25 @@ function usePointerParallax(
       raf = requestAnimationFrame(tick);
     };
 
-    hostEl.addEventListener("pointermove", onMove);
-    hostEl.addEventListener("pointerleave", onLeave);
+    window.addEventListener("pointermove", onMove);
     raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);
-      hostEl.removeEventListener("pointermove", onMove);
-      hostEl.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("pointermove", onMove);
       layerEl.style.transform = "";
     };
-  }, [host, layer]);
+  }, [layer]);
 }
 
-export function CourtGridHero({ children }: {children?: ReactNode;}) {
-  const hostRef = useRef<HTMLElement>(null);
+export function CourtGridBackdrop() {
   const layerRef = useRef<HTMLDivElement>(null);
-  usePointerParallax(hostRef, layerRef);
+  usePointerParallax(layerRef);
 
   return (
-    <section
-      ref={hostRef}
-      className="relative grid items-center overflow-hidden"
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       style={
         {
           "--lineO": 0.07,
@@ -86,12 +78,11 @@ export function CourtGridHero({ children }: {children?: ReactNode;}) {
           "--scanT": "8s",
           "--driftT": "116s",
           "--vigO": 0.8,
-          background: "#0A0A0A",
-          minHeight: "max(560px, min(92vh, 900px))"
+          background: "#0A0A0A"
         } as CSSProperties
       }>
 
-      <div ref={layerRef} aria-hidden className="absolute inset-0 will-change-transform">
+      <div ref={layerRef} className="absolute inset-0 will-change-transform">
         {/* Court-Grundrisse, Grundraster */}
         <svg width="100%" height="100%" className="absolute inset-0" style={{ opacity: "var(--lineO, .07)" }}>
           <defs>
@@ -162,17 +153,12 @@ export function CourtGridHero({ children }: {children?: ReactNode;}) {
 
       {/* Vignette */}
       <div
-        aria-hidden
         className="absolute inset-0"
         style={{
           background:
           "radial-gradient(115% 95% at 50% 46%, rgba(10,10,10,0) 26%, rgba(10,10,10,.45) 64%, rgba(10,10,10,var(--vigO, .8)) 100%)"
         }} />
 
-
-      <div className="relative mx-auto w-full max-w-[1240px] px-[clamp(24px,5vw,64px)] pb-16 pt-28 md:pb-20 md:pt-32">
-        {children}
-      </div>
-    </section>);
+    </div>);
 
 }

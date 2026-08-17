@@ -3,12 +3,10 @@ import { Helmet } from "react-helmet-async";
 import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { localized } from "@/lib/localized";
-import { CourtGridHero } from "@/components/ui/court-grid-hero";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SectionDivider from "@/components/SectionDivider";
-import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
-import { sectionThemeVars, useSectionTheme } from "@/hooks/useSectionThemes";
+import { CourtGridBackdrop } from "@/components/CourtGridBackdrop";
 import { NavLink } from "@/components/NavLink";
 import { SiteVisual } from "@/components/SiteVisual";
 import BrandName from "@/components/BrandName";
@@ -155,7 +153,6 @@ type CuriosityItem = { label: string; sub: string };
 
 const FuerVereine = () => {
   const { t, i18n } = useTranslation("vereine");
-  const sectionColor = useSectionTheme("home");
   const { data: partnerTiles } = usePartnerTiles(true);
   const { data: clubTeasers = [] } = useLocationTeasers();
 
@@ -193,69 +190,75 @@ const FuerVereine = () => {
 
       <Navigation />
 
-      <main className="relative min-h-screen bg-background" style={sectionThemeVars(sectionColor)}>
-        <SectionShaderBackdrop color={sectionColor} />
+      <main className="relative min-h-screen bg-background">
+        {/* Court-Grid als Hintergrund der ganzen Seite */}
+        <CourtGridBackdrop />
         <div className="relative z-[1]">
 
-        {/* SEKTION 1: Hero — Court-Grid-Layer */}
-        <CourtGridHero>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}>
+        {/* SEKTION 1: Hero */}
+        <section
+          className="relative grid items-center"
+          style={{ minHeight: "max(560px, min(92vh, 900px))" }}>
 
-            <p className="mb-[clamp(18px,2.4vw,28px)] text-[clamp(11px,1.05vw,13px)] font-semibold uppercase tracking-[0.2em] text-white/40">
-              {t("hero.badge")}
-            </p>
-
-            <h1 className="max-w-[17ch] text-[clamp(34px,6.4vw,88px)] font-extrabold leading-[1.02] tracking-[-0.02em] text-white">
-              {t("hero.title")}{" "}
-              <span className="text-gradient-lime">{t("hero.highlightedText")}</span>
-            </h1>
-
-            <p className="mt-[clamp(20px,2.6vw,32px)] max-w-[46ch] text-[clamp(15px,1.35vw,19px)] font-medium leading-[1.55] text-white/70">
-              {t("hero.description")}
-            </p>
-            <p className="mt-3 max-w-[46ch] text-base md:text-lg font-semibold text-primary">
-              {t("hero.highlight")}
-            </p>
-
-            <motion.a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mt-9 inline-flex items-center gap-3 px-8 md:px-10 py-4 rounded-full bg-[#25D366] text-white hover:bg-[#1FB855] transition-colors font-semibold text-base md:text-lg shadow-lg shadow-[#25D366]/40 min-h-[48px]">
-              <WhatsAppIcon className="w-5 h-5" />
-              <span>{t("hero.cta")}</span>
-            </motion.a>
-
+          <div className="relative mx-auto w-full max-w-[1240px] px-[clamp(24px,5vw,64px)] pb-16 pt-28 md:pb-20 md:pt-32">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
+              transition={{ duration: 0.6 }}>
 
-              {(() => {
-                const statIcons = [Shield, Wrench, Target];
-                return heroStats.map((stat, i) => {
-                  const Icon = statIcons[i];
-                  return (
-                    <div
-                      key={stat.label}
-                      className="p-5 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-sm">
-                      <Icon className="w-6 h-6 mb-2 text-primary" />
-                      <div className="text-3xl md:text-4xl font-extrabold text-white">{stat.value}</div>
-                      <div className="text-sm font-medium text-white/50 mt-1">{stat.label}</div>
-                    </div>
-                  );
-                });
-              })()}
+              <p className="mb-[clamp(18px,2.4vw,28px)] text-[clamp(11px,1.05vw,13px)] font-semibold uppercase tracking-[0.2em] text-white/40">
+                {t("hero.badge")}
+              </p>
+
+              <h1 className="max-w-[17ch] text-[clamp(34px,6.4vw,88px)] font-extrabold leading-[1.02] tracking-[-0.02em] text-white">
+                {t("hero.title")}{" "}
+                <span className="text-gradient-lime">{t("hero.highlightedText")}</span>
+              </h1>
+
+              <p className="mt-[clamp(20px,2.6vw,32px)] max-w-[46ch] text-[clamp(15px,1.35vw,19px)] font-medium leading-[1.55] text-white/70">
+                {t("hero.description")}
+              </p>
+              <p className="mt-3 max-w-[46ch] text-base md:text-lg font-semibold text-primary">
+                {t("hero.highlight")}
+              </p>
+
+              <motion.a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mt-9 inline-flex items-center gap-3 px-8 md:px-10 py-4 rounded-full bg-[#25D366] text-white hover:bg-[#1FB855] transition-colors font-semibold text-base md:text-lg shadow-lg shadow-[#25D366]/40 min-h-[48px]">
+                <WhatsAppIcon className="w-5 h-5" />
+                <span>{t("hero.cta")}</span>
+              </motion.a>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
+
+                {(() => {
+                  const statIcons = [Shield, Wrench, Target];
+                  return heroStats.map((stat, i) => {
+                    const Icon = statIcons[i];
+                    return (
+                      <div
+                        key={stat.label}
+                        className="p-5 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-sm">
+                        <Icon className="w-6 h-6 mb-2 text-primary" />
+                        <div className="text-3xl md:text-4xl font-extrabold text-white">{stat.value}</div>
+                        <div className="text-sm font-medium text-white/50 mt-1">{stat.label}</div>
+                      </div>
+                    );
+                  });
+                })()}
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </CourtGridHero>
+          </div>
+        </section>
 
         {/* ── SO KOMMT PADEL IN EUREN VEREIN ────────────────────── */}
         <section className="py-14 md:py-20">
