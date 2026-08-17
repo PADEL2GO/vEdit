@@ -33,7 +33,6 @@ import { de } from "date-fns/locale";
 import { Navigate } from "react-router-dom";
 import skypadelOutdoor from "@/assets/courts/skypadel-outdoor.jpg";
 import eventsHero from "@/assets/events-hero.jpg";
-import fuerVereineHero from "@/assets/fuer-vereine-hero.jpg";
 
 // ── Reveal wrapper (fade + rise on scroll) ────────────────────────────────────
 const revealProps = (delay = 0) => ({
