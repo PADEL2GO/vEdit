@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 
 export interface PartnerTouchpointSlide {
   id: string;
@@ -37,16 +38,12 @@ export function usePartnerTouchpoints(onlyActive = true) {
 
   const uploadImageMutation = useMutation({
     mutationFn: async ({ id, file }: { id: string; file: File }) => {
-      const ext = file.name.split(".").pop();
-      const path = `partner-touchpoints/${id}-${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("media")
-        .upload(path, file, { upsert: true });
-      if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+      const publicUrl = await uploadMediaFile(file, `partner-touchpoints/${id}-${Date.now()}`, {
+        upsert: true,
+      });
       const { error: updateError } = await supabase
         .from("partner_touchpoint_slides")
-        .update({ image_url: urlData.publicUrl, updated_at: new Date().toISOString() })
+        .update({ image_url: publicUrl, updated_at: new Date().toISOString() })
         .eq("id", id);
       if (updateError) throw updateError;
     },

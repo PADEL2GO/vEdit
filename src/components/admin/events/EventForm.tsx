@@ -14,6 +14,7 @@ import {
 import { ImagePlus, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 import { toast } from "sonner";
 import { ArtistManager, BrandManager, HighlightsInput } from "@/components/admin/events";
 import { useTranslateContent, toastTranslateResult } from "@/hooks/useTranslateContent";
@@ -243,17 +244,7 @@ export function EventForm({ event, locations, onSuccess }: EventFormProps) {
 
     setUploading(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `events/${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("media")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrl } = supabase.storage.from("media").getPublicUrl(fileName);
-      setImageUrl(publicUrl.publicUrl);
+      setImageUrl(await uploadMediaFile(file, `events/${Date.now()}`));
       toast.success("Bild hochgeladen");
     } catch (error: any) {
       toast.error(error.message || "Fehler beim Hochladen");

@@ -136,7 +136,7 @@ const Account = () => {
         .upload(fileName, processed, {
           upsert: true,
           contentType: "image/jpeg",
-          cacheControl: "3600",
+          cacheControl: "2592000",
         });
 
       if (uploadError) throw uploadError;

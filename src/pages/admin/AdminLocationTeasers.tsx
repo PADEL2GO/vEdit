@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 import { useAllLocationTeasers, type LocationTeaser } from "@/hooks/useLocationTeasers";
 import { useTranslateContent, toastTranslateResult } from "@/hooks/useTranslateContent";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -180,17 +181,14 @@ export default function AdminLocationTeasers() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `location-teasers/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage.from("media").upload(path, file);
-    if (error) {
+    try {
+      const url = await uploadMediaFile(file, `location-teasers/${crypto.randomUUID()}`);
+      setForm((f) => ({ ...f, image_url: url }));
+    } catch {
       toast.error("Upload fehlgeschlagen");
+    } finally {
       setUploading(false);
-      return;
     }
-    const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
-    setForm((f) => ({ ...f, image_url: urlData.publicUrl }));
-    setUploading(false);
   };
 
   return (

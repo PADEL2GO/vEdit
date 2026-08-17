@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 
 export interface SkyPadelGalleryImage {
   id: string;
@@ -31,14 +32,10 @@ export function useSkyPadelGallery(onlyActive = true) {
 
   const uploadMutation = useMutation({
     mutationFn: async ({ file, altText }: { file: File; altText?: string }) => {
-      const ext = file.name.split(".").pop();
-      const path = `skypadel-gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("media")
-        .upload(path, file, { upsert: false });
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+      const publicUrl = await uploadMediaFile(
+        file,
+        `skypadel-gallery/${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      );
 
       // Get max sort_order
       const { data: maxRow } = await supabase
@@ -51,7 +48,7 @@ export function useSkyPadelGallery(onlyActive = true) {
       const nextOrder = (maxRow?.sort_order ?? -1) + 1;
 
       const { error: insertError } = await supabase.from("skypadel_gallery").insert({
-        image_url: urlData.publicUrl,
+        image_url: publicUrl,
         alt_text: altText || null,
         sort_order: nextOrder,
       });

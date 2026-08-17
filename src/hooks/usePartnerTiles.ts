@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 
 export interface PartnerTile {
   id: string;
@@ -38,18 +39,13 @@ export function usePartnerTiles(onlyActive = true) {
 
   const uploadLogoMutation = useMutation({
     mutationFn: async ({ id, file }: { id: string; file: File }) => {
-      const ext = file.name.split(".").pop();
-      const path = `partner-tiles/${id}-${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("media")
-        .upload(path, file, { upsert: true });
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+      const publicUrl = await uploadMediaFile(file, `partner-tiles/${id}-${Date.now()}`, {
+        upsert: true,
+      });
 
       const { error: updateError } = await supabase
         .from("partner_tiles")
-        .update({ logo_url: urlData.publicUrl, updated_at: new Date().toISOString() })
+        .update({ logo_url: publicUrl, updated_at: new Date().toISOString() })
         .eq("id", id);
       if (updateError) throw updateError;
     },

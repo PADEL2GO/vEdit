@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -209,12 +210,8 @@ export default function AdminNewsletter() {
       return n;
     });
 
-  const uploadImage = async (file: File): Promise<string> => {
-    const path = `newsletter/${crypto.randomUUID()}-${file.name}`;
-    const { error } = await supabase.storage.from("media").upload(path, file);
-    if (error) throw error;
-    return supabase.storage.from("media").getPublicUrl(path).data.publicUrl;
-  };
+  const uploadImage = (file: File): Promise<string> =>
+    uploadMediaFile(file, `newsletter/${crypto.randomUUID()}`);
 
   const handleBlockImage = async (i: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Trash2, Instagram, Globe, Image as ImageIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 import { toast } from "sonner";
 
 export interface Brand {
@@ -71,17 +72,8 @@ export function BrandManager({ brands, onChange }: BrandManagerProps) {
 
     setUploadingIndex(index);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `brands/${Date.now()}-${index}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("media")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrl } = supabase.storage.from("media").getPublicUrl(fileName);
-      updateBrand(index, "logo_url", publicUrl.publicUrl);
+      const url = await uploadMediaFile(file, `brands/${Date.now()}-${index}`);
+      updateBrand(index, "logo_url", url);
       toast.success("Logo hochgeladen");
     } catch (error: any) {
       toast.error(error.message || "Fehler beim Hochladen");

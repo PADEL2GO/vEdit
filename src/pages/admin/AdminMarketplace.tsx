@@ -85,6 +85,7 @@ import { MarketplaceOrdersSection } from "@/components/admin/marketplace/Marketp
 import type { MarketplaceItem, MarketplaceCategory, ProductType } from "@/hooks/useMarketplaceItems";
 import { useTranslateContent, toastTranslateResult } from "@/hooks/useTranslateContent";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 import { toast } from "sonner";
 
 const PRODUCT_TRANSLATE_FIELDS = ["name", "subtitle", "description", "long_description", "meta_title", "meta_description"];
@@ -473,15 +474,12 @@ const AdminMarketplace = () => {
     }));
 
   const uploadFile = async (file: File): Promise<string | null> => {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `marketplace/${Date.now()}-${Math.floor(performance.now())}.${fileExt}`;
-    const { error } = await supabase.storage.from("media").upload(fileName, file);
-    if (error) {
-      toast.error("Fehler beim Hochladen: " + error.message);
+    try {
+      return await uploadMediaFile(file, `marketplace/${Date.now()}-${Math.floor(performance.now())}`);
+    } catch (error) {
+      toast.error("Fehler beim Hochladen: " + (error as Error).message);
       return null;
     }
-    const { data } = supabase.storage.from("media").getPublicUrl(fileName);
-    return data.publicUrl;
   };
 
   const handleTitleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

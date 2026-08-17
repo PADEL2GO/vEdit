@@ -43,6 +43,56 @@ export async function resizeAvatarToSquare(
   });
 }
 
+/**
+ * Downscale an image File to a max edge length and re-encode for upload.
+ *
+ * Why: the media bucket filled up with 11–42 MB PNGs from AI-generated covers, and the raw
+ * storage endpoint serves them with `no-cache` — every page view downloaded them again. A
+ * 2000px JPEG at quality 0.82 is under 400 KB and indistinguishable at every size we render.
+ * Images at or below `maxEdge` are still re-encoded — a small PNG is usually still a large
+ * JPEG-equivalent, and PNG is the wrong format for photographic content.
+ *
+ * Keeps the aspect ratio (covers, product shots and teasers are not square). Sources with
+ * transparency stay PNG — a logo re-encoded as JPEG would get a black box behind it.
+ */
+export async function resizeImageForUpload(
+  file: File,
+  maxEdge = 2000,
+  quality = 0.82,
+): Promise<Blob> {
+  const dataUrl = await readFileAsDataURL(file);
+  const img = await loadImage(dataUrl);
+
+  const factor = Math.min(1, maxEdge / Math.max(img.width, img.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(img.width * factor);
+  canvas.height = Math.round(img.height * factor);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas 2D context unavailable");
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  const keepAlpha = file.type !== "image/jpeg" && hasTransparency(ctx, canvas);
+
+  return await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Canvas toBlob failed"))),
+      keepAlpha ? "image/png" : "image/jpeg",
+      keepAlpha ? undefined : quality,
+    );
+  });
+}
+
+function hasTransparency(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): boolean {
+  const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] < 255) return true;
+  }
+  return false;
+}
+
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

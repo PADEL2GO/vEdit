@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 import type { Article, ArticleAudience, NewsAuthor } from "@/types/article";
 
 /** URL-Slug aus einem Titel (Umlaute transliteriert, Rest zu Bindestrichen). */
@@ -68,12 +69,7 @@ export interface ArticleInput {
 
 /** Upload an image to the shared `media` bucket under news/, return its public URL. */
 export async function uploadArticleImage(file: File): Promise<string> {
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const path = `news/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("media").upload(path, file);
-  if (error) throw error;
-  const { data } = supabase.storage.from("media").getPublicUrl(path);
-  return data.publicUrl;
+  return uploadMediaFile(file, `news/${crypto.randomUUID()}`);
 }
 
 function invalidateAll(qc: ReturnType<typeof useQueryClient>) {

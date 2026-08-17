@@ -23,6 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { AlertTriangle, Loader2, Plus, Trash2, Check, X, Pencil, ImagePlus, ImageOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 import {
   useAdminCatalogCategories,
   useAdminCatalogBrands,
@@ -92,15 +93,13 @@ export function CatalogManagerDialog({ kind, open, onOpenChange }: Props) {
     if (!file || !row) return;
     setLogoUploading(true);
     try {
-      const ext = file.name.split(".").pop();
-      const fileName = `marketplace/brand-logos/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from("media").upload(fileName, file);
-      if (error) {
-        toast.error("Fehler beim Hochladen: " + error.message);
-        return;
-      }
-      const { data } = supabase.storage.from("media").getPublicUrl(fileName);
-      saveLogo(row, data.publicUrl);
+      const url = await uploadMediaFile(file, `marketplace/brand-logos/${Date.now()}`).catch(
+        (error: Error) => {
+          toast.error("Fehler beim Hochladen: " + error.message);
+          return null;
+        },
+      );
+      if (url) saveLogo(row, url);
     } finally {
       setLogoUploading(false);
     }

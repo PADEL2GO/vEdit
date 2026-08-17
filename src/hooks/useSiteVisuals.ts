@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 
 export interface SiteVisual {
   id: string;
@@ -55,31 +56,21 @@ export function useUploadVisual() {
 
   return useMutation({
     mutationFn: async ({ key, file }: { key: string; file: File }) => {
-      // Create unique filename
-      const ext = file.name.split(".").pop();
-      const fileName = `visuals/${key.replace(/\./g, "_")}_${Date.now()}.${ext}`;
-
-      // Upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from("media")
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("media")
-        .getPublicUrl(fileName);
+      const publicUrl = await uploadMediaFile(
+        file,
+        `visuals/${key.replace(/\./g, "_")}_${Date.now()}`,
+        { upsert: true },
+      );
 
       // Update database
       const { error: updateError } = await supabase
         .from("site_visuals" as any)
-        .update({ image_url: urlData.publicUrl })
+        .update({ image_url: publicUrl })
         .eq("key", key);
 
       if (updateError) throw updateError;
 
-      return urlData.publicUrl;
+      return publicUrl;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["site-visuals"] });

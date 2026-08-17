@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Trash2, Instagram, Music2, Globe, Image as ImageIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadMediaFile } from "@/lib/uploadMedia";
 import { toast } from "sonner";
 
 export interface Artist {
@@ -74,17 +75,8 @@ export function ArtistManager({ artists, onChange }: ArtistManagerProps) {
 
     setUploadingIndex(index);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `artists/${Date.now()}-${index}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("media")
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrl } = supabase.storage.from("media").getPublicUrl(fileName);
-      updateArtist(index, "image_url", publicUrl.publicUrl);
+      const url = await uploadMediaFile(file, `artists/${Date.now()}-${index}`);
+      updateArtist(index, "image_url", url);
       toast.success("Bild hochgeladen");
     } catch (error: any) {
       toast.error(error.message || "Fehler beim Hochladen");
