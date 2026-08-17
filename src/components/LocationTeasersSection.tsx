@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useLocationTeasers } from "@/hooks/useLocationTeasers";
 import { localized } from "@/lib/localized";
 import SectionDivider from "@/components/SectionDivider";
+import { StorageImage } from "@/components/StorageImage";
 
 export function LocationTeasersSection() {
   const { t, i18n } = useTranslation("index");
@@ -63,11 +64,11 @@ export function LocationTeasersSection() {
                   {/* Image */}
                   <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                     {teaser.image_url ? (
-                      <img
+                      <StorageImage
                         src={teaser.image_url}
+                        renderWidth={800}
                         alt={title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

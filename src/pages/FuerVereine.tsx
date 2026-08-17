@@ -9,6 +9,7 @@ import SectionDivider from "@/components/SectionDivider";
 import { CourtGridBackdrop } from "@/components/CourtGridBackdrop";
 import { NavLink } from "@/components/NavLink";
 import { SiteVisual } from "@/components/SiteVisual";
+import { StorageImage } from "@/components/StorageImage";
 import BrandName from "@/components/BrandName";
 import partnerP2GLogo from "@/assets/partners/p2g-logo-vereine.png";
 import {
@@ -59,26 +60,25 @@ import {
   Settings,
 } from "lucide-react";
 
+const ICON_ANIMATION_CLASS = {
+  pulse: "icon-pulse",
+  spin: "icon-spin",
+  bounce: "icon-bounce",
+  glow: "icon-glow",
+  blink: "icon-blink",
+} as const;
+
 const AnimatedIcon = ({
   children,
   animation = "pulse",
 }: {
   children: React.ReactNode;
-  animation?: "pulse" | "spin" | "bounce" | "glow" | "blink";
-}) => {
-  const animations = {
-    pulse:  { scale: [1, 1.15, 1],      transition: { duration: 2, repeat: Infinity } },
-    spin:   { rotate: [0, 360],          transition: { duration: 8, repeat: Infinity, ease: "linear" as const } },
-    bounce: { y: [0, -5, 0],            transition: { duration: 1.5, repeat: Infinity } },
-    glow:   { opacity: [0.6, 1, 0.6],   transition: { duration: 2, repeat: Infinity } },
-    blink:  { opacity: [1, 0.3, 1],     transition: { duration: 0.8, repeat: Infinity } },
-  };
-  return (
-    <motion.div animate={animations[animation]} className="inline-flex">
-      {children}
-    </motion.div>
-  );
-};
+  animation?: keyof typeof ICON_ANIMATION_CLASS;
+}) => (
+  <span className={`inline-flex ${ICON_ANIMATION_CLASS[animation]}`}>
+    {children}
+  </span>
+);
 
 
 
@@ -109,8 +109,9 @@ const CourtImageCarousel = ({ carouselAlt }: { carouselAlt: string }) => {
         <div className="flex">
           {galleryImages.map((img, i) =>
           <div key={img.id} className="flex-[0_0_100%] min-w-0">
-              <img
+              <StorageImage
               src={img.image_url}
+              renderWidth={1200}
               alt={localized(img, "alt_text", i18n.language) || `${carouselAlt} ${i + 1}`}
               className="w-full aspect-video object-cover" />
 
@@ -119,13 +120,13 @@ const CourtImageCarousel = ({ carouselAlt }: { carouselAlt: string }) => {
         </div>
         <button
           onClick={() => emblaApi?.scrollPrev()}
-          className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center hover:bg-background transition-colors min-h-[44px] min-w-[44px]">
+          className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-background/90 border border-border flex items-center justify-center hover:bg-background transition-colors min-h-[44px] min-w-[44px]">
 
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={() => emblaApi?.scrollNext()}
-          className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center hover:bg-background transition-colors min-h-[44px] min-w-[44px]">
+          className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-background/90 border border-border flex items-center justify-center hover:bg-background transition-colors min-h-[44px] min-w-[44px]">
 
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -201,11 +202,6 @@ const FuerVereine = () => {
           style={{ minHeight: "max(560px, min(92vh, 900px))" }}>
 
           <div className="relative mx-auto w-full max-w-[1240px] px-[clamp(24px,5vw,64px)] pb-16 pt-28 md:pb-20 md:pt-32">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}>
-
               <p className="mb-[clamp(18px,2.4vw,28px)] text-[clamp(11px,1.05vw,13px)] font-semibold uppercase tracking-[0.2em] text-white/40">
                 {t("hero.badge")}
               </p>
@@ -222,23 +218,16 @@ const FuerVereine = () => {
                 {t("hero.highlight")}
               </p>
 
-              <motion.a
+              <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
                 className="mt-9 inline-flex items-center gap-3 px-8 md:px-10 py-4 rounded-full bg-[#25D366] text-white hover:bg-[#1FB855] transition-colors font-semibold text-base md:text-lg shadow-lg shadow-[#25D366]/40 min-h-[48px]">
                 <WhatsAppIcon className="w-5 h-5" />
                 <span>{t("hero.cta")}</span>
-              </motion.a>
+              </a>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
+              <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
 
                 {(() => {
                   const statIcons = [Shield, Wrench, Target];
@@ -247,7 +236,7 @@ const FuerVereine = () => {
                     return (
                       <div
                         key={stat.label}
-                        className="p-5 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-sm">
+                        className="p-5 rounded-2xl bg-white/[0.04] border border-white/10">
                         <Icon className="w-6 h-6 mb-2 text-primary" />
                         <div className="text-3xl md:text-4xl font-extrabold text-white">{stat.value}</div>
                         <div className="text-sm font-medium text-white/50 mt-1">{stat.label}</div>
@@ -255,8 +244,7 @@ const FuerVereine = () => {
                     );
                   });
                 })()}
-              </motion.div>
-            </motion.div>
+              </div>
           </div>
         </section>
 
@@ -294,13 +282,14 @@ const FuerVereine = () => {
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.08 * index }}
+                    transition={{ duration: 0.4 }}
                     className="group relative"
                   >
                     <div className="overflow-hidden rounded-2xl mb-5 bg-card border border-border/50 h-36 md:h-44">
                       <SiteVisual
                         visualKey={visualKey}
                         alt={item.title}
+                        renderWidth={800}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         fallbackClassName="w-full h-full bg-card"
                       />
@@ -377,14 +366,15 @@ const FuerVereine = () => {
                       initial={{ opacity: 0, y: 40 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ delay: i * 0.08, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                       className="group relative rounded-3xl border border-white/10 bg-white/[0.03] overflow-hidden hover:border-[#C7F011]/30 hover:bg-[#C7F011]/[0.04] transition-all duration-300 hover:-translate-y-1"
                     >
                       {/* Image */}
                       {club.image_url ? (
                         <div className="h-44 overflow-hidden">
-                          <img
+                          <StorageImage
                             src={club.image_url}
+                            renderWidth={800}
                             alt={localized(club, "title", i18n.language)}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
@@ -448,6 +438,8 @@ const FuerVereine = () => {
               <img
                 src={tennisPadelAerial}
                 alt={t("courts.aerialAlt")}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover" />
 
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/60" />
@@ -475,8 +467,8 @@ const FuerVereine = () => {
                       initial={{ opacity: 0, y: 30 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ delay: i * 0.15 }}
-                      className="p-6 rounded-2xl bg-card/80 backdrop-blur-md border border-border hover:border-primary/30 transition-colors">
+                      transition={{ duration: 0.4 }}
+                      className="p-6 rounded-2xl bg-card/90 border border-border hover:border-primary/30 transition-colors">
 
                       <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-4">
                         <Icon className="w-6 h-6 text-primary" />
@@ -497,6 +489,8 @@ const FuerVereine = () => {
               <img
                 src={padelNorway}
                 alt={t("courts.imageAlt")}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover" />
 
               <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/60" />
@@ -532,7 +526,7 @@ const FuerVereine = () => {
                         style={{ backgroundColor: skyPadel?.bg_color || '#156184' }}
                       >
                         {skyPadel?.logo_url ? (
-                          <img src={skyPadel.logo_url} alt="SkyPadel" className="h-10 md:h-20 w-auto object-contain" />
+                          <StorageImage src={skyPadel.logo_url} renderWidth={448} alt="SkyPadel" className="h-10 md:h-20 w-auto object-contain" />
                         ) : (
                           <span className="font-bold text-white text-xl">SkyPadel</span>
                         )}
@@ -561,7 +555,7 @@ const FuerVereine = () => {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ delay: index * 0.1 }}
+                        transition={{ duration: 0.4 }}
                         className="p-5 rounded-xl bg-card border border-border hover:border-primary/30 transition-all duration-300 group">
 
                         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
@@ -611,7 +605,7 @@ const FuerVereine = () => {
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ delay: i * 0.1 }}
+                        transition={{ duration: 0.4 }}
                         className="p-6 rounded-2xl bg-card border border-border hover:border-primary/30 transition-colors">
                         <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                           <Icon className="w-6 h-6 text-primary" />

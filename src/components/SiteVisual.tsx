@@ -1,4 +1,5 @@
 import { useSiteVisual } from "@/hooks/useSiteVisuals";
+import { StorageImage } from "@/components/StorageImage";
 import { cn } from "@/lib/utils";
 
 interface SiteVisualProps {
@@ -7,14 +8,17 @@ interface SiteVisualProps {
   className?: string;
   fallbackClassName?: string;
   fallbackSrc?: string;
+  /** Zielbreite des Storage-Derivats — Anzeigebreite × 2 (Retina). */
+  renderWidth?: number;
 }
 
-export function SiteVisual({ 
-  visualKey, 
-  alt, 
+export function SiteVisual({
+  visualKey,
+  alt,
   className,
   fallbackClassName,
-  fallbackSrc
+  fallbackSrc,
+  renderWidth = 1200
 }: SiteVisualProps) {
   const { data: visual, isLoading } = useSiteVisual(visualKey);
 
@@ -27,6 +31,8 @@ export function SiteVisual({
         <img
           src={fallbackSrc}
           alt={alt}
+          loading="lazy"
+          decoding="async"
           className={cn("object-cover", className)}
         />
       );
@@ -43,6 +49,8 @@ export function SiteVisual({
         <img
           src={fallbackSrc}
           alt={alt}
+          loading="lazy"
+          decoding="async"
           className={cn("object-cover", className)}
         />
       );
@@ -53,8 +61,9 @@ export function SiteVisual({
   }
 
   return (
-    <img
+    <StorageImage
       src={imageUrl}
+      renderWidth={renderWidth}
       alt={alt}
       className={cn("object-cover", className)}
     />

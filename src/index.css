@@ -230,6 +230,24 @@
   .p2g-drift, .p2g-scan, .p2g-scan-inv, .p2g-flare { animation: none !important; }
 }
 
+/* Icon-Animationen als CSS (nicht per JS-Loop) — laufen sonst dauerhaft im
+   Main-Thread und ruckeln beim Scrollen mit. */
+@keyframes iconPulse  { 0%, 100% { transform: scale(1); }      50% { transform: scale(1.15); } }
+@keyframes iconSpin   { to { transform: rotate(360deg); } }
+@keyframes iconBounce { 0%, 100% { transform: translateY(0); }  50% { transform: translateY(-5px); } }
+@keyframes iconGlow   { 0%, 100% { opacity: 0.6; }              50% { opacity: 1; } }
+@keyframes iconBlink  { 0%, 100% { opacity: 1; }                50% { opacity: 0.3; } }
+
+.icon-pulse  { animation: iconPulse 2s ease-in-out infinite; }
+.icon-spin   { animation: iconSpin 8s linear infinite; }
+.icon-bounce { animation: iconBounce 1.5s ease-in-out infinite; }
+.icon-glow   { animation: iconGlow 2s ease-in-out infinite; }
+.icon-blink  { animation: iconBlink 0.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-pulse, .icon-spin, .icon-bounce, .icon-glow, .icon-blink { animation: none !important; }
+}
+
 /* News-Section: Input-Focus folgt dem Topic-Akzent (--acc kommt vom .news-root) */
 .news-root input:focus-visible,
 .news-root textarea:focus-visible {
