@@ -5,6 +5,7 @@ import { Calendar, MapPin, Clock, ArrowRight, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import { StorageImage } from "@/components/StorageImage";
 
 interface FeaturedEventProps {
   slug: string;
@@ -46,8 +47,9 @@ export const FeaturedEvent = ({
       {/* Image */}
       <div className="relative min-h-[320px]">
         {image_url ? (
-          <img
+          <StorageImage
             src={image_url}
+            renderWidth={1200}
             alt={title}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />

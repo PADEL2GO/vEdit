@@ -18,6 +18,7 @@ import {
   useDashboardEvents, useMyEventRegistrations, useRegisterForEvent, useCancelEventRegistration,
   type DashboardEvent, type MyEventRegistration,
 } from "@/hooks/useEventRegistrations";
+import { StorageImage } from "@/components/StorageImage";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const eur = (c: number) => "€" + (c / 100).toFixed(2).replace(".", ",");
@@ -347,7 +348,7 @@ function NextUpCard({
           </div>
         </div>
         <div className="relative min-h-[210px] md:min-h-[280px] order-first md:order-last">
-          {event.image_url && <img src={event.image_url} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />}
+          {event.image_url && <StorageImage src={event.image_url} renderWidth={1200} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />}
           <div className="absolute inset-0" style={{ background: "linear-gradient(90deg, hsl(0 0% 4%), transparent 45%)" }} />
           <span className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-xs font-bold text-primary bg-black/70 backdrop-blur border border-primary/40 rounded-full px-3 py-1.5">
             <Check className="w-3 h-3" strokeWidth={3} />Angemeldet
@@ -391,7 +392,7 @@ function EventRow({
         </div>
         {/* Thumbnail */}
         {event.image_url && (
-          <img src={event.image_url} alt="" className="hidden md:block w-[130px] flex-none object-cover border-r border-border/50" />
+          <StorageImage src={event.image_url} renderWidth={300} alt="" className="hidden md:block w-[130px] flex-none object-cover border-r border-border/50" />
         )}
         {/* Info */}
         <div className="flex flex-col gap-2 p-4 flex-1 min-w-0 justify-center">

@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { EventCard } from "@/components/events";
 import { localized } from "@/lib/localized";
+import { StorageImage } from "@/components/StorageImage";
 
 interface DbArtist {
   id: string;
@@ -296,8 +297,9 @@ const EventDetail = () => {
               className="relative overflow-hidden rounded-[22px] border border-border/80"
             >
               {event.image_url ? (
-                <img
+                <StorageImage
                   src={event.image_url}
+                  renderWidth={1600}
                   alt={event.title}
                   className="block w-full h-[clamp(280px,38vw,400px)] object-cover"
                 />
@@ -415,8 +417,9 @@ const EventDetail = () => {
                           >
                             <span className="w-11 h-11 shrink-0 overflow-hidden rounded-full border border-primary/35 bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))] flex items-center justify-center text-primary">
                               {artist.image_url ? (
-                                <img
+                                <StorageImage
                                   src={artist.image_url}
+                                  renderWidth={200}
                                   alt={artist.name}
                                   className="w-full h-full object-cover"
                                 />
@@ -485,8 +488,9 @@ const EventDetail = () => {
                             className="flex h-[76px] items-center justify-center overflow-hidden rounded-2xl bg-[#F5F5F3] p-2.5"
                           >
                             {brand.logo_url ? (
-                              <img
+                              <StorageImage
                                 src={brand.logo_url}
+                                renderWidth={300}
                                 alt={brand.name}
                                 className="max-h-[56px] w-full object-contain"
                               />

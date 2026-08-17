@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Profile } from "./types";
+import { StorageImage } from "@/components/StorageImage";
 
 interface AccountProfileFormProps {
   profile: Profile;
@@ -49,7 +50,7 @@ export function AccountProfileForm({
         <div className="relative">
           <div className="w-20 h-20 rounded-full bg-secondary overflow-hidden border-2 border-border">
             {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={t("profileForm.avatarAlt")} className="w-full h-full object-cover" />
+              <StorageImage src={profile.avatar_url} renderWidth={200} alt={t("profileForm.avatarAlt")} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <User className="w-8 h-8 text-muted-foreground" />

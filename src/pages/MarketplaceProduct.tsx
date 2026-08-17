@@ -22,6 +22,7 @@ import { usePointsValue } from "@/hooks/usePointsValue";
 import { eur, ptsFmt, discountPct, maxRedeemablePoints } from "@/lib/marketplace";
 import { localized } from "@/lib/localized";
 import type { MarketplaceItem } from "@/hooks/useMarketplaceItems";
+import { StorageImage } from "@/components/StorageImage";
 
 const MarketplaceProduct = () => {
   const sectionColor = useSectionTheme("market");
@@ -165,10 +166,10 @@ const MarketplaceProduct = () => {
             {/* Hauptbild + weitere Bilder direkt darunter */}
             <div className="flex flex-col gap-3">
               <div className="relative rounded-[20px] overflow-hidden border border-border/80 bg-gradient-to-br from-white/[0.04] to-black aspect-[2/3]">
-                <img src={images[mainIdx]} alt={localized(product, "name", i18n.language)} className="w-full h-full object-cover absolute inset-0" />
+                <StorageImage src={images[mainIdx]} renderWidth={1200} alt={localized(product, "name", i18n.language)} className="w-full h-full object-cover absolute inset-0" />
                 {brandLogoUrl && (
                   <span className="absolute top-4 left-4 w-12 h-12 rounded-full overflow-hidden border border-white/20 bg-black/70 backdrop-blur shadow-lg">
-                    <img src={brandLogoUrl} alt={brandName} className="w-full h-full object-cover" />
+                    <StorageImage src={brandLogoUrl} renderWidth={200} alt={brandName} className="w-full h-full object-cover" />
                   </span>
                 )}
                 {soldOut && (
@@ -187,7 +188,7 @@ const MarketplaceProduct = () => {
                         i === mainIdx ? "border-primary" : "border-border/80 hover:border-primary/50"
                       }`}
                     >
-                      <img src={src} alt="" className="w-full h-full object-cover" />
+                      <StorageImage src={src} renderWidth={300} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -444,7 +445,7 @@ function RelatedCard({ p, brand, logo, onOpen }: { p: MarketplaceItem; brand: st
     >
       <div className="relative overflow-hidden">
         <div className={`aspect-[2/3] ${soldOut ? "opacity-45 grayscale" : ""}`}>
-          <img src={p.image_url || "/placeholder.svg"} alt={localized(p, "name", i18n.language)} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+          <StorageImage src={p.image_url || "/placeholder.svg"} renderWidth={800} alt={localized(p, "name", i18n.language)} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
         </div>
         {logo && (
           <span className="absolute top-3 left-3 w-8 h-8 rounded-full overflow-hidden border border-white/20 bg-black/70 backdrop-blur shadow-md">

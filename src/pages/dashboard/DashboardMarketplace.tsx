@@ -32,6 +32,7 @@ import {
 import { ShoppingBag, Gift, Loader2, Sparkles, Truck, Coins } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { de, enUS } from "date-fns/locale";
+import { StorageImage } from "@/components/StorageImage";
 
 type SortOption = "default" | "price-asc" | "price-desc";
 
@@ -218,7 +219,8 @@ const DashboardMarketplace = () => {
                           </div>
 
                           <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
-                            <img
+                            <StorageImage
+                              renderWidth={600}
                               src={item.image_url || "/placeholder.svg"}
                               alt={item.name}
                               className="w-full h-full object-cover transition-transform hover:scale-105"
@@ -319,7 +321,7 @@ const DashboardMarketplace = () => {
             <div className="py-4 space-y-4">
               {selectedItem.image_url && (
                 <div className="aspect-video w-full overflow-hidden rounded-lg bg-muted">
-                  <img src={selectedItem.image_url} alt={selectedItem.name} className="w-full h-full object-cover" />
+                  <StorageImage renderWidth={1200} src={selectedItem.image_url} alt={selectedItem.name} className="w-full h-full object-cover" />
                 </div>
               )}
 

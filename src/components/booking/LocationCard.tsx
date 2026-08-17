@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import type { DbLocation } from "@/types/database";
+import { StorageImage } from "@/components/StorageImage";
 
 interface LocationCardProps {
   location: DbLocation;
@@ -55,8 +56,9 @@ export function LocationCard({ location, todayFreeSlots, occupancyPercent, index
       {/* Hero-Bild + Overlays */}
       <div className="relative">
         {location.main_image_url ? (
-          <img
+          <StorageImage
             src={location.main_image_url}
+            renderWidth={800}
             alt={location.name}
             className="block w-full h-[168px] object-cover group-hover:scale-105 transition-transform duration-300"
           />

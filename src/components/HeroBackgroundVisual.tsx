@@ -1,5 +1,6 @@
 import { useSiteVisual } from "@/hooks/useSiteVisuals";
 import { cn } from "@/lib/utils";
+import { StorageImage } from "@/components/StorageImage";
 
 interface Props {
   videoKey: string;
@@ -73,7 +74,7 @@ export function HeroBackgroundVisual({ videoKey, imageKey, alt, fallbackSrc, cla
   }
 
   if (imageUrl) {
-    return <img src={imageUrl} alt={alt} className={cn("object-cover", className)} />;
+    return <StorageImage src={imageUrl} renderWidth={1600} alt={alt} className={cn("object-cover", className)} />;
   }
   return <div className={cn("bg-black", className)} />;
 }

@@ -4,6 +4,7 @@ import { NavLink } from "@/components/NavLink";
 import { Calendar, MapPin, Clock, Music, ArrowRight, Ticket } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { de, enUS } from "date-fns/locale";
+import { StorageImage } from "@/components/StorageImage";
 
 interface EventArtist {
   id: string;
@@ -72,8 +73,9 @@ export const EventCard = ({
           {/* Image */}
           <div className="relative">
             {image_url ? (
-              <img
+              <StorageImage
                 src={image_url}
+                renderWidth={800}
                 alt={title}
                 className={`block w-full h-40 object-cover transition-transform duration-500 group-hover:scale-105 ${
                   past ? "grayscale brightness-[0.6]" : ""

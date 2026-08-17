@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { PartnerTouchpointSlide } from "@/hooks/usePartnerTouchpoints";
 import { Monitor, MapPin, Trophy, Gift, Zap } from "lucide-react";
 import { localized } from "@/lib/localized";
+import { StorageImage } from "@/components/StorageImage";
 
 const fallbackSlides = [
   { icon: MapPin, title: "Branding am Court", description: "Auf Courts, Netzen, Banden und Glaswänden." },
@@ -61,8 +62,9 @@ export const TouchpointCarousel = ({ slides }: Props) => {
               className="relative aspect-[16/7] bg-card border border-border rounded-2xl overflow-hidden"
             >
               {items[safeIndex].image_url ? (
-                <img
+                <StorageImage
                   src={items[safeIndex].image_url}
+                  renderWidth={1200}
                   alt={localized(items[safeIndex], "title", i18n.language)}
                   className="absolute inset-0 w-full h-full object-cover"
                 />

@@ -18,6 +18,7 @@ import { useUserRedemptions, type UserRedemption } from "@/hooks/useUserRedempti
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { eur } from "@/lib/marketplace";
+import { StorageImage } from "@/components/StorageImage";
 
 const dateFmt = (iso: string) =>
   new Date(iso).toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" });
@@ -144,7 +145,7 @@ export function AccountOrdersTab() {
             <div className="flex items-start gap-4">
               <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted shrink-0">
                 {o.item?.image_url ? (
-                  <img src={o.item.image_url} alt="" className="w-full h-full object-cover" />
+                  <StorageImage src={o.item.image_url} renderWidth={200} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <ImageIcon className="w-6 h-6 text-muted-foreground" />

@@ -18,6 +18,7 @@ import { useP2GPoints } from "@/hooks/useP2GPoints";
 import { usePointsValue } from "@/hooks/usePointsValue";
 import { eur, ptsFmt, maxRedeemablePoints } from "@/lib/marketplace";
 import { localized } from "@/lib/localized";
+import { StorageImage } from "@/components/StorageImage";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -240,7 +241,7 @@ const MarketplaceCheckout = () => {
 
                 <div className="flex gap-3 items-center">
                   <div className="w-16 h-16 rounded-xl overflow-hidden border border-border shrink-0 bg-gradient-to-br from-white/[0.06] to-black">
-                    <img src={product.image_url || "/placeholder.svg"} alt={localized(product, "name", i18n.language)} className="w-full h-full object-cover" />
+                    <StorageImage src={product.image_url || "/placeholder.svg"} renderWidth={300} alt={localized(product, "name", i18n.language)} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                     <span className="font-display font-bold text-[15px] leading-tight">{localized(product, "name", i18n.language)}</span>

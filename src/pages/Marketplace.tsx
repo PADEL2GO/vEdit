@@ -19,6 +19,7 @@ import { useP2GPoints } from "@/hooks/useP2GPoints";
 import { usePointsValue } from "@/hooks/usePointsValue";
 import { eur, ptsFmt, discountPct } from "@/lib/marketplace";
 import { localized } from "@/lib/localized";
+import { StorageImage } from "@/components/StorageImage";
 
 const CAT_ICONS: Record<string, typeof Package> = {
   schlaeger: Zap,
@@ -353,8 +354,9 @@ function ProductCard({
     >
       <div className="relative overflow-hidden">
         <div className={`aspect-[2/3] ${soldOut ? "opacity-45 grayscale" : ""}`}>
-          <img
+          <StorageImage
             src={p.image_url || "/placeholder.svg"}
+            renderWidth={800}
             alt={localized(p, "name", i18n.language)}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />

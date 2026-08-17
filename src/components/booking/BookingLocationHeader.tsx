@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { DbLocation } from "@/types/database";
 import { COURT_FEATURES, extractFeatures } from "@/lib/courtFeatures";
 import { DEFAULT_COURT_SPORT, type CourtSport } from "./types";
+import { StorageImage } from "@/components/StorageImage";
 
 interface BookingLocationHeaderProps {
   location: DbLocation;
@@ -48,8 +49,9 @@ export function BookingLocationHeader({ location, sport = DEFAULT_COURT_SPORT }:
       <div className="relative">
       {/* Hero Image */}
       {heroImageUrl ? (
-        <img
+        <StorageImage
           src={heroImageUrl}
+          renderWidth={1200}
           alt={location.name}
           className="block w-full h-[236px] object-cover"
         />

@@ -25,6 +25,7 @@ import { sectionThemeVars, useSectionTheme, useSectionThemes, type SectionKey } 
 import { SectionShaderBackdrop } from "@/components/SectionShaderBackdrop";
 import { NewsCard } from "@/components/news/NewsCard";
 import courtHero from "@/assets/courts/skypadel-outdoor.jpg";
+import { StorageImage } from "@/components/StorageImage";
 
 const MON = ["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
 
@@ -315,7 +316,7 @@ const DashboardHome = () => {
                 {nextReg?.event ? (
                   <>
                     <div className="relative h-[168px] flex-none">
-                      {nextReg.event.image_url && <img src={nextReg.event.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />}
+                      {nextReg.event.image_url && <StorageImage renderWidth={600} src={nextReg.event.image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />}
                       <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.15), #0a0a0a)" }} />
                       <span className="absolute top-3.5 right-3.5 inline-flex items-center gap-1.5 text-xs font-bold text-primary bg-black/70 backdrop-blur border border-primary/40 rounded-full px-3 py-1.5">Angemeldet</span>
                     </div>
@@ -360,7 +361,7 @@ const DashboardHome = () => {
           {shopItems.length > 0 && (
             <div className="rounded-2xl border border-border/60 bg-gradient-card overflow-hidden grid lg:grid-cols-[5fr_7fr]">
               <div className="relative min-h-[240px] flex flex-col justify-end">
-                {shopItems[0]?.image_url && <img src={shopItems[0].image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />}
+                {shopItems[0]?.image_url && <StorageImage renderWidth={600} src={shopItems[0].image_url} alt="" className="absolute inset-0 w-full h-full object-cover" />}
                 <div className="absolute inset-0" style={{ background: "linear-gradient(200deg, rgba(0,0,0,0.15), rgba(0,0,0,0.9) 82%)" }} />
                 <div className="relative flex flex-col items-start gap-2.5 p-6">
                   <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/[0.08] px-3 py-1 text-xs font-semibold text-primary">Shop</span>
@@ -376,7 +377,7 @@ const DashboardHome = () => {
                     <Link key={m.id} to={`/marketplace/${m.slug}`}
                       className="flex items-center gap-3.5 bg-white/[0.03] border border-border/70 rounded-[15px] px-3.5 py-3 transition-colors hover:border-primary/35">
                       <span className="w-[42px] h-[42px] flex-none rounded-xl overflow-hidden bg-primary/[0.1] border border-primary/25">
-                        {m.image_url ? <img src={m.image_url} alt="" className="w-full h-full object-cover" /> : <span className="w-full h-full flex items-center justify-center text-primary"><ShoppingBag className="w-5 h-5" /></span>}
+                        {m.image_url ? <StorageImage renderWidth={300} src={m.image_url} alt="" className="w-full h-full object-cover" /> : <span className="w-full h-full flex items-center justify-center text-primary"><ShoppingBag className="w-5 h-5" /></span>}
                       </span>
                       <span className="flex flex-col gap-0.5 min-w-0 flex-1">
                         <span className="font-semibold text-[14.5px] truncate">{m.name}</span>

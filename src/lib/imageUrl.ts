@@ -15,10 +15,17 @@ export function storageImage(
   opts: { width: number; quality?: number },
 ): string | null {
   if (!url) return null;
-  if (!url.includes(OBJECT_PATH)) return url;
-  const width = Math.max(1, Math.round(opts.width));
-  const quality = opts.quality ?? 70;
-  return `${url.replace(OBJECT_PATH, RENDER_PATH)}?width=${width}&quality=${quality}&format=webp`;
+  const [base, query] = url.split("?");
+  if (!base.includes(OBJECT_PATH)) return url;
+  // SVG ist vektoriell und winzig — durch den Transformer gäbe es nur ein 400.
+  if (base.toLowerCase().endsWith(".svg")) return url;
+
+  // Vorhandene Parameter erhalten: Avatare hängen ?v=<timestamp> zum Cache-Busting an.
+  const params = new URLSearchParams(query);
+  params.set("width", String(Math.max(1, Math.round(opts.width))));
+  params.set("quality", String(opts.quality ?? 70));
+  params.set("format", "webp");
+  return `${base.replace(OBJECT_PATH, RENDER_PATH)}?${params.toString()}`;
 }
 
 /**
@@ -27,5 +34,9 @@ export function storageImage(
  */
 export function originalImage(url: string): string {
   if (!url.includes(RENDER_PATH)) return url;
-  return url.replace(RENDER_PATH, OBJECT_PATH).split("?")[0];
+  const [base, query] = url.split("?");
+  const params = new URLSearchParams(query);
+  for (const key of ["width", "quality", "format"]) params.delete(key);
+  const rest = params.toString();
+  return base.replace(RENDER_PATH, OBJECT_PATH) + (rest ? `?${rest}` : "");
 }

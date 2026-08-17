@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { StorageImage } from "@/components/StorageImage";
 import { motion } from "framer-motion";
 import { ArrowRight, Image as ImageIcon, ThumbsUp } from "lucide-react";
 import { format, parseISO } from "date-fns";
@@ -55,11 +56,11 @@ export function NewsCard({ article, variant = "grid", index = 0 }: NewsCardProps
           }`}
         >
           {article.cover_image_url ? (
-            <img
+            <StorageImage
               src={article.cover_image_url}
+              renderWidth={800}
               alt={article.cover_alt ?? title}
               className="absolute inset-0 h-full w-full object-cover"
-              loading="lazy"
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">

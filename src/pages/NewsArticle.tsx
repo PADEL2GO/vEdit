@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
@@ -26,6 +26,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { localized } from "@/lib/localized";
 import { sanitizeArticleHtml } from "@/lib/sanitizeHtml";
+import { storageImage } from "@/lib/imageUrl";
+import { useStorageImageFallback } from "@/hooks/useStorageImageFallback";
 import {
   trackArticleView,
   useArticleBySlug,
@@ -65,6 +67,8 @@ export default function NewsArticle() {
   const { data: location } = useArticleLocation(article?.location_id);
   const { liked, likeCount, toggle, pending } = useArticleLike(article);
   const [copied, setCopied] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  useStorageImageFallback(bodyRef);
 
   const { data: authorName } = useQuery({
     queryKey: ["article-author", article?.created_by],
@@ -134,7 +138,12 @@ export default function NewsArticle() {
       <Helmet>
         <title>{seoTitle}</title>
         <meta name="description" content={seoDescription} />
-        {article.cover_image_url && <meta property="og:image" content={article.cover_image_url} />}
+        {article.cover_image_url && (
+          <meta
+            property="og:image"
+            content={storageImage(article.cover_image_url, { width: 1200, quality: 75 }) ?? article.cover_image_url}
+          />
+        )}
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="article" />
@@ -214,6 +223,7 @@ export default function NewsArticle() {
               <div className="flex max-w-[720px] flex-col gap-6">
                 {article.body_html?.trim() && (
                   <div
+                    ref={bodyRef}
                     className="prose prose-invert max-w-none text-justify [hyphens:auto] text-[17px] leading-[1.75] prose-headings:font-display prose-headings:font-extrabold prose-headings:tracking-tight prose-headings:text-left prose-h2:text-3xl prose-p:my-5 prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-[color:var(--acc)] prose-blockquote:rounded-2xl prose-blockquote:border prose-blockquote:border-[color:var(--acc-brd)] prose-blockquote:bg-gradient-card prose-blockquote:px-7 prose-blockquote:py-6 prose-blockquote:font-display prose-blockquote:text-xl prose-blockquote:not-italic prose-blockquote:text-left prose-blockquote:text-foreground prose-li:text-muted-foreground prose-img:rounded-2xl"
                     dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(localized(article, "body_html", i18n.language)) }}
                   />
