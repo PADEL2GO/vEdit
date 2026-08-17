@@ -194,6 +194,42 @@
   50% { box-shadow: 0 0 40px hsl(71 91% 51% / 0.5); }
 }
 
+/* Court-Grid-Hero (Design "Hero Court Grid") ─────────────────────────────── */
+
+/* Drift: exakt eine Kachel (200 x 120) pro Zyklus -> nahtlos */
+@keyframes p2gDrift {
+  from { transform: translate(0px, 0px); }
+  to   { transform: translate(200px, 120px); }
+}
+
+/* Scanband: ein Durchlauf pro Zyklus, danach Pause ausserhalb des Bildes */
+@keyframes p2gScan {
+  0%   { opacity: 0; transform: translateX(-320px); }
+  3%   { opacity: 1; }
+  30%  { opacity: 1; }
+  33%  { opacity: 0; transform: translateX(100vw); }
+  100% { opacity: 0; transform: translateX(100vw); }
+}
+
+/* Gegenbewegung: haelt die aufgehellten Linien geometrisch still */
+@keyframes p2gScanInv {
+  0%   { transform: translateX(320px); }
+  33%  { transform: translateX(-100vw); }
+  100% { transform: translateX(-100vw); }
+}
+
+@keyframes p2gFlare {
+  0%    { opacity: 0; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  0.35% { opacity: 1; }
+  0.9%  { opacity: 1; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  1.43% { opacity: 0; }
+  100%  { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p2g-drift, .p2g-scan, .p2g-scan-inv, .p2g-flare { animation: none !important; }
+}
+
 /* News-Section: Input-Focus folgt dem Topic-Akzent (--acc kommt vom .news-root) */
 .news-root input:focus-visible,
 .news-root textarea:focus-visible {
