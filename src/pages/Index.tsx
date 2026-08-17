@@ -19,11 +19,6 @@ import {
   Building2,
   Calendar,
   MapPin,
-  ClipboardCheck,
-  Hammer,
-  Smartphone,
-  PartyPopper,
-  Settings,
   Coins,
   ShoppingBag,
   Banknote,
@@ -39,17 +34,6 @@ import { Navigate } from "react-router-dom";
 import skypadelOutdoor from "@/assets/courts/skypadel-outdoor.jpg";
 import eventsHero from "@/assets/events-hero.jpg";
 import fuerVereineHero from "@/assets/fuer-vereine-hero.jpg";
-
-// ── Animated icon helper (spinning gear in the Verein steps) ──────────────────
-const AnimatedIcon = ({ children }: { children: React.ReactNode }) => (
-  <motion.div
-    animate={{ rotate: [0, 360] }}
-    transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
-    className="inline-flex"
-  >
-    {children}
-  </motion.div>
-);
 
 // ── Reveal wrapper (fade + rise on scroll) ────────────────────────────────────
 const revealProps = (delay = 0) => ({
@@ -123,18 +107,6 @@ const Index = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const vereinStepsCopy = t("vereinSteps.steps", { returnObjects: true }) as { title: string; desc: string }[];
-
-  // Verein steps — icon + tile animation per design (float / pulse-glow / spin)
-  const vereinSteps = [
-    { icon: MapPin, anim: "float" as const },
-    { icon: ClipboardCheck, anim: "float" as const },
-    { icon: Hammer, anim: "float" as const },
-    { icon: Smartphone, anim: "float" as const },
-    { icon: PartyPopper, anim: "pulse-glow" as const },
-    { icon: Settings, anim: "spin" as const },
-  ];
-
   return (
     <>
       <Helmet>
@@ -180,69 +152,6 @@ const Index = () => {
             </Button>
           </div>
         </SyntheticHero>
-
-        {/* ── SO KOMMT PADEL IN EUREN VEREIN ────────────────────── */}
-        <section id="vereine" className="py-16 md:py-24">
-          <div className="mx-auto max-w-[1200px] px-5">
-            <motion.div {...revealProps()} className="flex flex-col items-center gap-4 text-center max-w-3xl mx-auto mb-14">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">
-                <Building2 className="w-3.5 h-3.5" />
-                {t("vereinSteps.badge")}
-              </span>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground" style={{ lineHeight: 1.1 }}>
-                {t("vereinSteps.titlePart1")}{" "}
-                <span className="text-gradient-lime">{t("vereinSteps.titlePart2")}</span>
-              </h2>
-              <p className="text-base md:text-lg text-muted-foreground max-w-xl">{t("vereinSteps.subtitle")}</p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {vereinSteps.map((cfg, index) => {
-                const Icon = cfg.icon;
-                const step = index + 1;
-                const tileAnim = cfg.anim === "float" ? "animate-float" : cfg.anim === "pulse-glow" ? "animate-pulse-glow" : "";
-                return (
-                  <motion.div
-                    key={step}
-                    {...revealProps(0.08 * index)}
-                    className="group flex flex-col gap-3.5 p-6 rounded-2xl bg-gradient-card border border-border/60 hover:border-primary/30 transition-colors duration-300"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div
-                        className={`w-[54px] h-[54px] rounded-[14px] border border-primary/35 flex items-center justify-center bg-[linear-gradient(135deg,hsl(71_91%_51%/0.18),hsl(71_91%_51%/0.04))] ${tileAnim}`}
-                        style={cfg.anim === "float" ? { animationDelay: `${index * 0.4}s` } : undefined}
-                      >
-                        {cfg.anim === "spin" ? (
-                          <AnimatedIcon><Icon className="w-6 h-6 text-primary" /></AnimatedIcon>
-                        ) : (
-                          <Icon className="w-6 h-6 text-primary" />
-                        )}
-                      </div>
-                      <span className="font-stat text-xs text-primary bg-primary/10 border border-primary/25 rounded-full px-3 py-1">
-                        {String(step).padStart(2, "0")}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-foreground font-display" style={{ lineHeight: 1.2 }}>
-                      {vereinStepsCopy[index].title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{vereinStepsCopy[index].desc}</p>
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            <motion.div {...revealProps()} className="flex justify-center mt-11">
-              <Button size="lg" variant="hero" asChild>
-                <NavLink to="/fuer-vereine">
-                  <Building2 className="w-5 h-5 mr-2" />
-                  {t("vereinSteps.cta")}
-                </NavLink>
-              </Button>
-            </motion.div>
-          </div>
-        </section>
-
-        <SectionDivider variant="glow" />
 
         {/* ── LOCATION ROLLOUT (backend: location_teasers) ──────── */}
         <LocationTeasersSection />

@@ -12,39 +12,6 @@
     "ctaPrimary": "Book a court now",
     "ctaSecondary": "For Clubs"
   },
-  "vereinSteps": {
-    "badge": "For Clubs",
-    "titlePart1": "How padel comes to",
-    "titlePart2": "your club",
-    "subtitle": "In 6 steps from the first conversation to the first match",
-    "cta": "Learn more for clubs",
-    "steps": [
-      {
-        "title": "On-site visit",
-        "desc": "Site check with surface analysis and aerial drone footage – we assess which areas are suitable for padel courts."
-      },
-      {
-        "title": "Building permit & approval",
-        "desc": "We handle the planning and support the building permit process – including all technical documentation and authority communication."
-      },
-      {
-        "title": "Court setup & installation",
-        "desc": "Professional installation of mobile padel courts on your surface – turnkey and ready to play."
-      },
-      {
-        "title": "Digital setup",
-        "desc": "App integration, booking system, AI cameras and lighting – the court is fully digitised."
-      },
-      {
-        "title": "Opening & first matches",
-        "desc": "Grand opening with event, marketing support and the first booked matches from your members."
-      },
-      {
-        "title": "Ongoing operations",
-        "desc": "Maintenance, season management and technical support – we take care of it, you collect revenue share."
-      }
-    ]
-  },
   "ecosystem": {
     "badgePart1": "The",
     "badgePart2": "ecosystem",

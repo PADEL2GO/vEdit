@@ -12,39 +12,6 @@
     "ctaPrimary": "Jetzt Court buchen",
     "ctaSecondary": "Für Vereine"
   },
-  "vereinSteps": {
-    "badge": "Für Vereine",
-    "titlePart1": "So kommt Padel in",
-    "titlePart2": "euren Verein",
-    "subtitle": "In 6 Schritten vom ersten Gespräch bis zum ersten Match",
-    "cta": "Mehr für Vereine erfahren",
-    "steps": [
-      {
-        "title": "Vor-Ort Termin",
-        "desc": "Standortcheck mit Flächenanalyse und Drohnen-Luftaufnahme – wir prüfen, welche Flächen für Padel Courts geeignet sind."
-      },
-      {
-        "title": "Bauantrag & Genehmigung",
-        "desc": "Wir übernehmen die Planung und unterstützen beim Bauantrag – inklusive aller technischen Unterlagen und Behördenkommunikation."
-      },
-      {
-        "title": "Court-Aufbau & Installation",
-        "desc": "Professionelle Montage der mobilen Padel Courts auf eurer Fläche – schlüsselfertig und spielbereit."
-      },
-      {
-        "title": "Digitales Setup",
-        "desc": "App-Anbindung, Booking-System, KI-Kameras und Beleuchtung – der Court wird vollständig digitalisiert."
-      },
-      {
-        "title": "Eröffnung & Spielstart",
-        "desc": "Feierliche Eröffnung mit Event, Marketing-Support und den ersten gebuchten Matches eurer Mitglieder."
-      },
-      {
-        "title": "Laufender Betrieb",
-        "desc": "Wartung, Saisonmanagement und technischer Support – wir kümmern uns, ihr kassiert Umsatzbeteiligung."
-      }
-    ]
-  },
   "ecosystem": {
     "badgePart1": "Das",
     "badgePart2": "Ökosystem",
